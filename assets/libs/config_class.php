@@ -743,7 +743,7 @@ class Employee_data extends mysqli
 					<i class='inverted circular blue edit icon' onclick='suppFuncEditEmpData($fdata[sfd_id])'></i>
 					<br>
 					<br>
-					<i style='$this->hide' class='inverted circular red trash icon' onclick='suppFuncRemoveEmpData($fdata[sfd_id])'></i>
+					<i style='$this->hide' class='inverted circular grey undo icon' onclick='suppFuncRemoveEmpData($fdata[sfd_id])'></i>
 					</td>";
 				}
 				$this->supportPercent += $fdata['percent'];
@@ -812,7 +812,7 @@ class Employee_data extends mysqli
 				<i style='$this->hide' class='ui inverted green circular edit icon'	onclick='strategicOpenModal($row[strategicFunc_id])'></i>
 				<br>
 				<br>
-				<i style='$this->hide' class='ui inverted red circular trash icon' 	onclick='strategicDeleteFunc($row[strategicFunc_id])'></i>
+				<i style='$this->hide' class='ui inverted red circular times icon' 	onclick='strategicDeleteFunc($row[strategicFunc_id])'></i>
 				</td>";
 			}
 			$tr .= "
@@ -881,11 +881,11 @@ class Employee_data extends mysqli
 				</div>
 				<div class='field'>
 					<label>Success Indicator</label>
-					<textarea rows='2' id='suc_in' required	></textarea>
+					<textarea rows='2' id='suc_in'></textarea>
 				</div>
 				<div class='field'>
 					<label>Actual Accomplishments</label>	
-					<textarea rows='2' id='acc' required></textarea>
+					<textarea rows='2' id='acc'></textarea>
 					</div>
 <!--		
 				<div class='field'>
