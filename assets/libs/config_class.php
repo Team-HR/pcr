@@ -549,7 +549,7 @@ class Employee_data extends mysqli
 					<i class='inverted circular blue edit icon' onclick='EditCoreFuncData(\"$SiData[cfd_id]\")'></i>
 					<br>
 					<br>
-					<i style='$this->hide' class='inverted circular red trash icon' onclick='RemoveCoreFuncData(\"$SiData[cfd_id]\")'></i>
+					<i style='$this->hide' class='inverted circular grey undo icon' onclick='RemoveCoreFuncData(\"$SiData[cfd_id]\")'></i>
 					</td>
 					";
 				}
@@ -1393,11 +1393,11 @@ class Employee_data extends mysqli
 		<tr>
 		<td>Strategic Objectives</td>
 		<td>Total Weight Allocation:" . $this->get_strtPercent() . "</td>
-		<td><center><b>" . $this->strategic_totalAv . "</b></center></td>
+		<td><center><b style='display:hidden'>" . " " /* $this->strategic_totalAv */ . "</b></center></td>
 		<td colspan='3' rowspan='3'>
-		<center><b> $overallAv </b></center>
+		<center><b> ". " " /* $overallAv */ ." </b></center>
 		</td>
-		<td colspan='2' rowspan='3'><center><b> $adjectival</b></center></td>
+		<td colspan='2' rowspan='3'><center><b>". " " /* $adjectival */ ."</b></center></td>
 		<td class='noprint'></td>
 		$col
 		</tr>

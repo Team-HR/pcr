@@ -497,11 +497,11 @@ elseif (isset($_POST['strategicModalContentPost'])){
     </div>
     <div class='field'>
     <label>Success Indicator</label>
-    <textarea rows='2' id='Editsuc_in' required	>$sql[succ_in]</textarea>
+    <textarea rows='2' id='Editsuc_in'>$sql[succ_in]</textarea>
     </div>
     <div class='field'>
     <label>Actual Accomplishments</label>
-    <textarea rows='2' id='Editacc' required>$sql[acc]</textarea>
+    <textarea rows='2' id='Editacc'>$sql[acc]</textarea>
     </div>
 <!--    
     <div class='field'>
