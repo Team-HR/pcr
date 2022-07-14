@@ -1,100 +1,24 @@
 <?php
 require_once "assets/libs/config_class.php";
+session_start();
+echo json_encode($_SESSION);
+# to make queries faster
+# get first array of corefunctions with dep_id and mfo_period
+$sql = "SELECT `cf_ID` FROM `spms_corefunctions` WHERE `dep_id` = '32' AND `mfo_periodId` = '3';";
+// $result = $mysqli->query($sql);
+// $cf_IDs = [];
+// while ($row = $result->fetch_assoc()) {
+//   $cf_IDs[] = $row["cf_ID"];
+// }
+// $json = json_encode($cf_IDs);
+// echo $json;
 
-function changeCount($dat){
-  $dat = str_replace(")","",$dat);
-  $dat = explode(".",$dat);
-  $d = "";
-  foreach ($dat as $a){
-    $a = str_replace(' ', '', $a);
-    if($a){
-      if(is_numeric($a)){
-        if($a<10&&strlen($a)==1){
-          $d.="0".$a.".";
-        }else{
-          $d.=$a.".";
-        }
-      }else{
-        $d.=$a.".";
-      }
-    }
-  }
-  return $d;
+echo "<br/>";
+# get core functions from spms_matrixindicators using first query above
+$sql = "SELECT * FROM `spms_matrixindicators` WHERE `cf_ID` IN (SELECT `cf_ID` FROM `spms_corefunctions` WHERE `dep_id` = '32' AND `mfo_periodId` = '3')";
+$result = $mysqli->query($sql);
+$core_functions = [];
+while ($row = $result->fetch_assoc()) {
+  $core_functions[] = $row;
 }
-
-if(isset($_GET['config'])){
-  if(isset($_GET['core'])){
-    $sql = "SELECT * from spms_corefunctions";
-    $sql = $mysqli->query($sql);
-    $a = [];
-    while($ar = $sql->fetch_assoc()){
-      $a[] =  $ar;
-    } 
-    echo json_encode($a);
-  }elseif($_GET['update']){
-    $dat = $_GET['update'];
-    $sql = "SELECT * from `spms_corefunctions` where `cf_ID`=$dat";
-    $sql = $mysqli->query($sql);
-    $sql = $sql->fetch_assoc();
-
-    $from = $sql['cf_count'];
-    $con = changeCount($from);
-    $u = "UPDATE `spms_corefunctions` SET `cf_count` = '$con' WHERE `spms_corefunctions`.`cf_ID` = $dat";
-    $u = $mysqli->query($u);
-    $result = "SELECT * from `spms_corefunctions` where `cf_ID`=$dat";
-    $result = $mysqli->query($result);
-    $result = $result->fetch_assoc();
-    echo $from." to ".$result['cf_count'];
-  }
- 
-
-
-}else{
-?>
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-  <meta charset="utf-8">
-  <title></title>
-</head>
-<script>
-  function changeCount(){
-    let xml = new XMLHttpRequest();
-        xml.onload = function(){
-          upld(JSON.parse(xml.responseText),0);
-        }
-        xml.open("GET","?config&core",false);
-        xml.send();
-  }
-  function upld(a,count){
-    let xml = new XMLHttpRequest();
-    xml.onload = function(){
-      if(count<a.length){
-        _("logs").innerHTML = _("logs").innerHTML+"<br>"+xml.responseText+" = <b>("+count+" of "+a.length+")</b>";
-        count++;
-        setTimeout(() => {
-            upld(a,count);
-          }, 100);
-        }    
-      }
-    xml.open("GET","?config&update="+a[count]['cf_ID'],false);
-    xml.send();
-  }
-  function _(el){
-    return document.getElementById(el);
-  }
-</script>
-<body >
-  <button onclick="changeCount()">
-    Start
-  </button>
-  <div id="logs">
-    <h1>Logs</h1>
-  </div>
-
-
-</body>
-</html>
-  <?php  
-  }
-  ?>
+echo json_encode($core_functions);
