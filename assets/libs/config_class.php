@@ -1378,6 +1378,13 @@ class Employee_data extends mysqli
 			$DepartmentHead = $this->get_fullname($this->get_status('DepartmentHead'));
 		}
 
+		# Temporarily empties strategic rating, final numerical rating, 
+		# and final adjectival rating for the period of Jan-June 2022 ONLY 
+		# $this->period["year_mfo"] != "2022"?...
+		$strategic_total = $this->period["year_mfo"] != "2022"?$this->strategic_totalAv:" ";
+		$final_numerical_rating = $this->period["year_mfo"] != "2022"? $overallAv : "";
+		$final_adjectival_rating = $this->period["year_mfo"] != "2022"? $adjectival : "";
+
 		// <td>Formula:(Total of all average ratings / no. of entries)x20%</td>
 		$view = "
 		<table border='1px' style='border-collapse:collapse;width:98%;margin:auto'>
@@ -1393,11 +1400,11 @@ class Employee_data extends mysqli
 		<tr>
 		<td>Strategic Objectives</td>
 		<td>Total Weight Allocation:" . $this->get_strtPercent() . "</td>
-		<td><center><b style='display:hidden'>" . " " /* $this->strategic_totalAv */ . "</b></center></td>
+		<td><center><b>" . $strategic_total . "</b></center></td>
 		<td colspan='3' rowspan='3'>
-		<center><b> ". " " /* $overallAv */ ." </b></center>
+		<center><b> ". $final_numerical_rating ." </b></center>
 		</td>
-		<td colspan='2' rowspan='3'><center><b>". " " /* $adjectival */ ."</b></center></td>
+		<td colspan='2' rowspan='3'><center><b>". $final_adjectival_rating ."</b></center></td>
 		<td class='noprint'></td>
 		$col
 		</tr>
