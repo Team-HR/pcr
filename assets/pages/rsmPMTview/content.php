@@ -2,8 +2,8 @@
 $rsmView = new RsmClass($host, $usernameDb, $password, $database);
 $rsmView->set_period($_GET['period']);
 $rsmView->set_department($_GET["department"]);
+$rsmView->get_rating_scale_matrix();
 ?>
-
 <div id="rsm_pmt_view">
     <table border='1px' style="border-collapse:collapse;width:98%;margin:auto">
         <thead style="background:#00c4ff36;font-size:14px">
@@ -11,8 +11,8 @@ $rsmView->set_department($_GET["department"]);
                 <th rowspan="2" style="padding:20px">MFO / PAP</th>
                 <th rowspan="2">Success Indicator</th>
                 <th colspan="3" style="width:40px">Rating Matrix</th>
-                <th rowspan="2" style="width:40px">Incharge</th>
-                <th rowspan="2" style="width:40px">Option</th>
+                <th rowspan="2" style="min-width:100px">Incharge</th>
+                <th rowspan="2" style="width:40px">Success Indicator Option</th>
             </tr>
             <tr style="font-size:12px">
                 <th>Q</th>
@@ -21,9 +21,100 @@ $rsmView->set_department($_GET["department"]);
             </tr>
         </thead>
         <tbody>
-            <?= $rsmView->get_view() ?>
+
+            <tr v-for="item in items" :key="item.cf_ID">
+                <template v-if="!item.mi_id">
+                    <td colspan="7">
+                        <div :style="'margin-left:'+(item.level*50)+'px;'">
+                            <button class="ui mini green button" @click="edit_corrections(item)"><i class="ui edit icon"></i>MFO</button>
+                            {{ item.code + " " + item.title }}
+                            <br>
+                            {{ item.mfo_corrections }}
+                        </div>
+                    </td>
+                </template>
+                <template v-else>
+                    <td>
+                        <div :style="'margin-left:'+(item.level*50)+'px;'">
+                            <button v-if="item.title" class="ui mini green button" @click="edit_corrections(item)"><i class="ui edit icon"></i>MFO</button>
+                            {{ item.code + " " + item.title }}
+                            <br>
+                            {{ item.mfo_corrections }}
+                        </div>
+                    </td>
+                    <td>
+                        {{
+                            item.success_indicator
+                        }}
+                    </td>
+                    <td>
+                        <template v-for="(quality, i) in item.qualities" :key="i">
+                            <div>
+                                {{ quality.score + " - " + quality.description }}
+                            </div>
+                        </template>
+                    </td>
+                    <td>
+                        <template v-for="(efficiency, i) in item.efficiencies" :key="i">
+                            <div>
+                                {{ efficiency.score + " - " + efficiency.description }}
+                            </div>
+                        </template>
+                    </td>
+                    <td>
+                        <template v-for="(timeliness, i) in item.timelinesses" :key="i">
+                            <div>
+                                {{ timeliness.score + " - " + timeliness.description }}
+                            </div>
+                        </template>
+                    </td>
+                    <td style="white-space: nowrap;">
+                        <template v-for="(employee, i) in item.incharges" :key="i">
+                            {{ employee.name }} <br>
+                        </template>
+                    </td>
+                    <td>
+                        <button class="ui mini blue button"><i class="ui edit icon"></i>Add Correction</button>
+                    </td>
+                </template>
+
+            </tr>
         </tbody>
     </table>
+
+    <!-- mfo edit corrections start -->
+    <div id="mfo_correction_modal" class="ui modal">
+        <div class="header">
+            MFO/PAP Corrections
+        </div>
+        <div class="content">
+            <form id="mfo_correction_form" class="ui form" @submit.prevent="save_mfo_correction()">
+                <div class="field">
+                    <label>MFO/PAP:</label>
+                    <input type="text" readonly :value="mfo_edit_item.code +' '+ mfo_edit_item.title"></input>
+                </div>
+                <div class="field">
+                    <label>Corrections:</label>
+                    <textarea></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="actions">
+            <div class="ui black deny button">
+                Cancel
+            </div>
+            <button form="mfo_correction_form" type="submit" class="ui positive right labeled icon button">
+                Save
+                <i class="checkmark icon"></i>
+            </button>
+        </div>
+    </div>
+    <!-- mfo edit corrections end -->
+
+    <!-- si edit corrections start -->
+
+    <!-- si edit corrections end -->
+
 </div>
 <script>
     /* Vue3 Start*/
@@ -34,8 +125,22 @@ $rsmView->set_department($_GET["department"]);
     createApp({
         data() {
             return {
-                message: 'Hello Vue!'
+                mfo_edit_item: {},
+                items: <?= $rsmView->get_rating_scale_matrix_rows() ?>
             }
+        },
+        methods: {
+            edit_corrections(item) {
+                this.mfo_edit_item = item;
+                $("#mfo_correction_modal").modal({
+                    closable: false,
+                }).modal("show")
+            },
+            save_mfo_correction() {
+                console.log(this.mfo_edit_item);
+            }
+        },
+        mounted() {
         }
     }).mount('#rsm_pmt_view')
     /* Vue3 End*/
