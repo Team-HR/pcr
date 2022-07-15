@@ -10,7 +10,11 @@
 	<script src="assets/libs/node_modules/chart.js/dist/Chart.js"></script>
 	<script src="assets/libs/node_modules/chart.js/dist/Chart.min.js"></script>
 	<script src="assets/libs/umbra.js"></script>
+	<!-- Addition of Vue3js -->
+	<script src="https://unpkg.com/vue@3"></script>
+
 	<style media="screen">
+
 	body{
 		background-color:black; 
 		background:url('assets/img/mainPage.jpg');
