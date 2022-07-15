@@ -88,4 +88,3 @@ if(isset($_SESSION['emp_id'])) {
 function notFound(){
 	return "<center><h1 style='color:#888888de'>Page Not Found</h1></center>";
 }
-?>

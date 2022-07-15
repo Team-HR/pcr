@@ -131,7 +131,7 @@
                     <td></td>   
                     <td></td>
                     <td></td>
-                    <td $comStyle></td>
+                    <td $comStyle ></td>
                     <tr>
                     ";
                 }else{   
@@ -232,4 +232,3 @@
             return $view;
         }
     }
-?>
