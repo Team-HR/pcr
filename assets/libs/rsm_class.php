@@ -50,6 +50,12 @@ class RsmClass extends mysqli
     {
         $this->department = $department;
     }
+
+    public function get_department()
+    {
+        return $this->department;
+    }
+
     public function set_period($period)
     {
         $this->period = $period;
@@ -75,6 +81,7 @@ class RsmClass extends mysqli
 
     public function get_rating_scale_matrix_rows()
     {
+        $this->get_rating_scale_matrix();
         return json_encode($this->rating_scale_matrix_rows);
     }
 
@@ -93,7 +100,8 @@ class RsmClass extends mysqli
                 "level" => 0,
                 "code" => $row["cf_count"],
                 "title" => $row["cf_title"],
-                "mfo_corrections" => unserialize($row["corrections"])
+                "mfo_corrections" => unserialize($row["corrections"]),
+                "correction_status" => $this->get_correction_status(unserialize($row["corrections"]))
             ];
 
             # get success indicators
@@ -158,7 +166,8 @@ class RsmClass extends mysqli
                 "level" => $level,
                 "code" => $row["cf_count"],
                 "title" => $row["cf_title"],
-                "mfo_corrections" => unserialize($row["corrections"])
+                "mfo_corrections" => unserialize($row["corrections"]),
+                "correction_status" => $this->get_correction_status(unserialize($row["corrections"]))
             ];
 
             # get success indicators
@@ -187,6 +196,19 @@ class RsmClass extends mysqli
         }
         return $data;
     }
+
+    # get_correction_status
+    private function get_correction_status($corrections){
+        if (!$corrections) return false;
+        foreach ($corrections as $key => $correction) {
+            if ($correction[1] == 0) {
+                return "red";
+            } else {
+                return "blue";
+            }
+        }
+    }
+
     # get_success_indicators
     private function get_success_indicators($cf_ID)
     {

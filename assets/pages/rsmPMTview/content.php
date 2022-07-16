@@ -1,11 +1,11 @@
 <?php
-$rsmView = new RsmClass($host, $usernameDb, $password, $database);
-$rsmView->set_period($_GET['period']);
-$rsmView->set_department($_GET["department"]);
-$rsmView->get_rating_scale_matrix();
+// $rsmView = new RsmClass($host, $usernameDb, $password, $database);
+// $rsmView->set_period($_GET['period']);
+// $rsmView->set_department($_GET["department"]);
+// $rsmView->get_rating_scale_matrix();
 ?>
 <div id="rsm_pmt_view">
-    <table border='1px' style="border-collapse:collapse;width:98%;margin:auto">
+    <table class="ui mini compact celled structured table" style="border-collapse:collapse;width:98%;margin:auto">
         <thead style="background:#00c4ff36;font-size:14px">
             <tr>
                 <th rowspan="2" style="padding:20px">MFO / PAP</th>
@@ -20,26 +20,37 @@ $rsmView->get_rating_scale_matrix();
                 <th>T</th>
             </tr>
         </thead>
-        <tbody>
-
+        <tbody id="tbody_rsm">
+            <tr v-if="items.length < 1">
+                <td colspan="7">
+                    <div style="min-height: 500px;"></div>
+                </td>
+            </tr>
             <tr v-for="item in items" :key="item.cf_ID">
                 <template v-if="!item.mi_id">
                     <td colspan="7">
-                        <div :style="'margin-left:'+(item.level*50)+'px;'">
-                            <button class="ui mini green button" @click="edit_corrections(item)"><i class="ui edit icon"></i>MFO</button>
-                            {{ item.code + " " + item.title }}
-                            <br>
+                        <div :style="'margin-left:'+(item.level*50)+'px;' ">
+                            <!-- {{ item.id }} -->
+                            <button class="ui mini green button" @click="edit_mfo_corrections(item)" style="margin-right: 15px;"><i class="ui edit icon"></i>MFO</button>
+                            <span :style="item.correction_status?'color:'+item.correction_status:''" @click="edit_mfo_corrections(item)"> {{ item.code + " " + item.title }}</span>
+                            <!-- <br>
                             {{ item.mfo_corrections }}
+                            <br>
+                            {{ item.correction_status }} -->
+
                         </div>
                     </td>
                 </template>
                 <template v-else>
                     <td>
                         <div :style="'margin-left:'+(item.level*50)+'px;'">
-                            <button v-if="item.title" class="ui mini green button" @click="edit_corrections(item)"><i class="ui edit icon"></i>MFO</button>
-                            {{ item.code + " " + item.title }}
-                            <br>
+                            <!-- {{ item.id }} -->
+                            <button v-if="item.title" class="ui mini green button" @click="edit_mfo_corrections(item)" style="margin-right: 15px;"><i class="ui edit icon"></i>MFO</button>
+                            <span :style="item.correction_status?'color:'+item.correction_status:''" @click="edit_mfo_corrections(item)"> {{ item.code + " " + item.title }}</span>
+                            <!-- <br>
                             {{ item.mfo_corrections }}
+                            <br>
+                            {{ item.correction_status }} -->
                         </div>
                     </td>
                     <td>
@@ -93,9 +104,37 @@ $rsmView->get_rating_scale_matrix();
                     <label>MFO/PAP:</label>
                     <input type="text" readonly :value="mfo_edit_item.code +' '+ mfo_edit_item.title"></input>
                 </div>
+                <div class="field" v-if="mfo_edit_item.mfo_corrections">
+                    <!-- <label>Corrections:</label> -->
+                    <table class="ui small compact celled structured table" style="width: 100%;">
+                        <thead>
+                            <tr style="text-align: center;">
+                                <th>
+                                    Corrections
+                                </th>
+                                <th>
+                                    Status
+                                </th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(mfo_correction, i) in mfo_edit_item.mfo_corrections" :key="i">
+                                <td><span v-html="mfo_correction[0]"></span></td>
+                                <td style="text-align: center;">
+                                    <span v-if="mfo_correction[1]" style="color: green;">Accomplished</span>
+                                    <span v-else style="color: red;">Unaccomplished</span>
+                                </td>
+                                <td style="text-align: center;">
+                                    <button v-if="!mfo_correction[1]" class="ui mini red button" type="button" @click="remove_mfo_correction(i)">Remove</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
                 <div class="field">
-                    <label>Corrections:</label>
-                    <textarea></textarea>
+                    <label>Add Corrections:</label>
+                    <textarea v-model="mfo_correction"></textarea>
                 </div>
             </form>
         </div>
@@ -103,7 +142,7 @@ $rsmView->get_rating_scale_matrix();
             <div class="ui black deny button">
                 Cancel
             </div>
-            <button form="mfo_correction_form" type="submit" class="ui positive right labeled icon button">
+            <button form="mfo_correction_form" type="submit" class="ui right labeled icon button">
                 Save
                 <i class="checkmark icon"></i>
             </button>
@@ -114,7 +153,11 @@ $rsmView->get_rating_scale_matrix();
     <!-- si edit corrections start -->
 
     <!-- si edit corrections end -->
+    <!-- loading modal start -->
+    <div id="loading_modal" class="ui modal">
 
+    </div>
+    <!-- loading modal end -->
 </div>
 <script>
     /* Vue3 Start*/
@@ -125,22 +168,87 @@ $rsmView->get_rating_scale_matrix();
     createApp({
         data() {
             return {
+                // loading: true,
                 mfo_edit_item: {},
-                items: <?= $rsmView->get_rating_scale_matrix_rows() ?>
+                mfo_correction: "",
+                items: []
             }
         },
+        watch: {
+            // loading(newValue, oldValue) {
+            //     if (newValue) {
+            //         $('tbody').dimmer('show')
+            //     } else $('tbody').dimmer('hide')
+            // },
+        },
         methods: {
-            edit_corrections(item) {
+
+            get_rating_scale_matrix() {
+                $('#tbody_rsm').dimmer({
+                        closable: false,
+                    })
+                    .dimmer('add content', '<div class="ui text loader">Loading<div>')
+                    .dimmer('show ');
+                const queryString = window.location.search;
+                const urlParams = new URLSearchParams(queryString);
+                const period_id = urlParams.get('period');
+                const department_id = urlParams.get('department');
+                $.get("?config=rsmPMTview", {
+                        get_rating_scale_matrix: true,
+                        period_id: period_id,
+                        department_id: department_id
+                    }, (data, textStatus, jqXHR) => {
+                        // console.log("get_rating_scale_matrix:", data);
+                        this.items = JSON.parse(data);
+                        $('#tbody_rsm')
+                            .dimmer('hide')
+                    },
+                    "json"
+                );
+            },
+            edit_mfo_corrections(item) {
                 this.mfo_edit_item = item;
                 $("#mfo_correction_modal").modal({
                     closable: false,
                 }).modal("show")
             },
+            remove_mfo_correction(index) {
+                if (confirm('Are you sure you want to delete this correction?')) {
+                    $.post("?config=rsmPMTview", {
+                            remove_mfo_correction: true,
+                            index: index,
+                            cf_ID: this.mfo_edit_item.id
+                        }, (data, textStatus, jqXHR) => {
+                            data ? this.mfo_edit_item.mfo_corrections.splice(index, 1) : null
+                            this.get_rating_scale_matrix()
+                        },
+                        "json"
+                    );
+                }
+            },
             save_mfo_correction() {
-                console.log(this.mfo_edit_item);
+                // console.log(this.mfo_edit_item);
+                $.post("?config=rsmPMTview", {
+                    add_correction: true,
+                    cf_ID: this.mfo_edit_item.id,
+                    correction: this.mfo_correction
+                }).then(res => {
+                    // console.log(res);
+                    if (res == "false") {
+                        alert('There is an existing unaccomplished correction, cannot add new correction until accomplished. Please remove/wait for the department to accomplish to add new correction.')
+                    } else {
+                        this.get_rating_scale_matrix()
+                        this.mfo_edit_item = {}
+                        this.mfo_correction = ""
+                        $("#mfo_correction_modal").modal({
+                            closable: false,
+                        }).modal("hide")
+                    }
+                })
             }
         },
         mounted() {
+            this.get_rating_scale_matrix()
         }
     }).mount('#rsm_pmt_view')
     /* Vue3 End*/

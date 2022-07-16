@@ -3,6 +3,8 @@ session_start();
 require_once "assets/libs/config_class.php";
 require_once "assets/libs/rsm_class.php";
 require_once "assets/libs/irm_class.php";
+
+
 if(isset($_SESSION['emp_id'])) {
 	$user = new Employee_data();
 	$year = new year();
