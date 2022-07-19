@@ -223,7 +223,9 @@ class RsmClass extends mysqli
                 "qualities" => $this->parse_ratings($row["mi_quality"]),
                 "efficiencies" => $this->parse_ratings($row["mi_eff"]),
                 "timelinesses" => $this->parse_ratings($row["mi_time"]),
-                "incharges" => $this->get_incharges($row["mi_incharge"])
+                "incharges" => $this->get_incharges($row["mi_incharge"]),
+                "si_corrections" => unserialize($row["corrections"]),
+                "si_correction_status" => $this->get_correction_status(unserialize($row["corrections"]))
             ];
             $data[] = $item;
         }

@@ -17,7 +17,7 @@
 	<style media="screen">
 		body {
 			background-color: white;
-			/* background:url('assets/img/mainPage.jpg'); */
+			background:url('assets/img/mainPage.jpg');
 			background-size: cover;
 			background-repeat: no-repeat;
 			background-attachment: fixed;

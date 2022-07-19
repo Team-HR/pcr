@@ -142,24 +142,7 @@ if (isset($_POST['getIRM'])) {
 // remove_mfo_correction: true,
 //                             index: index,
 //                             cf_ID: this.mfo_edit_item.id
-elseif (isset($_POST["remove_mfo_correction"])) {
-    $index = $_POST["index"]; //though no need since its always the index 0 to be deleted
-    $cf_ID = $_POST["cf_ID"];
-
-    # get the corrections first
-    $sql = "SELECT * FROM `spms_corefunctions` WHERE `cf_ID` = '$cf_ID'";
-    $result = $mysqli->query($sql);
-    $row = $result->fetch_assoc();
-    $corrections = unserialize($row["corrections"]);
-    array_splice($corrections, $index, 1);
-
-    # save new corrections to db
-    $corrections = $mysqli->real_escape_string(serialize($corrections));
-
-    $sql = "UPDATE `spms_corefunctions` SET `corrections` = '$corrections' WHERE `cf_ID` = '$cf_ID'";
-    $mysqli->query($sql);
-    echo json_encode(true);
-} elseif (isset($_GET["get_rating_scale_matrix"])) {
+elseif (isset($_GET["get_rating_scale_matrix"])) {
     $data = [];
     $period_id = $_GET["period_id"];
     $department_id = $_GET["department_id"];
@@ -203,5 +186,82 @@ elseif (isset($_POST["remove_mfo_correction"])) {
     $sql = "UPDATE `spms_corefunctions` SET `corrections` = '$corrections' WHERE `spms_corefunctions`.`cf_ID` = '$cf_ID';";
     $mysqli->query($sql);
 
+    echo json_encode(true);
+} elseif (isset($_POST["remove_mfo_correction"])) {
+    $index = $_POST["index"]; //though no need since its always the index 0 to be deleted
+    $cf_ID = $_POST["cf_ID"];
+
+    # get the corrections first
+    $sql = "SELECT * FROM `spms_corefunctions` WHERE `cf_ID` = '$cf_ID'";
+    $result = $mysqli->query($sql);
+    $row = $result->fetch_assoc();
+    $corrections = unserialize($row["corrections"]);
+    array_splice($corrections, $index, 1);
+
+    # save new corrections to db
+    $corrections = $mysqli->real_escape_string(serialize($corrections));
+
+    $sql = "UPDATE `spms_corefunctions` SET `corrections` = '$corrections' WHERE `cf_ID` = '$cf_ID'";
+    $mysqli->query($sql);
+    echo json_encode(true);
+}
+
+// add_si_correction: true,
+// mi_id: this.si_edit_item.mi_id,
+// correction: this.si_correction
+
+elseif (isset($_POST["add_si_correction"])) {
+    $mi_id = $_POST["mi_id"];
+    $correction = $_POST["correction"];
+    if (!$correction) {
+        return false;
+    }
+    $pmt_name = $_SESSION["emp_info"]["lastName"] . ", " . $_SESSION["emp_info"]["firstName"];
+    $timestamp = date("Y-m-d H:i:s", time());
+
+    $correction = "<b>$pmt_name</b> - <i>$timestamp</i>:<br>" . $correction;
+    // $correction = $mysqli->real_escape_string($correction);
+
+    $corrections = [];
+
+    # check if there are existing corrections SELECT * FROM `spms_matrixindicators` WHERE `mi_id` = '10103';
+
+    $sql = "SELECT * FROM `spms_matrixindicators` WHERE `spms_matrixindicators`.`mi_id` = '$mi_id';";
+    $result = $mysqli->query($sql);
+    $row = $result->fetch_assoc();
+    $corrections = $row["corrections"] ? unserialize($row["corrections"]) : [];
+
+    foreach ($corrections as $corr) {
+        if ($corr[1] == 0) {
+            echo json_encode(false);
+            return false;
+        }
+    }
+
+    array_unshift($corrections, [$correction, 0]);
+    $corrections = serialize($corrections);
+    $corrections = $mysqli->real_escape_string($corrections);
+
+
+    $sql = "UPDATE `spms_matrixindicators` SET `corrections` = '$corrections' WHERE `spms_matrixindicators`.`mi_id` = '$mi_id';";
+    $mysqli->query($sql);
+
+    echo json_encode(true);
+} elseif (isset($_POST["remove_si_correction"])) {
+    $index = $_POST["index"]; //though no need since its always the index 0 to be deleted
+    $mi_id = $_POST["mi_id"];
+
+    # get the corrections first
+    $sql = "SELECT * FROM `spms_matrixindicators` WHERE `mi_id` = '$mi_id'";
+    $result = $mysqli->query($sql);
+    $row = $result->fetch_assoc();
+    $corrections = unserialize($row["corrections"]);
+    array_splice($corrections, $index, 1);
+
+    # save new corrections to db
+    $corrections = $mysqli->real_escape_string(serialize($corrections));
+
+    $sql = "UPDATE `spms_matrixindicators` SET `corrections` = '$corrections' WHERE `mi_id` = '$mi_id'";
+    $mysqli->query($sql);
     echo json_encode(true);
 }

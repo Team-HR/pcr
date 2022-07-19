@@ -7,14 +7,14 @@
 <div id="rsm_pmt_view">
     <table class="ui mini compact celled structured table" style="border-collapse:collapse;width:98%;margin:auto">
         <thead style="background:#00c4ff36;font-size:14px">
-            <tr>
+            <tr style="text-align: center;">
                 <th rowspan="2" style="padding:20px">MFO / PAP</th>
                 <th rowspan="2">Success Indicator</th>
                 <th colspan="3" style="width:40px">Rating Matrix</th>
                 <th rowspan="2" style="min-width:100px">Incharge</th>
                 <th rowspan="2" style="width:40px">Success Indicator Option</th>
             </tr>
-            <tr style="font-size:12px">
+            <tr style="font-size:12px; text-align: center;">
                 <th>Q</th>
                 <th>E</th>
                 <th>T</th>
@@ -44,7 +44,7 @@
                 <template v-else>
                     <td>
                         <div :style="'margin-left:'+(item.level*50)+'px;'">
-                            <!-- {{ item.id }} -->
+                            <!-- {{ item.mi_id }} -->
                             <button v-if="item.title" class="ui mini green button" @click="edit_mfo_corrections(item)" style="margin-right: 15px;"><i class="ui edit icon"></i>MFO</button>
                             <span :style="item.correction_status?'color:'+item.correction_status:''" @click="edit_mfo_corrections(item)"> {{ item.code + " " + item.title }}</span>
                             <!-- <br>
@@ -53,31 +53,39 @@
                             {{ item.correction_status }} -->
                         </div>
                     </td>
-                    <td>
-                        {{
-                            item.success_indicator
-                        }}
+                    <td :style="'color:'+item.si_correction_status">
+                        <span @click="edit_si_corrections(item)">
+                            {{
+                                item.success_indicator
+                            }}
+                        </span>
                     </td>
-                    <td>
-                        <template v-for="(quality, i) in item.qualities" :key="i">
-                            <div>
-                                {{ quality.score + " - " + quality.description }}
-                            </div>
-                        </template>
+                    <td :style="'color:'+item.si_correction_status">
+                        <div @click="edit_si_corrections(item)">
+                            <template v-for="(quality, i) in item.qualities" :key="i">
+                                <div>
+                                    {{ quality.score + " - " + quality.description }}
+                                </div>
+                            </template>
+                        </div>
                     </td>
-                    <td>
-                        <template v-for="(efficiency, i) in item.efficiencies" :key="i">
-                            <div>
-                                {{ efficiency.score + " - " + efficiency.description }}
-                            </div>
-                        </template>
+                    <td :style="'color:'+item.si_correction_status">
+                        <div @click="edit_si_corrections(item)">
+                            <template v-for="(efficiency, i) in item.efficiencies" :key="i">
+                                <div>
+                                    {{ efficiency.score + " - " + efficiency.description }}
+                                </div>
+                            </template>
+                        </div>
                     </td>
-                    <td>
-                        <template v-for="(timeliness, i) in item.timelinesses" :key="i">
-                            <div>
-                                {{ timeliness.score + " - " + timeliness.description }}
-                            </div>
-                        </template>
+                    <td :style="'color:'+item.si_correction_status">
+                        <div @click="edit_si_corrections(item)">
+                            <template v-for="(timeliness, i) in item.timelinesses" :key="i">
+                                <div>
+                                    {{ timeliness.score + " - " + timeliness.description }}
+                                </div>
+                            </template>
+                        </div>
                     </td>
                     <td style="white-space: nowrap;">
                         <template v-for="(employee, i) in item.incharges" :key="i">
@@ -85,7 +93,7 @@
                         </template>
                     </td>
                     <td>
-                        <button class="ui mini blue button"><i class="ui edit icon"></i>Add Correction</button>
+                        <button class="ui mini blue button" @click="edit_si_corrections(item)"><i class="ui edit icon"></i>Add Correction</button>
                     </td>
                 </template>
 
@@ -134,7 +142,7 @@
                 </div>
                 <div class="field">
                     <label>Add Corrections:</label>
-                    <textarea v-model="mfo_correction"></textarea>
+                    <textarea v-model="mfo_correction" placeholder="Add corrections here..."></textarea>
                 </div>
             </form>
         </div>
@@ -151,7 +159,80 @@
     <!-- mfo edit corrections end -->
 
     <!-- si edit corrections start -->
+    <div id="si_correction_modal" class="ui modal">
+        <div class="header">
+            Success Indicator Corrections
+        </div>
+        <div class="content">
+            <b>Success Indicator:</b>
+            <div>{{si_edit_item.success_indicator}}</div>
+            <div v-if="count_array(si_edit_item.qualities) > 0">
+                <b>Quality:</b>
+                <div v-for="item in si_edit_item.qualities" :key="item.score">
+                    {{item.score}} - {{item.description}}
+                </div>
+            </div>
+            <div v-if="count_array(si_edit_item.efficiencies) > 0">
+                <b>Efficiency:</b>
+                <div v-for="item in si_edit_item.efficiencies" :key="item.score">
+                    {{item.score}} - {{item.description}}
+                </div>
+            </div>
+            <div v-if="count_array(si_edit_item.timelinesses) > 0">
+                <b>Timeliness:</b>
+                <div v-for="item in si_edit_item.timelinesses" :key="item.score">
+                    {{item.score}} - {{item.description}}
+                </div>
+            </div>
+            <!-- corrections table start -->
+            <form id="si_correction_form" class="ui form" @submit.prevent="save_si_correction()">
 
+                <div class="field" v-if="si_edit_item.si_corrections">
+                    <br>
+                    <!-- <label>Corrections:</label> -->
+                    <table class="ui small compact celled structured table" style="width: 100%;">
+                        <thead>
+                            <tr style="text-align: center;">
+                                <th>
+                                    Corrections
+                                </th>
+                                <th>
+                                    Status
+                                </th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(correction, i) in si_edit_item.si_corrections" :key="i">
+                                <td><span v-html="correction[0]"></span></td>
+                                <td style="text-align: center;">
+                                    <span v-if="correction[1]" style="color: green;">Accomplished</span>
+                                    <span v-else style="color: red;">Unaccomplished</span>
+                                </td>
+                                <td style="text-align: center;">
+                                    <button v-if="!correction[1]" class="ui mini red button" type="button" @click="remove_si_correction(i)">Remove</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="field">
+                    <label>Add Corrections:</label>
+                    <textarea v-model="si_correction" placeholder="Add corrections here..."></textarea>
+                </div>
+            </form>
+            <!-- corrections table end -->
+        </div>
+        <div class="actions">
+            <div class="ui deny button">
+                Close
+            </div>
+            <button form="si_correction_form" type="submit" class="ui right labeled icon green button approve">
+                Save
+                <i class="checkmark icon"></i>
+            </button>
+        </div>
+    </div>
     <!-- si edit corrections end -->
     <!-- loading modal start -->
     <div id="loading_modal" class="ui modal">
@@ -170,7 +251,9 @@
             return {
                 // loading: true,
                 mfo_edit_item: {},
+                si_edit_item: {},
                 mfo_correction: "",
+                si_correction: "",
                 items: []
             }
         },
@@ -182,7 +265,10 @@
             // },
         },
         methods: {
-
+            count_array(arr) {
+                if (!arr) return 0;
+                return arr.length;
+            },
             get_rating_scale_matrix() {
                 $('#tbody_rsm').dimmer({
                         closable: false,
@@ -206,6 +292,13 @@
                     "json"
                 );
             },
+            edit_si_corrections(item) {
+                console.log(item);
+                this.si_edit_item = item
+                $("#si_correction_modal").modal({
+                    closable: false,
+                }).modal("show")
+            },
             edit_mfo_corrections(item) {
                 this.mfo_edit_item = item;
                 $("#mfo_correction_modal").modal({
@@ -225,6 +318,39 @@
                         "json"
                     );
                 }
+            },
+            remove_si_correction(index) {
+                if (confirm('Are you sure you want to delete this correction?')) {
+                    $.post("?config=rsmPMTview", {
+                            remove_si_correction: true,
+                            index: index,
+                            mi_id: this.si_edit_item.mi_id
+                        }, (data, textStatus, jqXHR) => {
+                            data ? this.si_edit_item.si_corrections.splice(index, 1) : null
+                            this.get_rating_scale_matrix()
+                        },
+                        "json"
+                    );
+                }
+            },
+            save_si_correction() {
+                $.post("?config=rsmPMTview", {
+                    add_si_correction: true,
+                    mi_id: this.si_edit_item.mi_id,
+                    correction: this.si_correction
+                }).then(res => {
+                    // console.log(res);
+                    if (res == "false") {
+                        alert('There is an existing unaccomplished correction, cannot add new correction until accomplished. Please remove/wait for the department to accomplish to add new correction.')
+                    } else {
+                        this.get_rating_scale_matrix()
+                        this.si_edit_item = {}
+                        this.si_correction = ""
+                        $("#si_correction_modal").modal({
+                            closable: false,
+                        }).modal("hide")
+                    }
+                })
             },
             save_mfo_correction() {
                 // console.log(this.mfo_edit_item);
