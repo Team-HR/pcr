@@ -139,10 +139,10 @@
             </form>
         </div>
         <div class="actions">
-            <div class="ui black deny button">
-                Cancel
+            <div class="ui deny button">
+                Close
             </div>
-            <button form="mfo_correction_form" type="submit" class="ui right labeled icon button">
+            <button form="mfo_correction_form" type="submit" class="ui right labeled icon green button">
                 Save
                 <i class="checkmark icon"></i>
             </button>
