@@ -88,9 +88,15 @@
                         </div>
                     </td>
                     <td style="white-space: nowrap;">
-                        <template v-for="(employee, i) in item.incharges" :key="i">
-                            <button class="ui mini text button" style="margin-bottom: 2px;" @click="show_employee_irm(employee.id)">{{ employee.name }}</button> <br>
-                        </template>
+
+                        <div class="ui list">
+                            <a href="javascript:void(0)" class="item" v-for="(employee, i) in item.incharges" :key="i" @click="show_employee_irm(employee)">
+                                {{ employee.name }}
+                            </a>
+                        </div>
+                        <!-- <template v-for="(employee, i) in item.incharges" :key="i">
+                            <button class="ui mini text fluid button" style="margin-bottom: 2px;" @click="show_employee_irm(employee.id)">{{ employee.name }}</button> <br>
+                        </template> -->
                     </td>
                     <td>
                         <button class="ui mini blue button" @click="edit_si_corrections(item)"><i class="ui edit icon"></i>Add Correction</button>
@@ -235,7 +241,7 @@
     <!-- si edit corrections end -->
     <!-- irm modal start -->
     <div id="irm_modal" class="ui fullscreen modal">
-        <div class="header">Individual Rating Scale Matrix</div>
+        <div class="header">RATING SCALE MATRIX OF: {{irm_name}}</div>
         <div v-html="irm" class="scrolling content"></div>
         <div class="actions">
             <div class="ui red deny button">
@@ -261,6 +267,7 @@
                 si_correction: "",
                 items: [],
                 irm: "",
+                irm_name: ""
             }
         },
         watch: {
@@ -271,17 +278,23 @@
             // },
         },
         methods: {
-            show_employee_irm(employee_id) {
+            show_employee_irm(employee) {
+                this.irm_name = employee.name
                 // alert(id)\
                 const queryString = window.location.search;
                 const urlParams = new URLSearchParams(queryString);
                 const period_id = urlParams.get('period');
                 const department_id = urlParams.get('department');
                 $.post("?config=rsmPMTview", {
-                        getIRM: employee_id + "||" + period_id + "||" + department_id
+                        getIRM: employee.id + "||" + period_id + "||" + department_id
                     }, (data, textStatus, jqXHR) => {
                         // console.log("get_rating_scale_matrix:", data);
-                        $("#irm_modal").modal("show");
+                        $("#irm_modal").modal({
+                            onHide: () => {
+                                this.irm = ""
+                                this.irm_name = ""
+                            }
+                        }).modal("show");
                         this.irm = data;
                         // $('#tbody_rsm')
                         //     .dimmer('hide')
