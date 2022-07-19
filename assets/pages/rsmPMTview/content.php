@@ -242,7 +242,15 @@
     <!-- irm modal start -->
     <div id="irm_modal" class="ui fullscreen modal">
         <div class="header">RATING SCALE MATRIX OF: {{irm_name}}</div>
-        <div v-html="irm" class="scrolling content"></div>
+
+        <div class="scrolling content">
+            <div v-if="!irm" class="ui basic segment" style="min-height: 500px;">
+                <div id="irm_loader" class="ui inverted dimmer">
+                    <div class="ui text loader">Loading</div>
+                </div>
+            </div>
+            <div v-html="irm"></div>
+        </div>
         <div class="actions">
             <div class="ui red deny button">
                 Close
@@ -279,6 +287,18 @@
         },
         methods: {
             show_employee_irm(employee) {
+                $("#irm_modal").modal({
+                    onHide: () => {
+                        this.irm = ""
+                        this.irm_name = ""
+                    },
+                    onShow: () => {
+                        $("#irm_loader").dimmer({
+                            closable: false
+                        }).dimmer("show")
+                    }
+                }).modal("show");
+
                 this.irm_name = employee.name
                 // alert(id)\
                 const queryString = window.location.search;
@@ -289,12 +309,8 @@
                         getIRM: employee.id + "||" + period_id + "||" + department_id
                     }, (data, textStatus, jqXHR) => {
                         // console.log("get_rating_scale_matrix:", data);
-                        $("#irm_modal").modal({
-                            onHide: () => {
-                                this.irm = ""
-                                this.irm_name = ""
-                            }
-                        }).modal("show");
+                        $("#irm_loader").dimmer("hide")
+
                         this.irm = data;
                         // $('#tbody_rsm')
                         //     .dimmer('hide')
