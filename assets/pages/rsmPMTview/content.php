@@ -89,7 +89,7 @@
                     </td>
                     <td style="white-space: nowrap;">
                         <template v-for="(employee, i) in item.incharges" :key="i">
-                            {{ employee.name }} <br>
+                            <button class="ui mini text button" style="margin-bottom: 2px;" @click="show_employee_irm(employee.id)">{{ employee.name }}</button> <br>
                         </template>
                     </td>
                     <td>
@@ -147,7 +147,7 @@
             </form>
         </div>
         <div class="actions">
-            <div class="ui deny button">
+            <div class="ui red deny button">
                 Close
             </div>
             <button form="mfo_correction_form" type="submit" class="ui right labeled icon green button">
@@ -186,7 +186,6 @@
             </div>
             <!-- corrections table start -->
             <form id="si_correction_form" class="ui form" @submit.prevent="save_si_correction()">
-
                 <div class="field" v-if="si_edit_item.si_corrections">
                     <br>
                     <!-- <label>Corrections:</label> -->
@@ -224,7 +223,7 @@
             <!-- corrections table end -->
         </div>
         <div class="actions">
-            <div class="ui deny button">
+            <div class="ui red deny button">
                 Close
             </div>
             <button form="si_correction_form" type="submit" class="ui right labeled icon green button approve">
@@ -234,11 +233,17 @@
         </div>
     </div>
     <!-- si edit corrections end -->
-    <!-- loading modal start -->
-    <div id="loading_modal" class="ui modal">
-
+    <!-- irm modal start -->
+    <div id="irm_modal" class="ui fullscreen modal">
+        <div class="header">Individual Rating Scale Matrix</div>
+        <div v-html="irm" class="scrolling content"></div>
+        <div class="actions">
+            <div class="ui red deny button">
+                Close
+            </div>
+        </div>
     </div>
-    <!-- loading modal end -->
+    <!-- irm modal end -->
 </div>
 <script>
     /* Vue3 Start*/
@@ -254,7 +259,8 @@
                 si_edit_item: {},
                 mfo_correction: "",
                 si_correction: "",
-                items: []
+                items: [],
+                irm: "",
             }
         },
         watch: {
@@ -265,6 +271,24 @@
             // },
         },
         methods: {
+            show_employee_irm(employee_id) {
+                // alert(id)\
+                const queryString = window.location.search;
+                const urlParams = new URLSearchParams(queryString);
+                const period_id = urlParams.get('period');
+                const department_id = urlParams.get('department');
+                $.post("?config=rsmPMTview", {
+                        getIRM: employee_id + "||" + period_id + "||" + department_id
+                    }, (data, textStatus, jqXHR) => {
+                        // console.log("get_rating_scale_matrix:", data);
+                        $("#irm_modal").modal("show");
+                        this.irm = data;
+                        // $('#tbody_rsm')
+                        //     .dimmer('hide')
+                    },
+                    // "json"
+                );
+            },
             count_array(arr) {
                 if (!arr) return 0;
                 return arr.length;
