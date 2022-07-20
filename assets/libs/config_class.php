@@ -191,7 +191,35 @@ class Employee_data extends mysqli
 		$sql = "SELECT * from employees where employees_id='$id'";
 		$sql = mysqli::query($sql);
 		$sql = $sql->fetch_assoc();
-		return $sql['firstName'] . " " . $sql['middleName'] . " " . $sql['lastName'];
+
+		$firstName = isset($sql["firstName"]) ? $sql["firstName"] : "";
+		$lastName = isset($sql["lastName"]) ? $sql["lastName"] : "";
+
+		$middleName = " ";
+		if (isset($sql["middleName"])) {
+			$middleName = $sql["middleName"];
+			if ($middleName == ".") {
+				$middleName = " ";
+			} else {
+				if (strlen($middleName) > 0) {
+					$middleName = " " . $middleName[0] . ". ";
+				} else $middleName = " ";
+			}
+		}
+
+		$extName = "";
+		if (isset($sql["extName"])) {
+			$extName = $sql["extName"];
+			if ($extName) {
+				$extName = strtoupper($extName);
+				$extName = ", " . $extName . ".";
+			}
+		}
+
+
+		$fullname =  mb_convert_case("$firstName$middleName$lastName$extName", MB_CASE_UPPER, "UTF-8");
+
+		return $fullname;
 	}
 
 	// method made for reviewing status of the file
@@ -467,19 +495,19 @@ class Employee_data extends mysqli
 	private function accountblePersons($perId)
 	{
 		$emp = $this->emp_ID;
-		// $core = mysqli::query("SELECT * FROM `spms_corefunctions` where parent_id='$perId'");
-		// while($coreId = $core->fetch_assoc()){
 		$indicators = mysqli::query("SELECT * FROM `spms_matrixindicators` where cf_ID='$perId'");
 		while ($empId = $indicators->fetch_assoc()) {
 			$emp .= "," . $empId['mi_incharge'];
 		}
-		// }
 		$emp  = explode(",", $emp);
 		$emp = array_unique($emp);
 		$view = "<br>";
-		while (list($i, $val) = each($emp)) {
-			$view .= $this->get_fullname($val) . "<br>";
-			// $view .=$val."<br>";
+		$emp_length = count($emp);
+		foreach ($emp as $i => $employee_id) {
+			$view .= $this->get_fullname($employee_id);
+			if ($i < $emp_length && $emp_length > 1) {
+				$view .= ";<br>";
+			}
 		}
 		return $view;
 	}
@@ -977,14 +1005,16 @@ class Employee_data extends mysqli
 		$empSql = mysqli::query($empSql);
 		while ($getData = $empSql->fetch_assoc()) {
 			$val = $getData["employees_id"];
+
 			if ($mayor) {
-				$val  = $getData['firstName'] . " " . $getData["middleName"] . " " . $getData["lastName"];
+				$val  = $getData['firstName'] . " " . $getData["middleName"] . " " . $getData["lastName"] . $getData["extName"] ? ", " . $getData["extName"] : "";
+				$val = mb_convert_case($val, MB_CASE_UPPER);
 			}
 
 			if ($getData['employees_id'] == $id) {
-				$emps .= "<option value='$val' selected>$getData[firstName] $getData[middleName] $getData[lastName]</option>";
+				$emps .= "<option value='$val' selected>$getData[firstName] $getData[middleName] $getData[lastName] $getData[extName]</option>";
 			} else {
-				$emps .= "<option value='$val'>$getData[firstName] $getData[middleName] $getData[lastName]</option>";
+				$emps .= "<option value='$val'>$getData[firstName] $getData[middleName] $getData[lastName] $getData[extName]</option>";
 			}
 		}
 		return $emps;
@@ -1381,9 +1411,9 @@ class Employee_data extends mysqli
 		# Temporarily empties strategic rating, final numerical rating, 
 		# and final adjectival rating for the period of Jan-June 2022 ONLY 
 		# $this->period["year_mfo"] != "2022"?...
-		$strategic_total = $this->period["year_mfo"] != "2022"?$this->strategic_totalAv:" ";
-		$final_numerical_rating = $this->period["year_mfo"] != "2022"? $overallAv : "";
-		$final_adjectival_rating = $this->period["year_mfo"] != "2022"? $adjectival : "";
+		$strategic_total = $this->period["year_mfo"] != "2022" ? $this->strategic_totalAv : " ";
+		$final_numerical_rating = $this->period["year_mfo"] != "2022" ? $overallAv : "";
+		$final_adjectival_rating = $this->period["year_mfo"] != "2022" ? $adjectival : "";
 
 		// <td>Formula:(Total of all average ratings / no. of entries)x20%</td>
 		$view = "
@@ -1402,9 +1432,9 @@ class Employee_data extends mysqli
 		<td>Total Weight Allocation:" . $this->get_strtPercent() . "</td>
 		<td><center><b>" . $strategic_total . "</b></center></td>
 		<td colspan='3' rowspan='3'>
-		<center><b> ". $final_numerical_rating ." </b></center>
+		<center><b> " . $final_numerical_rating . " </b></center>
 		</td>
-		<td colspan='2' rowspan='3'><center><b>". $final_adjectival_rating ."</b></center></td>
+		<td colspan='2' rowspan='3'><center><b>" . $final_adjectival_rating . "</b></center></td>
 		<td class='noprint'></td>
 		$col
 		</tr>
@@ -1448,15 +1478,16 @@ class Employee_data extends mysqli
 		$col
 		</tr>
 		<tr>
-		<td style='text-align:center;width:16%'>
-		<p style='font-size:11px'><b>" . $this->get_emp("firstName") . " " . $this->get_emp("middleName") . " " . $this->get_emp("lastName") . " " . $this->get_emp("extName") . "</b></p>
+		<td style='text-align:center;width:16%; vertical-align:bottom;'>
+		<span style='font-size:11px'><b>" . $this->get_emp("firstName") . " " . $this->get_emp("middleName") . " " . $this->get_emp("lastName") . " " . $this->get_emp("extName") . "</b></span>
 		</td>
 		<td style='text-align:center;width:16%'>
-		<p style='font-size:9px'>	I certified that I discussed my assessment of the performance with the employee:</p>
+		<p style='font-size:9px; margin-bottom: 25px;'>	I certified that I discussed my assessment of the performance with the employee:</p>
 		<p style='font-size:11px'><b>" . $ImmediateSup . "</b></p>
 		</td>
 		<td style='text-align:center;width:16%'>
-		<p style='font-size:9px'>	I certified that I discussed with the employee how they are rated:<p style='font-size:11px'><b>" . $DepartmentHead . "</b></p></p>
+			<p style='font-size:9px; margin-bottom: 25px;'>I certified that I discussed with the employee how they are rated:</p>
+			<p style='font-size:11px;'><b>" . $DepartmentHead . "</b></p>
 		</td>
 		<td style='text-align:center;width:16%'>
 		<p style='font-size:9px;'>
@@ -1466,8 +1497,8 @@ class Employee_data extends mysqli
 		(all PMT member will sign)
 		</p>
 		</td>
-		<td style='text-align:center;width:16%'>
-		<p style='font-size:11px'><b>" . $this->get_status('HeadAgency') . "</b></p>
+		<td style='text-align:center;width:16%;vertical-align:bottom;'>
+			<span style='font-size:11px'><b>" . $this->get_status('HeadAgency') . "</b></span>
 		</td>
 		<td style='text-align:center;width:9.2%'>
 		</td>
