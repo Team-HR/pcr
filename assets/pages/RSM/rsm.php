@@ -1,13 +1,11 @@
-
-<div id="rsmCont" style="min-height:500px">
+<div style="min-height:500px">
 	<?php
-	if($user->authorization){
-		for ($index = 0; $index <= count($user->authorization) ; $index++) {
-			if($index == count($user->authorization)){
+	if ($user->authorization) {
+		for ($index = 0; $index <= count($user->authorization); $index++) {
+			if ($index == count($user->authorization)) {
 				echo	Authorization_Error();
-			}
-			else if($user->authorization[$index]=="Matrix") {
-				?>
+			} else if ($user->authorization[$index] == "Matrix") {
+	?>
 				<div style="margin:auto;width:400px;padding-top:50px">
 					<h1 class="ui icon header">
 						<i class="handshake outline icon"></i>
@@ -30,7 +28,7 @@
 							</div>
 							<div class="ui four wide field">
 								<select id="year">
-									<?=$year->get_year()?>
+									<?= $year->get_year() ?>
 								</select>
 							</div>
 							<div class="ui four wide field">
@@ -39,11 +37,11 @@
 						</div>
 					</div>
 				</div>
-				<?php
+	<?php
 				break;
 			}
 		}
-	}else{
+	} else {
 		echo Authorization_Error();
 	}
 	?>

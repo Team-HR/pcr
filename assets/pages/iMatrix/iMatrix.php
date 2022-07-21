@@ -3,8 +3,8 @@
 		<h1 class="ui center aligned icon header">
 			<i class="eye icon"></i>
 			<div class="content">
-				Rating Scale Matrix
-				<div class="sub header">View Rating scale Matrix</div>
+				Individual Rating Scale Matrix
+				<div class="sub header">Show/Edit Individual Rating scale Matrix</div>
 			</div>
 		</h1>
 	</div>
@@ -21,7 +21,7 @@
 				</div>
 				<div class="ui four wide field">
 					<select id="year">
-						<?=$year->get_year()?>
+						<?= $year->get_year() ?>
 					</select>
 				</div>
 				<div class="ui four wide field">

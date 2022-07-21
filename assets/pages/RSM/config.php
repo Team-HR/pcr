@@ -1,5 +1,113 @@
 <?php
-if (isset($_POST['period_check'])) {
+// copy previous rsm start
+
+if (isset($_POST['get_prev_rsm'])) {
+  $data = [];
+  $selected_period_id = $_SESSION["period"];
+
+  // get selected period data
+  $sql = "SELECT * FROM `spms_mfo_period` WHERE `mfoperiod_id` = '$selected_period_id';";
+  $result = $mysqli->query($sql);
+  $row = $result->fetch_assoc();
+  //  {"mfoperiod_id":"10","month_mfo":"July - December","year_mfo":"2022"}
+
+  $selected_months = $row["month_mfo"];
+  $selected_year = $row["year_mfo"];
+
+  // get previous period data
+  $period_id = 0;
+  $months = "";
+  $year = "";
+  if ($selected_months == "July - December") {
+    $months = "January - June";
+    $year = $selected_year;
+  } else {
+    $months = "July - December";
+    $year = $selected_year - 1;
+  }
+
+  echo json_encode([
+    "previous" => "$months $year",
+    "new" => "$selected_months $selected_year"
+  ]);
+} elseif (isset($_POST['copy_prev_rsm'])) {
+  $selected_period_id = $_SESSION["period"];
+
+  // get selected period data
+  $sql = "SELECT * FROM `spms_mfo_period` WHERE `mfoperiod_id` = '$selected_period_id';";
+  $result = $mysqli->query($sql);
+  $row = $result->fetch_assoc();
+  //  {"mfoperiod_id":"10","month_mfo":"July - December","year_mfo":"2022"}
+
+  $selected_months = $row["month_mfo"];
+  $selected_year = $row["year_mfo"];
+
+  // get previous period data
+  $period_id = 0;
+  $months = "";
+  $year = "";
+  if ($selected_months == "July - December") {
+    $months = "January - June";
+    $year = $selected_year;
+  } else {
+    $months = "July - December";
+    $year = $selected_year - 1;
+  }
+  $sql = "SELECT `mfoperiod_id` FROM `spms_mfo_period` WHERE `month_mfo` = '$months' AND `year_mfo` = '$year'";
+  $result = $mysqli->query($sql);
+  $row = $result->fetch_assoc();
+  $period_id = $row["mfoperiod_id"];
+
+  $department_id = $_SESSION["emp_info"]["department_id"];
+
+  // get previous period core functions
+  $data = [];
+  $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$period_id' AND `dep_id` = '$department_id' AND `parent_id` = '';";
+  $result = $mysqli->query($sql);
+  while ($row = $result->fetch_assoc()) {
+    // $data[] = [
+    //   "core_function_data" => $row,
+    //   "success_indicators" => get_success_indicators($mysqli, $row["cf_ID"])
+    // ];
+    $row["children"] = get_children($mysqli, $row['cf_ID']);
+    $data[] = $row;
+  }
+
+  $data = start_duplicating($mysqli, $data, $selected_period_id, "");
+
+  /*
+  spms_corefunctions
+  cf_ID: "9801"
+  cf_count: "01."
+  cf_title: "Recruitment Services"
+  corrections: "a:1:{i:0;a:2:{i:0;s:64:\"<b>VILLARIN, MA. RAYZA</b> - <i>2022-07-15 16:12:15</i>:<br>test\";i:1;i:1;}}"
+  dep_id: "32"
+  mfo_periodId: "2"
+  parent_id: "9816"
+
+  spms_matrixindicators
+  cf_ID: "9802"
+  corrections: ""
+  mi_eff: "a:6:{i:0;s:0:\"\";i:1;s:0:\"\";i:2;s:20:\"No meeting conducted\";i:3;s:0:\"\";i:4;s:0:\"\";i:5;s:22:\"With meeting conducted\";}"
+  mi_id: "10123"
+  mi_incharge: "21805"
+  mi_quality: "a:6:{i:0;s:0:\"\";i:1;s:0:\"\";i:2;s:0:\"\";i:3;s:0:\"\";i:4;s:0:\"\";i:5;s:0:\"\";}"
+  mi_succIn: "100% of PMT meetings / sessions conducted\n          "
+  mi_time: "a:6:{i:0;s:0:\"\";i:1;s:0:\"\";i:2;s:0:\"\";i:3;s:0:\"\";i:4;s:0:\"\";i:5;s:0:\"\";}"
+*/
+
+  // foreach ($data as $i => $datum) {
+  // copy to spms_corefunctions
+  // $sql = "INSERT INTO `spms_corefunctions`(`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`, `corrections`) VALUES ('$selected_period_id','$datum[parent_id]','$datum[dep_id]','$datum[cf_count]','$datum[cf_title]','')";
+  // $data[$i]['core_function_data']['insert_id'] = '9';
+  // }
+
+  echo json_encode(true);
+
+  // echo json_encode($_SESSION["emp_info"]["department_id"]);
+}
+// copy previous rsm end
+elseif (isset($_POST['period_check'])) {
 
   $period = "";
   $statusOK = 0;
@@ -7,64 +115,63 @@ if (isset($_POST['period_check'])) {
   $sql = "SELECT * from spms_mfo_period where month_mfo='$_POST[period_check]' and year_mfo='$_POST[year]'";
   $sql = $mysqli->query($sql);
 
-  if(!$sql){
+  if (!$sql) {
     die($mysqli->error);
   }
 
-  if($sql->num_rows){
+  if ($sql->num_rows) {
     $sqlFetch = $sql->fetch_assoc();
     $period = $sqlFetch['mfoperiod_id'];
     $_SESSION['period'] = $sqlFetch['mfoperiod_id'];
     $statusOK = 1;
-  }else{
+  } else {
     $sql = "INSERT INTO `spms_mfo_period` (`mfoperiod_id`, `month_mfo`, `year_mfo`) VALUES (NULL,'$_POST[period_check]','$_POST[year]')";
     $sql = $mysqli->query($sql);
     $statusOK = 1;
     $period = $mysqli->insert_id;
     $_SESSION['period'] = $mysqli->insert_id;
   }
-  if($statusOK){
+  if ($statusOK) {
     $department = $user->get_emp('department_id');
     $rsmStatus = "SELECT * from `spms_rsmstatus` where `period_id`='$period' and `department_id`='$department'";
     $rsmStatus = $mysqli->query($rsmStatus);
-    if($rsmStatus->num_rows<1){
+    if ($rsmStatus->num_rows < 1) {
       // if this period will end edit will change to zero;
       $rsm = "INSERT INTO `spms_rsmstatus` (`rsmStatus_id`, `period_id`, `department_id`, `done`, `edit`, `alter_logs`) VALUES (NULL, '$period', '$department', '0', '1', '')";
       $rsm = $mysqli->query($rsm);
-      if(!$rsm){
+      if (!$rsm) {
         die($mysqli->error);
       }
-     } 
+    }
   }
   echo $statusOK;
-}elseif (isset($_POST['page'])) {
+} elseif (isset($_POST['page'])) {
   $page = $_POST['page'];
-  if ($page=='table') {
+  if ($page == 'table') {
     echo table($mysqli);
-    if(rsmEditStatus("")){
-      echo "<button class='ui primary button fluid' onclick='closeRsm(".rsmEditStatus("id").")'>Submit Rating Scale Matrix</button>";
+    if (rsmEditStatus("")) {
+      echo "<button class='ui primary button fluid' onclick='closeRsm(" . rsmEditStatus("id") . ")'>Submit Rating Scale Matrix</button>";
     }
-  }elseif(false) {
-    
+  } elseif (false) {
   }
-}elseif (isset($_POST['addRSMData'])) {
+} elseif (isset($_POST['addRSMData'])) {
   $rsmCount = changeCount($_POST['rsmCount']);
   $rsmCount = addslashes($rsmCount);
   $addRSMData = addslashes($_POST['addRSMData']);
-  if($rsmCount!=""&&$addRSMData!=""){
-    $dep_id= $_SESSION['emp_info']['department_id'];
+  if ($rsmCount != "" && $addRSMData != "") {
+    $dep_id = $_SESSION['emp_info']['department_id'];
     $pid = $_POST['pid'];
     $sql = "INSERT INTO `spms_corefunctions` (`cf_ID`,`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`) VALUES ('','$_SESSION[period]', '$pid','$dep_id', '$rsmCount', '$addRSMData')";
     $sql = $mysqli->query($sql);
     if (!$sql) {
       die($mysqli->error);
-    }else{
+    } else {
       print(1);
     }
-  }else{
+  } else {
     echo "Some important input fields are Empty";
   }
-}elseif (isset($_POST['editRsmTitle'])) {
+} elseif (isset($_POST['editRsmTitle'])) {
   $editRsmTitle = $_POST['editRsmTitle'];
   $editcountRsm = changeCount($_POST['editcountRsm']);
   $dataId = $_POST['dataId'];
@@ -72,12 +179,12 @@ if (isset($_POST['period_check'])) {
   $getC = $mysqli->query($getC);
   $getC = $getC->fetch_assoc();
   $update_correction = "";
-  if($getC['corrections']){
+  if ($getC['corrections']) {
     $update_correction = [];
     $getC = unserialize($getC['corrections']);
     $count = 0;
-    while($count<count($getC)){
-      $update_correction[] = [$getC[$count][0],1];
+    while ($count < count($getC)) {
+      $update_correction[] = [$getC[$count][0], 1];
       $count++;
     }
     $update_correction = serialize($update_correction);
@@ -89,19 +196,19 @@ if (isset($_POST['period_check'])) {
   $sql = $mysqli->query($sql);
   if (!$sql) {
     die($mysqli->error);
-  }else{
+  } else {
     print(1);
   }
-}elseif (isset($_POST['MfoSiDelete'])) {
+} elseif (isset($_POST['MfoSiDelete'])) {
   $dataId = $_POST['MfoSiDelete'];
   $sql = "DELETE FROM `spms_corefunctions` WHERE `spms_corefunctions`.`cf_ID` ='$dataId'";
   $sql = $mysqli->query($sql);
   if (!$sql) {
     die($mysqli->error);
-  }else{
+  } else {
     print(1);
   }
-}elseif (isset($_POST['SaveMfoSI'])){
+} elseif (isset($_POST['SaveMfoSI'])) {
   $dataId = $_POST['SaveMfoSI'];
   $quality = addslashes(serialize($_POST['quality']));
   $efficiency = addslashes(serialize($_POST['efficiency']));
@@ -112,13 +219,13 @@ if (isset($_POST['period_check'])) {
   (`mi_id`, `cf_ID`, `mi_succIn`, `mi_quality`, `mi_eff`, `mi_time`, `mi_incharge`)
   VALUES
   (NULL, '$dataId', '$successIn', '$quality', '$efficiency', '$timeliness', '$incharge')";
-  $sql=$mysqli->query($sql);
+  $sql = $mysqli->query($sql);
   if (!$sql) {
     die($mysqli->error);
-  }else{
+  } else {
     print(1);
   }
-}elseif (isset($_POST['SaveMfoSIEdit'])) {
+} elseif (isset($_POST['SaveMfoSIEdit'])) {
   $dataId = $_POST['SaveMfoSIEdit'];
   $quality = addslashes(serialize($_POST['quality']));
   $efficiency = addslashes(serialize($_POST['efficiency']));
@@ -129,12 +236,12 @@ if (isset($_POST['period_check'])) {
   $getC = $mysqli->query($getC);
   $getC = $getC->fetch_assoc();
   $update_correction = "";
-  if($getC['corrections']){
+  if ($getC['corrections']) {
     $update_correction = [];
     $getC = unserialize($getC['corrections']);
     $count = 0;
-    while($count<count($getC)){
-      $update_correction[] = [$getC[$count][0],1];
+    while ($count < count($getC)) {
+      $update_correction[] = [$getC[$count][0], 1];
       $count++;
     }
     $update_correction = serialize($update_correction);
@@ -150,29 +257,29 @@ if (isset($_POST['period_check'])) {
   WHERE `spms_matrixindicators`.`mi_id` = $dataId;
   ";
   $sql = $mysqli->query($sql);
-  if(!$sql){
+  if (!$sql) {
     die($mysqli->error);
-  }else{
+  } else {
     print(1);
   }
-}elseif (isset($_POST['removeSi'])) {
+} elseif (isset($_POST['removeSi'])) {
   $sql = "DELETE FROM `spms_matrixindicators` WHERE `spms_matrixindicators`.`mi_id` = '$_POST[removeSi]'";
   $sql = $mysqli->query($sql);
   if (!$sql) {
     die($mysqli->error);
-  }else{
+  } else {
     print(1);
   }
-}elseif (isset($_POST['closeRsm'])) {
+} elseif (isset($_POST['closeRsm'])) {
   $sql = "UPDATE `spms_rsmstatus` SET `edit` = '0' , `done`='1' WHERE `spms_rsmstatus`.`rsmStatus_id` = '$_POST[closeRsm]'";
   $sql = $mysqli->query($sql);
-  if(!$sql){
+  if (!$sql) {
     die($mysqli->error);
-  }else{
+  } else {
     echo 1;
   }
-}elseif (isset($_POST['getRsmparentChange'])) {
-  $rsmMFO = new RsmClass($host,$usernameDb,$password,$database);
+} elseif (isset($_POST['getRsmparentChange'])) {
+  $rsmMFO = new RsmClass($host, $usernameDb, $password, $database);
   $rsmMFO->set_period($_SESSION["period"]);
   $rsmMFO->set_department($_POST['dept']);
   $rsmMFO->set_mfoID($_POST['getRsmparentChange']);
@@ -195,20 +302,21 @@ if (isset($_POST['period_check'])) {
         </tr>
         <thead>
         <tbody id='mfoChangeBody'>
-        ".$rsmMFO->get_view()."
+        " . $rsmMFO->get_view() . "
         </tbody>
         </table>";
-  }elseif(isset($_POST['changeParent'])) {
-    $sub = $_POST['sub'];
-    $parent = $_POST['parent'];
-    $sql  = "UPDATE `spms_corefunctions` SET `parent_id` = '$parent' WHERE `spms_corefunctions`.`cf_ID` = $sub";
-    $sql = $mysqli->query($sql);
-    echo 1;
-}elseif (false) {
-}else{
+} elseif (isset($_POST['changeParent'])) {
+  $sub = $_POST['sub'];
+  $parent = $_POST['parent'];
+  $sql  = "UPDATE `spms_corefunctions` SET `parent_id` = '$parent' WHERE `spms_corefunctions`.`cf_ID` = $sub";
+  $sql = $mysqli->query($sql);
+  echo 1;
+} elseif (false) {
+} else {
   echo notFound();
 }
-function table($mysqli){
+function table($mysqli)
+{
   $dep = $_SESSION['emp_info']['department_id'];
   $dep = "SELECT * from `department` where department_id='$dep'";
   $dep = $mysqli->query($dep);
@@ -247,47 +355,49 @@ function table($mysqli){
   <th>T</th>
   </tr>
   </thead>
-  <tbody>".tbody($mysqli)."
+  <tbody>" . tbody($mysqli) . "
   </tbody>
   </table>
   ";
 }
-function tbody($mysqli){
+function tbody($mysqli)
+{
   $view = "";
-  $dep_id= $_SESSION['emp_info']['department_id'];
+  $dep_id = $_SESSION['emp_info']['department_id'];
   $sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$_SESSION[period]' and dep_id='$dep_id' ORDER BY `spms_corefunctions`.`cf_count` ASC ";
   $sql = $mysqli->query($sql);
   $tr = "";
-  while($row1 = $sql->fetch_assoc()){
-    $view.=trows($mysqli,$row1,'10px','');
-    $view.=tbodyChild($row1['cf_ID'],10);
+  while ($row1 = $sql->fetch_assoc()) {
+    $view .= trows($mysqli, $row1, '10px', '');
+    $view .= tbodyChild($row1['cf_ID'], 10);
   }
   $view .= "<tr class='noprint' >
   <td colspan='8' style='padding:10px'>
-  ".AddInputs('')."
+  " . AddInputs('') . "
   </td>
   </tr>";
   return $view;
 }
 
-function tbodyChild($dataId,$padding){
-    $view = "";
-    $mysqli = $GLOBALS['mysqli'];
-    $sql2 = "SELECT * from spms_corefunctions where parent_id='$dataId' ORDER BY `spms_corefunctions`.`cf_count` ASC";
-    $sql2 = $mysqli->query($sql2);
-    $padding +=15;
-    while ($row2 = $sql2->fetch_assoc()) {
-      $sql3 = "SELECT * from spms_corefunctions where parent_id='$row2[cf_ID]' ORDER BY `spms_corefunctions`.`cf_count` ASC";
-      $sql3 = $mysqli->query($sql3);
-      $pad = $padding."px";
-      $view.=trows($mysqli,$row2,$pad,'');
-      $view.=tbodyChild($row2['cf_ID'],$padding);
-    }
-    return $view;
-
+function tbodyChild($dataId, $padding)
+{
+  $view = "";
+  $mysqli = $GLOBALS['mysqli'];
+  $sql2 = "SELECT * from spms_corefunctions where parent_id='$dataId' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+  $sql2 = $mysqli->query($sql2);
+  $padding += 15;
+  while ($row2 = $sql2->fetch_assoc()) {
+    $sql3 = "SELECT * from spms_corefunctions where parent_id='$row2[cf_ID]' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+    $sql3 = $mysqli->query($sql3);
+    $pad = $padding . "px";
+    $view .= trows($mysqli, $row2, $pad, '');
+    $view .= tbodyChild($row2['cf_ID'], $padding);
+  }
+  return $view;
 }
 
-function editInputs($dataId,$count,$title){
+function editInputs($dataId, $count, $title)
+{
   $view = "
   <div class=' field' >
   <div class='ui right labeled input' >
@@ -298,13 +408,14 @@ function editInputs($dataId,$count,$title){
   </div>";
   return $view;
 }
-function unserData($ser_arr){
+function unserData($ser_arr)
+{
   $count = 5;
-  $data="";
+  $data = "";
   $arr = unserialize($ser_arr);
-  while($count>=1){
-    if($arr[$count]){
-      $data.="<b>".$count."</b> - ".$arr[$count]."<br>";
+  while ($count >= 1) {
+    if ($arr[$count]) {
+      $data .= "<b>" . $count . "</b> - " . $arr[$count] . "<br>";
     }
     $count--;
   }
@@ -320,30 +431,32 @@ function unserData($ser_arr){
   return $data;
 }
 
-function validaateCorrection($dat){
+function validaateCorrection($dat)
+{
   $color = false;
-  if($dat){
-      $count = 0;
-      $dat = unserialize($dat);
-      while($count<count($dat)){
-          if($dat[$count][1]==0){
-              $color = true;
-              break;
-          }
-          $count++;
+  if ($dat) {
+    $count = 0;
+    $dat = unserialize($dat);
+    while ($count < count($dat)) {
+      if ($dat[$count][1] == 0) {
+        $color = true;
+        break;
       }
+      $count++;
+    }
   }
   return $color;
 }
 
-function trows($mysqli,$row,$padding,$addDisplay){
+function trows($mysqli, $row, $padding, $addDisplay)
+{
   $sql2 = "SELECT * from spms_corefunctions where parent_id='$row[cf_ID]'";
   $sql2 = $mysqli->query($sql2);
   $sql2count = $sql2->num_rows;
-  if($sql2count>0){
-    $set_drop = settingDrop($row,'',$addDisplay,'display:none');
-  }else{
-    $set_drop = settingDrop($row,'',$addDisplay,'');
+  if ($sql2count > 0) {
+    $set_drop = settingDrop($row, '', $addDisplay, 'display:none');
+  } else {
+    $set_drop = settingDrop($row, '', $addDisplay, '');
   }
   $view = "";
   $siData1 = "SELECT * from spms_matrixindicators where cf_ID='$row[cf_ID]'";
@@ -352,21 +465,21 @@ function trows($mysqli,$row,$padding,$addDisplay){
   $count = 1;
   $correctionColorMFO = "";
   $correctionMFO = validaateCorrection($row['corrections']);
-  if($correctionMFO){
+  if ($correctionMFO) {
     $correctionColorMFO = "color:red;";
   }
-  
-  if($siDatacount1>0){
-    while ($siDataRow1 = $siData1->fetch_assoc()){
+
+  if ($siDatacount1 > 0) {
+    while ($siDataRow1 = $siData1->fetch_assoc()) {
       $correctionColor = "";
       $correction = validaateCorrection($siDataRow1['corrections']);
-      if($correction){
+      if ($correction) {
         $correctionColor = "color:red;";
       }
       $empincharge = "";
-      $incharge = explode(',',$siDataRow1['mi_incharge']);
+      $incharge = explode(',', $siDataRow1['mi_incharge']);
       foreach ($incharge as $empDataId) {
-        if (!$empDataId||$empDataId == null) {
+        if (!$empDataId || $empDataId == null) {
           continue;
         }
         $sqlIncharge = "SELECT * from employees where employees_id='$empDataId'";
@@ -374,72 +487,72 @@ function trows($mysqli,$row,$padding,$addDisplay){
         $sqlIncharge = $sqlIncharge->fetch_assoc();
         $empincharge .= "<br><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br>";
       }
-      $Qdata ="";
-      $Edata ="";
-      $Tdata ="";
+      $Qdata = "";
+      $Edata = "";
+      $Tdata = "";
       $performanceMeasure = "";
-      if(unserData($siDataRow1['mi_quality'])!=""){
+      if (unserData($siDataRow1['mi_quality']) != "") {
         $performanceMeasure .= "Quality<br>";
       }
-      if(unserData($siDataRow1['mi_eff'])!=""){
+      if (unserData($siDataRow1['mi_eff']) != "") {
         $performanceMeasure .= "Efficiency<br>";
       }
-      if(unserData($siDataRow1['mi_time'])!=""){
+      if (unserData($siDataRow1['mi_time']) != "") {
         $performanceMeasure .= "Timeliness<br>";
       }
-      if($count==1){
-        $view.="
+      if ($count == 1) {
+        $view .= "
         <tr >
         <td style='padding-left:$padding;width:25%;$correctionColorMFO'>
-        ".$set_drop."
+        " . $set_drop . "
         $row[cf_count]) $row[cf_title]
         </td>
-        <td style='width:25%;$correctionColor'>".nl2br($siDataRow1['mi_succIn'])."</td>
+        <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . "</td>
         <td>$performanceMeasure</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>".unserData($siDataRow1['mi_quality'])."</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>".unserData($siDataRow1['mi_eff'])."</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>".unserData($siDataRow1['mi_time'])."</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_quality']) . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_eff']) . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_time']) . "</td>
         <td>$empincharge</td>
         <td class='noprint' style='width:100px;padding:5px'>
         ";
-        if(rsmEditStatus("")||$correction){
-            $view .="
+        if (rsmEditStatus("") || $correction) {
+          $view .= "
             <button class='ui green icon basic button' onclick='siEditOpenModal($siDataRow1[mi_id])'><i class='edit icon' ></i></button>
             <button class='ui red icon basic button' onclick='deleteOpenModal($siDataRow1[mi_id])'><i class='trash icon'></i></button>
             ";
         }
-        $view .="
+        $view .= "
         </td>
         </tr>
         ";
-      }else{
-        $view.="
+      } else {
+        $view .= "
         <tr >
         <td></td>
-        <td style='width:25%;$correctionColor'>".nl2br($siDataRow1['mi_succIn'])."</td>
+        <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . "</td>
         <td>$performanceMeasure</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>".unserData($siDataRow1['mi_quality'])."</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>".unserData($siDataRow1['mi_eff'])."</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>".unserData($siDataRow1['mi_time'])."</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_quality']) . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_eff']) . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_time']) . "</td>
         <td>$empincharge</td>
         <td class='noprint' style='width:100px;padding:5px'>
         ";
-        if(rsmEditStatus("")||$correction){
-          $view .="<button class='ui green icon basic button' onclick='siEditOpenModal($siDataRow1[mi_id])'><i class='edit icon' ></i></button>
+        if (rsmEditStatus("") || $correction) {
+          $view .= "<button class='ui green icon basic button' onclick='siEditOpenModal($siDataRow1[mi_id])'><i class='edit icon' ></i></button>
           <button class='ui red icon basic button' onclick='deleteOpenModal($siDataRow1[mi_id])'><i class='trash icon'></i></button>";
         }
-        $view .="
+        $view .= "
         </td>
         </tr>
         ";
       }
       $count++;
     }
-  }else{
-    $view.="
+  } else {
+    $view .= "
     <tr >
     <td style='padding-left:$padding;width:500px;$correctionColorMFO'>
-    ".$set_drop."
+    " . $set_drop . "
     $row[cf_count]) $row[cf_title]
     </td>
     <td></td>
@@ -454,29 +567,30 @@ function trows($mysqli,$row,$padding,$addDisplay){
   }
   return $view;
 }
-function rsmEditStatus($dat){
+function rsmEditStatus($dat)
+{
   $mysqli = $GLOBALS['mysqli'];
   $department_id = $GLOBALS['user'];
   $department_id = $department_id->get_emp('department_id');
   $period = $_SESSION['period'];
   $enable = false;
-  
+
   $sql = "SELECT * from `spms_rsmstatus` where `period_id`='$period' and `department_id`='$department_id'";
   $sql = $mysqli->query($sql);
   $sql = $sql->fetch_assoc();
-  if($sql['edit']){
+  if ($sql['edit']) {
     $enable = true;
   }
-  if($dat=="id"){
+  if ($dat == "id") {
     return $sql['rsmStatus_id'];
-  }else{
+  } else {
     return $enable;
   }
-
 }
 
-function AddInputs($dataId){
-  $view ="
+function AddInputs($dataId)
+{
+  $view = "
   <div class='ui mini form'>
   <div class='fields'>
   <input type='hidden' value='$dataId' id='mfo_pid$dataId'>
@@ -493,26 +607,26 @@ function AddInputs($dataId){
   </div>
   </div>
   </div>
-  <button class='ui black button' onclick='copyRSM()'>Select from Previous RMS</button>
-  ";
-  if(!rsmEditStatus("")){
+  <button class='ui black button' onclick='copyRSM()'>Copy Previous RSM</button>";
+  if (!rsmEditStatus("")) {
     $view = "";
   }
   return $view;
 }
-function settingDrop($row,$edit,$add,$delete){
+function settingDrop($row, $edit, $add, $delete)
+{
   $correction = "";
-  if($row['corrections']){
+  if ($row['corrections']) {
     $c = unserialize($row['corrections']);
     $count = 0;
     $crt = "";
-    while($count<count($c)){
-        $state = "<b style='color:red'>Unaccomplished</b>";            
-        if($c[$count][1]){
-            $state = "<b style='color:green'>Accomplished</b>";            
-        }
-        $crt .= $c[$count][0]." - $state <br>";
-        $count++;
+    while ($count < count($c)) {
+      $state = "<b style='color:red'>Unaccomplished</b>";
+      if ($c[$count][1]) {
+        $state = "<b style='color:green'>Accomplished</b>";
+      }
+      $crt .= $c[$count][0] . " - $state <br>";
+      $count++;
     }
     $correction = "
     <div class='header'>
@@ -526,7 +640,7 @@ function settingDrop($row,$edit,$add,$delete){
     </div>
     ";
   }
-  $view="
+  $view = "
   <div class='mini ui left pointing dropdown icon noprint'>
   <i class='green settings icon'></i>
   <div class='menu'>
@@ -542,7 +656,7 @@ function settingDrop($row,$edit,$add,$delete){
   </p>
   </div>
   <div class='header' style='$edit'>
-  ".editInputs($row['cf_ID'],$row['cf_count'],$row['cf_title'])."
+  " . editInputs($row['cf_ID'], $row['cf_count'], $row['cf_title']) . "
   </div>
   <div class='header'>
   <p class='ui horizontal divider'>
@@ -569,7 +683,7 @@ function settingDrop($row,$edit,$add,$delete){
   </p>
   </div>
   <div class='header' style='$add'>
-  ".AddInputs($row['cf_ID'])."
+  " . AddInputs($row['cf_ID']) . "
   </div>
   <div class='header' style='$delete'>
   <p class='ui horizontal divider'>
@@ -587,29 +701,72 @@ function settingDrop($row,$edit,$add,$delete){
   </div>
   ";
   $correctionMFO = validaateCorrection($row['corrections']);
-  if(!rsmEditStatus("")&&!$correctionMFO){
+  if (!rsmEditStatus("") && !$correctionMFO) {
     $view = "";
   }
   return $view;
 }
-function changeCount($dat){
-  $dat = str_replace(")","",$dat);
-  $dat = explode(".",$dat);
+function changeCount($dat)
+{
+  $dat = str_replace(")", "", $dat);
+  $dat = explode(".", $dat);
   $d = "";
-  foreach ($dat as $a){
+  foreach ($dat as $a) {
     $a = str_replace(' ', '', $a);
-    if($a){
-      if(is_numeric($a)){
-        if($a<10&&strlen($a)==1){
-          $d.="0".$a.".";
-        }else{
-          $d.=$a.".";
+    if ($a) {
+      if (is_numeric($a)) {
+        if ($a < 10 && strlen($a) == 1) {
+          $d .= "0" . $a . ".";
+        } else {
+          $d .= $a . ".";
         }
-      }else{
-        $d.=$a.".";
+      } else {
+        $d .= $a . ".";
       }
     }
   }
   return $d;
 }
-?>
+
+function get_children($mysqli, $cf_ID)
+{
+  $data = [];
+  $sql = "SELECT * FROM `spms_corefunctions` WHERE `parent_id` ='$cf_ID'";
+  $result = $mysqli->query($sql);
+  while ($row = $result->fetch_assoc()) {
+    $row["children"] = get_children($mysqli, $row["cf_ID"]);
+    $data[] = $row;
+  }
+  return $data;
+}
+
+function start_duplicating($mysqli, $data, $selected_period_id, $parent_id)
+{
+  foreach ($data as $key => $core_function) {
+    $sql = "INSERT INTO `spms_corefunctions`(`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`, `corrections`) VALUES ('$selected_period_id','$parent_id','$core_function[dep_id]','$core_function[cf_count]','$core_function[cf_title]','')";
+    $mysqli->query($sql);
+    $insert_id = $mysqli->insert_id;
+
+    #get success indicators
+    $success_idicators = get_success_indicators($mysqli, $core_function["cf_ID"]);
+    foreach ($success_idicators as $success_idicator) {
+      $sql = "INSERT INTO `spms_matrixindicators`(`cf_ID`, `mi_succIn`, `mi_quality`, `mi_eff`, `mi_time`, `mi_incharge`, `corrections`) VALUES ('$insert_id','$success_idicator[mi_succIn]','$success_idicator[mi_quality]','$success_idicator[mi_eff]','$success_idicator[mi_time]','$success_idicator[mi_incharge]','')";
+      $mysqli->query($sql);
+    }
+
+    $data[$key]["children"] = start_duplicating($mysqli, $core_function["children"], $selected_period_id, $insert_id);
+  }
+
+  return $data;
+}
+
+function get_success_indicators($mysqli, $cf_ID)
+{
+  $data = [];
+  $sql = "SELECT * FROM `spms_matrixindicators` WHERE `cf_ID` = '$cf_ID'";
+  $result = $mysqli->query($sql);
+  while ($row = $result->fetch_assoc()) {
+    $data[] = $row;
+  }
+  return $data;
+}
