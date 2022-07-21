@@ -373,7 +373,7 @@ function tbody($mysqli)
   }
   $view .= "<tr class='noprint' >
   <td colspan='8' style='padding:10px'>
-  " . AddInputs('') . "
+  " . AddInputs($mysqli, '') . "
   </td>
   </tr>";
   return $view;
@@ -454,9 +454,9 @@ function trows($mysqli, $row, $padding, $addDisplay)
   $sql2 = $mysqli->query($sql2);
   $sql2count = $sql2->num_rows;
   if ($sql2count > 0) {
-    $set_drop = settingDrop($row, '', $addDisplay, 'display:none');
+    $set_drop = settingDrop($mysqli, $row, '', $addDisplay, 'display:none');
   } else {
-    $set_drop = settingDrop($row, '', $addDisplay, '');
+    $set_drop = settingDrop($mysqli, $row, '', $addDisplay, '');
   }
   $view = "";
   $siData1 = "SELECT * from spms_matrixindicators where cf_ID='$row[cf_ID]'";
@@ -588,7 +588,7 @@ function rsmEditStatus($dat)
   }
 }
 
-function AddInputs($dataId)
+function AddInputs($mysqli, $dataId)
 {
   $view = "
   <div class='ui mini form'>
@@ -606,14 +606,23 @@ function AddInputs($dataId)
   </div>
   </div>
   </div>
-  </div>
-  <button class='ui black button' onclick='copyRSM()'>Copy Previous RSM</button>";
+  </div>";
+
+  # check first if rating scale matrix has already existing data
+  // period
+  $period_id = $_SESSION["period"];
+  $department_id = $_SESSION["emp_info"]["department_id"];
+  $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$period_id' AND `dep_id` = '$department_id' LIMIT 1;";
+  $result = $mysqli->query($sql);
+  if ($result->num_rows < 1) {
+    $view .= "<button class='ui black button' onclick='copyRSM()'>Copy Previous RSM</button>";
+  }
   if (!rsmEditStatus("")) {
     $view = "";
   }
   return $view;
 }
-function settingDrop($row, $edit, $add, $delete)
+function settingDrop($mysqli, $row, $edit, $add, $delete)
 {
   $correction = "";
   if ($row['corrections']) {
@@ -683,7 +692,7 @@ function settingDrop($row, $edit, $add, $delete)
   </p>
   </div>
   <div class='header' style='$add'>
-  " . AddInputs($row['cf_ID']) . "
+  " . AddInputs($mysqli, $row['cf_ID']) . "
   </div>
   <div class='header' style='$delete'>
   <p class='ui horizontal divider'>
