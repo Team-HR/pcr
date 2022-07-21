@@ -188,6 +188,9 @@ class Employee_data extends mysqli
 	}
 	private function get_fullname($id)
 	{
+		if (!is_numeric($id)) {
+			return $id;
+		}
 		$sql = "SELECT * from employees where employees_id='$id'";
 		$sql = mysqli::query($sql);
 		$sql = $sql->fetch_assoc();
