@@ -896,6 +896,10 @@ class Employee_data extends mysqli
 	}
 	public function form_strategicView()
 	{
+		$not_applicable_button = "<button hidden class='ui fluid button secondary' onclick='noStrategicFunc()'>Not Applicable</button>";
+		$not_applicable_button = ""; //disabled 
+
+
 		$view = "
 		<br>
 		<br>
@@ -950,7 +954,7 @@ class Employee_data extends mysqli
 				</div>
 				<input type='submit' class='ui fluid button' value='Save'>
 			</form>
-				<button class='ui fluid button secondary' onclick='noStrategicFunc()'>No Strategic Function</button>
+				$not_applicable_button
 			</div>
 		</div>
 		<div class='column'>
