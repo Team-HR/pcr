@@ -1047,7 +1047,7 @@ class Employee_data extends mysqli
 	}
 	private function signatories()
 	{
-		$sql = $this->fileStatus;
+		$fileStatus = $this->fileStatus;
 		// echo json_encode($sql);
 		$option  = ['', '', '', '', ''];
 		$fieldDisabled = "";
@@ -1070,13 +1070,20 @@ class Employee_data extends mysqli
 		    </div>
 	    </div>
 		";
-		$agencyOp = $this->empData($sql['HeadAgency'], 1);
-		if ($sql['formType'] != "") {
-			$option[$sql['formType']] = 'selected';
+		$agencyOp = $this->empData($fileStatus['HeadAgency'], 1);
+		if ($fileStatus['formType'] != "") {
+			$option[$fileStatus['formType']] = 'selected';
 			$fieldDisabled = "disabled";
 			$agencyRadioBtn = '';
-			$agencyOp = "<option value='$sql[HeadAgency]' selected>$sql[HeadAgency]</option>";
+			$agencyOp = "<option value='$fileStatus[HeadAgency]' selected>$fileStatus[HeadAgency]</option>";
 		}
+
+
+		$json = json_encode($this);
+
+		$form_type = isset($this->fileStatus["formType"]) ? $this->fileStatus["formType"] : '';
+
+
 		$view = "
 		<script>
 
@@ -1127,14 +1134,14 @@ class Employee_data extends mysqli
 		<label>Immediate Supervisor</label>
 		<select class='ui fluid search dropdown' id='immediateSup' >
 		<option value=''>Select your Supervisor</option>
-		" . $this->empData($sql['ImmediateSup'], 0) . "
+		" . $this->empData($fileStatus['ImmediateSup'], 0) . "
 		</select>
 		</div>
 		<div class='field'>
 		<label>Department Head</label>
 		<select class='ui fluid search dropdown' id='departmentHead'>
 		<option value=''>Select your Supervisor</option>
-		" . $this->empData($sql['DepartmentHead'], 0) . "
+		" . $this->empData($fileStatus['DepartmentHead'], 0) . "
 		</select>
 		</div>
 
@@ -1148,10 +1155,59 @@ class Employee_data extends mysqli
 		<br>
 		<br>
 		</div>
-
 		";
 
-		// $agencyOp
+		#if national agency
+		if ($form_type == 5) {
+			$view = "
+		<div style='background:white;width:900px;padding-top:100px;margin:auto;border-radius: 50px 20px;'>
+		<div class='ui icon message' style='width:50%;padding:20px;margin:auto'>
+		<i class='open book icon'></i>
+		<div class='content'>
+		<div class='header'>
+		Agreement
+		</div>
+		<p>By filling Up this form from Start to Finish means that I,
+		commit to deliver and agree to be rated on the attainment of
+		the following targets in accordance with the indicated measures</p>
+		</div>
+		</div>
+		<br>
+		<br>
+
+		$agencyRadioBtn
+
+	    <br>
+	    <br>
+		<form class='ui form' style='width:50%;padding:20px;margin:auto;' onsubmit='return signatoriesFunc()'>
+		<div class='field'>
+		<label>Form Type</label>
+		<select id='formType' required onchange='reviewFormType()' $fieldDisabled>
+		<option value='5' selected>IPCR</option>
+		</select>
+		</div>
+		<div class='field' >
+		<label>Immediate Supervisor</label>
+		<input class='ui fluid input' type='text' id='immediateSup' value='" . $fileStatus['ImmediateSup'] . "'>
+		</div>
+		<div class='field'>
+		<label>Department Head</label>
+		<input class='ui fluid input' type='text' id='departmentHead' value='" . $fileStatus['DepartmentHead'] . "'>
+		</div>
+
+		<div class='field'>
+		<label>Head of Agency</label>
+		<input type='text' id='headAgency' placeholder='Head of Agency' " . $this->head_of_agency() . ">
+		</div>
+		<button type='submit' class='ui fluid primary button'>Next <i class='ui angle double right icon'></i></button>
+		</form>
+		<br>
+		<br>
+		<br>
+		</div>
+		";
+		}
+
 		$this->signa_form = $view;
 	}
 	public function form_signatories()

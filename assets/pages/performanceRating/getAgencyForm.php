@@ -17,8 +17,15 @@ function empData($a)
 	return $emps;
 }
 
+function get_nga_signatories()
+{
+	$data = [];
+	global $mysqli;
+	$data = $_SESSION;
+	return $data;
+}
 
-
+// function get($a)
 
 
 if ($formName == "LGU") {
@@ -69,6 +76,7 @@ if ($formName == "LGU") {
 		<button type='submit' class='ui fluid primary button'>Next <i class='ui angle double right icon'></i></button>
 	";
 } else if ($formName == "NGA") {
+
 	echo "
 				<div class='field'>
 		<label>Form Type</label>
