@@ -1060,12 +1060,20 @@ class Employee_data extends mysqli
 		}
 		$view = "
 		<script>
-		$(document).ready(function() {
+
 			$('.ui.dropdown').dropdown({
-				fullTextSearch:true,
-				clearable:true
-			});
-		});
+				forceSelection: false,
+				fullTextSearch: true,
+				clearable: true,
+			  });
+			
+			  $('.ui.dropdown.headAgency').dropdown({
+				forceSelection: false,
+				fullTextSearch: true,
+				clearable: true,
+				allowAdditions: true
+			  });
+
 		</script>
 		<div style='background:white;width:900px;padding-top:100px;margin:auto;border-radius: 50px 20px;'>
 		<div class='ui icon message' style='width:50%;padding:20px;margin:auto'>
@@ -1098,14 +1106,14 @@ class Employee_data extends mysqli
 		</div>
 		<div class='field' >
 		<label>Immediate Supervisor</label>
-		<select class='ui fluid search $fieldDisabled dropdown' id='immediateSup' >
+		<select class='ui fluid search dropdown' id='immediateSup' >
 		<option value=''>Select your Supervisor</option>
 		" . $this->empData($sql['ImmediateSup'], 0) . "
 		</select>
 		</div>
 		<div class='field'>
 		<label>Department Head</label>
-		<select class='ui fluid search $fieldDisabled dropdown' id='departmentHead'>
+		<select class='ui fluid search dropdown' id='departmentHead'>
 		<option value=''>Select your Supervisor</option>
 		" . $this->empData($sql['DepartmentHead'], 0) . "
 		</select>
@@ -1113,10 +1121,7 @@ class Employee_data extends mysqli
 
 		<div class='field'>
 		<label>Head of Agency</label>
-		<select class='ui fluid search $fieldDisabled dropdown' id='headAgency'>
-		<option value=''>Select your Agency Head</option>
-		$agencyOp
-		</select>
+		<input type='text' id='headAgency' palceholder='Head of Agency' value='JOHN T. RAYMOND, JR.'>
 		</div>
 		<button type='submit' class='ui fluid primary button'>Next <i class='ui angle double right icon'></i></button>
 		</form>
@@ -1124,7 +1129,10 @@ class Employee_data extends mysqli
 		<br>
 		<br>
 		</div>
+
 		";
+
+		// $agencyOp
 		$this->signa_form = $view;
 	}
 	public function form_signatories()

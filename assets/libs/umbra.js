@@ -293,6 +293,7 @@ function SaveMfoSIEdit(i, dataId) {
     }
   });
 }
+
 function ShowIPcrModal(i) {
   $("#allModalFull").modal('show');
   $('#contLFull').html("<div style='text-align: center'><img src='assets/img/loading.gif' style='transform: scale(.1);height:500px'></div>");
@@ -320,7 +321,11 @@ function performanceRatingCore() {
     period: period,
     year: year
   }, function (data, textStatus, xhr) {
-    showPr("coreFunction", "");
+    // coreFunctionForm
+    if (data) {
+      window.location.href = "?performanceRating&form";
+    }
+    // showPr("coreFunction", "");
   });
 }
 function showPr(page, go) {
@@ -330,7 +335,7 @@ function showPr(page, go) {
     gotoStep: go
   }, function (data, textStatus, xhr) {
     $('.segment').dimmer('hide');
-    $('#performanceRatingBody').html(data);
+    $('#perfratingBody').html(data);
   });
 }
 function coreShowModal(type, quality, eff, timeli, dataId) {
@@ -683,13 +688,11 @@ function finishperformanceReview(s, r, a) {
   });
 }
 
-
-
 function signatoriesFunc() {
+  formType = $('#formType').val();
   immediateSup = $('#immediateSup').val();
   departmentHead = $('#departmentHead').val();
   headAgency = $('#headAgency').val();
-  formType = $('#formType').val();
   // if(formType == 2){
   //   immediateSup = null;
 

@@ -1,23 +1,39 @@
-<?php 
+<?php
 
 $formName = $_POST['agencyName'];
 function empData($a)
-	{
-		global $mysqli;
-		$emps ="";
-		$empSql = "SELECT * from `employees`";
-		$empSql = $mysqli->query($empSql);
-		while($getData = $empSql->fetch_assoc()){
-				$val = $getData['employees_id'];
-			if($a){
-				$val = $getData['firstName']." ".$getData['middleName']." ".$getData["lastName"];
-			}	
-			$emps .= "<option value='$val'>$getData[firstName] $getData[middleName] $getData[lastName]</option>";
+{
+	global $mysqli;
+	$emps = "";
+	$empSql = "SELECT * from `employees`";
+	$empSql = $mysqli->query($empSql);
+	while ($getData = $empSql->fetch_assoc()) {
+		$val = $getData['employees_id'];
+		if ($a) {
+			$val = $getData['firstName'] . " " . $getData['middleName'] . " " . $getData["lastName"];
 		}
-		return $emps;
+		$emps .= "<option value='$val'>$getData[firstName] $getData[middleName] $getData[lastName]</option>";
 	}
-if($formName == "LGU"){
+	return $emps;
+}
+if ($formName == "LGU") {
 	echo "
+		<script>
+
+			$('.ui.dropdown').dropdown({
+				forceSelection: false,
+				fullTextSearch: true,
+				clearable: true,
+			});
+			
+			$('.ui.dropdown.headAgency').dropdown({
+				forceSelection: false,
+				fullTextSearch: true,
+				clearable: true,
+				allowAdditions: true
+			});
+
+		</script>
 		<div class='field'>
 		<label>Form Type</label>
 		<select id='formType' required onchange='reviewFormType()'>
@@ -31,26 +47,23 @@ if($formName == "LGU"){
 		<label>Immediate Supervisor</label>
 		<select class='ui fluid search dropdown' id='immediateSup' >
 		<option value=''></option>
-		".empData(0)."
+		" . empData(0) . "
 		</select>
 		</div>
 		<div class='field'>
 		<label>Department Head</label>
 		<select class='ui fluid search dropdown' id='departmentHead'>
 		<option value=''></option>
-		".empData(0)."
+		" . empData(0) . "
 		</select>
 		</div>
 		<div class='field'>
 		<label>Head of Agency</label>
-		<select class='ui fluid search dropdown' id='headAgency'>
-		<option value=''></option>
-		".empData(1)."
-		</select>
+		<input type='text' id='headAgency' palceholder='Head of Agency' value='JOHN T. RAYMOND, JR.'>
 		</div>
 		<button type='submit' class='ui fluid primary button'>Next <i class='ui angle double right icon'></i></button>
 	";
-}else if($formName == "NGA"){
+} else if ($formName == "NGA") {
 	echo "
 				<div class='field'>
 		<label>Form Type</label>
@@ -73,5 +86,3 @@ if($formName == "LGU"){
 		<button type='submit' class='ui fluid primary button'>Next <i class='ui angle double right icon'></i></button>
 	";
 }
-?>
-

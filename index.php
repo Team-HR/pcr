@@ -18,7 +18,11 @@ if (isset($_SESSION['emp_id'])) {
 		if (isset($_GET['logout'])) {
 			require_once "assets/pages/logout.php";
 		} else if (isset($_GET['performanceRating'])) {
-			require_once "assets/pages/performanceRating/performanceRating.php";
+			if (!isset($_GET['form'])) {
+				require_once "assets/pages/performanceRating/performanceRating.php";
+			} else {
+				require_once "assets/pages/performanceRating/form.php";
+			}
 		} else if (isset($_GET['home'])) {
 			require_once "assets/pages/home.php";
 		} else if (isset($_GET['RatingScale'])) {
