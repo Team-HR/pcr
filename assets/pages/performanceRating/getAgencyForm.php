@@ -16,6 +16,11 @@ function empData($a)
 	}
 	return $emps;
 }
+
+
+
+
+
 if ($formName == "LGU") {
 	echo "
 		<script>
@@ -59,7 +64,7 @@ if ($formName == "LGU") {
 		</div>
 		<div class='field'>
 		<label>Head of Agency</label>
-		<input type='text' id='headAgency' palceholder='Head of Agency' value='JOHN T. RAYMOND, JR.'>
+		<input type='text' id='headAgency' palceholder='Head of Agency'>
 		</div>
 		<button type='submit' class='ui fluid primary button'>Next <i class='ui angle double right icon'></i></button>
 	";

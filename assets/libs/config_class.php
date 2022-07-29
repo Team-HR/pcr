@@ -1002,6 +1002,25 @@ class Employee_data extends mysqli
 		return $dat[$i];
 	}
 	// strat
+	private function head_of_agency()
+	{
+		$sql = "SELECT * from spms_performancereviewstatus where period_id='$this->per_ID' and employees_id='$this->emp_ID'";
+		$result = mysqli::query($sql);
+		$row = $result->fetch_assoc();
+
+		$department_id = $_SESSION["emp_info"]["department_id"];
+
+		# if vice mayor & sp head of agency = vice mayor
+		if ($department_id == 16) {
+			$lgu_head = "HENRY E. CARREON, JR.";
+		} else {
+			$lgu_head = "JACK T. RAYMOND, JR.";
+		}
+
+		return isset($row["HeadAgency"]) ? "value='$row[HeadAgency]'" : "value='$lgu_head'";
+		// return json_encode($this);
+	}
+
 	private	function empData($id, $mayor)
 	{
 		$emps = "";
@@ -1121,7 +1140,7 @@ class Employee_data extends mysqli
 
 		<div class='field'>
 		<label>Head of Agency</label>
-		<input type='text' id='headAgency' palceholder='Head of Agency' value='JOHN T. RAYMOND, JR.'>
+		<input type='text' id='headAgency' placeholder='Head of Agency' " . $this->head_of_agency() . ">
 		</div>
 		<button type='submit' class='ui fluid primary button'>Next <i class='ui angle double right icon'></i></button>
 		</form>
