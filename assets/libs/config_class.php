@@ -1014,7 +1014,7 @@ class Employee_data extends mysqli
 		if ($department_id == 16) {
 			$lgu_head = "HENRY E. CARREON, JR.";
 		} else {
-			$lgu_head = "JACK T. RAYMOND, JR.";
+			$lgu_head = "JOHN T. RAYMOND, JR.";
 		}
 
 		return isset($row["HeadAgency"]) ? "value='$row[HeadAgency]'" : "value='$lgu_head'";
