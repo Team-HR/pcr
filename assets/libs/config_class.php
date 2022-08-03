@@ -920,16 +920,16 @@ class Employee_data extends mysqli
 		<h1 >Strategic Function</h1>
 			<form class='ui form' onsubmit='return saveStrategicFunc()'>
 				<div class='field'>
-					<label>MFO /  PAP</label>
-					<textarea rows='1' id='mfo' required></textarea>
+					<label>PIG Title:</label>
+					<textarea rows='1' id='mfo' required placeholder='Pinaka-Importanteng Gawain Title'></textarea>
 				</div>
 				<div class='field'>
-					<label>Success Indicator</label>
-					<textarea rows='2' id='suc_in'></textarea>
+					<label>Success Indicator:</label>
+					<textarea rows='2' id='suc_in' placeholder='Enter success indicator here...'></textarea>
 				</div>
 				<div class='field'>
-					<label>Actual Accomplishments</label>	
-					<textarea rows='2' id='acc'></textarea>
+					<label>Actual Accomplishment:</label>	
+					<textarea rows='2' id='acc' placeholder='Enter the actual accomplishment here...'></textarea>
 					</div>
 <!--		
 				<div class='field'>
@@ -954,14 +954,14 @@ class Employee_data extends mysqli
 				</div>
 -->
 				<div class='field'>
-					<label>Total Average</label>
-					<input name='my_field' pattern='^\d*(\.\d{0,3})?$' id='stratAverage'>
+					<label>Final Rating:</label>
+					<input name='my_field' pattern='^\d*(\.\d{0,3})?$' id='stratAverage' placeholder='1-5'>
 				</div>
 				<div class='field'>
 					<label>Remark</label>
 					<textarea rows='2' id='remark'></textarea>
 				</div>
-				<input type='submit' class='ui fluid button' value='Save'>
+				<input type='submit' class='ui fluid button' value='Save' placeholder='Enter remarks here...'>
 			</form>
 				$not_applicable_button
 			</div>

@@ -492,16 +492,16 @@ elseif (isset($_POST['strategicModalContentPost'])){
     <h1 style='color:#6f6f73'>Strategic Function</h1>
     <form class='ui form' onsubmit='return EditStrategicFunc($dataId)'>
     <div class='field'>
-    <label>MFO /  PAP</label>
-    <textarea rows='1' id='Editmfo' required>$sql[mfo]</textarea>
+    <label>PIG Title:</label>
+    <textarea rows='1' id='Editmfo' required placeholder='Pinaka-Importanteng Gawain Title'>$sql[mfo]</textarea>
     </div>
     <div class='field'>
-    <label>Success Indicator</label>
-    <textarea rows='2' id='Editsuc_in'>$sql[succ_in]</textarea>
+    <label>Success Indicator:</label>
+    <textarea rows='2' id='Editsuc_in' placeholder='Enter success indicator here...'>$sql[succ_in]</textarea>
     </div>
     <div class='field'>
-    <label>Actual Accomplishments</label>
-    <textarea rows='2' id='Editacc'>$sql[acc]</textarea>
+    <label>Actual Accomplishment:</label>
+    <textarea rows='2' id='Editacc' placeholder='Enter the actual accomplishment here...'>$sql[acc]</textarea>
     </div>
 <!--    
     <div class='field'>
@@ -514,12 +514,12 @@ elseif (isset($_POST['strategicModalContentPost'])){
     </div>
 -->
     <div class='field'>
-      <label>Total Average</label>
-      <input name='my_field' value='$sql[average]' pattern='^\d*(\.\d{0,3})?$' id='EditstratAverage'>
+      <label>Final Rating:</label>
+      <input name='my_field' value='$sql[average]' pattern='^\d*(\.\d{0,3})?$' id='EditstratAverage' placeholder='1 to 5'>
     </div>
     <div class='field'>
     <label>Remark</label>
-    <textarea rows='2' id='Editremark'>$sql[remark]</textarea>
+    <textarea rows='2' id='Editremark' placeholder='Enter remarks here...'>$sql[remark]</textarea>
     </div>
     <input type='submit' class='ui fluid button' value='Save'>
     </form>
@@ -605,4 +605,3 @@ elseif (isset($_POST['strategicModalContentPost'])){
 else{
   echo notFound();
 }
-?>
