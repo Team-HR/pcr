@@ -920,8 +920,8 @@ class Employee_data extends mysqli
 		<h1 >Strategic Function</h1>
 			<form class='ui form' onsubmit='return saveStrategicFunc()'>
 				<div class='field'>
-					<label>PIG Title:</label>
-					<textarea rows='1' id='mfo' required placeholder='Pinaka-Importanteng Gawain Title'></textarea>
+					<label>MFO/PAP:</label>
+					<textarea rows='1' id='mfo' required placeholder='...'></textarea>
 				</div>
 				<div class='field'>
 					<label>Success Indicator:</label>

@@ -1,24 +1,24 @@
 <?php
 require_once "assets/pages/performanceRating/config.php";
 require_once "assets/libs/config_class.php";
-if(isset($_POST['coreFucntionInput'])){
+if (isset($_POST['coreFucntionInput'])) {
   $type = $_POST['type'];
   $quality = $_POST['quality'];
   $eff = $_POST['eff'];
   $timeli = $_POST['timeli'];
-  if ($quality==1) {
+  if ($quality == 1) {
     $quality = "inline";
-  }else{
+  } else {
     $quality = "none";
   }
-  if ($eff==1) {
+  if ($eff == 1) {
     $eff = "inline";
-  }else{
+  } else {
     $eff = "none";
   }
-  if ($timeli==1) {
+  if ($timeli == 1) {
     $timeli = "inline";
-  }else{
+  } else {
     $timeli = "none";
   }
   echo "
@@ -84,30 +84,30 @@ if(isset($_POST['coreFucntionInput'])){
   <br>
   <button class='ui fluid primary button'onclick='SaveInputedSiData()'>Save</button>
   ";
-}
-elseif(isset($_POST['accOpenAdd'])) {
-  function s($mysqli,$type){
+} elseif (isset($_POST['accOpenAdd'])) {
+  function s($mysqli, $type)
+  {
     $sql = "SELECT * from spms_matrixindicators where mi_id='$_POST[accOpenAdd]'";
     $sql = $mysqli->query($sql);
     $sql = $sql->fetch_assoc();
-    if($type=='Quality'){
+    if ($type == 'Quality') {
       $q = unserialize($sql['mi_quality']);
-    }elseif($type=='Efficiency'){
+    } elseif ($type == 'Efficiency') {
       $q = unserialize($sql['mi_eff']);
-    }elseif($type=='Timeliness'){
+    } elseif ($type == 'Timeliness') {
       $q = unserialize($sql['mi_time']);
     }
-    $qnum=1;
-    $optQ="";
-    while($qnum<=count($q)-1){
-      if($q[$qnum]!=""){
-        $optQ .= "<option value='$qnum'>".$q[$qnum]."</option>";
+    $qnum = 1;
+    $optQ = "";
+    while ($qnum <= count($q) - 1) {
+      if ($q[$qnum] != "") {
+        $optQ .= "<option value='$qnum'>" . $q[$qnum] . "</option>";
       }
       $qnum++;
     }
-    if($optQ!=""){
+    if ($optQ != "") {
       $style = "";
-    }else{
+    } else {
       $optQ = "<option value=''></option>";
       $style = "style='display:none'";
     }
@@ -119,7 +119,7 @@ elseif(isset($_POST['accOpenAdd'])) {
     </select>
     </div>";
     return $view;
-  } 
+  }
   $sqlSuccess = "SELECT * from spms_matrixindicators where mi_id='$_POST[accOpenAdd]'";
   $sqlSuccess = $mysqli->query($sqlSuccess);
   $sqlSuccess = $sqlSuccess->fetch_assoc();
@@ -137,7 +137,7 @@ elseif(isset($_POST['accOpenAdd'])) {
   <div class='ui horizontal divider'>
   Rating
   </div>
-  ".s($mysqli,"Quality").s($mysqli,"Efficiency").s($mysqli,"Timeliness")."
+  " . s($mysqli, "Quality") . s($mysqli, "Efficiency") . s($mysqli, "Timeliness") . "
   <div class='field'>
   <label>Weight Allocation(%)</label>
   <input type='number' id='perc'>
@@ -146,45 +146,45 @@ elseif(isset($_POST['accOpenAdd'])) {
   <label>Remark</label>
   <textarea id='remark'></textarea>
   </div>
-  <button class='ui fluid primary button'onclick='saveSi(\"".$_POST['accOpenAdd']."\")'>Save</button>
+  <button class='ui fluid primary button'onclick='saveSi(\"" . $_POST['accOpenAdd'] . "\")'>Save</button>
   </div>
   ";
-}
-elseif(isset($_POST['EditCoreFuncDataPost'])){
+} elseif (isset($_POST['EditCoreFuncDataPost'])) {
   // modal for inputing and editing the core functions
   // this will be be used by the individual,sectionHead, departmentHead, and even pmt
   // including
 
   $dataId = $_POST['EditCoreFuncDataPost'];
-  function s($mysqli,$type,$ind,$pmtCheck){
+  function s($mysqli, $type, $ind, $pmtCheck)
+  {
     $sqlChild = "SELECT * FROM `spms_corefucndata` where cfd_id='$_POST[EditCoreFuncDataPost]'";
     $sqlChild = $mysqli->query($sqlChild);
     $sqlChild = $sqlChild->fetch_assoc();
     $sql = "SELECT * from spms_matrixindicators where mi_id='$sqlChild[p_id]'";
     $sql = $mysqli->query($sql);
     $sql = $sql->fetch_assoc();
-    if($type=='Quality'){
+    if ($type == 'Quality') {
       $q = unserialize($sql['mi_quality']);
-    }elseif($type=='Efficiency'){
+    } elseif ($type == 'Efficiency') {
       $q = unserialize($sql['mi_eff']);
-    }elseif($type=='Timeliness'){
+    } elseif ($type == 'Timeliness') {
       $q = unserialize($sql['mi_time']);
     }
-    $qnum=1;
-    $optQ="";
-    while($qnum<=count($q)-1){
-      if($q[$qnum]!=""){
-        if($qnum==$ind){
-          $optQ .= "<option value='$qnum' selected>".$q[$qnum]."</option>";
-        }else{
-          $optQ .= "<option value='$qnum'>".$q[$qnum]."</option>";
+    $qnum = 1;
+    $optQ = "";
+    while ($qnum <= count($q) - 1) {
+      if ($q[$qnum] != "") {
+        if ($qnum == $ind) {
+          $optQ .= "<option value='$qnum' selected>" . $q[$qnum] . "</option>";
+        } else {
+          $optQ .= "<option value='$qnum'>" . $q[$qnum] . "</option>";
         }
       }
       $qnum++;
     }
-    if($optQ!=""){
+    if ($optQ != "") {
       $style = "";
-    }else{
+    } else {
       $optQ = "<option value=''></option>";
       $style = "style='display:none'";
     }
@@ -196,10 +196,10 @@ elseif(isset($_POST['EditCoreFuncDataPost'])){
     //   <input type='number' step='0.001' id='".$type."Edit' value='".$ind."'>
     //   </div>";
     // }else{
-      $view = "
+    $view = "
       <div class='field' $style>
       <label>$type</label>
-      <select class='ui fluid dropdown' id='".$type."Edit'>
+      <select class='ui fluid dropdown' id='" . $type . "Edit'>
       $optQ
       </select>
       </div>";
@@ -214,7 +214,7 @@ elseif(isset($_POST['EditCoreFuncDataPost'])){
   $IS  = "";
   $DH  = "";
   $PMT = "";
-  if($sql['critics']){
+  if ($sql['critics']) {
     $critics = unserialize($sql['critics']);
     $IS = $critics['IS'];
     $DH = $critics['DH'];
@@ -258,22 +258,22 @@ elseif(isset($_POST['EditCoreFuncDataPost'])){
   $eveluatorsId = $_SESSION['emp_id'];
   $criticInput = "";
   $pmtCheck = false;
-  if($fileStatus['PMT']==$eveluatorsId){
+  if ($fileStatus['PMT'] == $eveluatorsId) {
     $criticInput = $pmtCriticInput;
     $pmtCheck = true;
-  }elseif($fileStatus['DepartmentHead']==$eveluatorsId){
+  } elseif ($fileStatus['DepartmentHead'] == $eveluatorsId) {
     $criticInput = $departmentHeadCriticInput;
-  }elseif($fileStatus['ImmediateSup']==$eveluatorsId){
+  } elseif ($fileStatus['ImmediateSup'] == $eveluatorsId) {
     $criticInput = $immediateSuppCriticInput;
   }
 
 
-    $sqlChildSucIn = "SELECT * FROM `spms_corefucndata` where cfd_id='$_POST[EditCoreFuncDataPost]'";
-    $sqlChildSucIn = $mysqli->query($sqlChildSucIn);
-    $sqlChildSucIn = $sqlChildSucIn->fetch_assoc();
-    $sqlSucIn = "SELECT * from spms_matrixindicators where mi_id='$sqlChildSucIn[p_id]'";
-    $sqlSucIn = $mysqli->query($sqlSucIn);
-    $sqlSucIn = $sqlSucIn->fetch_assoc();
+  $sqlChildSucIn = "SELECT * FROM `spms_corefucndata` where cfd_id='$_POST[EditCoreFuncDataPost]'";
+  $sqlChildSucIn = $mysqli->query($sqlChildSucIn);
+  $sqlChildSucIn = $sqlChildSucIn->fetch_assoc();
+  $sqlSucIn = "SELECT * from spms_matrixindicators where mi_id='$sqlChildSucIn[p_id]'";
+  $sqlSucIn = $mysqli->query($sqlSucIn);
+  $sqlSucIn = $sqlSucIn->fetch_assoc();
   echo "
   <div class='ui form'>
   <div class='field'>
@@ -287,7 +287,7 @@ elseif(isset($_POST['EditCoreFuncDataPost'])){
   <div class='ui horizontal divider'>
   Rating
   </div>
-  ".s($mysqli,"Quality",$sql['Q'],$pmtCheck).s($mysqli,"Efficiency",$sql['E'],$pmtCheck).s($mysqli,"Timeliness",$sql['T'],$pmtCheck)."
+  " . s($mysqli, "Quality", $sql['Q'], $pmtCheck) . s($mysqli, "Efficiency", $sql['E'], $pmtCheck) . s($mysqli, "Timeliness", $sql['T'], $pmtCheck) . "
   <div class='field'>
     <label>Weight Allocation(%)</label>
     <input type='text' id='percEdit' value='$sql[percent]'>
@@ -303,11 +303,11 @@ elseif(isset($_POST['EditCoreFuncDataPost'])){
   <button class='ui fluid primary button'onclick='EditCoreFuncDataSaveChanges($dataId)'>Save Changes</button>
   </div>
   ";
-}
-elseif(isset($_POST['addSuppAccomplishementModalContent'])){
+} elseif (isset($_POST['addSuppAccomplishementModalContent'])) {
 
   $dataId = $_POST['addSuppAccomplishementModalContent'];
-  function cb($mysqli,$type,$col){
+  function cb($mysqli, $type, $col)
+  {
     $dataId = $_POST['addSuppAccomplishementModalContent'];
     $sql = "SELECT * FROM `spms_supportfunctions` where id_suppFunc='$dataId'";
     $sql = $mysqli->query($sql);
@@ -315,16 +315,16 @@ elseif(isset($_POST['addSuppAccomplishementModalContent'])){
     $a = unserialize($sql[$col]);
     $count = 1;
     $op = "";
-    while($count<=5){
-      if($a[$count]!=""){
-        $op.="<option value='$count'>$a[$count]</option>";
+    while ($count <= 5) {
+      if ($a[$count] != "") {
+        $op .= "<option value='$count'>$a[$count]</option>";
       }
       $count++;
     }
-    if($op==""){
-      $dis="style='display:none'";
-    }else{
-      $dis="";
+    if ($op == "") {
+      $dis = "style='display:none'";
+    } else {
+      $dis = "";
     }
     $view = "
     <div class='field' $dis>
@@ -337,9 +337,9 @@ elseif(isset($_POST['addSuppAccomplishementModalContent'])){
     return $view;
   }
 
-    $sqlSuc = "SELECT * FROM `spms_supportfunctions` where id_suppFunc='$dataId'";
-    $sqlSuc = $mysqli->query($sqlSuc);
-    $sqlSuc = $sqlSuc->fetch_assoc();
+  $sqlSuc = "SELECT * FROM `spms_supportfunctions` where id_suppFunc='$dataId'";
+  $sqlSuc = $mysqli->query($sqlSuc);
+  $sqlSuc = $sqlSuc->fetch_assoc();
   echo "
   <script>
   $('.ui.dropdown').dropdown();
@@ -357,7 +357,7 @@ elseif(isset($_POST['addSuppAccomplishementModalContent'])){
   <label>Accomplishments</label>
   <textarea id='acc_supp'></textarea>
   </div>
-  ".cb($mysqli,"Quality","Q").cb($mysqli,"Efficiency","E").cb($mysqli,"Timeliness","T")."
+  " . cb($mysqli, "Quality", "Q") . cb($mysqli, "Efficiency", "E") . cb($mysqli, "Timeliness", "T") . "
   <div class='field'>
   <label>Remarks</label>
   <textarea id='remarks_supp'></textarea>
@@ -366,8 +366,7 @@ elseif(isset($_POST['addSuppAccomplishementModalContent'])){
   </form>
   </div>
   ";
-}
-elseif(isset($_POST['suppFuncEditEmpDataPost'])){
+} elseif (isset($_POST['suppFuncEditEmpDataPost'])) {
   $empdataId = $_POST['suppFuncEditEmpDataPost'];
   $sqldata = "SELECT * from spms_supportfunctiondata where sfd_id='$empdataId'";
   $sqldata = $mysqli->query($sqldata);
@@ -375,7 +374,7 @@ elseif(isset($_POST['suppFuncEditEmpDataPost'])){
   $pmtCheck = false;
   $supportFunction = new Employee_data();
 
-  if(isset($_SESSION['empIdPending'])&&isset($_SESSION['periodPending'])){
+  if (isset($_SESSION['empIdPending']) && isset($_SESSION['periodPending'])) {
     $emp = $_SESSION['empIdPending'];
     $period = $_SESSION['periodPending'];
     $supportFunction->set_emp($emp);
@@ -383,7 +382,7 @@ elseif(isset($_POST['suppFuncEditEmpDataPost'])){
     $fileStatus = $supportFunction->fileStatus;
     $eveluatorsId = $_SESSION['emp_id'];
     $criticInput = "";
-    if($fileStatus['PMT']==$eveluatorsId){
+    if ($fileStatus['PMT'] == $eveluatorsId) {
       $criticInput = $pmtCriticInput;
       $pmtCheck = true;
     }
@@ -394,8 +393,9 @@ elseif(isset($_POST['suppFuncEditEmpDataPost'])){
     // }
   }
 
-  function cb($mysqli,$type,$col,$pmtCheck){
-  
+  function cb($mysqli, $type, $col, $pmtCheck)
+  {
+
     $empdataId = $_POST['suppFuncEditEmpDataPost'];
     $sqldata = "SELECT * from spms_supportfunctiondata where sfd_id='$empdataId'";
     $sqldata = $mysqli->query($sqldata);
@@ -406,20 +406,20 @@ elseif(isset($_POST['suppFuncEditEmpDataPost'])){
     $a = unserialize($sql[$col]);
     $count = 1;
     $op = "";
-    while($count<=5){
-      if($a[$count]!=""){
-        if($count==$sqldata[$col]){
-          $op.="<option value='$count' selected>$a[$count]</option>";
-        }else{
-          $op.="<option value='$count'>$a[$count] </option>";
+    while ($count <= 5) {
+      if ($a[$count] != "") {
+        if ($count == $sqldata[$col]) {
+          $op .= "<option value='$count' selected>$a[$count]</option>";
+        } else {
+          $op .= "<option value='$count'>$a[$count] </option>";
         }
       }
       $count++;
     }
-    if($op==""){
-      $dis="style='display:none'";
-    }else{
-      $dis="";
+    if ($op == "") {
+      $dis = "style='display:none'";
+    } else {
+      $dis = "";
     }
 
     // if($pmtCheck){
@@ -430,7 +430,7 @@ elseif(isset($_POST['suppFuncEditEmpDataPost'])){
     //   </div>
     //   ";
     // }else{
-      $view = "
+    $view = "
       <div class='field' $dis>
       <label>$type</label>
       <select class='ui fluid dropdown' id='sup_in$type'>
@@ -442,12 +442,12 @@ elseif(isset($_POST['suppFuncEditEmpDataPost'])){
     return $view;
   }
 
-    $sqldataSuccIn = "SELECT * from spms_supportfunctiondata where sfd_id='$_POST[suppFuncEditEmpDataPost]'";
-    $sqldataSuccIn = $mysqli->query($sqldataSuccIn);
-    $sqldataSuccIn = $sqldataSuccIn->fetch_assoc();
-    $sqlSuccIn = "SELECT * FROM `spms_supportfunctions` where id_suppFunc='$sqldataSuccIn[parent_id]'";
-    $sqlSuccIn = $mysqli->query($sqlSuccIn);
-    $sqlSuccIn = $sqlSuccIn->fetch_assoc();
+  $sqldataSuccIn = "SELECT * from spms_supportfunctiondata where sfd_id='$_POST[suppFuncEditEmpDataPost]'";
+  $sqldataSuccIn = $mysqli->query($sqldataSuccIn);
+  $sqldataSuccIn = $sqldataSuccIn->fetch_assoc();
+  $sqlSuccIn = "SELECT * FROM `spms_supportfunctions` where id_suppFunc='$sqldataSuccIn[parent_id]'";
+  $sqlSuccIn = $mysqli->query($sqlSuccIn);
+  $sqlSuccIn = $sqlSuccIn->fetch_assoc();
 
   echo "
     <script>
@@ -466,7 +466,7 @@ elseif(isset($_POST['suppFuncEditEmpDataPost'])){
     <label>Accomplishments</label>
     <textarea id='acc_supp'>$sqldata[accomplishment]</textarea>
     </div>
-    ".cb($mysqli,"Quality","Q",$pmtCheck).cb($mysqli,"Efficiency","E",$pmtCheck).cb($mysqli,"Timeliness","T",$pmtCheck)."
+    " . cb($mysqli, "Quality", "Q", $pmtCheck) . cb($mysqli, "Efficiency", "E", $pmtCheck) . cb($mysqli, "Timeliness", "T", $pmtCheck) . "
     <div class='field'>
     <label>Remarks</label>
     <textarea id='remarks_supp'>$sqldata[remark]</textarea>
@@ -475,8 +475,7 @@ elseif(isset($_POST['suppFuncEditEmpDataPost'])){
     </form>
     </div>
   ";
-}
-elseif (isset($_POST['strategicModalContentPost'])){
+} elseif (isset($_POST['strategicModalContentPost'])) {
   $dataId = $_POST['strategicModalContentPost'];
   $sql = "SELECT * from spms_strategicfuncdata where strategicFunc_id='$dataId'";
   $sql = $mysqli->query($sql);
@@ -492,8 +491,8 @@ elseif (isset($_POST['strategicModalContentPost'])){
     <h1 style='color:#6f6f73'>Strategic Function</h1>
     <form class='ui form' onsubmit='return EditStrategicFunc($dataId)'>
     <div class='field'>
-    <label>PIG Title:</label>
-    <textarea rows='1' id='Editmfo' required placeholder='Pinaka-Importanteng Gawain Title'>$sql[mfo]</textarea>
+    <label>MFO/PAP:</label>
+    <textarea rows='1' id='Editmfo' required placeholder='...'>$sql[mfo]</textarea>
     </div>
     <div class='field'>
     <label>Success Indicator:</label>
@@ -529,22 +528,22 @@ elseif (isset($_POST['strategicModalContentPost'])){
     </div>
     </div>
   ";
-}elseif(isset($_POST['showcommentOfSignatoriesPost'])) {
+} elseif (isset($_POST['showcommentOfSignatoriesPost'])) {
   $dataId = $_POST['showcommentOfSignatoriesPost'];
   $sql = "SELECT * from `spms_corefucndata` where `cfd_id` = '$dataId' ";
   $sql = $mysqli->query($sql);
   $sqlData = $sql->fetch_assoc();
-  if($sqlData['critics']){
+  if ($sqlData['critics']) {
     $criticsData = unserialize($sqlData['critics']);
     $viewContent = "";
-    if($criticsData['IS']){
+    if ($criticsData['IS']) {
       $viewContent .= "
       <div class='ui segments'>
       <div class='ui yellow inverted segment'>
         <h3>Immediate Suppervisor</h3>
       </div>
       <div class='ui secondary segment'>
-      ".nl2br($criticsData['IS'])."
+      " . nl2br($criticsData['IS']) . "
       </div>
       </div>
       ";
@@ -556,7 +555,7 @@ elseif (isset($_POST['strategicModalContentPost'])){
         <h3>Department Head</h3>
       </div>
       <div class='ui secondary segment'>
-      ".nl2br($criticsData['DH'])."
+      " . nl2br($criticsData['DH']) . "
       </div>
       </div>
       ";
@@ -568,7 +567,7 @@ elseif (isset($_POST['strategicModalContentPost'])){
         <h3>PMT</h3>
       </div>
       <div class='ui secondary segment'>
-      ".nl2br($criticsData['PMT'])."
+      " . nl2br($criticsData['PMT']) . "
       </div>
       </div>
       ";
@@ -581,7 +580,7 @@ elseif (isset($_POST['strategicModalContentPost'])){
     $viewContent
     ";
   }
-}elseif(isset($_POST['changePercent'])) {
+} elseif (isset($_POST['changePercent'])) {
   $sql = "SELECT * from spms_corefucndata where `cfd_id`='$_POST[dataId]'";
   $sql = $mysqli->query($sql);
   $dat = $sql->fetch_assoc();
@@ -600,8 +599,7 @@ elseif (isset($_POST['strategicModalContentPost'])){
     </div>    ";
 
   echo $view;
-  }elseif(false) {
-}
-else{
+} elseif (false) {
+} else {
   echo notFound();
 }
