@@ -836,7 +836,7 @@ class Employee_data extends mysqli
 		$totalAv = 0;
 		while ($row = $sql->fetch_assoc()) {
 			// $av = $row['Q']+$row['T'];
-			$av = isset($row['average']) && $row['average'] > 0 ? intval($row['average']) : 0;
+			$av = isset($row['average']) && $row['average'] > 0 ? $row['average'] : 0;
 			$col = "";
 			if (!$this->hideCol) {
 				$col = "<td class='noprint' style='width:20px;'>
@@ -884,8 +884,17 @@ class Employee_data extends mysqli
 		<button class='ui primary fluid button' onclick='finishperformanceReview(\"Done\",\"\",\"\")'>Next <i class='ui angle double right icon'></i></button>
 		</td>
 		</tr>";
+		if ($totalAv > 0) {
+			$totalAv = $totalAv * 0.20;
+			# format only two decimal places
+			$totalAv = number_format($totalAv, 2);
+			# prevent rounding off value
+			// $totalAv = intval(($totalAv * 100)) / 100;
+		} else {
+			$totalAv = 0;
+		}
 		// $totalAv = $totalAv*0.20;
-		$totalAv = $totalAv;
+		// $totalAv = $totalAv;
 		$this->strategicView = $tr;
 		$this->strategic_totalAv = $totalAv;
 		$this->strategic_count = $countStrat;
@@ -1501,9 +1510,10 @@ class Employee_data extends mysqli
 		# Temporarily empties strategic rating, final numerical rating, 
 		# and final adjectival rating for the period of Jan-June 2022 ONLY 
 		# $this->period["year_mfo"] != "2022"?...
-		$strategic_total = $this->period["year_mfo"] != "2022" ? $this->strategic_totalAv : " ";
-		$final_numerical_rating = $this->period["year_mfo"] != "2022" ? $overallAv : "";
-		$final_adjectival_rating = $this->period["year_mfo"] != "2022" ? $adjectival : "";
+		$cut_year = "2222";
+		$strategic_total = $this->period["year_mfo"] != $cut_year ? $this->strategic_totalAv : " ";
+		$final_numerical_rating = $this->period["year_mfo"] != $cut_year ? $overallAv : "";
+		$final_adjectival_rating = $this->period["year_mfo"] != $cut_year ? $adjectival : "";
 
 		// <td>Formula:(Total of all average ratings / no. of entries)x20%</td>
 		$view = "
