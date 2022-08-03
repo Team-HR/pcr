@@ -817,7 +817,7 @@ class Employee_data extends mysqli
 	// method for stratgic function
 	private function strategicTr()
 	{
-		$this->strtPercent = "N/A";
+		$this->strtPercent = ""; //previously N/A
 		$sql = "SELECT * from spms_strategicfuncdata where period_id = '$this->per_ID' and emp_id = '$this->emp_ID'";
 		$sql = mysqli::query($sql);
 		$countStrat = $sql->num_rows;
