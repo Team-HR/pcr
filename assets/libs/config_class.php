@@ -817,7 +817,7 @@ class Employee_data extends mysqli
 	// method for stratgic function
 	private function strategicTr()
 	{
-		$this->strtPercent = ""; //previously N/A
+		$this->strtPercent = "N/A"; //previously N/A
 		$sql = "SELECT * from spms_strategicfuncdata where period_id = '$this->per_ID' and emp_id = '$this->emp_ID'";
 		$sql = mysqli::query($sql);
 		$countStrat = $sql->num_rows;
@@ -905,9 +905,20 @@ class Employee_data extends mysqli
 	}
 	public function form_strategicView()
 	{
-		$not_applicable_button = "<button hidden class='ui fluid button secondary' onclick='noStrategicFunc()'>Not Applicable</button>";
-		$not_applicable_button = ""; //disabled 
 
+		$period_id = $_SESSION['period_pr'];
+		$employee_id = $_SESSION['emp_id'];
+		# get form filetype
+		$sql = "SELECT `formType` FROM `spms_performancereviewstatus` WHERE `period_id` = '$period_id' and `employees_id` = '$employee_id';
+		";
+		$result = mysqli::query($sql);
+		$row = $result->fetch_assoc();
+		$formType = $row['formType'];
+		if ($formType == 3) {
+			$not_applicable_button = "<div class='ui container' style='margin-auto: 50px; margin-top: 15px;'><button hidden class='ui fluid button red' onclick='noStrategicFunc()'>Not Applicable</button></div>";
+		} else {
+			$not_applicable_button = "";
+		}
 
 		$view = "
 		<br>
@@ -920,7 +931,7 @@ class Employee_data extends mysqli
 		<h1 >Strategic Function</h1>
 			<form class='ui form' onsubmit='return saveStrategicFunc()'>
 				<div class='field'>
-					<label>MFO/PAP:</label>
+					<label>MFO/PAPs:</label>
 					<textarea rows='1' id='mfo' required placeholder='...'></textarea>
 				</div>
 				<div class='field'>
@@ -963,13 +974,18 @@ class Employee_data extends mysqli
 				</div>
 				<input type='submit' class='ui fluid button' value='Save' placeholder='Enter remarks here...'>
 			</form>
-				$not_applicable_button
+				
 			</div>
 		</div>
 		<div class='column'>
 		</div>
-		</div>
+		</div>	
 		";
+
+		if ($formType == 3) {
+			$view = $not_applicable_button;
+		}
+
 		return $view;
 	}
 	public function hideNextBtn()
@@ -1511,7 +1527,7 @@ class Employee_data extends mysqli
 		# and final adjectival rating for the period of Jan-June 2022 ONLY 
 		# $this->period["year_mfo"] != "2022"?...
 		$cut_year = "2222";
-		$strategic_total = $this->period["year_mfo"] != $cut_year ? $this->strategic_totalAv : " ";
+		$strategic_total = $this->period["year_mfo"] != $cut_year ||  $this->strategic_totalAv != 0 ? $this->strategic_totalAv : "";
 		$final_numerical_rating = $this->period["year_mfo"] != $cut_year ? $overallAv : "";
 		$final_adjectival_rating = $this->period["year_mfo"] != $cut_year ? $adjectival : "";
 
