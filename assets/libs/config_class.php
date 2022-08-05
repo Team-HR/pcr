@@ -1531,6 +1531,10 @@ class Employee_data extends mysqli
 		$final_numerical_rating = $this->period["year_mfo"] != $cut_year ? $overallAv : "";
 		$final_adjectival_rating = $this->period["year_mfo"] != $cut_year ? $adjectival : "";
 
+		if ($fileStatus['formType'] == 3) {
+			$strategic_total = "";
+		}
+
 		// <td>Formula:(Total of all average ratings / no. of entries)x20%</td>
 		$view = "
 		<table border='1px' style='border-collapse:collapse;width:98%;margin:auto'>
