@@ -40,7 +40,6 @@ class Employee_data extends mysqli
 	private $supportPercent;
 	private $strtPercent;
 
-
 	// properties made for core function
 
 	public $core_countEmpty;
@@ -257,6 +256,8 @@ class Employee_data extends mysqli
 
 		// var_dump(json_encode($perStatus));
 		$this->fileStatus = $perStatus;
+		// echo json_encode($perStatus["department_id"]);
+
 		$this->signatoriesCount = $countData;
 		$accountId = $_SESSION['emp_id'];
 		if (!isset($perStatus['panelApproved']) || $perStatus['panelApproved'] != "") {
@@ -345,7 +346,9 @@ class Employee_data extends mysqli
 	private function coreAr()
 	{
 		# for more compact and faster query
-		$department_id = $this->department_id;
+		# ... and `dep_id` = '$department_id'
+		$fileStatus = $this->fileStatus;
+		$department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
 		$main_Arr = [];
 		$sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$this->per_ID' and `dep_id` = '$department_id' ORDER BY `spms_corefunctions`.`cf_count` ASC";
 		$sql = mysqli::query($sql);
