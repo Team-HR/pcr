@@ -343,12 +343,14 @@ class Employee_data extends mysqli
 		$this->rsmStatus = $sql->fetch_assoc();
 	}
 
+
 	private function coreAr()
 	{
 		# for more compact and faster query
 		# ... and `dep_id` = '$department_id'
-		$fileStatus = $this->fileStatus;
-		$department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
+		// $fileStatus = $this->fileStatus;
+		// $department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
+		$department_id = $this->EmpInfo["department_id"];
 		$main_Arr = [];
 		$sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$this->per_ID' and `dep_id` = '$department_id' ORDER BY `spms_corefunctions`.`cf_count` ASC";
 		$sql = mysqli::query($sql);
