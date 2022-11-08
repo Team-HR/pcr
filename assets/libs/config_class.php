@@ -25,7 +25,6 @@ class Employee_data extends mysqli
 	public $accountStatus;
 	private $rsmStatus;
 	private $emp_ID;
-	private $department_id;
 	private $per_ID;
 	private $coreData;
 	private $period;
@@ -82,15 +81,10 @@ class Employee_data extends mysqli
 	{
 		$host = "localhost";
 		$usernameDb = "admin";
-		// $password = "teamhrmo2019";
 		$password = "teamhrmo2019";
 		$database = "ihris";
 		parent::__construct($host, $usernameDb, $password, $database);
 		parent::set_charset("utf8");
-
-		# usefull later in compacting queries for faster application loading
-		$this->department_id = $_SESSION["emp_info"]["department_id"];
-		// echo json_encode($this->department_id);
 	}
 	private function load()
 	{
@@ -255,9 +249,7 @@ class Employee_data extends mysqli
 		}
 
 
-		// var_dump(json_encode($perStatus));
 		$this->fileStatus = $perStatus;
-		// echo json_encode($perStatus["department_id"]);
 
 		$this->signatoriesCount = $countData;
 		$accountId = $_SESSION['emp_id'];
@@ -349,9 +341,11 @@ class Employee_data extends mysqli
 	{
 		# for more compact and faster query
 		# ... and `dep_id` = '$department_id'
-		// $fileStatus = $this->fileStatus;
-		// $department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
-		$department_id = $this->EmpInfo["department_id"];
+		$fileStatus = $this->fileStatus;
+		# department_id from spms_performancereviewstatus
+		$department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
+		# not recommended department_id from employees table
+		// $department_id = $this->EmpInfo["department_id"];
 		$main_Arr = [];
 		$sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$this->per_ID' and `dep_id` = '$department_id' ORDER BY `spms_corefunctions`.`cf_count` ASC";
 		$sql = mysqli::query($sql);
@@ -1049,7 +1043,6 @@ class Employee_data extends mysqli
 		}
 
 		return isset($row["HeadAgency"]) ? "value='$row[HeadAgency]'" : "value='$lgu_head'";
-		// return json_encode($this);
 	}
 
 	private	function empData($id, $mayor)
@@ -1079,7 +1072,6 @@ class Employee_data extends mysqli
 	private function signatories()
 	{
 		$fileStatus = $this->fileStatus;
-		// echo json_encode($sql);
 		$option  = ['', '', '', '', ''];
 		$fieldDisabled = "";
 		$agencyRadioBtn = "
@@ -1472,13 +1464,16 @@ class Employee_data extends mysqli
 			$headerTitle = "INDIVIDUAL PERFORMANCE COMMITMENT AND REVIEW (IPCR)";
 		}
 		$period = $this->period;
+		$fileStatus = $this->fileStatus;
+		$department_id = $fileStatus["department_id"];
+		$department = $this->get_department_name($department_id);
 		$view = "
 		<table border='1px' style='border-collapse:collapse;width:98%;margin:auto;'>
 		<tr>
 		<td colspan='8' style='padding:10px'>
 		<p style='text-align:center'><b>$headerTitle</b></p>
 		<p>
-		I, <b>$empInfo[firstName] $empInfo[middleName] $empInfo[lastName] $empInfo[extName]</b>, $empInfo[position] of the <b>$empInfo[department]</b>
+		I, <b>$empInfo[firstName] $empInfo[middleName] $empInfo[lastName] $empInfo[extName]</b>, $empInfo[position] of the <b>$department</b>
 		commit to deliver and agree to be rated on the attainment of the following targets in accordance with the indicated measures for the
 		period $period[month_mfo] $period[year_mfo]
 		</p>
@@ -1562,7 +1557,9 @@ class Employee_data extends mysqli
 		<td>Total Weight Allocation:" . $this->get_strtPercent() . "</td>
 		<td><center><b>" . $strategic_total . "</b></center></td>
 		<td colspan='3' rowspan='3'>
-		<center><b> " . /*json_encode($fileStatus["formType"])*/  $final_numerical_rating  . "</b></center>
+		<center><b> " .
+		/**json_encode($this->EmpInfo)**/
+		$final_numerical_rating   . "</b></center>
 		</td>
 		<td colspan='2' rowspan='3'><center><b>" . $final_adjectival_rating . "</b></center></td>
 		<td class='noprint'></td>
@@ -1701,6 +1698,16 @@ class Employee_data extends mysqli
 		}
 		return $view;
 	}
+
+
+	public function get_department_name($department_id)
+	{
+		$sql  = "SELECT * FROM `department` where `department_id`='$department_id'";
+		$res = parent::query($sql);
+		$row = $res->fetch_assoc();
+		return isset($row["department"]) ? $row["department"] : "_______________________________";
+	}
+
 	// Rating Scale
 	function RatingScaleTable()
 	{
@@ -1816,6 +1823,13 @@ class Employee_data extends mysqli
 		return $view;
 	}
 }
+
+##############################################
+#####	 End of Employee_data Class  	######
+##############################################
+
+
+
 class year
 {
 	private $show;
@@ -1835,6 +1849,9 @@ class year
 		return $this->show;
 	}
 }
+
+
+
 class step
 {
 	private	$signa;
