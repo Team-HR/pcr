@@ -128,6 +128,7 @@ class Employee_data extends mysqli
 			$this->authorization = explode(',', $authSql['type']);
 		}
 	}
+
 	public function set_period($per)
 	{
 		$this->per_ID = $per;
@@ -1500,7 +1501,11 @@ class Employee_data extends mysqli
 		$fileStatus = $this->fileStatus;
 		$overallAv = 0;
 
-		$overallAv += $this->strategic_totalAv;
+		# if department head
+		if ($fileStatus["formType"] != '3') {
+			$overallAv += $this->strategic_totalAv;
+		}
+
 		$overallAv += $this->core_totalAv;
 		$overallAv += $this->support_totalAv;
 
@@ -1557,7 +1562,7 @@ class Employee_data extends mysqli
 		<td>Total Weight Allocation:" . $this->get_strtPercent() . "</td>
 		<td><center><b>" . $strategic_total . "</b></center></td>
 		<td colspan='3' rowspan='3'>
-		<center><b> " . $final_numerical_rating . " </b></center>
+		<center><b> " . /*json_encode($fileStatus["formType"])*/  $final_numerical_rating  . "</b></center>
 		</td>
 		<td colspan='2' rowspan='3'><center><b>" . $final_adjectival_rating . "</b></center></td>
 		<td class='noprint'></td>
