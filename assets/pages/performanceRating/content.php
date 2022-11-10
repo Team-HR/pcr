@@ -55,6 +55,7 @@ if (isset($_POST['page'])) {
 		if ($user->core_countTotal > 0) {
 			$step->set_disable($user->hideCol);
 			echo $step->_get();
+			// json_encode($user->update_prrlist()) .
 			echo $view;
 		} else {
 			// echo json_encode($_SESSION["emp_info"]["department_id"]);

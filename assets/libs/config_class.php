@@ -92,7 +92,7 @@ class Employee_data extends mysqli
 		$this->strategicTr();
 
 		# update prrlist from ihris
-		// $final_rating = $this->update_prrlist();
+		$final_rating = $this->update_prrlist();
 	}
 	public function get_prr_id()
 	{
