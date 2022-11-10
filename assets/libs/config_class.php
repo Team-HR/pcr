@@ -40,33 +40,29 @@ class Employee_data extends mysqli
 	private $strtPercent;
 
 	// properties made for core function
-
 	public $core_countEmpty;
 	public $core_countTotal;
 	public $core_totalAv;
 	private $coreView;
 
 	// properties made for support function
-
 	private $supportView;
 	public $support_countEmpty;
 	public $support_totalAv;
 
 	// properties made for strategic function
-
 	private $strategicView;
 	private $strtBtn;
 	public $strategic_totalAv;
 	public $strategic_count;
 
 	//properties for the comment
-
 	private $commentData;
 	private $comment;
 	public $commentCount;
+	private $final_comments;
 
 	//signatories
-
 	private $signa_form;
 	public $signatoriesCount;
 
@@ -94,7 +90,65 @@ class Employee_data extends mysqli
 		$this->coreRow();
 		$this->supportFunctionTr();
 		$this->strategicTr();
+
+		# update prrlist from ihris
+		// $final_rating = $this->update_prrlist();
 	}
+	public function get_prr_id()
+	{
+		if (!$this->fileStatus["period_id"]) return null;
+		$month_mfo = $this->period["month_mfo"];
+		$year_mfo = $this->period["year_mfo"];
+		$sql = "SELECT `prr_id` FROM `prr` WHERE `period` = '$month_mfo' AND `year` = '$year_mfo'";
+		$res = mysqli::query($sql);
+		if ($row = $res->fetch_assoc()) {
+			return $row["prr_id"];
+		} else return null;
+	}
+	public function update_prrlist()
+	{
+		if (!$this->fileStatus["formType"]) return null;
+		$final_numerical_rating = 0;
+		$strat = 0;
+		# check if personnel is a department head
+		# if so exclude strat score
+		if ($this->fileStatus["formType"] != '3') {
+			$strat =  bcdiv($this->strategic_totalAv, 1, 2);
+		}
+		$core =  bcdiv($this->core_totalAv, 1, 2);
+		$support =  bcdiv($this->support_totalAv, 1, 2);
+		$final_numerical_rating = $strat + $core + $support;
+
+		$final_adjectival_rating = "";
+		if ($final_numerical_rating <= 5 && $final_numerical_rating > 4) {
+			$final_adjectival_rating = "O";
+		} elseif ($final_numerical_rating <= 4 && $final_numerical_rating > 3) {
+			$final_adjectival_rating = "VS";
+		} elseif ($final_numerical_rating <= 3 && $final_numerical_rating > 2) {
+			$final_adjectival_rating = "S";
+		} elseif ($final_numerical_rating <= 2 && $final_numerical_rating > 1) {
+			$final_adjectival_rating = "U";
+		}
+
+		$employee_id = $this->fileStatus["employees_id"];
+		$prr_id = $this->get_prr_id();
+		// $date_submitted = $this->fileStatus["dateAccomplished"];
+		// $date_appraised = $this->fileStatus["panelApproved"];
+		$final_comments = mysqli::real_escape_string($this->final_comments);
+		// $prr_id = $this->get_prr_id();
+
+		$sql = "UPDATE `prrlist` SET `numerical` = '$final_numerical_rating', `adjectival` = '$final_adjectival_rating', `comments` = '$final_comments' WHERE `prr_id` = '$prr_id' AND `employees_id` = '$employee_id'";
+		mysqli::query($sql);
+
+		return [
+			"prr_id" => $prr_id,
+			"final_numerical_rating" => $final_numerical_rating,
+			"final_adjectival_rating" => $final_adjectival_rating,
+			"final_comments" => $this->final_comments,
+			"sql" => $sql
+		];
+	}
+
 	public function set_hide($h)
 	{
 		$this->hide = $h;
@@ -229,6 +283,7 @@ class Employee_data extends mysqli
 		$perStatus = $perStatus->fetch_assoc();
 		# put values in $perStatus to prevent null errors
 		if (!$perStatus) {
+			$department_id = $_SESSION["emp_info"]["department_id"];
 			$perStatus = [
 				'performanceReviewStatus_id' => '',
 				'period_id' => $this->per_ID,
@@ -243,7 +298,7 @@ class Employee_data extends mysqli
 				'panelApproved' => '',
 				'dateAccomplished' => '',
 				'formType' => '',
-				'department_id' => '',
+				'department_id' => $department_id,
 				'assembleAll' => '',
 			];
 		}
@@ -1004,6 +1059,7 @@ class Employee_data extends mysqli
 		if (isset($commentsql['comment'])) {
 			$comment = $commentsql['comment'];
 		}
+		$this->final_comments = $comment;
 		$view = "
 		<form class='ui form' style='width:40%;margin:auto;padding:20px' onsubmit='return commentRecFunc()' >
 		<div class='field'>
@@ -1558,8 +1614,8 @@ class Employee_data extends mysqli
 		<td><center><b>" . $strategic_total . "</b></center></td>
 		<td colspan='3' rowspan='3'>
 		<center><b> " .
-		/**json_encode($this->EmpInfo)**/
-		$final_numerical_rating   . "</b></center>
+			/**json_encode($this->EmpInfo)**/
+			$final_numerical_rating   . "</b></center>
 		</td>
 		<td colspan='2' rowspan='3'><center><b>" . $final_adjectival_rating . "</b></center></td>
 		<td class='noprint'></td>
