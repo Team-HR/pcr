@@ -56,7 +56,7 @@ if (isset($_POST['page'])) {
 			$step->set_disable($user->hideCol);
 			echo $step->_get();
 			// json_encode($user->update_prrlist()) .
-			echo $view;
+			echo json_encode($user->update_prrlist()) . $view;
 		} else {
 			// echo json_encode($_SESSION["emp_info"]["department_id"]);
 			echo "

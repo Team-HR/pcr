@@ -92,7 +92,7 @@ class Employee_data extends mysqli
 		$this->strategicTr();
 
 		# update prrlist from ihris
-		$final_rating = $this->update_prrlist();
+		$this->update_prrlist();
 	}
 	public function get_prr_id()
 	{
@@ -101,9 +101,18 @@ class Employee_data extends mysqli
 		$year_mfo = $this->period["year_mfo"];
 		$sql = "SELECT `prr_id` FROM `prr` WHERE `period` = '$month_mfo' AND `year` = '$year_mfo'";
 		$res = mysqli::query($sql);
-		if ($row = $res->fetch_assoc()) {
-			return $row["prr_id"];
-		} else return null;
+		$data = [];
+		# since spms_performancereviewstatus table does not identify the personnel to be casual or 
+		# permanent on the time they accomplish their pcrs
+		# return two ids of prr for casual and permanent and find out later which of the two was the 
+		# personnel appointed to from the prrlist generated 
+		while ($row = $res->fetch_assoc()) {
+			$data[] = $row["prr_id"];
+		}
+		return $data;
+		// if ($row = $res->fetch_assoc()) {
+		// 	return $row["prr_id"];
+		// } else return null;
 	}
 	public function update_prrlist()
 	{
@@ -131,12 +140,23 @@ class Employee_data extends mysqli
 		}
 
 		$employee_id = $this->fileStatus["employees_id"];
-		$prr_id = $this->get_prr_id();
+		$prr_ids = $this->get_prr_id();
+		
+		# find out which of the two was the 
+		# personnel appointed to from the prrlist generated 
+		$prr_id = 0;
+		foreach ($prr_ids as $id) {
+			$sql = "SELECT * FROM `prrlist` WHERE `prr_id` = '$id' AND `employees_id` = '$employee_id'";
+			$result = mysqli::query($sql);
+			if ($result->num_rows > 0) {
+				$prr_id = $id;
+				continue;
+			}
+		}
 		// $date_submitted = $this->fileStatus["dateAccomplished"];
 		// $date_appraised = $this->fileStatus["panelApproved"];
 		$final_comments = mysqli::real_escape_string($this->final_comments);
 		// $prr_id = $this->get_prr_id();
-
 		$sql = "UPDATE `prrlist` SET `numerical` = '$final_numerical_rating', `adjectival` = '$final_adjectival_rating', `comments` = '$final_comments' WHERE `prr_id` = '$prr_id' AND `employees_id` = '$employee_id'";
 		mysqli::query($sql);
 
