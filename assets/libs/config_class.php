@@ -141,7 +141,7 @@ class Employee_data extends mysqli
 
 		$employee_id = $this->fileStatus["employees_id"];
 		$prr_ids = $this->get_prr_id();
-		
+
 		# find out which of the two was the 
 		# personnel appointed to from the prrlist generated 
 		$prr_id = 0;
@@ -1915,7 +1915,12 @@ class year
 		$dpast = date('Y') - 50;
 		$view = "";
 		while ($dnow >= $dpast) {
-			$view .= "<option value='$dnow'>$dnow</option>";
+
+			if ($dnow == date('Y')) {
+				$view .= "<option value='$dnow' selected>$dnow</option>";
+			} else {
+				$view .= "<option value='$dnow'>$dnow</option>";
+			}
 			$dnow--;
 		}
 		$this->show = $view;
