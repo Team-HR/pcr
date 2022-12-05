@@ -315,6 +315,8 @@ elseif (isset($_POST['period_check'])) {
 } else {
   echo notFound();
 }
+
+
 function table($mysqli)
 {
   $dep = $_SESSION['emp_info']['department_id'];
@@ -325,6 +327,7 @@ function table($mysqli)
   $period = "SELECT * from `spms_mfo_period` where `mfoperiod_id`='$_SESSION[period]'";
   $period = $mysqli->query($period);
   $period = $period->fetch_assoc();
+  // $period_id = $period['mfoperiod_id'];
   echo "
   <button class='noprint' onclick = 'rsmLoad(\"table\")'>Refresh</button>
   <script>
@@ -752,7 +755,10 @@ function get_children($mysqli, $cf_ID)
 function start_duplicating($mysqli, $data, $selected_period_id, $parent_id)
 {
   foreach ($data as $key => $core_function) {
-    $sql = "INSERT INTO `spms_corefunctions`(`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`, `corrections`) VALUES ('$selected_period_id','$parent_id','$core_function[dep_id]','$core_function[cf_count]','$core_function[cf_title]','')";
+    $parent_id = $parent_id ? $parent_id : NULL;
+    $cf_title = $mysqli->real_escape_string($core_function['cf_title']);
+    $cf_count = $mysqli->real_escape_string($core_function['cf_count']);
+    $sql = "INSERT INTO `spms_corefunctions`(`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`, `corrections`) VALUES ('$selected_period_id','$parent_id','$core_function[dep_id]','$cf_count','$cf_title','')";
     $mysqli->query($sql);
     $insert_id = $mysqli->insert_id;
 
