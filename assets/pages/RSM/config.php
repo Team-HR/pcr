@@ -593,32 +593,36 @@ function rsmEditStatus($dat)
 
 function AddInputs($mysqli, $dataId)
 {
-  $view = "
-  <div class='ui mini form'>
-  <div class='fields'>
-  <input type='hidden' value='$dataId' id='mfo_pid$dataId'>
-  <div class='field'>
-  <label>Category. No.</label>
-  <input type='text' style='width:90px' placeholder='ex: I,II,1,1.0,1.1.0' id='rsmcount$dataId'>
-  </div>
-  <div class=' field' >
-  <label>Title</label>
-  <div class='ui right labeled input'>
-  <input type='text' style='width:200px' placeholder='Type Here.....' id='titleRsm$dataId'>
-  <div class='mini ui primary basic icon button' onclick='addMFoRsm(\"$dataId\")'><i class='save icon'></i></div>
-  </div>
-  </div>
-  </div>
-  </div>";
+
 
   # check first if rating scale matrix has already existing data
   // period
+  $view = "";
   $period_id = $_SESSION["period"];
   $department_id = $_SESSION["emp_info"]["department_id"];
   $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$period_id' AND `dep_id` = '$department_id' LIMIT 1;";
+
   $result = $mysqli->query($sql);
   if ($result->num_rows < 1) {
-    $view .= "<button class='ui black button' onclick='copyRSM()'>Copy Previous RSM</button>";
+    $view .= "<button class='ui green large button' onclick='copyRSM()'>Copy Previous RSM</button>";
+  } else {
+    $view = "
+    <div class='ui mini form'>
+    <div class='fields'>
+    <input type='hidden' value='$dataId' id='mfo_pid$dataId'>
+    <div class='field'>
+    <label>Category. No.</label>
+    <input type='text' style='width:90px' placeholder='ex: I,II,1,1.0,1.1.0' id='rsmcount$dataId'>
+    </div>
+    <div class=' field' >
+    <label>Title</label>
+    <div class='ui right labeled input'>
+    <input type='text' style='width:200px' placeholder='Type Here.....' id='titleRsm$dataId'>
+    <div class='mini ui primary basic icon button' onclick='addMFoRsm(\"$dataId\")'><i class='save icon'></i></div>
+    </div>
+    </div>
+    </div>
+    </div>";
   }
   if (!rsmEditStatus("")) {
     $view = "";
