@@ -339,7 +339,7 @@ function table($mysqli)
   <thead>
   <tr class='noprint'>
   <th colspan='8' style='font-size:20px'>
-  Rating Scale Matrix
+  Rating Scale Matrix Test
   <br>$dep
   <br>$period[month_mfo] $period[year_mfo]
   </th>
@@ -471,7 +471,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
   if ($correctionMFO) {
     $correctionColorMFO = "color:red;";
   }
-
+  // if cf has success indicator/s
   if ($siDatacount1 > 0) {
     while ($siDataRow1 = $siData1->fetch_assoc()) {
       $correctionColor = "";
@@ -479,7 +479,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
       if ($correction) {
         $correctionColor = "color:red;";
       }
-      $empincharge = "";
+      $empincharge = "<b style='color:red;'> $siDataRow1[mi_incharge] </b>";
       $incharge = explode(',', $siDataRow1['mi_incharge']);
       foreach ($incharge as $empDataId) {
         if (!$empDataId || $empDataId == null) {
@@ -488,7 +488,8 @@ function trows($mysqli, $row, $padding, $addDisplay)
         $sqlIncharge = "SELECT * from employees where employees_id='$empDataId'";
         $sqlIncharge = $mysqli->query($sqlIncharge);
         $sqlIncharge = $sqlIncharge->fetch_assoc();
-        $empincharge .= "<br><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br>";
+        $empincharge .=
+          "<br><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br>";
       }
       $Qdata = "";
       $Edata = "";
@@ -507,10 +508,13 @@ function trows($mysqli, $row, $padding, $addDisplay)
         $view .= "
         <tr >
         <td style='padding-left:$padding;width:25%;$correctionColorMFO'>
-        " . $set_drop . "
-        $row[cf_count]) $row[cf_title]
+        " . $set_drop .
+          "<b style='color:red;'>cf_ID: $row[cf_ID]</b>" .
+          " $row[cf_count]) $row[cf_title]
         </td>
-        <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . "</td>
+        <td style='width:25%;$correctionColor'>" .
+          "<b style='color:red;'>mi_id: $siDataRow1[mi_id]</b>" .
+          nl2br($siDataRow1['mi_succIn']) . "</td>
         <td>$performanceMeasure</td>
         <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_quality']) . "</td>
         <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_eff']) . "</td>
@@ -551,12 +555,15 @@ function trows($mysqli, $row, $padding, $addDisplay)
       }
       $count++;
     }
-  } else {
+  }
+  // if parent/cf with no success indicator/s
+  else {
     $view .= "
     <tr >
     <td style='padding-left:$padding;width:500px;$correctionColorMFO'>
-    " . $set_drop . "
-    $row[cf_count]) $row[cf_title]
+    " . $set_drop .
+      "<b style='color:red;'>cf_ID: $row[cf_ID]</b>" .
+      "$row[cf_count]) $row[cf_title]
     </td>
     <td></td>
     <td></td>
