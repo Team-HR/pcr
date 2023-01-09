@@ -769,7 +769,14 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id)
     #get success indicators
     $success_idicators = get_success_indicators($mysqli, $core_function["cf_ID"]);
     foreach ($success_idicators as $success_idicator) {
-      $sql = "INSERT INTO `spms_matrixindicators`(`cf_ID`, `mi_succIn`, `mi_quality`, `mi_eff`, `mi_time`, `mi_incharge`, `corrections`) VALUES ('$insert_id','$success_idicator[mi_succIn]','$success_idicator[mi_quality]','$success_idicator[mi_eff]','$success_idicator[mi_time]','$success_idicator[mi_incharge]','')";
+
+      $mi_succIn = $mysqli->real_escape_string($success_idicator['mi_succIn']);
+
+      $mi_quality = $mysqli->real_escape_string($success_idicator['mi_quality']);
+      $mi_eff = $mysqli->real_escape_string($success_idicator['mi_eff']);
+      $mi_time = $mysqli->real_escape_string($success_idicator['mi_time']);
+
+      $sql = "INSERT INTO `spms_matrixindicators`(`cf_ID`, `mi_succIn`, `mi_quality`, `mi_eff`, `mi_time`, `mi_incharge`, `corrections`) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
       $mysqli->query($sql);
     }
 
