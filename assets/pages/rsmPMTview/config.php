@@ -116,7 +116,7 @@ if (isset($_POST['getIRM'])) {
         if (!$c) {
             $c = "";
         } elseif (count($c) >= 1) {
-            $c = serialize($c);
+            $c = $mysqli->real_escape_string(serialize($c));
         } else {
             $c = "";
         }

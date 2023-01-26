@@ -210,11 +210,11 @@ elseif (isset($_POST['period_check'])) {
   }
 } elseif (isset($_POST['SaveMfoSI'])) {
   $dataId = $_POST['SaveMfoSI'];
-  $quality = addslashes(serialize($_POST['quality']));
-  $efficiency = addslashes(serialize($_POST['efficiency']));
-  $timeliness = addslashes(serialize($_POST['timeliness']));
-  $successIn = addslashes($_POST['successIn']);
-  $incharge = addslashes($_POST['incharge']);
+  $quality = $mysqli->real_escape_string(serialize($_POST['quality']));
+  $efficiency = $mysqli->real_escape_string(serialize($_POST['efficiency']));
+  $timeliness = $mysqli->real_escape_string(serialize($_POST['timeliness']));
+  $successIn = $mysqli->real_escape_string($_POST['successIn']);
+  $incharge = $mysqli->real_escape_string($_POST['incharge']);
   $sql = "INSERT INTO `spms_matrixindicators`
   (`mi_id`, `cf_ID`, `mi_succIn`, `mi_quality`, `mi_eff`, `mi_time`, `mi_incharge`)
   VALUES
@@ -227,11 +227,11 @@ elseif (isset($_POST['period_check'])) {
   }
 } elseif (isset($_POST['SaveMfoSIEdit'])) {
   $dataId = $_POST['SaveMfoSIEdit'];
-  $quality = addslashes(serialize($_POST['quality']));
-  $efficiency = addslashes(serialize($_POST['efficiency']));
-  $timeliness = addslashes(serialize($_POST['timeliness']));
-  $successIn = addslashes($_POST['successIn']);
-  $incharge = addslashes($_POST['incharge']);
+  $quality = $mysqli->real_escape_string(serialize($_POST['quality']));
+  $efficiency = $mysqli->real_escape_string(serialize($_POST['efficiency']));
+  $timeliness = $mysqli->real_escape_string(serialize($_POST['timeliness']));
+  $successIn = $mysqli->real_escape_string($_POST['successIn']);
+  $incharge = $mysqli->real_escape_string($_POST['incharge']);
   $getC = "SELECT * from `spms_matrixindicators` where `mi_id`=$dataId";
   $getC = $mysqli->query($getC);
   $getC = $getC->fetch_assoc();
