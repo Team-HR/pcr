@@ -26,9 +26,12 @@ if (isset($_SESSION['emp_id'])) {
 		} else if (isset($_GET['home'])) {
 			require_once "assets/pages/home.php";
 		} else if (isset($_GET['RatingScale'])) {
-			require_once "assets/pages/iMatrix/iMatrix.php";
+			if (!isset($_GET['Error'])) {
+				require_once "assets/pages/iMatrix/iMatrix.php";
+			} else {
+				require_once "assets/pages/iMatrix/iMatrixError.php";
+			}
 		} else if (isset($_GET['MotherRatingScale'])) {
-
 			if (!isset($_GET['Edit'])) {
 				// period and year selector
 				require_once "assets/pages/RSM/rsm.php";

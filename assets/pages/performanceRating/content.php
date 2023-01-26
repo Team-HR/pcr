@@ -65,7 +65,8 @@ if (isset($_POST['page'])) {
 			<i class='ui red exclamation triangle icon'></i>
 			<div class='content'>
 			Rating Scale Required
-			<div class='sub header'>You Dont have Rating Matrix Yet. Please consult your Department Head For this Matter</div>
+			<div class='sub header'>You Dont have Rating Matrix Yet. Please consult your Department Head For this Matter Test
+			</div>
 			</div>
 			</h2>
 			</div>
@@ -86,6 +87,7 @@ if (isset($_POST['page'])) {
 	} else {
 		$sql = $sql->fetch_assoc();
 		$_SESSION['period_pr'] = $sql['mfoperiod_id'];
+		$_SESSION['iMatrix_period'] = $sql['mfoperiod_id'];
 		print(1);
 	}
 } elseif (isset($_POST['saveSiData'])) {

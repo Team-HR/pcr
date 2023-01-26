@@ -304,6 +304,7 @@ class Employee_data extends mysqli
 		# put values in $perStatus to prevent null errors
 		if (!$perStatus) {
 			$department_id = $_SESSION["emp_info"]["department_id"];
+			// $department_id = 6;
 			$perStatus = [
 				'performanceReviewStatus_id' => '',
 				'period_id' => $this->per_ID,
@@ -1793,6 +1794,12 @@ class Employee_data extends mysqli
 		<tr>
 		<th colspan='5' style='font-size:18px'>
 		Rating Scale Matrix
+
+		".
+			// json_encode($_SESSION)
+			""
+		."
+
 		<br>" . $this->get_emp('department') . "
 		<br>For " . $this->get_period('month_mfo') . " " . $this->get_period('year_mfo') . "
 		</th>

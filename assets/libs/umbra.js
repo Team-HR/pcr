@@ -877,9 +877,9 @@ function iMatrix_period(i) {
   }, function (data, textStatus, xhr) {
     if (data == 1) {
       iMatrixLoad("RatingScale");
-
     } else {
       alert(data);
+      // window.location.href = "?RatingScale&Error";
     }
   });
 }
@@ -889,7 +889,12 @@ function iMatrixLoad(i) {
     page: i
   }, function (data, textStatus, xhr) {
     $('.segment').dimmer('hide');
-    $("#iMatrixCont").html(data);
+    // if error or no rsm found goto 
+    if (data == "error") {
+      window.location.href = "?RatingScale&Error";
+    } else {
+      $("#iMatrixCont").html(data);
+    }
   });
 }
 function fileDisplayContent() {
