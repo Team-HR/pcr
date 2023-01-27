@@ -1,6 +1,6 @@
 <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->
 
-<div id="iMatrixContError" style="min-height:500px">
+<div id="pMatrixContError" style="min-height:500px">
     <br>
     <br>
     <br>
@@ -68,7 +68,7 @@
                     // console.log(data);
                     // this.departments = JSON.parse(data);
                     if (data) {
-                        window.location.href = "?RatingScale&View"
+                        window.location.href = "?performanceRating&form"
                     }
 
                 });
@@ -79,6 +79,7 @@
                 fullTextSearch: true,
                 forceSelection: false
             });
+            
             // get list of departments
             $.post('?config=iMatrixConfig', {
                 getListOfDepartments: true
@@ -90,6 +91,6 @@
             });
         }
 
-    }).mount('#iMatrixContError')
+    }).mount('#pMatrixContError')
     /* Vue3 End*/
 </script>

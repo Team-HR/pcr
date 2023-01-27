@@ -133,11 +133,11 @@ function EditRsmTitle(i) {
   });
 }
 function rsmLoad(i) {
-  $('.segment').dimmer('show');
+  $('#appLoader').dimmer({ closable: false }).dimmer('show');
   $.post('?config=rsm', {
     page: i
   }, function (data, textStatus, xhr) {
-    $('.segment').dimmer('hide');
+    $('#appLoader').dimmer('hide');
     $("#rsmCont").html(data);
   });
 }
@@ -329,13 +329,19 @@ function performanceRatingCore() {
   });
 }
 function showPr(page, go) {
-  $('.segment').dimmer('show');
+  $('#appLoader').dimmer({ closable: false }).dimmer('show');
   $.post('?config=prContent', {
     page: page,
     gotoStep: go
   }, function (data, textStatus, xhr) {
-    $('.segment').dimmer('hide');
-    $('#perfratingBody').html(data);
+    console.log(data);
+    $('#appLoader').dimmer('hide');
+    if (data == "error") {
+      window.location.href = "?performanceRating&error";
+    } else {
+      $('#perfratingBody').html(data);
+    }
+
   });
 }
 function coreShowModal(type, quality, eff, timeli, dataId) {
@@ -787,12 +793,12 @@ function unrevRec(i) {
   });
 }
 function showRev(page) {
-  $('.segment').dimmer('show');
+  $('#appLoader').dimmer({ closable: false }).dimmer('show');
   $.post('?config=revContent', {
     page: page,
   }, function (data, textStatus, xhr) {
     $('#Reviewcontent').html(data);
-    $('.segment').dimmer('hide');
+    $('#appLoader').dimmer('hide');
   });
 }
 function UncriticizedEmpIdFunc(i) {
@@ -884,16 +890,17 @@ function iMatrix_period(i) {
   });
 }
 function iMatrixLoad(i) {
-  $('.segment').dimmer('show');
+  $('#appLoader').dimmer({ closable: false }).dimmer('show');
   $.post('?config=iMatrixConfig', {
     page: i
   }, function (data, textStatus, xhr) {
-    $('.segment').dimmer('hide');
+    // $('#appLoader').dimmer('hide');
     // if error or no rsm found goto 
     if (data == "error") {
       window.location.href = "?RatingScale&Error";
     } else {
-      $("#iMatrixCont").html(data);
+      window.location.href = "?RatingScale&View";
+      // $("#iMatrixCont").html(data);
     }
   });
 }

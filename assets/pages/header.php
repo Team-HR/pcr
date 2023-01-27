@@ -17,7 +17,7 @@
 	<style media="screen">
 		body {
 			background-color: white;
-			background:url('assets/img/mainPage.jpg');
+			background: url('assets/img/mainPage.jpg');
 			background-size: cover;
 			background-repeat: no-repeat;
 			background-attachment: fixed;
@@ -115,8 +115,8 @@
 		</div>
 	</div>
 </div>
-<div class="ui vertical segment">
-	<div class="ui active dimmer" style="height:200%">
+<div id="appLoader" class="ui vertical segment">
+	<div class="ui active page dimmer" style="height:200%">
 		<div class="ui medium text loader" style="top:100px;position:fixed">Loading</div>
 	</div>
 

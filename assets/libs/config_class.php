@@ -38,6 +38,7 @@ class Employee_data extends mysqli
 	private $percent;
 	private $supportPercent;
 	private $strtPercent;
+	public $departmentInPeriod = "";
 
 	// properties made for core function
 	public $core_countEmpty;
@@ -293,8 +294,17 @@ class Employee_data extends mysqli
 		return $fullname;
 	}
 
-	// method made for reviewing status of the file
+	private function get_department_this_period($department_id)
+	{
+		$sql = "SELECT * FROM department WHERE department_id = $department_id";
+		$res = mysqli::query($sql);
+		if ($row = $res->fetch_assoc()) {
+			return $row["department"];
+		}
+	}
 
+
+	// method made for reviewing status of the file
 	private function file_status()
 	{
 		$perStatus = "SELECT * from spms_performancereviewstatus where period_id='$this->per_ID' and employees_id='$this->emp_ID'";
@@ -326,6 +336,9 @@ class Employee_data extends mysqli
 
 
 		$this->fileStatus = $perStatus;
+
+		# get and set department during the selected period
+		$this->departmentInPeriod = $this->get_department_this_period($perStatus["department_id"]);
 
 		$this->signatoriesCount = $countData;
 		$accountId = $_SESSION['emp_id'];
@@ -1795,12 +1808,11 @@ class Employee_data extends mysqli
 		<th colspan='5' style='font-size:18px'>
 		Rating Scale Matrix
 
-		".
-			// json_encode($_SESSION)
-			""
-		."
+		" .
+			"" // $this->departmentInPeriod
+			. "
 
-		<br>" . $this->get_emp('department') . "
+		<br>" . $this->departmentInPeriod . "
 		<br>For " . $this->get_period('month_mfo') . " " . $this->get_period('year_mfo') . "
 		</th>
 		<tr>

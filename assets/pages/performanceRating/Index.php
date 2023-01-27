@@ -20,16 +20,16 @@
 					</div>
 					<div class="ui four wide field">
 						<select id="year">
-							<?=$year->get_year()?>
-							
+							<?= $year->get_year() ?>
+
 						</select>
 					</div>
 					<div class="ui four wide field">
-						<input type="submit" class="ui submit button" value="Go" >
+						<input type="submit" class="ui submit button" value="Go">
 					</div>
 				</div>
 			</div>
-		</div>
+	</div>
 	</form>
 </div>
 

@@ -58,19 +58,27 @@ if (isset($_POST['page'])) {
 			// json_encode($user->update_prrlist()) .
 			echo $view;
 		} else {
+
 			// echo json_encode($_SESSION["emp_info"]["department_id"]);
-			echo "
-			<div style='margin:auto;width:500px'>
-			<h2 class='ui icon header'>
-			<i class='ui red exclamation triangle icon'></i>
-			<div class='content'>
-			Rating Scale Required
-			<div class='sub header'>You Dont have Rating Matrix Yet. Please consult your Department Head For this Matter Test
-			</div>
-			</div>
-			</h2>
-			</div>
-			";
+			echo "error";
+
+			// echo "
+			// <div style='margin:auto;width:500px'>
+			// <h2 class='ui icon header'>
+			// <i class='ui red exclamation triangle icon'></i>
+			// <div class='content'>
+			// Rating Scale Required
+			// <div class='sub header'>You Dont have Rating Matrix Yet. Please consult your Department Head For this Matter Test
+			// </div>
+			// </div>
+			// </h2>
+			// </div>
+			// ";
+
+
+
+
+
 		}
 	} elseif (false) {
 	} else {

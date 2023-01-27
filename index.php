@@ -18,15 +18,19 @@ if (isset($_SESSION['emp_id'])) {
 		if (isset($_GET['logout'])) {
 			require_once "assets/pages/logout.php";
 		} else if (isset($_GET['performanceRating'])) {
-			if (!isset($_GET['form'])) {
-				require_once "assets/pages/performanceRating/performanceRating.php";
+			if (!isset($_GET['form']) && !isset($_GET['error'])) {
+				require_once "assets/pages/performanceRating/Index.php";
+			} else if (!isset($_GET['form']) && isset($_GET['error'])) {
+				require_once "assets/pages/performanceRating/matrixError.php";
 			} else {
 				require_once "assets/pages/performanceRating/form.php";
 			}
 		} else if (isset($_GET['home'])) {
 			require_once "assets/pages/home.php";
 		} else if (isset($_GET['RatingScale'])) {
-			if (!isset($_GET['Error'])) {
+			if (!isset($_GET['Error']) && !isset($_GET['View'])) {
+				require_once "assets/pages/iMatrix/Index.php";
+			} else if (isset($_GET['View']) && !isset($_GET['Error'])) {
 				require_once "assets/pages/iMatrix/iMatrix.php";
 			} else {
 				require_once "assets/pages/iMatrix/iMatrixError.php";
