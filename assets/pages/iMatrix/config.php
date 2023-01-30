@@ -59,6 +59,11 @@ if (isset($_POST['page'])) {
   if ($res->num_rows < 1) {
     $sql = "INSERT INTO `spms_performancereviewstatus` (`performanceReviewStatus_id`, `period_id`, `employees_id`, `ImmediateSup`, `DepartmentHead`, `HeadAgency`, `PMT`, `submitted`, `certify`, `approved`, `panelApproved`, `dateAccomplished`, `formType`, `department_id`, `assembleAll`) VALUES (NULL, $period_id, $employee_id, '', '', '', '', '', '', '', '', '', '', '$department_id', '1')";
     $res = $mysqli->query($sql);
+  } elseif ($res->num_rows > 0) {
+    $row = $res->fetch_assoc();
+    $id = $row["performanceReviewStatus_id"];
+    $sql = "UPDATE spms_performancereviewstatus SET department_id = '$department_id' WHERE performanceReviewStatus_id = '$id'";
+    $mysqli->query($sql);
   }
 
   echo json_encode($res);
