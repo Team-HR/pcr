@@ -1,7 +1,8 @@
 <?php
 require_once "assets/pages/performanceRating/config.php";
-function pendingTable($mysqli){
-  $table ="";
+function pendingTable($mysqli)
+{
+  $table = "";
   $period = $_SESSION['periodPending'];
   $gperiod = "SELECT * from spms_mfo_period where mfoperiod_id='$period'";
   $gperiod = $mysqli->query($gperiod);
@@ -9,23 +10,23 @@ function pendingTable($mysqli){
   $empId = $_SESSION['emp_id'];
   $sql = "SELECT * from spms_performancereviewstatus where `submitted` like '%Done%' and period_id='$period' and ImmediateSup='$empId'  ORDER BY `spms_performancereviewstatus`.`approved` ASC";
   $sql = $mysqli->query($sql);
-  $tr="";
+  $tr = "";
   while ($data = $sql->fetch_assoc()) {
     $fsql = "SELECT * from employees where employees_id='$data[employees_id]'";
-    $fsql = $mysqli->query($fsql);  
+    $fsql = $mysqli->query($fsql);
     $fsql = $fsql->fetch_assoc();
-    if($data['ImmediateSup']!=$data['DepartmentHead']){
+    if ($data['ImmediateSup'] != $data['DepartmentHead']) {
       $color = "#BEBEBE";
       $statusText = "$data[dateAccomplished] - Accomplished";
-      if($data['panelApproved']){
+      if ($data['panelApproved']) {
         $statusText = "$data[panelApproved] - Checked by PMT";
-      }elseif($data['certify']){
+      } elseif ($data['certify']) {
         $statusText = "$data[certify] - Certified by Department Head";
-      }elseif($data['approved']!=""){
+      } elseif ($data['approved'] != "") {
         $color = "#00FA9A";
         $statusText = "$data[approved] - Approved";
       }
-      $tr .="
+      $tr .= "
             <tr onclick='UncriticizedEmpIdFunc(\"$data[employees_id]\")' style='background:$color'>
             <td>$fsql[firstName] $fsql[lastName]</td>
             <td>$statusText</td>
@@ -35,30 +36,29 @@ function pendingTable($mysqli){
   $DepartmentHeadData = "SELECT * from `spms_performancereviewstatus` where `submitted`= 'Done' 
                         and `period_id`= '$period' and `DepartmentHead`='$empId'";
   $DepartmentHeadData = $mysqli->query($DepartmentHeadData);
-  if($DepartmentHeadData->num_rows>0){
+  if ($DepartmentHeadData->num_rows > 0) {
     while ($getDepartmentHeadData = $DepartmentHeadData->fetch_assoc()) {
-          $fsql = "SELECT * from employees where employees_id='$getDepartmentHeadData[employees_id]'";
-          $fsql = $mysqli->query($fsql);
-          $fsql = $fsql->fetch_assoc();
-          $color = "#BEBEBE";
-          $statusText = "Accomplished";
-          if(isset($data['panelApproved'])){
-            $statusText = "$data[panelApproved] - Checked by PMT";    
-          }elseif($getDepartmentHeadData['approved']!=""||$getDepartmentHeadData['certify']!=""){
-            $color = "#00FA9A";
-            $statusText = " Certified";
-          }
-          if($getDepartmentHeadData['ImmediateSup']==$getDepartmentHeadData['DepartmentHead']||$getDepartmentHeadData['ImmediateSup']==""){
-            $tr .="
+      $fsql = "SELECT * from employees where employees_id='$getDepartmentHeadData[employees_id]'";
+      $fsql = $mysqli->query($fsql);
+      $fsql = $fsql->fetch_assoc();
+      $color = "#BEBEBE";
+      $statusText = "Accomplished";
+      if (isset($data['panelApproved'])) {
+        $statusText = "$data[panelApproved] - Checked by PMT";
+      } elseif ($getDepartmentHeadData['approved'] != "" || $getDepartmentHeadData['certify'] != "") {
+        $color = "#00FA9A";
+        $statusText = " Certified";
+      }
+      if ($getDepartmentHeadData['ImmediateSup'] == $getDepartmentHeadData['DepartmentHead'] || $getDepartmentHeadData['ImmediateSup'] == "") {
+        $tr .= "
             <tr onclick='UncriticizedEmpIdFunc(\"$getDepartmentHeadData[employees_id]\")' style='background:$color'>
             <td>$fsql[firstName] $fsql[lastName]</td>
             <td>$getDepartmentHeadData[dateAccomplished] - $statusText</td>
             </tr>
-            ";      
-            $tr .= subordinates($getDepartmentHeadData['employees_id'],$period);
-          }
-
+            ";
+        $tr .= subordinates($getDepartmentHeadData['employees_id'], $period);
       }
+    }
   }
   $table .= "
   <h3> Period of $gperiod[month_mfo] $gperiod[year_mfo] </h3>
@@ -87,41 +87,75 @@ function pendingTable($mysqli){
   ";
   return $table;
 }
-function subordinates($dat,$period){
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+####
+####
+function subordinates($dat, $period)
+{
   $mysqli = $GLOBALS['mysqli'];
   $sql = "SELECT * from `spms_performancereviewstatus` where `ImmediateSup`='$dat' and `period_id`='$period' and `submitted` like '%DONE%'";
   $sql = $mysqli->query($sql);
-  $tr ="";
-  while($ipcr = $sql->fetch_assoc()){
+  $tr = "";
+  while ($ipcr = $sql->fetch_assoc()) {
     $fsql = "SELECT * from employees where employees_id='$ipcr[employees_id]'";
     $fsql = $mysqli->query($fsql);
     $fsql = $fsql->fetch_assoc();
-    if($ipcr['panelApproved']!=""){ 
-      $tr .="
+    if ($ipcr['panelApproved'] != "") {
+      $tr .= "
       <tr onclick='UncriticizedEmpIdFunc(\"$ipcr[employees_id]\")' style='background:#00FA9A'>
       <td style='padding-left:50px'><i class='minus icon'></i>
       $fsql[firstName] $fsql[lastName]</td>
       <td>$ipcr[panelApproved] - Checked by PMT</td>
       </tr>
       ";
-    }elseif($ipcr['certify']!=""){ 
-      $tr .="
+    } elseif ($ipcr['certify'] != "") {
+      $tr .= "
       <tr onclick='UncriticizedEmpIdFunc(\"$ipcr[employees_id]\")' style='background:#00FA9A'>
       <td style='padding-left:50px'><i class='minus icon'></i>
       $fsql[firstName] $fsql[lastName]</td>
       <td>$ipcr[certify] - Certified by Department Head</td>
       </tr>
       ";
-    }elseif($ipcr['approved']!=""){ 
-      $tr .="
+    } elseif ($ipcr['approved'] != "") {
+      $tr .= "
       <tr onclick='UncriticizedEmpIdFunc(\"$ipcr[employees_id]\")' style='background:#E8E8E8'>
       <td style='padding-left:50px'><i class='minus icon'></i>
       $fsql[firstName] $fsql[lastName]</td> 
       <td>$ipcr[approved] - Approved by supervisor</td>
       </tr>
       ";
-    }else{
-      $tr .="
+    } else {
+      $tr .= "
       <tr style='background:#f1dbd4'>
       <td style='padding-left:50px'><i class='minus icon'></i>
       $fsql[firstName] $fsql[lastName] - Unapproved</td>
@@ -135,19 +169,19 @@ function subordinates($dat,$period){
 
 
 
-function uncriticizedTable($employee){
+function uncriticizedTable($employee)
+{
   $emp = $_SESSION['empIdPending'];
   $period = $_SESSION['periodPending'];
   $employee->set_emp($emp);
   $employee->set_period($period);
   $employee->hideNextBtn();
   $employee->set_hide("display:none");
-  $body = $employee->get_strategicView().$employee->get_coreView().$employee->get_supportView();
+  $body = $employee->get_strategicView() . $employee->get_coreView() . $employee->get_supportView();
   $table_r = new table($employee->hideCol);
   $table_r->formType($employee->get_status('formType'));
   $table_r->set_head($employee->tableHeader());
   $table_r->set_body($body);
-  $table_r->set_foot($employee->tableFooter()."<br class='noprint'>".$employee->get_approveBTN());
+  $table_r->set_foot($employee->tableFooter() . "<br class='noprint'>" . $employee->get_approveBTN());
   return $table_r->_get();
 }
-?>

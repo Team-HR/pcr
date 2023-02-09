@@ -778,12 +778,29 @@ function commentReccomendationOfSupp(period, emp_id, fileStatusId) {
   }
   return false;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function unrevRec(i) {
   $.post('?config=revContent', {
     unrevRec: i,
   }, function (data, textStatus, xhr) {
     if (data == 1) {
-      showRev("viewPending");
+      // showRev("viewPending");
+      window.location.href = "?RPC&subordinates";
     } else {
       $('#allModal')
         .modal('setting', 'closable', false)
@@ -792,21 +809,34 @@ function unrevRec(i) {
     }
   });
 }
+
+
+
+
+
+
+
+// 
 function showRev(page) {
   $('#appLoader').dimmer({ closable: false }).dimmer('show');
   $.post('?config=revContent', {
     page: page,
   }, function (data, textStatus, xhr) {
-    $('#Reviewcontent').html(data);
+    $('#ReviewcontentSubs').html(data);
     $('#appLoader').dimmer('hide');
   });
 }
+
+
+
+
 function UncriticizedEmpIdFunc(i) {
   $.post('?config=revContent', {
     UncriticizedEmpIdPost: i,
   }, function (data, textStatus, xhr) {
     if (data == 1) {
-      showRev("UncriticizedPrTable");
+      // showRev("UncriticizedPrTable");
+      window.location.href = "?RPC&subordinates&view";
     } else {
       $('#allModal')
         .modal('setting', 'closable', false)
