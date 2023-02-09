@@ -1755,13 +1755,13 @@ class Employee_data extends mysqli
 					// }elseif($fileStatus['formType']==1){
 					// $view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(".$this->period['mfoperiod_id'].",$this->emp_ID)'>Approve Results</button>";
 				} else {
-					$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Add Comments/Recommendations to Approve Results</button>";
+					$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Add/Edit Comments/Recommendations to Approve Results</button>";
 					// $view ="<button alert='alert(contact toto)'>Something is Wrong</button>";
 					// $view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='approval(".$this->get_status('performanceReviewStatus_id').",$this->emp_ID)'>Approve</button>";
 				}
 			} elseif ($accountId == $fileStatus['DepartmentHead']) {
 				// if($fileStatus['formType']==2){
-				$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Add Comments/Recommendations to Certify Results</button>";
+				$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Add/Edit Comments/Recommendations to Certify Results</button>";
 				// }else{
 				// 	$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='approval(".$this->get_status('performanceReviewStatus_id').",$this->emp_ID)'>Approve</button>";
 				// }
