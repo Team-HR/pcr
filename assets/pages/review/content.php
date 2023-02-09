@@ -18,7 +18,12 @@ if (isset($_POST['page'])) {
   $_SESSION['periodPending'] = $_POST['unrevRec'];
   print(1);
 } elseif (isset($_POST['UncriticizedEmpIdPost'])) {
-  $_SESSION['empIdPending'] = $_POST['UncriticizedEmpIdPost'];
+  $employee_id = $_SESSION['empIdPending'] = $_POST['UncriticizedEmpIdPost'];
+  $period_id =  $_SESSION['periodPending'];
+  $sql = "SELECT * from `spms_performancereviewstatus` WHERE `period_id` = $period_id AND `employees_id` = $employee_id";
+  $res = $mysqli->query($sql);
+  $row = $res->fetch_assoc();
+  $_SESSION['fileStatusPending'] = $row;
   print(1);
 } elseif (isset($_POST['approvalPost'])) {
   $accountId = $_SESSION['emp_id'];

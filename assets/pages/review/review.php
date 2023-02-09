@@ -36,6 +36,8 @@ function gridNotifView()
   $empId = $_SESSION['emp_id'];
   $getAllPeriod = "SELECT * from `spms_mfo_period`";
   $getAllPeriod = $mysqli->query($getAllPeriod);
+  $department_id = $_SESSION['emp_info']['department_id'];
+
   $view = "";
   while ($period = $getAllPeriod->fetch_assoc()) {
     $DepartmentHeadDataCount = 0;
@@ -44,20 +46,35 @@ function gridNotifView()
     $ImmediateSupData = "SELECT * from `spms_performancereviewstatus` where `submitted`= 'Done' and `period_id`= '$period[mfoperiod_id]' and `ImmediateSup`='$empId' and `approved`=''";
     $ImmediateSupData = $mysqli->query($ImmediateSupData);
     $imCount = 0;
+    $test = [];
     while ($im = $ImmediateSupData->fetch_assoc()) {
       if ($im['ImmediateSup'] != $im['DepartmentHead']) {
         $imCount++;
       }
     }
+
     $ImmediateSupData = $imCount;
     // $ImmediateSupData = $ImmediateSupData->num_rows;
 
     $DepartmentHeadData = "SELECT * from `spms_performancereviewstatus` where `submitted`= 'Done' and `period_id`= '$period[mfoperiod_id]' and `DepartmentHead`='$empId' and `certify`=''";
     $DepartmentHeadData = $mysqli->query($DepartmentHeadData);
+
+
+
     $DepartmentHeadDataCount = $DepartmentHeadData->num_rows;
+
+    while ($row = $DepartmentHeadData->fetch_assoc()) {
+      $test[] = $row;
+    }
+
+    $test = $department_id;
+
+    $test = json_encode($test);
+
     $count =  $ImmediateSupData + $DepartmentHeadDataCount;
     if ($count > 0) {
-      $view .= "<div class='ui  raised segment ' style='cursor:pointer' onclick='unrevRec(\"$period[mfoperiod_id]\")' >
+      $view .= "
+      <div class='ui  raised segment ' style='cursor:pointer' onclick='unrevRec(\"$period[mfoperiod_id]\")' >
         <div class='floating ui red label'>$count</div>
         <span style='font-size:20px' >$period[month_mfo] $period[year_mfo]</span>
         </div>";
