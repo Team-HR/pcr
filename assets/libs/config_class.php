@@ -1082,7 +1082,6 @@ class Employee_data extends mysqli
 		$this->strtBtn = 'display:none';
 		$this->load();
 	}
-	// comment and reccomendation
 	private function comment()
 	{
 		$commentsql = "SELECT * from spms_commentrec where period_id='$this->per_ID' and emp_id='$this->emp_ID'";
@@ -1097,7 +1096,7 @@ class Employee_data extends mysqli
 		$view = "
 		<form class='ui form' style='width:40%;margin:auto;padding:20px' onsubmit='return commentRecFunc()' >
 		<div class='field'>
-		<label>Comments and Reccomendation (<i style='color:red'>Note:</i> This box is accessible only by your Immediate Suppervisor)</label>
+		<label>Comments and Recommendation (<i style='color:red'>Note:</i> This box is accessible only by your Immediate Suppervisor)</label>
 		<textarea id='comRec' disabled>$comment</textarea>
 		</div>
 		<button class='ui fluid primary button' type='submit'>Go to Final Stage</button>
@@ -1751,7 +1750,7 @@ class Employee_data extends mysqli
 			$fileStatus = $this->fileStatus;
 			if ($accountId == $fileStatus['ImmediateSup']) {
 				if ($fileStatus['ImmediateSup'] == $fileStatus['DepartmentHead']) {
-					$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Certify Results</button>";
+					$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Add/Edit Comments/Recommendations to Certify Results</button>";
 					// }elseif($fileStatus['formType']==1){
 					// $view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(".$this->period['mfoperiod_id'].",$this->emp_ID)'>Approve Results</button>";
 				} else {

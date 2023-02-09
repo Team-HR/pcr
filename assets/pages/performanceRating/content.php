@@ -469,7 +469,7 @@ elseif (isset($_POST['submitPerformance'])) {
 	<form class='ui form' style='width:40%;margin:auto;padding:20px'
 	onsubmit='return commentReccomendationOfSupp($_POST[commentRecommendationPeriod],$_POST[commentRecommendationEmpId]," . $getStatusId->get_status('performanceReviewStatus_id') . ")'>
 	<div class='field'>
-	<label>Comments and Reccomendation</label>
+	<label>Comments and Recommendation</label>
 	<textarea id='comRec' onkeyup='commentRecInputType()' required>$comment</textarea>
 	</div>
 	<button class='ui fluid primary button' type='submit' name='commentBtn'>Send</button>

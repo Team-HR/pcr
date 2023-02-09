@@ -609,7 +609,7 @@ class IPCR extends mysqli
               </tr>
               <tr>
                 <td colspan='5' style='font-size:13px;'>
-                  <b>Comments and Reccomendation:</b>
+                  <b>Comments and Recommendation:</b>
                   " . $this->comments() . "
                   <br>
                   <br>
