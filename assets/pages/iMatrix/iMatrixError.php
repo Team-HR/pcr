@@ -8,12 +8,12 @@
         <i class='ui red exclamation triangle icon'></i>
         <div class='content'>
             Rating Scale Matrix Not Found
-            <div class='sub header'>You Dont have Rating Matrix Yet. Please Contact OHRMD PMS system for this matter <br>
+            <div class='sub header'>You Dont have Rating Matrix Yet. Please Contact OHRMD for this matter <br>
                 <b style="color: blue;">OR try to set the department assigned to during this period down below.</b>
             </div>
         </div>
     </h2>
-    <br>
+    <br>9
 
     <form @submit.prevent="setDepartmentOnPeriod" class="ui form" style="width: 700px; margin: auto;">
         <div class="field" style="text-align: center;">

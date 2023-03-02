@@ -310,6 +310,7 @@ class Employee_data extends mysqli
 		$perStatus = "SELECT * from spms_performancereviewstatus where period_id='$this->per_ID' and employees_id='$this->emp_ID'";
 		$perStatus = mysqli::query($perStatus);
 		$countData = $perStatus->num_rows;
+
 		$perStatus = $perStatus->fetch_assoc();
 		# put values in $perStatus to prevent null errors
 		if (!$perStatus) {
@@ -337,10 +338,17 @@ class Employee_data extends mysqli
 
 		$this->fileStatus = $perStatus;
 
+		if (!$perStatus["formType"]) {
+			$this->signatoriesCount = 0;
+		} else {
+			$this->signatoriesCount = $countData;
+		}
+
+
 		# get and set department during the selected period
 		$this->departmentInPeriod = $this->get_department_this_period($perStatus["department_id"]);
 
-		$this->signatoriesCount = $countData;
+
 		$accountId = $_SESSION['emp_id'];
 		if (!isset($perStatus['panelApproved']) || $perStatus['panelApproved'] != "") {
 			$this->hideCol = true;
@@ -1120,9 +1128,17 @@ class Employee_data extends mysqli
 	{
 		$sql = "SELECT * from spms_performancereviewstatus where period_id='$this->per_ID' and employees_id='$this->emp_ID'";
 		$result = mysqli::query($sql);
-		$row = $result->fetch_assoc();
 
-		$department_id = $_SESSION["emp_info"]["department_id"];
+		if ($result->num_rows > 0) {
+			$row = $result->fetch_assoc();
+			$department_id = $row["department_id"];
+		} else {
+			$department_id = $_SESSION["emp_info"]["department_id"];
+		}
+
+
+
+
 
 		# if vice mayor & sp head of agency = vice mayor
 		if ($department_id == 16) {
@@ -1131,7 +1147,7 @@ class Employee_data extends mysqli
 			$lgu_head = "JOHN T. RAYMOND, JR.";
 		}
 
-		return isset($row["HeadAgency"]) ? "value='$row[HeadAgency]'" : "value='$lgu_head'";
+		return isset($row["HeadAgency"]) && $row["HeadAgency"] ? "value='$row[HeadAgency]'" : "value='$lgu_head'";
 	}
 
 	private	function empData($id, $mayor)

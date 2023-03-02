@@ -387,8 +387,9 @@ elseif (isset($_POST['submitPerformance'])) {
 	$countCheck = $check->num_rows;
 	if ($countCheck > 0) {
 		$check = $check->fetch_assoc();
+		// , `department_id` = '$department'
 		$sql = "UPDATE `spms_performancereviewstatus`
-		SET `ImmediateSup` = '$immediateSup', `DepartmentHead` = '$departmentHead', `HeadAgency` = '$headAgency',`formType`='$formType' , `department_id` = '$department'
+		SET `ImmediateSup` = '$immediateSup', `DepartmentHead` = '$departmentHead', `HeadAgency` = '$headAgency',`formType`='$formType'
 		WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$check[performanceReviewStatus_id]'";
 	} else {
 		$sql = "INSERT INTO `spms_performancereviewstatus`
