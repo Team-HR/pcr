@@ -8,14 +8,30 @@ $database = "ihris";
 $mysqli = new mysqli($host, $usernameDb, $password, $database);
 $mysqli->set_charset("utf8");
 #####################################################################################
+$fileStatus = [
+    'performanceReviewStatus_id' => '',
+    'period_id' => 11,
+    'employees_id' => 9,
+    'ImmediateSup' => '',
+    'DepartmentHead' => '',
+    'HeadAgency' => '',
+    'PMT' => '',
+    'submitted' => '',
+    'certify' => '',
+    'approved' => '',
+    'panelApproved' => '',
+    'dateAccomplished' => '',
+    'formType' => '',
+    'department_id' => 32,
+    'assembleAll' => '',
+];
 
+echo json_encode(coreRow($mysqli, $fileStatus));
 
-echo json_encode(coreRow($mysqli));
-
-function coreRow($mysqli)
+function coreRow($mysqli, $fileStatus)
 {
-    $arr = coreAr($mysqli);
-    return $arr;
+    $arr = coreAr($mysqli, $fileStatus);
+    // return $arr;
     $employee_id = 9;
     $count0 = count($arr);
     $in0 = 0;
@@ -31,40 +47,14 @@ function coreRow($mysqli)
         $cTotal += $t0[2] + $child[2];
         $in0++;
     }
-    // if($cTotal>0){
-    // 	// $totalav = $totalav/$cTotal;
-    // }else{
-    // 	$totalav=0;
-    // }
-    // $totalav = $totalav*0.60;
-    // $a = [$view,$count,count($arr),$totalav];
-    $core_countEmpty = $count;
-    $core_countTotal = count($arr);
     return $totalav;
 }
 
 
-function coreAr($mysqli)
+function coreAr($mysqli, $fileStatus = [])
 {
     # for more compact and faster query
     # ... and `dep_id` = '$department_id'
-    $fileStatus = [
-        'performanceReviewStatus_id' => '',
-        'period_id' => 10,
-        'employees_id' => 9,
-        'ImmediateSup' => '',
-        'DepartmentHead' => '',
-        'HeadAgency' => '',
-        'PMT' => '',
-        'submitted' => '',
-        'certify' => '',
-        'approved' => '',
-        'panelApproved' => '',
-        'dateAccomplished' => '',
-        'formType' => '',
-        'department_id' => 32,
-        'assembleAll' => '',
-    ];
 
     # department_id from spms_performancereviewstatus
     $department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
@@ -177,21 +167,18 @@ function Core_mfoRow($mysqli, $employee_id, $ar)
     $count = 0;
     $totalav = 0;
     $inSi = 0;
-    $view = "";
     if (count($ar[1]) > 0) {
         while ($inSi < count($ar[1])) {
             if ($inSi == 0) {
                 $row0 = Core_siRow($mysqli, $employee_id, $ar[0], $ar[1][$inSi]);
-                $view .= $row0[0];
-                $count += $row0[1];
-                $totalav += $row0[2];
-                $cTotal += $row0[3];
+                $count += $row0[0];
+                $totalav += $row0[1];
+                $cTotal += $row0[2];
             } else {
                 $row1 = Core_siRow($mysqli, $employee_id, ['cf_count' => '', 'cf_title' => ''], $ar[1][$inSi]);
-                $view .= $row1[0];
-                $count += $row1[1];
-                $totalav += $row1[2];
-                $cTotal += $row1[3];
+                $count += $row1[0];
+                $totalav += $row1[1];
+                $cTotal += $row1[2];
             }
             $inSi++;
         }
@@ -232,6 +219,6 @@ function Core_siRow($mysqli, $employee_id, $ar, $si)
             $count++;
         }
     }
-    $ar = ["", $count, $a, $cTotal];
+    $ar = [$count, $a, $cTotal];
     return $ar;
 }
