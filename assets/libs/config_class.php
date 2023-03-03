@@ -310,6 +310,7 @@ class Employee_data extends mysqli
 		$perStatus = "SELECT * from spms_performancereviewstatus where period_id='$this->per_ID' and employees_id='$this->emp_ID'";
 		$perStatus = mysqli::query($perStatus);
 		$countData = $perStatus->num_rows;
+
 		$perStatus = $perStatus->fetch_assoc();
 		# put values in $perStatus to prevent null errors
 		if (!$perStatus) {
@@ -337,10 +338,17 @@ class Employee_data extends mysqli
 
 		$this->fileStatus = $perStatus;
 
+		if (!$perStatus["formType"]) {
+			$this->signatoriesCount = 0;
+		} else {
+			$this->signatoriesCount = $countData;
+		}
+
+
 		# get and set department during the selected period
 		$this->departmentInPeriod = $this->get_department_this_period($perStatus["department_id"]);
 
-		$this->signatoriesCount = $countData;
+
 		$accountId = $_SESSION['emp_id'];
 		if (!isset($perStatus['panelApproved']) || $perStatus['panelApproved'] != "") {
 			$this->hideCol = true;
@@ -586,21 +594,46 @@ class Employee_data extends mysqli
 	}
 	private function accountblePersons($perId)
 	{
-		$emp = $this->emp_ID;
+
+		$period_id = $this->fileStatus["period_id"];
+		$emp = $this->fileStatus["employees_id"];
+		$superiors_id = $emp;
+
 		$indicators = mysqli::query("SELECT * FROM `spms_matrixindicators` where cf_ID='$perId'");
 		while ($empId = $indicators->fetch_assoc()) {
 			$emp .= "," . $empId['mi_incharge'];
 		}
+
 		$emp  = explode(",", $emp);
+
+		# filter here only employee_id what with immediate supervisor $emp
+		// SELECT `employees_id` FROM `spms_performancereviewstatus` where period_id = $period_id and ImmediateSup = $ImmediateSup;
+		$subordinates = [];
+		if ($this->fileStatus["formType"] == 2) { //if spcr
+			$res = mysqli::query("SELECT `employees_id` FROM `spms_performancereviewstatus` where `period_id` = '$period_id' and `ImmediateSup` = '$superiors_id'");
+		} elseif ($this->fileStatus["formType"] == 3) { //else if dpcr
+			$res = mysqli::query("SELECT `employees_id` FROM `spms_performancereviewstatus` where `period_id` = '$period_id' and `DepartmentHead` = '$superiors_id'");
+		}
+
+		while ($row = $res->fetch_assoc()) {
+			$subordinates[] = $row['employees_id'];
+		}
+
 		$emp = array_unique($emp);
+
 		$view = "<br>";
 		$emp_length = count($emp);
 		foreach ($emp as $i => $employee_id) {
-			$view .= $this->get_fullname($employee_id);
-			if ($i < $emp_length && $emp_length > 1) {
-				$view .= ";<br>";
+			if (in_array($employee_id, $subordinates) || $employee_id == $superiors_id) {
+				$view .= $this->get_fullname($employee_id);
+				if ($i < $emp_length && $emp_length > 1) {
+					$view .= ";<br>";
+				}
 			}
 		}
+
+
+
 		return $view;
 	}
 	private function Core_siRow($padding, $ar, $si)
@@ -708,7 +741,7 @@ class Employee_data extends mysqli
 				</td>
 				<td style='width:25%'>" . nl2br($si['mi_succIn']) . "</td>
 				<td style='$this->budgetView'></td>
-				<td style='$this->accountableView'> " . $accountableNames . "</td>
+				<td style='$this->accountableView'> " . $accountableNames . " </td>
 				<td style='width:25%;$actualAcc_row'> " . nl2br($SiData['actualAcc']) . "</td>
 				<td style='$q_row'>$SiData[Q]</td>
 				<td style='$e_row'>$SiData[E]</td>
@@ -1120,9 +1153,17 @@ class Employee_data extends mysqli
 	{
 		$sql = "SELECT * from spms_performancereviewstatus where period_id='$this->per_ID' and employees_id='$this->emp_ID'";
 		$result = mysqli::query($sql);
-		$row = $result->fetch_assoc();
 
-		$department_id = $_SESSION["emp_info"]["department_id"];
+		if ($result->num_rows > 0) {
+			$row = $result->fetch_assoc();
+			$department_id = $row["department_id"];
+		} else {
+			$department_id = $_SESSION["emp_info"]["department_id"];
+		}
+
+
+
+
 
 		# if vice mayor & sp head of agency = vice mayor
 		if ($department_id == 16) {
@@ -1131,7 +1172,7 @@ class Employee_data extends mysqli
 			$lgu_head = "JOHN T. RAYMOND, JR.";
 		}
 
-		return isset($row["HeadAgency"]) ? "value='$row[HeadAgency]'" : "value='$lgu_head'";
+		return isset($row["HeadAgency"]) && $row["HeadAgency"] ? "value='$row[HeadAgency]'" : "value='$lgu_head'";
 	}
 
 	private	function empData($id, $mayor)
@@ -1191,7 +1232,7 @@ class Employee_data extends mysqli
 		}
 
 
-		$json = json_encode($this);
+		// $json = json_encode($this);
 
 		$form_type = isset($this->fileStatus["formType"]) ? $this->fileStatus["formType"] : '';
 
