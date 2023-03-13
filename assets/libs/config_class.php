@@ -609,7 +609,7 @@ class Employee_data extends mysqli
 		# filter here only employee_id what with immediate supervisor $emp
 		// SELECT `employees_id` FROM `spms_performancereviewstatus` where period_id = $period_id and ImmediateSup = $ImmediateSup;
 		$subordinates = [];
-		if ($this->fileStatus["formType"] == 2) { //if spcr
+		if ($this->fileStatus["formType"] == 2 || $this->fileStatus["formType"] == 4) { //if spcr division pcr
 			$res = mysqli::query("SELECT `employees_id` FROM `spms_performancereviewstatus` where `period_id` = '$period_id' and `ImmediateSup` = '$superiors_id'");
 		} elseif ($this->fileStatus["formType"] == 3) { //else if dpcr
 			$res = mysqli::query("SELECT `employees_id` FROM `spms_performancereviewstatus` where `period_id` = '$period_id' and `DepartmentHead` = '$superiors_id'");
