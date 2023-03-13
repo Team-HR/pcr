@@ -8,6 +8,28 @@ $database = "ihris";
 $mysqli = new mysqli($host, $usernameDb, $password, $database);
 $mysqli->set_charset("utf8");
 #####################################################################################
+
+$period_id = 10; //10 - July to Dec 2022
+$sql = "SELECT * FROM `spms_performancereviewstatus` where period_id = '$period_id';";
+$res = $mysqli->query($sql);
+$data = [];
+while ($row = $res->fetch_assoc()) {
+    $row['final_numerical_rating'] = getFinalNumericalRating($mysqli, $row);
+    $data[] = $row;
+}
+
+
+print("<pre>" . print_r($data, true) . "</pre>");
+
+
+
+
+
+
+/*
+
+
+
 $fileStatus = [
     'performanceReviewStatus_id' => '',
     'period_id' => 11,
@@ -45,6 +67,34 @@ print "support => " . $support;
 print "<br/>";
 print "final => " . $final_numerical_rating;
 
+
+*/
+
+
+function getFinalNumericalRating($mysqli, $fileStatus)
+{
+
+
+    $strategic = strategicTr($mysqli, $fileStatus);
+    $core = coreRow($mysqli, $fileStatus);
+    $support = supportFunctionTr($mysqli, $fileStatus);
+
+    $final_numerical_rating = '';
+    if ($strategic > 0 && $core > 0 && $support > 0) {
+        $final_numerical_rating = $strategic + $core + $support;
+    }
+
+
+    // print "strategic => " . $strategic;
+    // print "<br/>";
+    // print "core =>  " . $core;
+    // print "<br/>";
+    // print "support => " . $support;
+    // print "<br/>";
+    // print "final => " . $final_numerical_rating; 
+
+    return $final_numerical_rating;
+}
 
 
 function coreRow($mysqli, $fileStatus)
