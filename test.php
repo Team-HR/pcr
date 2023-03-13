@@ -21,12 +21,31 @@ $fileStatus = [
     'approved' => '',
     'panelApproved' => '',
     'dateAccomplished' => '',
-    'formType' => '',
-    'department_id' => 32,
+    'formType' => '1',
+    'department_id' => '32',
     'assembleAll' => '',
 ];
 
-echo json_encode(coreRow($mysqli, $fileStatus));
+
+$strategic = strategicTr($mysqli, $fileStatus);
+$core = coreRow($mysqli, $fileStatus);
+$support = supportFunctionTr($mysqli, $fileStatus);
+
+$final_numerical_rating = '';
+if ($strategic > 0 && $core > 0 && $support > 0) {
+    $final_numerical_rating = $strategic + $core + $support;
+}
+
+
+print "strategic => " . $strategic;
+print "<br/>";
+print "core =>  " . $core;
+print "<br/>";
+print "support => " . $support;
+print "<br/>";
+print "final => " . $final_numerical_rating;
+
+
 
 function coreRow($mysqli, $fileStatus)
 {
@@ -47,7 +66,7 @@ function coreRow($mysqli, $fileStatus)
         $cTotal += $t0[2] + $child[2];
         $in0++;
     }
-    return $totalav;
+    return bcdiv($totalav, 1, 2);
 }
 
 
@@ -221,4 +240,97 @@ function Core_siRow($mysqli, $employee_id, $ar, $si)
     }
     $ar = [$count, $a, $cTotal];
     return $ar;
+}
+
+
+function strategicTr($mysqli, $fileStatus)
+{
+
+    $period_id = $fileStatus['period_id'];
+    $employee_id = $fileStatus['employees_id'];
+
+    $sql = "SELECT * from spms_strategicfuncdata where period_id = '$period_id' and emp_id = '$employee_id'";
+    $sql = $mysqli->query($sql);
+    $totalCount = 0;
+    $totalAv = 0;
+    while ($row = $sql->fetch_assoc()) {
+        // $av = $row['Q']+$row['T'];
+        $av = isset($row['average']) && $row['average'] > 0 ? $row['average'] : 0;
+        $col = "";
+        $totalAv += $av;
+        $totalCount++;
+    }
+
+    if ($totalAv > 0) {
+        $totalAv = $totalAv / $totalCount;
+    } else {
+        $totalAv = 0;
+    }
+    if ($totalAv > 0) {
+        $totalAv = $totalAv * 0.20;
+        # format only two decimal places
+        // $totalAv = number_format($totalAv, 2);
+        // $totalAv = bcdiv($totalAv, 1, 2);
+        # prevent rounding off value
+        // $totalAv = intval(($totalAv * 100)) / 100;
+    } else {
+        $totalAv = 0;
+    }
+    // $totalAv = $totalAv*0.20;
+    // $totalAv = $totalAv;
+    return bcdiv($totalAv, 1, 2);
+}
+
+
+function supportFunctionTr($mysqli, $fileStatus)
+{
+    $formType = $fileStatus['formType'];
+    $employee_id = $fileStatus['employees_id'];
+    $period_id = $fileStatus['period_id'];
+    $totalAv = 0;
+    if ($formType == '1' || $formType == '5') {
+        $sql = "SELECT * FROM `spms_supportfunctions` where `type`=1";
+    } elseif ($formType == '3') {
+        $sql = "SELECT * FROM `spms_supportfunctions` where `type`=3";
+    } elseif ($formType == '2') {
+        $sql = "SELECT * FROM `spms_supportfunctions` where `type`=2";
+    } else {
+        return bcdiv($totalAv, 1, 2);
+    }
+
+    $sql = $mysqli->query($sql);
+
+    $emp_count = 0;
+
+    while ($tr = $sql->fetch_assoc()) {
+        $sqlSelect = "SELECT * from spms_supportfunctiondata where parent_id='$tr[id_suppFunc]' and emp_id='$employee_id' and period_id='$period_id'";
+        $sqlSelect = $mysqli->query($sqlSelect);
+        $sqlSelectCount = $sqlSelect->num_rows;
+        if ($sqlSelectCount > 0) {
+            $fdata = $sqlSelect->fetch_assoc();
+            $av = 0;
+            $per = $fdata['percent'] / 100;
+            $q = 0;
+            $e = 0;
+            $t = 0;
+
+            if ($fdata['Q'] != "") {
+                $q = $fdata['Q'] * $per;
+            }
+            if ($fdata['E'] != "") {
+                $q = $fdata['E'] * $per;
+            }
+            if ($fdata['T'] != "") {
+                $q = $fdata['T'] * $per;
+            }
+            $av = $q + $e + $t;
+            $col = "";
+
+            $totalAv += $av;
+        } else {
+            $emp_count++;
+        }
+    }
+
+    return bcdiv($totalAv, 1, 2);
 }
