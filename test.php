@@ -10,7 +10,7 @@ $mysqli->set_charset("utf8");
 #####################################################################################
 
 $period_id = 10; //10 - July to Dec 2022
-$sql = "SELECT * FROM `spms_performancereviewstatus` where period_id = '$period_id';";
+$sql = "SELECT * FROM `spms_performancereviewstatus` where period_id = '$period_id' LIMIT 10;";
 $res = $mysqli->query($sql);
 $data = [];
 while ($row = $res->fetch_assoc()) {
