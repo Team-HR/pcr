@@ -1344,6 +1344,16 @@ function copyRSM() {
   })
 
   // console.log("copy RSM");
+}
 
+function copyToRSM() {
+  // alert()
 
+  $.post('?config=rsm', {
+    copy_to: true
+  }, function (data, textStatus, xhr) {
+    console.log(data);
+  })
+
+  // console.log("copy RSM");
 }

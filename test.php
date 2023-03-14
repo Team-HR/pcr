@@ -1,4 +1,19 @@
-<button>Compute</button>
+<script src="assets/libs/jquery/jquery-3.3.1.min.js"></script>
+<!-- <button onclick="test()">Compute</button> -->
+
+
+<script>
+    test();
+
+    function test() {
+        $.post('?config=rsm', {
+            copy_to: true
+        }, function(data, textStatus, xhr) {
+            // location.reload();
+            console.log(data);
+        })
+    }
+</script>
 
 <?php
 date_default_timezone_set("Asia/Manila");
@@ -14,14 +29,14 @@ $mysqli->set_charset("utf8");
 $period_id = 10; //10 - July to Dec 2022
 
 # performanceReviewStatus_id = 2434 test fomtype 3 strategic function shoul be excluded from computing final numerical rating
-$sql = "SELECT * FROM `spms_performancereviewstatus` where period_id = '$period_id' LIMIT 20 -- and performanceReviewStatus_id = '2434';";
-$res = $mysqli->query($sql);
-$data = [];
-while ($row = $res->fetch_assoc()) {
-    $row['final_numerical_rating'] = getFinalNumericalRating($mysqli, $row);
-    $data[] = $row;
-}
-print("<pre>" . print_r($data, true) . "</pre>");
+// $sql = "SELECT * FROM `spms_performancereviewstatus` where period_id = '$period_id' LIMIT 20 -- and performanceReviewStatus_id = '2434';";
+// $res = $mysqli->query($sql);
+// $data = [];
+// while ($row = $res->fetch_assoc()) {
+//     $row['final_numerical_rating'] = getFinalNumericalRating($mysqli, $row);
+//     $data[] = $row;
+// }
+// print("<pre>" . print_r($data, true) . "</pre>");
 
 /*
 $fileStatus = [

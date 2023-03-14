@@ -105,6 +105,31 @@ if (isset($_POST['get_prev_rsm'])) {
   echo json_encode(true);
 
   // echo json_encode($_SESSION["emp_info"]["department_id"]);
+} elseif (isset($_POST['copy_to'])) {
+  # code...
+  $curr_period_id = 10;
+  $curr_department_id = 15;
+  $parent_id = 13184;
+
+  $selected_period_id = 11;
+  $selected_parent_id = 18123;
+
+  $data = [];
+  $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$curr_period_id' AND `dep_id` = '$curr_department_id' AND `parent_id` = '$parent_id';";
+
+  $result = $mysqli->query($sql);
+  while ($row = $result->fetch_assoc()) {
+    // $data[] = [
+    //   "core_function_data" => $row,
+    //   "success_indicators" => get_success_indicators($mysqli, $row["cf_ID"])
+    // ];
+    $row["children"] = get_children($mysqli, $row['cf_ID']);
+    $data[] = $row;
+  }
+
+  $data = start_duplicating($mysqli, $data, $selected_period_id, $selected_parent_id);
+
+  print json_encode($data);
 }
 // copy previous rsm end
 elseif (isset($_POST['period_check'])) {
@@ -508,9 +533,9 @@ function trows($mysqli, $row, $padding, $addDisplay)
         <tr >
         <td style='padding-left:$padding;width:25%;$correctionColorMFO'>
         " . $set_drop . "
-        $row[cf_count]) $row[cf_title]
+        $row[cf_count]) $row[cf_title] " . "" /* json_encode($row) */  . "
         </td>
-        <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . "</td>
+        <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . ""/* json_encode($siDataRow1) */ . "</td>
         <td>$performanceMeasure</td>
         <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_quality']) . "</td>
         <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_eff']) . "</td>
@@ -556,7 +581,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
     <tr >
     <td style='padding-left:$padding;width:500px;$correctionColorMFO'>
     " . $set_drop . "
-    $row[cf_count]) $row[cf_title]
+    $row[cf_count]) $row[cf_title] " . ""/* json_encode($row) */ . "
     </td>
     <td></td>
     <td></td>
@@ -697,6 +722,7 @@ function settingDrop($mysqli, $row, $edit, $add, $delete)
   <i class='blue add icon'></i>
   Add Sub-Function
   </p>
+  <button onclick='copyToRSM()'>Delete All</button>
   </div>
   <div class='header' style='$add'>
   " . AddInputs($mysqli, $row['cf_ID']) . "
