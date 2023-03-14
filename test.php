@@ -92,6 +92,7 @@ function getFinalNumericalRating($mysqli, $fileStatus)
     // print "support => " . $support;
     // print "<br/>";
     // print "final => " . $final_numerical_rating; 
+    // return $fileStatus['employees_id'];
 
     return $final_numerical_rating;
 }
@@ -101,7 +102,7 @@ function coreRow($mysqli, $fileStatus)
 {
     $arr = coreAr($mysqli, $fileStatus);
     // return $arr;
-    $employee_id = 9;
+    $employee_id = $fileStatus['employees_id'];
     $count0 = count($arr);
     $in0 = 0;
     $count = 0;
