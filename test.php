@@ -10,8 +10,9 @@ $mysqli->set_charset("utf8");
 #####################################################################################
 
 $period_id = 10; //10 - July to Dec 2022
-// 2368 nbhamor
-$sql = "SELECT * FROM `spms_performancereviewstatus` where period_id = '$period_id' LIMIT 40;";
+
+# performanceReviewStatus_id = 2434 test fomtype 3 strategic function shoul be excluded from computing final numerical rating
+$sql = "SELECT * FROM `spms_performancereviewstatus` where period_id = '$period_id' LIMIT 20 -- and performanceReviewStatus_id = '2434';";
 $res = $mysqli->query($sql);
 $data = [];
 while ($row = $res->fetch_assoc()) {
@@ -19,18 +20,9 @@ while ($row = $res->fetch_assoc()) {
     $data[] = $row;
 }
 
-
 print("<pre>" . print_r($data, true) . "</pre>");
 
-
-
-
-
-
 /*
-
-
-
 $fileStatus = [
     'performanceReviewStatus_id' => '',
     'period_id' => 11,
@@ -75,17 +67,21 @@ print "final => " . $final_numerical_rating;
 function getFinalNumericalRating($mysqli, $fileStatus)
 {
 
+    $formType = $fileStatus['formType'];
 
     $strategic = strategicTr($mysqli, $fileStatus);
     $core = coreRow($mysqli, $fileStatus);
     $support = supportFunctionTr($mysqli, $fileStatus);
 
     $final_numerical_rating = '';
+
     if ($strategic > 0 && $core > 0 && $support > 0) {
         $final_numerical_rating = $strategic + $core + $support;
     }
 
-
+    if ($formType == '3') {
+        $final_numerical_rating = $core + $support;
+    }
     // print "strategic => " . $strategic;
     // print "<br/>";
     // print "core =>  " . $core;
