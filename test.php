@@ -1,3 +1,5 @@
+<button>Compute</button>
+
 <?php
 date_default_timezone_set("Asia/Manila");
 $host = "localhost";
@@ -16,10 +18,9 @@ $sql = "SELECT * FROM `spms_performancereviewstatus` where period_id = '$period_
 $res = $mysqli->query($sql);
 $data = [];
 while ($row = $res->fetch_assoc()) {
-    $row['final_numerical_ratings'] = getFinalNumericalRating($mysqli, $row);
+    $row['final_numerical_rating'] = getFinalNumericalRating($mysqli, $row);
     $data[] = $row;
 }
-
 print("<pre>" . print_r($data, true) . "</pre>");
 
 /*
@@ -82,35 +83,25 @@ function getFinalNumericalRating($mysqli, $fileStatus)
     if ($formType == '3') {
         $final_numerical_rating = $core + $support;
     }
-    // print "strategic => " . $strategic;
-    // print "<br/>";
-    // print "core =>  " . $core;
-    // print "<br/>";
-    // print "support => " . $support;
-    // print "<br/>";
-    // print "final => " . $final_numerical_rating; 
-    // return $fileStatus['employees_id'];
-    $scale = "";
+    // $scale = "";
+    // if ($final_numerical_rating <= 5 && $final_numerical_rating > 4) {
+    //     $scale = "Outstanding";
+    // } elseif ($final_numerical_rating <= 4 && $final_numerical_rating > 3) {
+    //     $scale = "Very Satisfactory";
+    // } elseif ($final_numerical_rating <= 3 && $final_numerical_rating > 2) {
+    //     $scale = "Satisfactory";
+    // } elseif ($final_numerical_rating <= 2 && $final_numerical_rating > 1) {
+    //     $scale = "Unsatisfactory";
+    // }
 
-
-    if ($final_numerical_rating <= 5 && $final_numerical_rating > 4) {
-        $scale = "Outstanding";
-    } elseif ($final_numerical_rating <= 4 && $final_numerical_rating > 3) {
-        $scale = "Very Satisfactory";
-    } elseif ($final_numerical_rating <= 3 && $final_numerical_rating > 2) {
-        $scale = "Satisfactory";
-    } elseif ($final_numerical_rating <= 2 && $final_numerical_rating > 1) {
-        $scale = "Unsatisfactory";
-    }
-
-    return [
-        "strategic" => $strategic,
-        "core" => $core,
-        "support" => $support,
-        "total" => $final_numerical_rating,
-        "scale" => $scale
-    ];
-    // return $final_numerical_rating;
+    // return [
+    //     "strategic" => $strategic,
+    //     "core" => $core,
+    //     "support" => $support,
+    //     "total" => $final_numerical_rating,
+    //     "scale" => $scale
+    // ];
+    return $final_numerical_rating;
 }
 
 
