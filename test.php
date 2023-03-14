@@ -10,11 +10,12 @@ $mysqli->set_charset("utf8");
 #####################################################################################
 
 $period_id = 10; //10 - July to Dec 2022
+// 2368 nbhamor
 $sql = "SELECT * FROM `spms_performancereviewstatus` where period_id = '$period_id' LIMIT 10;";
 $res = $mysqli->query($sql);
 $data = [];
 while ($row = $res->fetch_assoc()) {
-    $row['final_numerical_rating'] = getFinalNumericalRating($mysqli, $row);
+    $row['final_numerical_ratings'] = getFinalNumericalRating($mysqli, $row);
     $data[] = $row;
 }
 
@@ -93,8 +94,27 @@ function getFinalNumericalRating($mysqli, $fileStatus)
     // print "<br/>";
     // print "final => " . $final_numerical_rating; 
     // return $fileStatus['employees_id'];
+    $scale = "";
 
-    return $final_numerical_rating;
+
+    if ($final_numerical_rating <= 5 && $final_numerical_rating > 4) {
+        $scale = "Outstanding";
+    } elseif ($final_numerical_rating <= 4 && $final_numerical_rating > 3) {
+        $scale = "Very Satisfactory";
+    } elseif ($final_numerical_rating <= 3 && $final_numerical_rating > 2) {
+        $scale = "Satisfactory";
+    } elseif ($final_numerical_rating <= 2 && $final_numerical_rating > 1) {
+        $scale = "Unsatisfactory";
+    }
+
+    return [
+        "strategic" => $strategic,
+        "core" => $core,
+        "support" => $support,
+        "total" => $final_numerical_rating,
+        "scale" => $scale
+    ];
+    // return $final_numerical_rating;
 }
 
 
@@ -343,7 +363,7 @@ function supportFunctionTr($mysqli, $fileStatus)
         $sql = "SELECT * FROM `spms_supportfunctions` where `type`=1";
     } elseif ($formType == '3') {
         $sql = "SELECT * FROM `spms_supportfunctions` where `type`=3";
-    } elseif ($formType == '2') {
+    } elseif ($formType == '2' || $formType == '4') {
         $sql = "SELECT * FROM `spms_supportfunctions` where `type`=2";
     } else {
         return bcdiv($totalAv, 1, 2);
