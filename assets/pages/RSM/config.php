@@ -108,11 +108,12 @@ if (isset($_POST['get_prev_rsm'])) {
 } elseif (isset($_POST['copy_to'])) {
   # code...
   $curr_period_id = 10;
-  $curr_department_id = 15;
-  $parent_id = 13184;
+  $curr_department_id = 1;
+  $parent_id = 14776;
 
   $selected_period_id = 11;
-  $selected_parent_id = 18123;
+  $selected_parent_id = 22277;
+  $selected_department_id = 3;
 
   $data = [];
   $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$curr_period_id' AND `dep_id` = '$curr_department_id' AND `parent_id` = '$parent_id';";
@@ -127,7 +128,7 @@ if (isset($_POST['get_prev_rsm'])) {
     $data[] = $row;
   }
 
-  $data = start_duplicating($mysqli, $data, $selected_period_id, $selected_parent_id);
+  $data = start_duplicating($mysqli, $data, $selected_period_id, $selected_parent_id, $selected_department_id);
 
   print json_encode($data);
 }
@@ -888,7 +889,7 @@ function settingDrop($mysqli, $row, $edit, $add, $delete)
   <i class='blue add icon'></i>
   Add Sub-Function
   </p>
-  <button onclick='copyToRSM()' style='display:none;'>Delete All</button>
+  <button onclick='copyToRSM()' style='display:_none;'>Delete All</button>
   </div>
   <div class='header' style='$add'>
   " . AddInputs($mysqli, $row['cf_ID']) . "
@@ -948,13 +949,18 @@ function get_children($mysqli, $cf_ID)
   return $data;
 }
 
-function start_duplicating($mysqli, $data, $selected_period_id, $parent_id)
+function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $department_id = null)
 {
+  // $department_id = 3;
   foreach ($data as $key => $core_function) {
+    // $department_id = $core_function['dep_id'];
+    if (!$department_id) {
+      $department_id = $core_function['dep_id'];
+    }
     $parent_id = $parent_id ? $parent_id : NULL;
     $cf_title = $mysqli->real_escape_string($core_function['cf_title']);
     $cf_count = $mysqli->real_escape_string($core_function['cf_count']);
-    $sql = "INSERT INTO `spms_corefunctions`(`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`, `corrections`) VALUES ('$selected_period_id','$parent_id','$core_function[dep_id]','$cf_count','$cf_title','')";
+    $sql = "INSERT INTO `spms_corefunctions`(`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`, `corrections`) VALUES ('$selected_period_id','$parent_id','$department_id','$cf_count','$cf_title','')";
     $mysqli->query($sql);
     $insert_id = $mysqli->insert_id;
 
