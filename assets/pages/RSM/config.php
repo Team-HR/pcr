@@ -889,7 +889,7 @@ function settingDrop($mysqli, $row, $edit, $add, $delete)
   <i class='blue add icon'></i>
   Add Sub-Function
   </p>
-  <button onclick='copyToRSM()' style='display:_none;'>Delete All</button>
+  <button onclick='copyToRSM()' style='display:none;'>Delete All (exec copy to RSM)</button>
   </div>
   <div class='header' style='$add'>
   " . AddInputs($mysqli, $row['cf_ID']) . "
