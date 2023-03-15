@@ -112,7 +112,7 @@ if (isset($_POST['get_prev_rsm'])) {
   $parent_id = 14776;
 
   $selected_period_id = 11;
-  $selected_parent_id = 22277;
+  $selected_parent_id = 22217;
   $selected_department_id = 3;
 
   $data = [];
