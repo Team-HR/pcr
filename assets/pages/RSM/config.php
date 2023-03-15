@@ -14,7 +14,7 @@ if (isset($_POST['get_prev_rsm'])) {
   $selected_months = $row["month_mfo"];
   $selected_year = $row["year_mfo"];
 
-  // get previous period data
+  # get previous period data start
   $period_id = 0;
   $months = "";
   $year = "";
@@ -25,7 +25,7 @@ if (isset($_POST['get_prev_rsm'])) {
     $months = "July - December";
     $year = $selected_year - 1;
   }
-
+  # get previous period data end
   echo json_encode([
     "previous" => "$months $year",
     "new" => "$selected_months $selected_year"
@@ -341,15 +341,71 @@ elseif (isset($_POST['period_check'])) {
   echo notFound();
 }
 
+function getPreviousPeriodId($mysqli)
+{
+
+  $previous_period_id = null;
+  $period_id = $_SESSION["period"];
+
+  # get previous period_id start
+
+  $selected_months = '';
+  $selected_year = '';
+
+  $sql = "SELECT * FROM `spms_mfo_period` WHERE `mfoperiod_id` = '$period_id';";
+  $result = $mysqli->query($sql);
+  if ($row = $result->fetch_assoc()) {
+    $selected_months = $row["month_mfo"];
+    $selected_year = $row["year_mfo"];
+  }
+
+  $months = "";
+  $year = "";
+
+  if ($selected_months == "July - December") {
+    $months = "January - June";
+    $year = $selected_year;
+  } else {
+    $months = "July - December";
+    $year = $selected_year - 1;
+  }
+
+  $sql = "SELECT * FROM `spms_mfo_period` WHERE `month_mfo` = '$months' AND `year_mfo` = '$year';";
+  $result = $mysqli->query($sql);
+  if ($row = $result->fetch_assoc()) {
+    $previous_period_id = $row['mfoperiod_id'];
+  }
+  # get previous period_id end
+
+  return $previous_period_id;
+  // echo json_encode($previous_period_id);
+}
 
 function table($mysqli)
 {
-  $dep = $_SESSION['emp_info']['department_id'];
-  $dep = "SELECT * from `department` where department_id='$dep'";
+
+
+  # $dep = $_SESSION['emp_info']['department_id']; 
+  # get department_id from formstatus of selected period
+  # return $_SESSION['emp_info']['department_id'] if no formstatus exists
+  $employee_id = $_SESSION['emp_info']['employees_id'];
+  $period_id = $_SESSION['period'];
+
+  $sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `employees_id` = '$employee_id' AND `period_id` = '$period_id'";
+  $res = $mysqli->query($sql);
+  if ($row = $res->fetch_assoc()) {
+    $department_id = $row['department_id'];
+  } else {
+    $department_id = $_SESSION['emp_info']['department_id'];
+  }
+
+  $dep = "SELECT * from `department` where department_id='$department_id'";
   $dep = $mysqli->query($dep);
   $dep = $dep->fetch_assoc();
   $dep = $dep['department'];
-  $period = "SELECT * from `spms_mfo_period` where `mfoperiod_id`='$_SESSION[period]'";
+
+
+  $period = "SELECT * from `spms_mfo_period` where `mfoperiod_id`='$period_id'";
   $period = $mysqli->query($period);
   $period = $period->fetch_assoc();
   // $period_id = $period['mfoperiod_id'];
@@ -391,8 +447,21 @@ function table($mysqli)
 function tbody($mysqli)
 {
   $view = "";
-  $dep_id = $_SESSION['emp_info']['department_id'];
-  $sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$_SESSION[period]' and dep_id='$dep_id' ORDER BY `spms_corefunctions`.`cf_count` ASC ";
+
+  # $dep_id = $_SESSION['emp_info']['department_id'];
+
+  $employee_id = $_SESSION['emp_info']['employees_id'];
+  $period_id = $_SESSION['period'];
+
+  $sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `employees_id` = '$employee_id' AND `period_id` = '$period_id'";
+  $res = $mysqli->query($sql);
+  if ($row = $res->fetch_assoc()) {
+    $dep_id = $row['department_id'];
+  } else {
+    $dep_id = $_SESSION['emp_info']['department_id'];
+  }
+
+  $sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$period_id' and dep_id='$dep_id' ORDER BY `spms_corefunctions`.`cf_count` ASC ";
   $sql = $mysqli->query($sql);
   $tr = "";
   while ($row1 = $sql->fetch_assoc()) {
@@ -499,6 +568,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
 
   if ($siDatacount1 > 0) {
     while ($siDataRow1 = $siData1->fetch_assoc()) {
+      // $mi_id = $siDataRow1['mi_id'];
       $correctionColor = "";
       $correction = validaateCorrection($siDataRow1['corrections']);
       if ($correction) {
@@ -506,6 +576,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
       }
       $empincharge = "";
       $incharge = explode(',', $siDataRow1['mi_incharge']);
+      #iterate employees
       foreach ($incharge as $empDataId) {
         if (!$empDataId || $empDataId == null) {
           continue;
@@ -514,6 +585,78 @@ function trows($mysqli, $row, $padding, $addDisplay)
         $sqlIncharge = $mysqli->query($sqlIncharge);
         $sqlIncharge = $sqlIncharge->fetch_assoc();
         $empincharge .= "<br><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br>";
+        // if (isset($siDataRow1['mi_id'])) {
+        //   $mi_id = $siDataRow1['mi_id'];
+        //   $sql = "SELECT * FROM `spms_corefucndata`where `p_id` = '$mi_id' AND `empId` = '$empDataId';";
+        //   $res = $mysqli->query($sql);
+        //   if ($rowdata = $res->fetch_assoc()) {
+        //     // $empincharge .= " -- " . json_encode($rowdata);
+        //     # Rehabilitation Leave Benefits
+        //     if ($rowdata['disable'] != 1) {
+        //       # code...
+        //       $score = 0;
+        //       $q = "";
+        //       $e = "";
+        //       $t = "";
+        //       $count_scales = 0;
+        //       if ($rowdata['Q']) {
+        //         $score += $rowdata['Q'];
+        //         $q = $rowdata['Q'];
+        //         $count_scales++;
+        //       }
+        //       if ($rowdata['E']) {
+        //         $score += $rowdata['E'];
+        //         $e = $rowdata['E'];
+        //         $count_scales++;
+        //       }
+        //       if ($rowdata['T']) {
+        //         $score += $rowdata['T'];
+        //         $t = $rowdata['T'];
+        //         $count_scales++;
+        //       }
+
+        //       // $empincharge .= "<br/>";
+        //       $score = bcdiv($score, $count_scales, 1);
+        //       $score = explode(".", $score);
+        //       if ($score[1] == 0) {
+        //         $score = $score[0];
+        //       } else {
+        //         $score = implode(".", $score);
+        //       }
+        //       $final_mfo_rating = $score . "/5";
+
+        //       $empincharge .= "<table class='ui mini compact structured celled table'>
+        //         <thead>
+        //             <tr style='text-align: left;'>
+        //               <th colspan='4'><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a></th>
+        //             </tr>
+        //             <tr style='text-align: center;'>
+        //               <th>Q</th>
+        //               <th>E</th>
+        //               <th>T</th>
+        //               <th>FINAL</th>
+        //             </tr>
+        //         </thead>
+        //         <tbody>
+        //             <tr style='text-align: center;'>
+        //               <td>$q</td>
+        //               <td>$e</td>
+        //               <td>$t</td>
+        //               <td>$final_mfo_rating</td>
+        //             </tr>
+        //         </tbody>
+        //       </table>";
+        //       // $empincharge .= $final_mfo_rating;
+        //     } #else not applicable
+        //     else {
+        //       $empincharge .= "<a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br/>";
+        //       $empincharge .= "N/A (" . $rowdata['remarks'] . ")";
+        //     }
+        //   } else {
+        //     $empincharge .= "<a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br/>";
+        //     $empincharge .= "NOT ACCOMPLISHED";
+        //   }
+        // }
       }
       $Qdata = "";
       $Edata = "";
@@ -533,9 +676,9 @@ function trows($mysqli, $row, $padding, $addDisplay)
         <tr >
         <td style='padding-left:$padding;width:25%;$correctionColorMFO'>
         " . $set_drop . "
-        $row[cf_count]) $row[cf_title] " . "" /* json_encode($row) */  . "
+        $row[cf_count]) $row[cf_title] " .  ""/*json_encode($row)*/ . "
         </td>
-        <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . ""/* json_encode($siDataRow1) */ . "</td>
+        <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . ""/*json_encode($siDataRow1)*/ . "</td>
         <td>$performanceMeasure</td>
         <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_quality']) . "</td>
         <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_eff']) . "</td>
@@ -581,7 +724,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
     <tr >
     <td style='padding-left:$padding;width:500px;$correctionColorMFO'>
     " . $set_drop . "
-    $row[cf_count]) $row[cf_title] " . ""/* json_encode($row) */ . "
+    $row[cf_count]) $row[cf_title] " . ""/*json_encode($row)*/ . "
     </td>
     <td></td>
     <td></td>
@@ -616,19 +759,42 @@ function rsmEditStatus($dat)
   }
 }
 
+
 function AddInputs($mysqli, $dataId)
 {
 
-
   # check first if rating scale matrix has already existing data
+  # also check if previous rsm exist for copying
   // period
   $view = "";
   $period_id = $_SESSION["period"];
-  $department_id = $_SESSION["emp_info"]["department_id"];
-  $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$period_id' AND `dep_id` = '$department_id' LIMIT 1;";
+  $employee_id = $_SESSION['emp_info']['employees_id'];
 
+  $sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `employees_id` = '$employee_id' AND `period_id` = '$period_id'";
+  $res = $mysqli->query($sql);
+  if ($row = $res->fetch_assoc()) {
+    $department_id = $row['department_id'];
+  } else {
+    $department_id = $_SESSION['emp_info']['department_id'];
+  }
+
+
+  $curr_rsm_exists = false;
+  $prev_rsm_exists = false;
+  $previous_period_id = getPreviousPeriodId($mysqli);
+  $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$period_id' AND `dep_id` = '$department_id' LIMIT 1;";
   $result = $mysqli->query($sql);
-  if ($result->num_rows < 1) {
+  if ($result->num_rows > 0) {
+    $curr_rsm_exists = true;
+  }
+
+  $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$previous_period_id' AND `dep_id` = '$department_id' LIMIT 1;";
+  $result = $mysqli->query($sql);
+  if ($result->num_rows > 0) {
+    $prev_rsm_exists = true;
+  }
+
+  if (!$curr_rsm_exists && $prev_rsm_exists) {
     $view .= "<button class='ui green large button' onclick='copyRSM()'>Copy Previous RSM</button>";
   } else {
     $view = "

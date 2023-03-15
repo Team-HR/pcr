@@ -8,13 +8,13 @@
         <i class='ui red exclamation triangle icon'></i>
         <div class='content'>
             Rating Scale Matrix Not Found
-            <div class='sub header'>You Dont have Rating Matrix Yet. Please Contact OHRMD for this matter <br>
-                <b style="color: blue;">OR try to set the department assigned to during this period down below.</b>
+            <div class='sub header' style="color:black;">You are not tagged to any MFOs in your office's rating scale matrix OR rating scale matrix doesn't exist yet for this period <br><b>{{period}}</b>. <br> Please contact your immediate supervisor or department head. <br>
+                <!-- <b style="color: blue;">OR try to set the department assigned to during this period down below.</b> -->
             </div>
         </div>
     </h2>
     <br>
-
+    <!-- 
     <form @submit.prevent="setDepartmentOnPeriod" class="ui form" style="width: 700px; margin: auto;">
         <div class="field" style="text-align: center;">
             <h2>{{period}}</h2>
@@ -37,7 +37,7 @@
             </div>
         </div>
 
-    </form>
+    </form> -->
 
 </div>
 
@@ -65,11 +65,11 @@
                     setDepartmentOnPeriod: true,
                     department_id: this.department_id
                 }, (data, textStatus, xhr) => {
-                    // console.log(data);
+                    console.log(data);
                     // this.departments = JSON.parse(data);
-                    if (data) {
-                        window.location.href = "?performanceRating&form"
-                    }
+                    // if (data) {
+                    //     window.location.href = "?performanceRating&form"
+                    // }
 
                 });
             },
