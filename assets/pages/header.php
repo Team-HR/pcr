@@ -82,6 +82,7 @@
 	</div>
 	<a class="item" href="?performanceRating">Performance Review</a>
 	<a class="item" href="?RatingScale">Individual Rating Scale</a>
+	<!-- <?= json_encode($user->authorization) ?> -->
 	<?php
 	if ($user->authorization) {
 		for ($index = 0; $index < count($user->authorization); $index++) {
@@ -96,11 +97,16 @@
 			} else if (strtoupper($user->authorization[$index]) == strtoupper('pmt')) {
 			?>
 				<a class="item" href="?PMT">Performance Management Team</a>
+			<?php
+			} else if (strtoupper($user->authorization[$index]) == strtoupper('HR')) {
+			?>
+				<a class="item" href="?HR" style="color:blue;"><i class="icon id card outline"></i> HRMO Dashboard</a>
 	<?php
 			}
 		}
 	}
 	?>
+
 	<a class="item" href="?Browse">Browse Records</a>
 	<div class="right menu">
 		<div class="ui dropdown item navOption">

@@ -66,6 +66,13 @@ if (isset($_SESSION['emp_id'])) {
 		} else if (isset($_GET['showRsmView'])) {
 			// require_once "assets/libs/rsm_class.php";
 			require_once "assets/pages/rsmPMTview/content.php";
+		} else if (isset($_GET['HR'])) {
+			// require_once "assets/libs/rsm_class.php";
+			if (isset($_GET['FinalNumericalRatings'])) {
+				require_once "assets/pages/HR/finalNumericalRatings.php";
+			} else {
+				require_once "assets/pages/HR/index.php";
+			}
 		} else if (false) {
 		} else {
 			echo "<h2 style='text-align:center'>Page NOT found go to <a href='?home'><u>Homepage</u></a></h2>";
