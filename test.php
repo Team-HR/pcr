@@ -15,17 +15,21 @@ $period_id = 10; //10 - July to Dec 2022
 $finalNumericalRating = new FinalNumericalRating();
 
 # performanceReviewStatus_id = 2434 test fomtype 3 strategic function shoul be excluded from computing final numerical rating
-$sql = "SELECT * FROM `spms_performancereviewstatus` where period_id = '$period_id' AND `final_numerical_rating` IS NULL LIMIT 20";
+$sql = "SELECT * FROM `spms_performancereviewstatus` where `period_id` = '$period_id' AND `final_numerical_rating` = 0";
+//--`performanceReviewStatus_id` = '2909'
+//--`period_id` = '$period_id' AND `final_numerical_rating` IS NULL LIMIT 1
 $res = $mysqli->query($sql);
 $data = [];
 while ($row = $res->fetch_assoc()) {
     // $row['final_numerical_rating'] = $finalNumericalRating->getFinalNumericalRating($mysqli, $row);
     $final_numerical_rating = $finalNumericalRating->getFinalNumericalRating($mysqli, $row);
+    $row['final_numerical_rating'] = $final_numerical_rating;
     $fileStatusId = $row['performanceReviewStatus_id'];
     $finalNumericalRating->setFinalNumericalRating($mysqli, $fileStatusId, $final_numerical_rating);
     // setFinalNumericalRating
     $data[] = $row;
 }
+
 print("<pre>" . print_r($data, true) . "</pre>");
 
 
@@ -93,9 +97,9 @@ class FinalNumericalRating
         $core = $this->coreRow($mysqli, $fileStatus);
         $support = $this->supportFunctionTr($mysqli, $fileStatus);
 
-        $final_numerical_rating = '';
+        $final_numerical_rating = NULL;
 
-        if ($strategic > 0 && $core > 0 && $support > 0) {
+        if ($core > 0 && $support > 0) {
             $final_numerical_rating = $strategic + $core + $support;
         }
 
