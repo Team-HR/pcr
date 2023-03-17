@@ -1,50 +1,4 @@
-<!-- <script src="assets/libs/jquery/jquery-3.3.1.min.js"></script> -->
-<!-- <button onclick="test()">Compute</button> -->
-<script src="https://unpkg.com/vue@3"></script>
-<script src="assets/libs/jquery/jquery-3.3.1.min.js"></script>
 
-<div id="testVueApp" style="min-height:500px">
-    {{ total }}
-</div>
-
-<script>
-    /* Vue3 Start*/
-    const {
-        createApp
-    } = Vue
-
-    createApp({
-        data() {
-            return {
-                init_time: 0,
-                interval: {},
-                total: 0,
-            }
-        },
-        methods: {
-            testing() {
-                $.post('test_proc.php', {
-                    test: true,
-                }, (data, textStatus, xhr) => {
-                    this.total = data
-                    console.log(data);
-                });
-            }
-        },
-        mounted() {
-            this.testing()
-            this.interval = setInterval(() => {
-                console.log(this.total--);
-                if (this.total == 10) {
-                    clearInterval(this.interval);
-                }
-            }, 300);
-
-        }
-
-    }).mount('#testVueApp')
-    /* Vue3 End*/
-</script>
 
 <?php
 date_default_timezone_set("Asia/Manila");
@@ -57,23 +11,14 @@ $mysqli = new mysqli($host, $usernameDb, $password, $database);
 $mysqli->set_charset("utf8");
 #####################################################################################
 
-
-if (isset($_POST['test'])) {
-    print("testing success!");
-}
-
 $period_id = 10; //10 - July to Dec 2022
-
-
-
-
 
 # performanceReviewStatus_id = 2434 test fomtype 3 strategic function shoul be excluded from computing final numerical rating
 $sql = "SELECT * FROM `spms_performancereviewstatus` where period_id = '$period_id' LIMIT 1 -- and performanceReviewStatus_id = '2434';";
 $res = $mysqli->query($sql);
 $data = [];
 while ($row = $res->fetch_assoc()) {
-    // $row['final_numerical_rating'] = getFinalNumericalRating($mysqli, $row);
+    $row['final_numerical_rating'] = getFinalNumericalRating($mysqli, $row);
     $data[] = $row;
 }
 print("<pre>" . print_r($data, true) . "</pre>");
