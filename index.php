@@ -109,6 +109,8 @@ if (isset($_SESSION['emp_id'])) {
 			require_once "assets/pages/browse/config.php";
 		} elseif ($filePath == "PMT") {
 			require_once "assets/pages/PMT/config.php";
+		} elseif ($filePath == "FinalNumericalRatings") {
+			require_once "assets/pages/HR/finalNumericalRatingsConfig.php";
 		} else {
 			echo notFound();
 			die();
