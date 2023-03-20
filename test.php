@@ -26,6 +26,17 @@ while ($row = $res->fetch_assoc()) {
     // setFinalNumericalRating
     $data[] = $row;
 }
+
+$sql = "SELECT * FROM `spms_performancereviewstatus` where period_id = '$period_id' AND `final_numerical_rating` IS NULL OR `final_numerical_rating` = 0";
+$res = $mysqli->query($sql);
+$left = $res->num_rows;
+
+$sql = "SELECT * FROM `spms_performancereviewstatus` where period_id = '$period_id'";
+$res = $mysqli->query($sql);
+$total = $res->num_rows;
+
+
+print("$left/$total <br/>");
 print("<pre>" . print_r($data, true) . "</pre>");
 
 
