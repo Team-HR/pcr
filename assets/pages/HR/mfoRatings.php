@@ -1,7 +1,7 @@
-<div id='finalNumericalRatingsApp' class="ui segment" style="margin-left: 25px; margin-right: 25px;">
-	<h1 class="ui header block">HRMO Dashboard | Final Numerical Ratings</h1>
+<div id='mfoRatingsApp' class="ui segment" style="margin-left: 25px; margin-right: 25px;">
+	<h1 class="ui header block">HRMO Dashboard | MFO Ratings</h1>
 	<div class="ui fluid basic segment">
-		<!-- <li v-for="item in items" :key="item.id">{{item}}</li> -->
+
 		<div class="ui form" style="width: 820px; margin:auto; margin-bottom: 20px;">
 			<div class="fields">
 				<div class="field" style="width: 220px;">
@@ -32,32 +32,16 @@
 				</div>
 			</div>
 		</div>
-		<!-- <h1>{{}}</h1> -->
-		<table class="ui selectable table compact celled structured" style="width: 820px; margin:auto;">
-			<tr>
-				<th>Name</th>
-				<th>Employment Status</th>
-				<!-- <th>Date Accomplished</th> -->
-				<th width='150'>Final Numerical Rating</th>
-				<th width='150'>Final Adjectival Rating</th>
-			</tr>
-			<tr v-if="items && items.length < 1">
-				<td colspan="4" style="text-align: center;"> No Records Found </td>
-			</tr>
-			<tr v-else-if="(!items && !department_id) || (!items && !period_id)">
-				<td colspan="4" style="text-align: center;"> Please select the Period and Department </td>
-			</tr>
-			<tr v-else-if="!items && department_id && period_id">
-				<td colspan="4" style="text-align: center;"> Loading... Please wait... </td>
-			</tr>
-			<tr v-for="item in items" :key="item.id">
-				<td>{{item.full_name}}</td>
-				<td>{{item.employmentStatus}}</td>
-				<!-- <td>{{item.dateAccomplished}}</td> -->
-				<td>{{item.final_numerical_rating}}</td>
-				<td>{{item.adjectival}}</td>
-			</tr>
-		</table>
+
+		<template v-if="(!htmlTable && !department_id) || (!htmlTable && !period_id)">
+			<div class="ui segment fluid" style="width: 1100px; margin:auto; text-align: center;">Please select a Period and Department</div>
+		</template>
+		<template v-else-if="!htmlTable && department_id && period_id">
+			<div class="ui segment fluid" style="width: 1100px; margin:auto; text-align: center;">Loading... Please wait...</div>
+		</template>
+		<template v-else>
+			<div v-html="htmlTable"></div>
+		</template>
 	</div>
 </div>
 
@@ -75,23 +59,12 @@
 				isLoading: null,
 				period_id: null,
 				department_id: null,
-				items: null
+				items: null,
+				htmlTable: null
 			}
 		},
 		methods: {
-			getItems() {
-				this.items = null
-				$.post('?config=FinalNumericalRatings', {
-					view: true,
-					period_id: this.period_id,
-					department_id: this.department_id
-				}, (data, textStatus, xhr) => {
-					// console.log(data);
-					this.items = JSON.parse(data)
-					// $("#iMatrixCont").html(data);
-					// $('#appLoader').dimmer('hide');
-				});
-			},
+
 			getDepartmentItems() {
 				$.post('?config=FinalNumericalRatings', {
 					getDepartmentItems: true,
@@ -107,12 +80,20 @@
 					this.periods = JSON.parse(data)
 				});
 			},
+
+			getHtmlTable() {
+				this.htmlTable = null
+				$.post('?config=FinalNumericalRatings', {
+					viewMfos: true,
+					period_id: this.period_id,
+					department_id: this.department_id
+				}, (data, textStatus, xhr) => {
+					this.htmlTable = data
+				});
+			}
 		},
 		mounted() {
-			// this.getItems()
-			// $('#appLoader').dimmer({
-			// 	closable: false
-			// }).dimmer('show');
+
 			this.getDepartmentItems()
 			this.getPeriodItems()
 
@@ -123,7 +104,7 @@
 				onChange: (value, text, $choice) => {
 					this.period_id = value;
 					if (this.period_id && this.department_id) {
-						this.getItems()
+						this.getHtmlTable()
 						console.log(this.period_id + " " + this.department_id);
 					}
 				}
@@ -136,13 +117,13 @@
 					// console.log(value);
 					this.department_id = value;
 					if (this.period_id && this.department_id) {
-						this.getItems()
+						this.getHtmlTable()
 						console.log(this.period_id + " " + this.department_id);
 					}
 				}
 			});
 		}
 
-	}).mount('#finalNumericalRatingsApp')
+	}).mount('#mfoRatingsApp')
 	/* Vue3 End*/
 </script>

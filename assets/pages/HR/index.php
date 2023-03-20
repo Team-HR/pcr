@@ -4,7 +4,7 @@
 		<a class="ui button primary" style="padding: 100px; width: 565px;" href="?HR&FinalNumericalRatings">
 			<h1><i class="icon percent"></i> Final Numerical Ratings</h1>
 		</a>
-		<a class="ui button primary" style="padding: 100px; width: 565px;">
+		<a class="ui button primary" style="padding: 100px; width: 565px;" href="?HR&MFORatings">
 			<h1><i class="icon table"></i> MFO Ratings</h1>
 		</a>
 	</div>

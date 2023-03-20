@@ -70,7 +70,11 @@ if (isset($_SESSION['emp_id'])) {
 			// require_once "assets/libs/rsm_class.php";
 			if (isset($_GET['FinalNumericalRatings'])) {
 				require_once "assets/pages/HR/finalNumericalRatings.php";
-			} else {
+			} else if (isset($_GET['MFORatings'])) {
+				require_once "assets/pages/HR/mfoRatings.php";
+			}
+			// MFORatings
+			else {
 				require_once "assets/pages/HR/index.php";
 			}
 		} else if (false) {
