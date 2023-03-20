@@ -390,7 +390,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
 							} else {
 								$score = implode(".", $score);
 							}
-							if ($score < 3) {
+							if ($score < 4) {
 								$ratingColor = $color;
 							}
 							$final_mfo_rating = $score . "/5";
