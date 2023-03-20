@@ -157,9 +157,6 @@ else if (isset($_POST['getPeriodItems'])) {
 
 function table($mysqli, $period_id, $department_id)
 {
-	# $dep = $_SESSION['emp_info']['department_id']; 
-	# get department_id from formstatus of selected period
-	# return $_SESSION['emp_info']['department_id'] if no formstatus exists
 	$period_id = $period_id;
 	$department_id  = $department_id;
 
@@ -201,27 +198,15 @@ function table($mysqli, $period_id, $department_id)
   <th>T</th>
   </tr>
   </thead>
-  <tbody>" . tbody($mysqli) . "
+  <tbody>" . tbody($mysqli, $period_id, $department_id) . "
   </tbody>
   </table>
   ";
 }
-function tbody($mysqli)
+function tbody($mysqli, $period_id, $dep_id)
 {
 	$view = "";
 
-	# $dep_id = $_SESSION['emp_info']['department_id'];
-
-	$employee_id = $_SESSION['emp_info']['employees_id'];
-	$period_id = $_SESSION['period'];
-
-	$sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `employees_id` = '$employee_id' AND `period_id` = '$period_id'";
-	$res = $mysqli->query($sql);
-	if ($row = $res->fetch_assoc()) {
-		$dep_id = $row['department_id'];
-	} else {
-		$dep_id = $_SESSION['emp_info']['department_id'];
-	}
 
 	$sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$period_id' and dep_id='$dep_id' ORDER BY `spms_corefunctions`.`cf_count` ASC ";
 	$sql = $mysqli->query($sql);
@@ -232,7 +217,7 @@ function tbody($mysqli)
 	}
 	$view .= "<tr class='noprint' >
   <td colspan='8' style='padding:10px'>
-  " . AddInputs($mysqli, '') . "
+
   </td>
   </tr>";
 	return $view;
@@ -505,88 +490,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
 	}
 	return $view;
 }
-function rsmEditStatus($dat)
-{
-	$mysqli = $GLOBALS['mysqli'];
-	$department_id = $GLOBALS['user'];
-	$department_id = $department_id->get_emp('department_id');
-	$period = $_SESSION['period'];
-	$enable = false;
 
-	$sql = "SELECT * from `spms_rsmstatus` where `period_id`='$period' and `department_id`='$department_id'";
-	$sql = $mysqli->query($sql);
-	$sql = $sql->fetch_assoc();
-	if ($sql['edit']) {
-		$enable = true;
-	}
-	if ($dat == "id") {
-		return $sql['rsmStatus_id'];
-	} else {
-		return $enable;
-	}
-}
-
-
-function AddInputs($mysqli, $dataId)
-{
-	return "";
-	# check first if rating scale matrix has already existing data
-	# also check if previous rsm exist for copying
-	// period
-	$view = "";
-	$period_id = $_SESSION["period"];
-	$employee_id = $_SESSION['emp_info']['employees_id'];
-
-	$sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `employees_id` = '$employee_id' AND `period_id` = '$period_id'";
-	$res = $mysqli->query($sql);
-	if ($row = $res->fetch_assoc()) {
-		$department_id = $row['department_id'];
-	} else {
-		$department_id = $_SESSION['emp_info']['department_id'];
-	}
-
-
-	$curr_rsm_exists = false;
-	$prev_rsm_exists = false;
-	$previous_period_id = getPreviousPeriodId($mysqli);
-	$sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$period_id' AND `dep_id` = '$department_id' LIMIT 1;";
-	$result = $mysqli->query($sql);
-	if ($result->num_rows > 0) {
-		$curr_rsm_exists = true;
-	}
-
-	$sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$previous_period_id' AND `dep_id` = '$department_id' LIMIT 1;";
-	$result = $mysqli->query($sql);
-	if ($result->num_rows > 0) {
-		$prev_rsm_exists = true;
-	}
-
-	if (!$curr_rsm_exists && $prev_rsm_exists) {
-		$view .= "<button class='ui green large button' onclick='copyRSM()'>Copy Previous RSM</button>";
-	} else {
-		$view = "
-    <div class='ui mini form'>
-    <div class='fields'>
-    <input type='hidden' value='$dataId' id='mfo_pid$dataId'>
-    <div class='field'>
-    <label>Category. No.</label>
-    <input type='text' style='width:90px' placeholder='ex: I,II,1,1.0,1.1.0' id='rsmcount$dataId'>
-    </div>
-    <div class=' field' >
-    <label>Title</label>
-    <div class='ui right labeled input'>
-    <input type='text' style='width:200px' placeholder='Type Here.....' id='titleRsm$dataId'>
-    <div class='mini ui primary basic icon button' onclick='addMFoRsm(\"$dataId\")'><i class='save icon'></i></div>
-    </div>
-    </div>
-    </div>
-    </div>";
-	}
-	if (!rsmEditStatus("")) {
-		$view = "";
-	}
-	return $view;
-}
 function settingDrop($mysqli, $row, $edit, $add, $delete)
 {
 	$correction = "";
@@ -620,10 +524,8 @@ function settingDrop($mysqli, $row, $edit, $add, $delete)
 
   </div>
   ";
-	$correctionMFO = validaateCorrection($row['corrections']);
-	if (!rsmEditStatus("") && !$correctionMFO) {
-		$view = "";
-	}
+
+
 	return $view;
 }
 function changeCount($dat)
