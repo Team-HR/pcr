@@ -11,7 +11,7 @@ $mysqli = new mysqli($host, $usernameDb, $password, $database);
 $mysqli->set_charset("utf8");
 #####################################################################################
 
-$period_id = 10; //10 - July to Dec 2022
+$period_id = 2;
 $finalNumericalRating = new FinalNumericalRating();
 
 # performanceReviewStatus_id = 2434 test fomtype 3 strategic function shoul be excluded from computing final numerical rating
