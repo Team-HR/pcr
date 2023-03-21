@@ -79,7 +79,7 @@ else if (isset($_POST['getPeriodItems'])) {
 
 	// $period_id = 10; //10 - July to Dec 2022
 	# performanceReviewStatus_id = 2434 test fomtype 3 strategic function shoul be excluded from computing final numerical rating
-	$sql = "SELECT *, `spms_performancereviewstatus`.`department_id` AS `dept_id` FROM `spms_performancereviewstatus` LEFT JOIN `employees` ON `spms_performancereviewstatus`.`employees_id` = `employees`.`employees_id` where `spms_performancereviewstatus`.`period_id` = '$period_id' $department_filter AND `spms_performancereviewstatus`.`employees_id` != '432258' AND `employees`.`employmentStatus` != 'ELECTIVE' ORDER BY `spms_performancereviewstatus`.`final_numerical_rating` DESC";
+	$sql = "SELECT *, `spms_performancereviewstatus`.`department_id` AS `dept_id` FROM `spms_performancereviewstatus` LEFT JOIN `employees` ON `spms_performancereviewstatus`.`employees_id` = `employees`.`employees_id` where `spms_performancereviewstatus`.`period_id` = '$period_id' $department_filter AND `spms_performancereviewstatus`.`employees_id` != '432258' AND `spms_performancereviewstatus`.`final_numerical_rating` != '0' AND `employees`.`employmentStatus` != 'ELECTIVE' ORDER BY `spms_performancereviewstatus`.`final_numerical_rating` DESC";
 	//--`performanceReviewStatus_id` = '2909'
 	//--`period_id` = '$period_id' AND `final_numerical_rating` IS NULL LIMIT 1
 	$res = $mysqli->query($sql);
