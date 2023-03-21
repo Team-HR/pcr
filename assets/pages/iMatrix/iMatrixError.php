@@ -25,7 +25,7 @@
                 <div id="officeSelection" class="ui fluid search selection dropdown" style="margin-right: 5px;">
                     <input type="hidden" name="department" v-model="department_id">
                     <i class="dropdown icon"></i>
-                    <div class="default text">Select Department</div>
+                    <div class="default text">Selec t Department</div>
                     <div class="menu">
                         <div v-for="department in departments" :key="department.id" class="item" :data-value="department.id">{{department.name}}</div>
                     </div>
