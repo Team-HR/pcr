@@ -164,7 +164,7 @@
 							plugins: {
 								title: {
 									display: true,
-									text: 'Percentage of personnel per measure in the department/s'
+									text: 'Performance Measure vs Percentage of Personnel in a Department'
 								},
 								tooltip: {
 									callbacks: {
