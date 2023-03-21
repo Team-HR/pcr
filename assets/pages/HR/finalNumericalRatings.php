@@ -33,38 +33,45 @@
 				</div>
 			</div>
 		</div>
-		<!-- <h1>{{}}</h1> -->
 
-		<div style="padding: 20px; position: relative; width:1000px; margin: auto;" :style="chartHeight">
+
+
+
+
+		<div style="padding: 20px; position: relative; width:1000px; margin: auto; background-color:azure" :style="chartHeight">
 			<canvas id="myChart"></canvas>
 		</div>
+		<br>
+		<br>
+		<h1 style="text-align: center; margin: 0">{{selectedDepartment}}</h1>
+		<h3 style="text-align: center; margin: 0">{{selectedPeriod}}</h1>
 
-		<table class="ui selectable table compact celled structured" style="width: 820px; margin:auto;">
-			<tr>
-				<th>No.</th>
-				<th>Name</th>
-				<th>Employment Status</th>
-				<!-- <th>Date Accomplished</th> -->
-				<th width='150'>Final Numerical Rating</th>
-				<th width='150'>Final Adjectival Rating</th>
-			</tr>
-			<tr v-if="items && items.length < 1">
-				<td colspan="4" style="text-align: center;"> No Records Found </td>
-			</tr>
-			<tr v-else-if="(!items && !department_id) || (!items && !period_id)">
-				<td colspan="4" style="text-align: center;"> Please select the Period and Department </td>
-			</tr>
-			<tr v-else-if="!items && department_id && period_id">
-				<td colspan="4" style="text-align: center;"> Loading... Please wait... </td>
-			</tr>
-			<tr v-for="item,no in items" :key="item.id">
-				<td>{{no+1}}</td>
-				<td>{{item.full_name}}</td>
-				<td>{{item.employmentStatus}}</td>
-				<td>{{item.final_numerical_rating}}</td>
-				<td>{{item.adjectival}}</td>
-			</tr>
-		</table>
+			<table class="ui selectable table compact celled structured" style="width: 820px; margin:auto;">
+				<tr>
+					<th>No.</th>
+					<th>Name</th>
+					<th>Employment Status</th>
+					<!-- <th>Date Accomplished</th> -->
+					<th width='150'>Final Numerical Rating</th>
+					<th width='150'>Final Adjectival Rating</th>
+				</tr>
+				<tr v-if="items && items.length < 1">
+					<td colspan="4" style="text-align: center;"> No Records Found </td>
+				</tr>
+				<tr v-else-if="(!items && !department_id) || (!items && !period_id)">
+					<td colspan="4" style="text-align: center;"> Please select the Period and Department </td>
+				</tr>
+				<tr v-else-if="!items && department_id && period_id">
+					<td colspan="4" style="text-align: center;"> Loading... Please wait... </td>
+				</tr>
+				<tr v-for="item,no in items" :key="item.id">
+					<td>{{no+1}}</td>
+					<td>{{item.full_name}}</td>
+					<td>{{item.employmentStatus}}</td>
+					<td>{{item.final_numerical_rating}}</td>
+					<td>{{item.adjectival}}</td>
+				</tr>
+			</table>
 	</div>
 </div>
 
@@ -92,14 +99,24 @@
 		},
 		computed: {
 			selectedDepartment() {
-				return $("#departmentDropdown").dropdown("get text")
+				if (this.department_id) return "ALL DEPARTMENTS"
+				for (let index = 0; index < this.departments.length; index++) {
+					const element = this.departments[index];
+					if (element.department_id == this.department_id) {
+						return element.department
+						break;
+					}
+				}
 			},
-			// chartHeight() {
-			// 	let h = 200;
-			// 	let count = this.chart_data.labels.length;
-			// 	h = h * count
-			// 	return "height:" + h + "px;";
-			// }
+			selectedPeriod() {
+				for (let index = 0; index < this.periods.length; index++) {
+					const element = this.periods[index];
+					if (element.period_id == this.period_id) {
+						return element.period
+						break;
+					}
+				}
+			},
 		},
 		methods: {
 
@@ -128,12 +145,11 @@
 					this.chartHeight = "height:" + h + "px;";
 
 					const ctx = document.getElementById('myChart');
-					Chart.defaults.font.size = 24;
+					Chart.defaults.font.size = 18;
 					this.chart = new Chart(ctx, {
 						type: 'bar',
 						data: res.chart_data,
 						options: {
-
 							responsive: true,
 							maintainAspectRatio: false,
 							indexAxis: 'y',
@@ -146,6 +162,10 @@
 								}
 							},
 							plugins: {
+								title: {
+									display: true,
+									text: 'Percentage of personnel per measure in the department/s'
+								},
 								tooltip: {
 									callbacks: {
 										// title: (context) => {
