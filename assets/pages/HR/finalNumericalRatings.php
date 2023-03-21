@@ -24,6 +24,7 @@
 						<i class="dropdown icon"></i>
 						<div class="default text">Select Department</div>
 						<div class="menu">
+							<div class="item" data-value="all">All</div>
 							<template v-for="dept in departments" :key="dept.department_id">
 								<div class="item" :data-value="dept.department_id">{{dept.department}}</div>
 							</template>
@@ -33,8 +34,14 @@
 			</div>
 		</div>
 		<!-- <h1>{{}}</h1> -->
+
+		<div style="padding: 20px; position: relative; width:1000px; margin: auto;" :style="chartHeight">
+			<canvas id="myChart"></canvas>
+		</div>
+
 		<table class="ui selectable table compact celled structured" style="width: 820px; margin:auto;">
 			<tr>
+				<th>No.</th>
 				<th>Name</th>
 				<th>Employment Status</th>
 				<!-- <th>Date Accomplished</th> -->
@@ -50,10 +57,10 @@
 			<tr v-else-if="!items && department_id && period_id">
 				<td colspan="4" style="text-align: center;"> Loading... Please wait... </td>
 			</tr>
-			<tr v-for="item in items" :key="item.id">
+			<tr v-for="item,no in items" :key="item.id">
+				<td>{{no+1}}</td>
 				<td>{{item.full_name}}</td>
 				<td>{{item.employmentStatus}}</td>
-				<!-- <td>{{item.dateAccomplished}}</td> -->
 				<td>{{item.final_numerical_rating}}</td>
 				<td>{{item.adjectival}}</td>
 			</tr>
@@ -61,6 +68,8 @@
 	</div>
 </div>
 
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 	/* Vue3 Start*/
 	const {
@@ -74,20 +83,89 @@
 				periods: [],
 				isLoading: null,
 				period_id: null,
-				department_id: null,
-				items: null
+				department_id: '',
+				items: null,
+				chart: null,
+				chart_data: null,
+				chartHeight: "height: 200px;"
 			}
 		},
+		computed: {
+			selectedDepartment() {
+				return $("#departmentDropdown").dropdown("get text")
+			},
+			// chartHeight() {
+			// 	let h = 200;
+			// 	let count = this.chart_data.labels.length;
+			// 	h = h * count
+			// 	return "height:" + h + "px;";
+			// }
+		},
 		methods: {
+
 			getItems() {
 				this.items = null
+				if (this.chart) {
+					this.chart.destroy()
+				}
 				$.post('?config=FinalNumericalRatings', {
 					view: true,
 					period_id: this.period_id,
 					department_id: this.department_id
 				}, (data, textStatus, xhr) => {
-					// console.log(data);
-					this.items = JSON.parse(data)
+					const res = JSON.parse(data)
+					this.items = res.table_data
+					this.chart_data = res.chart_data
+
+
+					let h = 100;
+					let count = this.chart_data.labels.length;
+					if (count > 1) {
+						h = h * count
+					} else {
+						h = 200
+					}
+					this.chartHeight = "height:" + h + "px;";
+
+					const ctx = document.getElementById('myChart');
+					Chart.defaults.font.size = 24;
+					this.chart = new Chart(ctx, {
+						type: 'bar',
+						data: res.chart_data,
+						options: {
+
+							responsive: true,
+							maintainAspectRatio: false,
+							indexAxis: 'y',
+							scales: {
+								x: {
+									// stacked: true,
+								},
+								y: {
+									// stacked: true
+								}
+							},
+							plugins: {
+								tooltip: {
+									callbacks: {
+										// title: (context) => {
+										// 	return context.datasetIndex;
+										// },
+										label: (context) => {
+											// let sum = 0;
+
+											// tooltipItems.forEach(function(tooltipItem) {
+											// 	sum += tooltipItem.parsed.y;
+											// });
+											return " " + context.formattedValue + "% - " + context.dataset.label;
+										}
+									}
+								}
+							}
+						}
+					});
+
+					console.log(res.chart_data);
 					// $("#iMatrixCont").html(data);
 					// $('#appLoader').dimmer('hide');
 				});
@@ -141,6 +219,10 @@
 					}
 				}
 			});
+
+			// chart start
+
+
 		}
 
 	}).mount('#finalNumericalRatingsApp')

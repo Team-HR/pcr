@@ -71,9 +71,15 @@ else if (isset($_POST['getPeriodItems'])) {
 	$period_id = $_POST["period_id"];
 	$department_id = $_POST["department_id"];
 
+	$department_filter = "AND `spms_performancereviewstatus`.`department_id` = '$department_id'";
+	if ($department_id == 'all') {
+		$department_filter = "";
+	}
+
+
 	// $period_id = 10; //10 - July to Dec 2022
 	# performanceReviewStatus_id = 2434 test fomtype 3 strategic function shoul be excluded from computing final numerical rating
-	$sql = "SELECT * FROM `spms_performancereviewstatus` LEFT JOIN `employees` ON `spms_performancereviewstatus`.`employees_id` = `employees`.`employees_id` where `spms_performancereviewstatus`.`period_id` = '$period_id' AND `spms_performancereviewstatus`.`department_id` = '$department_id' AND `spms_performancereviewstatus`.`employees_id` != '432258' ORDER BY `spms_performancereviewstatus`.`final_numerical_rating` DESC";
+	$sql = "SELECT *, `spms_performancereviewstatus`.`department_id` AS `dept_id` FROM `spms_performancereviewstatus` LEFT JOIN `employees` ON `spms_performancereviewstatus`.`employees_id` = `employees`.`employees_id` where `spms_performancereviewstatus`.`period_id` = '$period_id' $department_filter AND `spms_performancereviewstatus`.`employees_id` != '432258' AND `employees`.`employmentStatus` != 'ELECTIVE' ORDER BY `spms_performancereviewstatus`.`final_numerical_rating` DESC";
 	//--`performanceReviewStatus_id` = '2909'
 	//--`period_id` = '$period_id' AND `final_numerical_rating` IS NULL LIMIT 1
 	$res = $mysqli->query($sql);
@@ -106,7 +112,12 @@ else if (isset($_POST['getPeriodItems'])) {
 		$data[] = $row;
 	}
 
-	print json_encode($data);
+	$chart_data = get_distinct_departments($mysqli, $period_id, $department_id, $data);
+
+	print json_encode([
+		"table_data" => $data,
+		"chart_data" => $chart_data
+	]);
 } elseif (isset($_POST['viewMfos'])) {
 	$period_id = $_POST["period_id"];
 	$department_id = $_POST["department_id"];
@@ -114,44 +125,104 @@ else if (isset($_POST['getPeriodItems'])) {
 }
 
 
+function get_distinct_departments($mysqli, $period_id, $department_id, $data)
+{
+
+	$department_filter = "AND department_id = $department_id";
+	if ($department_id == "all") {
+		$department_filter = "";
+	}
+
+	$sql = "SELECT * FROM department WHERE department_id IN (SELECT DISTINCT department_id FROM `spms_performancereviewstatus` WHERE period_id = '$period_id' $department_filter) ORDER BY department;";
+	$res = $mysqli->query($sql);
+
+	$departments = [];
+	while ($row = $res->fetch_assoc()) {
+		$departments[] = $row;
+	}
+	$labels = [];
+	foreach ($departments as $dept) {
+		$labels[] = $dept['alias'];
+	}
+
+	// compute percentage per department
+	foreach ($departments as $key => $department) {
+		$figures = [
+			"Outstanding" => 0,
+			"Very Satisfactory" => 0,
+			"Satisfactory" => 0,
+			"Unsatisfactory" => 0,
+			"Total" => 0
+		];
+		foreach ($data as $fkey => $filestatus) {
+			if ($filestatus['dept_id'] == $department['department_id']) {
+				// $personnel[] = $filestatus;
+				if ($filestatus['adjectival'] == 'Outstanding') {
+					$figures['Outstanding']++;
+					$figures['Total']++;
+				} elseif ($filestatus['adjectival'] == 'Very Satisfactory') {
+					$figures['Very Satisfactory']++;
+					$figures['Total']++;
+				} elseif ($filestatus['adjectival'] == 'Satisfactory') {
+					$figures['Satisfactory']++;
+					$figures['Total']++;
+				} elseif ($filestatus['adjectival'] == 'Unsatisfactory') {
+					$figures['Unsatisfactory']++;
+					$figures['Total']++;
+				}
+			}
+		}
+
+		if ($figures['Total'] != 0) {
+			$figures['Outstanding'] = round(($figures['Outstanding'] / $figures['Total']) * 100);
+			$figures['Very Satisfactory'] = round(($figures['Very Satisfactory'] / $figures['Total']) * 100);
+			$figures['Satisfactory'] = round(($figures['Satisfactory'] / $figures['Total']) * 100);
+			$figures['Unsatisfactory'] = round(($figures['Unsatisfactory'] / $figures['Total']) * 100);
+		}
+
+		$departments[$key]['figures'] = $figures;
+	}
+
+	$datasets = [
+		[
+			"label" => "Outstanding",
+			"backgroundColor" => "#c778ff",
+			"data" => []
+		],
+		[
+			"label" => "Very Satisfactory",
+			"backgroundColor" => "#78c2ff",
+			"data" => []
+		],
+		[
+			"label" => "Satisfactory",
+			"backgroundColor" => "#ffff78",
+			"data" => []
+		],
+		[
+			"label" => "Unsatisfactory",
+			"backgroundColor" => "#ff7878",
+			"data" => []
+		],
+	];
+
+	foreach ($departments as $key => $dept) {
+		$datasets[0]['data'][] = $dept['figures']['Outstanding'];
+		$datasets[1]['data'][] = $dept['figures']['Very Satisfactory'];
+		$datasets[2]['data'][] = $dept['figures']['Satisfactory'];
+		$datasets[3]['data'][] = $dept['figures']['Unsatisfactory'];
+	}
+
+	return [
+		"labels" => $labels,
+		"datasets" => $datasets
+	];
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function get_percentiles_per_department($mysqli, $period_id, $department_id)
+{
+}
 
 
 
