@@ -1214,7 +1214,7 @@ class Employee_data extends mysqli
 		$fieldDisabled = "";
 		$agencyRadioBtn = "
 
-		<div class='ui  form' style='width:210px;padding:20px;margin:auto;border-radius:10px 10px 10px 10px;box-shadow:1px 1px 10px black;'>
+		<div id='agencyTypeSwitch' class='ui  form' style='width:210px;padding:20px;margin:auto;border-radius:10px 10px 10px 10px;box-shadow:1px 1px 10px black;'>
 			<div class='grouped fields'>
 			    <div class='field'>
 			      <div class='ui slider checkbox'>

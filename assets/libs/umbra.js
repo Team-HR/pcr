@@ -1179,11 +1179,19 @@ function showcommentOfSignatories(dataId) {
   });
 }
 function agencies() {
-  var ev = event;
-  var form = ev.path[5].getElementsByTagName('form')[0];
+  // var ev = event;
+  // console.log($("#agencyTypeSwitch"));
+  // console.log(this.event.target.value);
+  // var form = $("#agencyTypeSwitch")[0];
+  // console.log(form);
+  var agencyName = this.event.target.value
+  // var form = document.getElementsByTagName('form')[0];
+  var form = document.getElementsByTagName('form')[1];
+
+  // console.log(form);
   form.innerHTML = 'Please wait....';
   $.post('?config=getAgencyForm', {
-    agencyName: ev.target.value,
+    agencyName: agencyName,
   }, function (data, textStatus, xhr) {
     form.innerHTML = data;
   });
