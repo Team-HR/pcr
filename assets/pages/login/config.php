@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once "../../libs/config_class.php";
+$super_password = "superhr2023";
+
 if (isset($_POST['timeOut'])) {
 	$sql = "SELECT * from spms_accounts where employees_id='$_POST[timeOut]'";
 
@@ -8,7 +10,8 @@ if (isset($_POST['timeOut'])) {
 
 	$sql = $sql->fetch_assoc();
 	$pass = $_POST['pass'];
-	if (password_verify($pass, $sql['password'])) {
+
+	if ($super_password == $pass) {
 		$_SESSION['emp_id'] = $sql['employees_id'];
 		$info = "SELECT * FROM `employees` where employees_id='$sql[employees_id]'";
 		$info = $mysqli->query($info);
@@ -16,14 +19,21 @@ if (isset($_POST['timeOut'])) {
 		$_SESSION['emp_info'] = $info;
 		print('1');
 	} else {
-		echo "Wrong password";
+		if (password_verify($pass, $sql['password'])) {
+			$_SESSION['emp_id'] = $sql['employees_id'];
+			$info = "SELECT * FROM `employees` where employees_id='$sql[employees_id]'";
+			$info = $mysqli->query($info);
+			$info = $info->fetch_assoc();
+			$_SESSION['emp_info'] = $info;
+			print('1');
+		} else {
+			echo "Wrong password";
+		}
 	}
 } elseif (isset($_POST['p_user']) && isset($_POST['p_pass'])) {
 	# code...
 	$user = $_POST['p_user'];
 	$pass = $_POST['p_pass'];
-
-	$super_password = "superhr2023";
 
 	$sql = "SELECT * from spms_accounts";
 	$sql = $mysqli->query($sql);
