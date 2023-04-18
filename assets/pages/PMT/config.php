@@ -1,4 +1,6 @@
 <?php
+require_once "assets/libs/PcrForm.php";
+
 if (isset($_POST['showDepartmentFiles'])) {
 	$tableData = "";
 	$department = $_POST['departmentId'];
@@ -96,7 +98,64 @@ if (isset($_POST['showDepartmentFiles'])) {
 		</div>
 	</div>
 <?php
-} else if (isset($_POST['viewFile'])) {
+} elseif (isset($_POST["initLoad"])) {
+	$tableData = "";
+	$department_id = $_POST['department_id'];
+	$query = "SELECT * from `department` where `department_id`='$department_id'";
+	$res = $mysqli->query($query);
+	$row = $res->fetch_assoc();
+	$department = $row["department"];
+
+	$period_id = $_POST['period_id'];
+
+	// get period information
+	$period_info = getPeriodInformation($mysqli, $period_id);
+	// FETCH all validated spcr and ipcr 
+	// fetch all dpcr
+	// dpcr query 
+	$query = "SELECT * FROM `spms_performancereviewstatus` where `period_id` = '$period_id' and `department_id` = '$department_id'";
+	$sqlDpcr = $mysqli->query($query);
+
+	$data = [];
+
+	while ($row = $sqlDpcr->fetch_assoc()) {
+		$formOwner = new Employee_data();
+		$formOwner->set_emp($row['employees_id']);
+		$fullName = $formOwner->get_emp('lastName') . " " . $formOwner->get_emp('firstName') . " " . $formOwner->get_emp('middleName');
+
+		$formType = "";
+		$form_type = $row["formType"];
+		if ($form_type == 1) {
+			$formType = "IPCR";
+		} elseif ($form_type == 2) {
+			$formType = "SPCR";
+		} elseif ($form_type == 3) {
+			$formType = "DPCR";
+		} elseif ($form_type == 4) {
+			$formType = "DIVISION SPCR";
+		} else {
+			$formType = "IPCR (NGA)";
+		}
+		$item = [
+			"id" => $row["performanceReviewStatus_id"],
+			"name" => $fullName,
+			"form_type" => $row["formType"],
+			"formType" => $formType,
+			"date_submitted" => $row["dateAccomplished"],
+			"date_approved" => $row["approved"],
+			"date_certified" => $row["certify"],
+		];
+
+		$data[] = $item;
+	}
+
+	echo json_encode([
+		"data" => $data,
+		"department" => $department,
+		"period" => $period_info["period"],
+		"year" => $period_info["year"]
+	]);
+} else if (isset($_POST["viewFile"])) {
 	$sql = "SELECT * from `spms_performancereviewstatus` WHERE `performanceReviewStatus_id`='$_POST[dataId]'";
 	$sql = $mysqli->query($sql);
 	$sql = $sql->fetch_assoc();
@@ -124,5 +183,84 @@ if (isset($_POST['showDepartmentFiles'])) {
 	echo "<div id='Reviewcontent'>";
 	echo $pmtTable->_get();
 	echo "</div>";
+} elseif (isset($_POST['getDepartments'])) {
+	// $period = $_POST["period"];
+	// $year = $_POST["year"];
+	$data = [];
+	// $sql = "SELECT * from spms_mfo_period where `month_mfo`='$period' and `year_mfo`='$year'";
+	// $res = $mysqli->query($sql);
+	// $periodSql = $res->fetch_assoc();
+	$employee_id_auth = $user->get_emp('employees_id');
+	$sql = "SELECT * FROM `spms_departmentassignedtopmt` left join `department` on 
+			`spms_departmentassignedtopmt`.`department_id`=`department`.`department_id`
+			where `employees_id`='$employee_id_auth'";
+	$res = $mysqli->query($sql);
+	// echo json_encode($employee_id_auth);
+	while ($row = $res->fetch_assoc()) {
+		$data[] = $row;
+	}
+	echo json_encode($data);
+} elseif (isset($_POST['getPeriodId'])) {
+	$period = $_POST["period"];
+	$year = $_POST["year"];
+	$sql = "SELECT * from spms_mfo_period where `month_mfo`='$period' and `year_mfo`='$year'";
+	$res = $mysqli->query($sql);
+	$row = $res->fetch_assoc();
+	$period_id = $row['mfoperiod_id'];
+	$_SESSION['PMT'] = [
+		'period' => $period,
+		'year' => $year,
+		'period_id' => $period_id
+	];
+	echo json_encode($period_id);
+} elseif (isset($_POST["initSession"])) {
+	$data = isset($_SESSION['PMT']) ? $_SESSION['PMT'] : null;
+	echo json_encode($data);
 }
+// show form 
+elseif (isset($_POST["initLoadForm"])) {
+	$id = $_POST["id"];
+	$sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `performanceReviewStatus_id` = '$id'";
+	$res = $mysqli->query($sql);
+	$row = $res->fetch_assoc();
+	$period_id = $row["period_id"];
+	$period_info = getPeriodInformation($mysqli, $period_id);
+
+	$pcr_form = new PcrForm($mysqli);
+	$pcr_form->set_file_status_id($id);
+
+	echo json_encode([
+		"period" => $period_info["period"],
+		"year" => $period_info["year"],
+		"form_type" => $pcr_form->get_form_type(),
+		"data" => $pcr_form->get_rows()
+	]);
+}
+
+
+
+function getPeriodInformation($mysqli, $period_id)
+{
+	$sql = "SELECT * FROM `spms_mfo_period` WHERE `mfoperiod_id` = '$period_id'";
+	$res = $mysqli->query($sql);
+	$row = $res->fetch_assoc();
+	$period = $row["month_mfo"];
+	$year = $row["year_mfo"];
+	return [
+		"period" => $period,
+		"year" => $year,
+	];
+}
+
+
+function getFormData($mysqli, $id)
+{
+	$data = [];
+
+
+
+	return $data;
+}
+
+
 ?>

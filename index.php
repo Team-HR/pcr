@@ -63,6 +63,10 @@ if (isset($_SESSION['emp_id'])) {
 			require_once "assets/pages/browse/browse.php";
 		} else if (isset($_GET['PMT'])) {
 			require_once "assets/pages/PMT/pmt.php";
+		} else if (isset($_GET['showForms'])) {
+			require_once "assets/pages/PMT/showForms.php";
+		} else if (isset($_GET['showForm'])) {
+			require_once "assets/pages/PMT/form.php";
 		} else if (isset($_GET['showRsmView'])) {
 			// require_once "assets/libs/rsm_class.php";
 			require_once "assets/pages/rsmPMTview/content.php";

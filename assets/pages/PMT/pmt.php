@@ -1,130 +1,144 @@
-<?php
-
-if (isset($_GET['year']) && isset($_GET['period']) && $_GET['year'] != "" && $_GET['period'] != "") {
-	$year = $_GET['year'];
-	$period = $_GET['period'];
-} else {
-	$year = date('Y');
-	$period = "";
-	if (date('m') >= 7) {
-		$period = "January - June";
-	} else {
-		$period = "July - December";
-		$year--;
-	}
-}
-// $period = "July - December";
-$periodSql = "SELECT * from spms_mfo_period where `month_mfo`='$period' and `year_mfo`='$year'";
-$periodSql = $mysqli->query($periodSql);
-$periodSql = $periodSql->fetch_assoc();
-$userId = $user->get_emp('employees_id');
-$sql = "SELECT * FROM `spms_departmentassignedtopmt` left join `department` on 
-			`spms_departmentassignedtopmt`.`department_id`=`department`.`department_id`
-			where `employees_id`='$userId'";
-$sql = $mysqli->query($sql);
-$card = "";
-while ($data = $sql->fetch_assoc()) {
-	$card .= "
-			  <div class='card' >
-			    <div class='image'>
-			      <img src='assets/img/folder.jpg' style='width:50%;margin:auto'>
-			    </div>
-			    <div class='content'>
-			      <div class='header'>$data[department]</div>
-			      <div class='meta'>
-			        <a>Name of Department</a>
-			      </div>
-			    </div>
-			     <div class='extra'>
-			     	<button class='fluid ui primary button openBtn' data-target='$data[department_id]'>open</button>
-					 <br>
-			     	<button class='fluid ui secondary button openRsm' data-target='$data[department_id]'>Show RSM</button>
-			    </div>
-			  </div>
-		";
-}
-?>
-<div style="text-align:center">
-	<br>
-	<h1><?= $period ?> <?= $year ?></h1>
-</div>
-<center>
-	<div id='content'>
-		<form method="GET" action="index.php?PMT" style="width:20%;margin:auto" class="ui form">
-			<div class="field">
-				<div class="two fields">
-					<div class="field">
-						<input type="hidden" name="PMT">
-						<select name="period">
-							<option value="January - June">January - June</option>
-							<option value="July - December" <?= ($period == "July - December") ? "selected" : "" ?>>
-								July - December</option>
-						</select>
-					</div>
-					<div class="field">
-						<input type="number" name="year" value="<?= $year ?>" placeholder="Year">
-					</div>
-					<button class="ui button">Go</button>
+<div id="pmtIndexApp">
+	<div class="ui segment center aligned" style="margin: 20px;">
+		<h1 class="ui header" v-if="period && year">{{period}} {{year}}</h1>
+		<div class="ui form" style="width: 40%; margin: auto;">
+			<div class="ui two column fields">
+				<div class="field">
+					<select name="period" id="selectPeriod" class="ui dropdown" v-model="period">
+						<option value="" selected disabled>Select Period</option>
+						<option value="January - June">January - June</option>
+						<option value="July - December">July - December</option>
+					</select>
 				</div>
+				<div class="field">
+					<select name="year" id="selectYear" class="ui dropdown" v-model="year">
+						<option value="" selected disabled>Select Year</option>
+						<option value="2023"> 2023</option>
+						<option value="2022">2022</option>
+						<option value="2021">2021</option>
+					</select>
+				</div>
+				<!-- <div class="field">
+					<button type="submit" class="ui fluid primary button">Get Departments</button>
+				</div> -->
 			</div>
-		</form>
-		<br>
-		<br>
-		<br>
-		<div class="ui centered link cards">
-			<?= $card ?>
+		</div>
+		<!-- cards -->
+		<div v-if="!departments">
+			<h2>Please select a period and year</h2>
+		</div>
+		<div v-else-if="departments.length < 1">
+			<h2>No assigned departments</h2>
+		</div>
+		<div v-else class="ui centered link cards">
+			<template v-for="department,i in departments" :key="i">
+				<div class="card">
+					<div class="image">
+						<img src="assets/img/folder.jpg" style="width:50%;margin:auto">
+					</div>
+					<div class="content">
+						<div class="header">{{department.department}}</div>
+						<div class="meta">
+							<a>Name of Department</a>
+						</div>
+					</div>
+					<div class="extra">
+						<!-- <a class="fluid ui primary button" @click.prevent="getEmployees(department.department_id)">Open</a> -->
+						<a class="fluid ui primary button" :href=`?showForms&period_id=${period_id}&department_id=${department.department_id}`>Open</a>
+						<br>
+						<a class="fluid ui primary button" :href=`?showRsmView&period=${period_id}&department=${department.department_id}`>Show RSM</a>
+					</div>
+				</div>
+			</template>
 		</div>
 	</div>
-</center>
-<script type="text/javascript">
-	(function() {
-		'use strict';
-		var openBtn = document.getElementsByClassName("openBtn");
-		var openRsm = document.getElementsByClassName("openRsm");
-		var countCards = 0;
-		while (countCards < openBtn.length) {
-			openBtn[countCards].addEventListener('click', cardsFunction);
-			openRsm[countCards].addEventListener('click', openRsmFunction);
-			countCards++;
-		}
+</div>
 
-		function cardsFunction() {
-			$('.segment').dimmer('show');
-			var dataTarget = event.target.attributes['data-target'].value;
-			$.post('?config=PMT', {
-				showDepartmentFiles: true,
-				departmentId: dataTarget,
-				period: <?= $periodSql['mfoperiod_id'] ?>
-			}, function(data, textStatus, xhr) {
-				document.getElementById('content').innerHTML = data;
-				var count = 0;
-				var openFile = document.getElementsByClassName('openFile');
-				console.log(openFile);
-				var countBtn = 0;
-				while (countBtn < openFile.length) {
-					openFile[countBtn].addEventListener('click', openFileFunc);
-					countBtn++; 
+
+<script>
+	/* Vue3 Start*/
+	const {
+		createApp
+	} = Vue
+
+	createApp({
+		data() {
+			return {
+				period: "",
+				year: "",
+				period_id: null,
+				departments: null
+			}
+		},
+		watch: {
+			period(newValue, oldValue) {
+				if (this.period && this.year) {
+					this.getDepartments()
 				}
-				$('.segment').dimmer('hide');
-			});
+			},
+			year(newValue, oldValue) {
+				if (this.period && this.year) {
+					this.getDepartments()
+				}
+			}
+		},
+		computed: {
+
+		},
+		methods: {
+
+			initSession() {
+				// get session data for pmt
+				$.post('?config=PMT', {
+					initSession: true,
+				}, (data, textStatus, xhr) => {
+					const res = JSON.parse(data)
+					const sel = res ? res : {}
+					if (sel.period && sel.year && sel.period_id) {
+						this.period = sel.period
+						this.year = sel.year
+						this.period_id = sel.period_id
+					}
+				});
+			},
+
+			getDepartments() {
+				$.post('?config=PMT', {
+					getDepartments: true,
+				}, (data, textStatus, xhr) => {
+					this.departments = JSON.parse(data)
+					this.getPeriodId()
+				});
+			},
+
+			getPeriodId() {
+				$.post('?config=PMT', {
+					getPeriodId: true,
+					period: this.period,
+					year: this.year,
+				}, (data, textStatus, xhr) => {
+					this.period_id = JSON.parse(data)
+				});
+			},
+
+			getEmployees(department_id) {
+				console.log(department_id);
+				$.post('?config=PMT', {
+					getEmployees: true,
+					departmentId: department_id,
+					period: this.period_id
+				}, (data, textStatus, xhr) => {
+					const res = JSON.parse(data)
+					console.log("employees: ", res);
+				});
+			}
+
+
+		},
+		mounted() {
+			this.initSession();
 		}
 
-		function openRsmFunction() {
-			var dataTarget = event.target.attributes['data-target'].value;
-			var period = <?= $periodSql['mfoperiod_id'] ?>;
-			window.open("?showRsmView&period=" + period + "&department=" + dataTarget, "_blank");
-		}
-
-		function openFileFunc() {
-			$('.segment').dimmer('show');
-			var dataId = event.target.attributes['data-target'].value;
-			$.post('?config=PMT', {
-				viewFile: true,
-				dataId: dataId,
-			}, function(data, textStatus, xhr) {
-				document.getElementById('content').innerHTML = data;
-				$('.segment').dimmer('hide');
-			});
-		}
-	})();
+	}).mount('#pmtIndexApp')
+	/* Vue3 End*/
 </script>
