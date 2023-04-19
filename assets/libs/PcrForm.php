@@ -4,9 +4,12 @@ class PcrForm
 {
 	private $mysqli;
 	public $fileStatus;
+	private $name_formatter;
 
 	public function __construct($mysqli)
 	{
+		require_once "NameFormatter.php";
+		$this->name_formatter = new NameFormatter($mysqli);
 		$this->mysqli = $mysqli;
 	}
 
@@ -20,6 +23,59 @@ class PcrForm
 			$file_status = $row;
 		}
 		$this->fileStatus = $file_status;
+
+		// get employee department
+		$department_id = $file_status["department_id"];
+		$sql = "SELECT department FROM department WHERE department_id = '$department_id'";
+		$res = $this->mysqli->query($sql);
+		$row = $res->fetch_assoc();
+		$department = $row["department"];
+
+
+		// set employee_id for name formatting
+		$this->name_formatter->set_employee_id($file_status["employees_id"]);
+		$name = $this->name_formatter->getFullNameStandardUpper();
+
+		// set employee_id for immediate name formatting
+		$name_supervisor = "";
+		if (is_numeric($file_status["ImmediateSup"])) {
+			$this->name_formatter->set_employee_id($file_status["ImmediateSup"]);
+			$name_supervisor = $this->name_formatter->getFullNameStandardUpper();
+		} else {
+			$name_supervisor = $file_status["ImmediateSup"];
+		}
+
+		// set employee_id for department_head name formatting
+		$name_department_head = "";
+		if (is_numeric($file_status["DepartmentHead"])) {
+			$this->name_formatter->set_employee_id($file_status["DepartmentHead"]);
+			$name_department_head = $this->name_formatter->getFullNameStandardUpper();
+		} else {
+			$name_supervisor = $file_status["DepartmentHead"];
+		}
+
+		$name_head_of_agency = $file_status["HeadAgency"];
+
+		$form_type = "";
+
+		if ($file_status["formType"] == "1") {
+			$form_type = "INDIVIDUAL PERFORMANCE COMMITMENT AND REVIEW (IPCR)";
+		} else if ($file_status["formType"] == "2") {
+			$form_type = "SECTION PERFORMANCE COMMITMENT AND REVIEW (SPCR)";
+		} else if ($file_status["formType"] == "3") {
+			$form_type = "DEPARTMENT PERFORMANCE COMMITMENT AND REVIEW (DPCR)";
+		} else {
+			$form_type = "DIVISION PERFORMANCE COMMITMENT AND REVIEW (DIVISION PCR)";
+		}
+
+		$this->fileStatus = [
+			"name" => $name,
+			"name_supervisor" => $name_supervisor,
+			"name_department_head" => $name_department_head,
+			"name_head_of_agency" => $name_head_of_agency,
+			"department"  => $department,
+			"form_type" => $form_type
+		] + $this->fileStatus;
 	}
 
 	public function get_form_type()
@@ -109,11 +165,47 @@ class PcrForm
 						"mi_succIn" => $si["mi_succIn"],
 						"si_corrections" => $si["corrections"]
 					];
-					$data[] = $_tr + $si;
+					$data[] = /* $_tr + */ $si;
 				}
 			}
 		}
+
+		// transform $data with fetched spms_corefuncdata
+		foreach ($data as $key => $datum) {
+			if (isset($datum["mi_id"])) {
+				$mi_id = $datum["mi_id"];
+				$core_function_data = $this->get_core_function_data($mi_id);
+				$data[$key] = $data[$key] +  $core_function_data;
+			}
+		}
+
 		return $data;
+	}
+
+
+	private function get_core_function_data($mi_id)
+	{
+
+		$mysqli = $this->mysqli;
+		$employee_id = $this->fileStatus["employees_id"];
+		$sql = "SELECT * FROM `spms_corefucndata` WHERE `p_id` = '$mi_id' AND `empId` = '$employee_id' LIMIT 1";
+		$res = $mysqli->query($sql);
+		$row = $res->fetch_assoc();
+
+		if ($row) {
+			$row = [
+				"cfd_id" => $row["cfd_id"],
+				"actualAcc" => $row["actualAcc"],
+				"q" => $row["Q"],
+				"e" => $row["E"],
+				"t" => $row["T"],
+				"percent" => $row["percent"]
+			];
+		} else {
+			$row = [];
+		}
+
+		return $row;
 	}
 
 

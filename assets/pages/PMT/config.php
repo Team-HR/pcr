@@ -230,6 +230,7 @@ elseif (isset($_POST["initLoadForm"])) {
 	$pcr_form->set_file_status_id($id);
 
 	echo json_encode([
+		"file_status" => $pcr_form->fileStatus,
 		"period" => $period_info["period"],
 		"year" => $period_info["year"],
 		"form_type" => $pcr_form->get_form_type(),
