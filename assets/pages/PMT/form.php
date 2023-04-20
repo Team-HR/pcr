@@ -28,7 +28,7 @@
 					Ratee
 				</td>
 			</tr>
-			<tr style="background-color: #00ffdc14;">
+			<tr style="background-color: #86fea0;">
 				<td style="border: 1px solid grey;">
 					<span style="font-size: 9px;">Received by:</span><br>
 					<div class="ui fluid container center aligned">
@@ -62,20 +62,22 @@
 		<br>
 
 		<table class="ui structured celled table">
-			<tr>
-				<td rowspan="2">MFO / PAP</td>
-				<td rowspan="2">Success Indicator</td>
-				<td rowspan="2">Actual Accomplishment</td>
-				<td colspan="4">Rating Matrix</td>
-				<td rowspan="2">Remarks</td>
-				<td rowspan="2">Options</td>
-			</tr>
-			<tr>
-				<td>Q</td>
-				<td>E</td>
-				<td>T</td>
-				<td>A</td>
-			</tr>
+			<thead style="background-color: #00ffdc14; font-weight: bold; text-align: center;">
+				<tr>
+					<td rowspan="2">MFO / PAP</td>
+					<td rowspan="2">SUCCESS INDICATOR</td>
+					<td rowspan="2">ACTUAL ACCOMPLISHMENT</td>
+					<td colspan="4">RATING MATRIX</td>
+					<td rowspan="2">REMARKS</td>
+					<td rowspan="2">OPTIONS</td>
+				</tr>
+				<tr>
+					<td style="width: 20px;">Q</td>
+					<td style="width: 20px;">E</td>
+					<td style="width: 20px;">T</td>
+					<td style="width: 20px;">A</td>
+				</tr>
+			</thead>
 			<template v-for="item,i in items" :key="i">
 				<!-- if no success indicators -->
 				<tr v-if="item.colspan == 'all'">
@@ -86,30 +88,62 @@
 				<!-- else if has success indicators -->
 				<tr v-else-if="item.colspan == 0">
 					<td :rowspan="item.rowspan">
-						<div :style="getMargin(item.level)">{{ item.cf_count }} {{ item.cf_title }}</div>
+						<div :style="getMargin(item.level)">
+							<button class="ui basic button">{{item.percent + "%"}}</button> {{ item.cf_count }} {{ item.cf_title }}
+						</div>
 					</td>
 					<td>
 						{{item.mi_succIn}}
 					</td>
-					<td>{{item.actualAcc}}</td>
-					<td>{{item.q}}</td>
-					<td>{{item.e}}</td>
-					<td>{{item.t}}</td>
-					<td></td>
-					<td></td>
-					<td></td>
+					<!-- if has spms_corefucndata -->
+					<template v-if="item.cfd_id">
+						<td>{{item.actualAcc}}</td>
+						<td>{{item.q}}</td>
+						<td>{{item.e}}</td>
+						<td>{{item.t}}</td>
+						<td style="text-align: center;">{{item.average}}</td>
+						<td></td>
+						<td width="150" style="text-align: center;"> <button class="ui small button" @click="review(item)"><i class="ui icon edit"></i> Review</button> </td>
+					</template>
+					<!-- else if disabled/not_applicable -->
+					<template v-else-if="item.not_applicable == '1'">
+						<td colspan="5" style="color:blue; text-align: center;"> Not Applicable </td>
+						<td></td>
+						<td></td>
+					</template>
+					<!-- else not accomplished/filled out -->
+					<template v-else>
+						<td colspan="5" style="color:red; text-align: center;"> Not Accomplished </td>
+						<td></td>
+						<td></td>
+					</template>
 				</tr>
 				<tr v-else-if="!item.cf_title">
 					<td>
 						{{item.mi_succIn}}
 					</td>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
+					<!-- if has spms_corefucndata -->
+					<template v-if="item.cfd_id">
+						<td>{{item.actualAcc}}</td>
+						<td>{{item.q}}</td>
+						<td>{{item.e}}</td>
+						<td>{{item.t}}</td>
+						<td style="text-align: center;">{{item.average}}</td>
+						<td></td>
+						<td></td>
+					</template>
+					<!-- else if disabled/not_applicable -->
+					<template v-else-if="item.not_applicable == '1'">
+						<td colspan="5" style="color:blue; text-align: center;"> Not Applicable </td>
+						<td></td>
+						<td></td>
+					</template>
+					<!-- else not accomplished/filled out -->
+					<template v-else>
+						<td colspan="5" style="color:red; text-align: center;"> Not Accomplished </td>
+						<td></td>
+						<td></td>
+					</template>
 				</tr>
 			</template>
 		</table>
@@ -120,6 +154,90 @@
 		</template>
 
 	</div>
+
+	<!-- start reviewForm -->
+	<div class="ui modal" id="reviewForm">
+		<div class="header">
+			<i style="font-weight:lighter; _color:grey;">{{itemForEdit.cf_count}} {{itemForEdit.cf_title}}</i>
+		</div>
+
+		<div class="content">
+			<div class="ui form">
+				<div class="field">
+					<label>Success Indicators</label>
+					<!-- <textarea rows="1" readonly style="border: none 0px;">{{ itemForEdit.mi_succIn }}</textarea> -->
+					<p style="margin-left: 17px;">{{itemForEdit.mi_succIn}}</p>
+				</div>
+				<div class="field">
+					<label>Actual Accomplishments</label>
+					<textarea rows="2" v-model="itemForEdit.actualAcc"></textarea>
+				</div>
+				<div class="field" v-if="itemForEdit.q">
+					<label>Quality</label>
+					<select v-model="itemForEdit.q">
+						<template v-for="measure,score in itemForEdit.mi_quality" :key="score">
+							<option v-if="measure" :value="score">{{measure}}</option>
+						</template>
+					</select>
+				</div>
+				<div class="field" v-if="itemForEdit.e">
+					<label>Efficiency</label>
+					<select v-model="itemForEdit.e">
+						<template v-for="measure,score in itemForEdit.mi_eff" :key="score">
+							<option v-if="measure" :value="score">{{measure}}</option>
+						</template>
+					</select>
+				</div>
+				<div class="field" v-if="itemForEdit.t">
+					<label>Timeliness</label>
+					<select v-model="itemForEdit.t">
+						<template v-for="measure,score in itemForEdit.mi_time" :key="score">
+							<option v-if="measure" :value="score">{{measure}}</option>
+						</template>
+					</select>
+				</div>
+				<div class="field">
+					<label>Weight Allocation(%)</label>
+					<input type="number" v-model="itemForEdit.percent">
+				</div>
+
+
+
+				<div v-if="itemForEdit.critics && itemForEdit.critics.IS">
+					<div class="ui segments field">
+						<div class="ui green inverted segment">Immediate Supervisor</div>
+						<textarea class="ui secondary" rows="2" readonly v-model="itemForEdit.critics.IS"></textarea>
+					</div>
+				</div>
+
+				<div v-if="itemForEdit.critics && itemForEdit.critics.DH">
+					<div class="ui segments field">
+						<div class="ui orange inverted segment">Department Head</div>
+						<textarea class="ui secondary" rows="2" readonly v-model="itemForEdit.critics.DH"></textarea>
+					</div>
+				</div>
+
+				<!-- <div v-if="itemForEdit.critics && itemForEdit.critics.PMT"> -->
+				<div class="ui segments field">
+					<div class="ui red inverted segment">PMT</div>
+					<textarea class="ui secondary" rows="2" v-model="pmtComments" placeholder="Enter your comments/corrections here..."></textarea>
+				</div>
+				<!-- </div> -->
+
+
+			</div>
+		</div>
+		<div class="actions">
+			<div class="ui deny button">
+				Cancel
+			</div>
+			<div class="ui positive _right _labeled _icon button">
+				Save
+				<!-- <i class="checkmark icon"></i> -->
+			</div>
+		</div>
+	</div>
+	<!-- end reviewForm -->
 
 </div>
 
@@ -138,7 +256,9 @@
 				year: "",
 				department: "",
 				id: new URL(window.location.href).searchParams.get("id"),
-				items: null
+				items: null,
+				itemForEdit: {},
+				pmtComments: ""
 			}
 		},
 		watch: {
@@ -148,6 +268,19 @@
 
 		},
 		methods: {
+
+			review(item) {
+				this.itemForEdit = JSON.parse(JSON.stringify(item))
+				this.pmtComments = "";
+				if (this.itemForEdit.critics && this.itemForEdit.critics.PMT) {
+					this.pmtComments = this.itemForEdit.critics.PMT
+				}
+				// console.log(this.itemForEdit);
+				$('#reviewForm').modal({
+					closable: false
+				}).modal('show');
+				// console.log(item);
+			},
 			getMargin(level) {
 				const margin = level * 30;
 				return `margin-left:${margin}px;`
@@ -159,12 +292,10 @@
 					id: this.id,
 				}, (data, textStatus, xhr) => {
 					const res = JSON.parse(data)
-					// console.log("initLoad: ", res);
 					this.period = res.period
 					this.year = res.year
 					this.items = res.data
 					this.file_status = res.file_status
-					console.log(res);
 				});
 			}
 

@@ -138,7 +138,10 @@ class PcrForm
 			$si = [
 				"mi_id" => $si["mi_id"],
 				"mi_succIn" => $si["mi_succIn"],
-				"si_corrections" => $si["corrections"]
+				"si_corrections" => $si["corrections"],
+				"mi_quality" => unserialize($si["mi_quality"]),
+				"mi_eff" => unserialize($si["mi_eff"]),
+				"mi_time" => unserialize($si["mi_time"])
 			];
 			$tr = $tr + $si;
 		}
@@ -163,7 +166,10 @@ class PcrForm
 					$si = [
 						"mi_id" => $si["mi_id"],
 						"mi_succIn" => $si["mi_succIn"],
-						"si_corrections" => $si["corrections"]
+						"si_corrections" => $si["corrections"],
+						"mi_quality" => unserialize($si["mi_quality"]),
+						"mi_eff" => unserialize($si["mi_eff"]),
+						"mi_time" => unserialize($si["mi_time"])
 					];
 					$data[] = /* $_tr + */ $si;
 				}
@@ -193,16 +199,60 @@ class PcrForm
 		$row = $res->fetch_assoc();
 
 		if ($row) {
+
+			$q = $row["Q"];
+			$e = $row["E"];
+			$t = $row["T"];
+			$percent = $row["percent"];
+			// get average
+			$average = null;
+			if ($q || $e || $t) {
+				$measures = [];
+				if ($q) {
+					$measures[] = $q;
+				}
+				if ($e) {
+					$measures[] = $e;
+				}
+				if ($t) {
+					$measures[] = $t;
+				}
+
+				$average = array_sum($measures) / count($measures);
+
+				if ($percent) {
+					$average = ($percent / 100) * $average;
+				}
+
+				$average = bcdiv($average, 1, 2);
+				$average = explode(".", $average);
+				if ($average[1] == '00') {
+					$average = $average[0];
+				} else {
+					$average = $average[0] . "." . $average[1];
+				}
+
+				if (strlen($average) == 4) {
+					if ($average[3] == "0") {
+						$average = substr($average, 0, -1);
+					}
+				}
+			}
 			$row = [
 				"cfd_id" => $row["cfd_id"],
 				"actualAcc" => $row["actualAcc"],
-				"q" => $row["Q"],
-				"e" => $row["E"],
-				"t" => $row["T"],
-				"percent" => $row["percent"]
+				"q" => $q,
+				"e" => $e,
+				"t" => $t,
+				"average" => $average,
+				"percent" => $percent,
+				"not_applicable" => $row["disable"],
+				"critics" => isset($row["critics"]) ? unserialize($row["critics"]) : NULL
 			];
 		} else {
-			$row = [];
+			$row = [
+				"cfd_id" => NULL,
+			];
 		}
 
 		return $row;
@@ -214,12 +264,10 @@ class PcrForm
 		$mysqli = $this->mysqli;
 		# for more compact and faster query
 		# ... and `dep_id` = '$department_id'
-
 		# department_id from spms_performancereviewstatus
 		$department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
 		$period_id = $fileStatus["period_id"];
 		$employee_id = $fileStatus["employees_id"];
-
 		# not recommended department_id from employees table
 		$main_Arr = [];
 		$sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$period_id' and `dep_id` = '$department_id' ORDER BY `spms_corefunctions`.`cf_count` ASC";
@@ -235,7 +283,6 @@ class PcrForm
 			if (count($si)) {
 				$parent[1] = $si;
 			}
-
 			if (count($si) || $parent[2]) {
 				array_push($main_Arr, $parent);
 				$parent = [[], [], []];
