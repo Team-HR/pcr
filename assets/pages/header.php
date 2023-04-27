@@ -97,16 +97,15 @@
 			} else if (strtoupper($user->authorization[$index]) == strtoupper('pmt')) {
 			?>
 				<a class="item" href="?PMT">Performance Management Team</a>
-			<?php
+	<?php
 			}
 		}
 	}
-	// print json_encode($user->authorization);
-
-	if (in_array("PMT", $user->authorization) || in_array("HR", $user->authorization)) {
-		print ('<a class="item" href="?HR" style="color:blue;"><i class="icon id card outline"></i> HRMO Dashboard</a>');
+	if ($user->authorization) {
+		if (in_array("PMT", $user->authorization) || in_array("HR", $user->authorization)) {
+			print('<a class="item" href="?HR" style="color:blue;"><i class="icon id card outline"></i> HRMO Dashboard</a>');
+		}
 	}
-
 	?>
 
 	<a class="item" href="?Browse">Browse Records</a>
