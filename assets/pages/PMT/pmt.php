@@ -24,11 +24,11 @@
 			</div>
 		</div>
 		<!-- cards -->
-		<div v-if="!departments">
-			<h2>Please select a period and year</h2>
+		<div v-if="!departments" class="ui container center aligned">
+			<i style="font-size: 20px; color: grey;">Please select a period and year</i>
 		</div>
-		<div v-else-if="departments.length < 1">
-			<h2>No assigned departments</h2>
+		<div v-else-if="departments.length < 1" class="ui container center aligned">
+			<i style="font-size: 20px; color: red;">No assigned departments</i>
 		</div>
 		<div v-else class="ui centered link cards">
 			<template v-for="department,i in departments" :key="i">
