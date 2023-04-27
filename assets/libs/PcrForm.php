@@ -5,6 +5,7 @@ class PcrForm
 	private $mysqli;
 	public $fileStatus;
 	private $name_formatter;
+	private $core_final_numerical_rating;
 
 	public function __construct($mysqli)
 	{
@@ -31,6 +32,7 @@ class PcrForm
 		$row = $res->fetch_assoc();
 		$department = $row["department"];
 
+		$employees_id = isset($file_status["employees_id"]) ? $file_status["employees_id"] : null;
 
 		// set employee_id for name formatting
 		$this->name_formatter->set_employee_id($file_status["employees_id"]);
@@ -67,14 +69,28 @@ class PcrForm
 		} else {
 			$form_type = "DIVISION PERFORMANCE COMMITMENT AND REVIEW (DIVISION PCR)";
 		}
+		// get position start
+		$position = "";
+		if ($employees_id) {
+			$sql = "SELECT `employees`.`position_id`, `positiontitles`.* FROM `employees` LEFT JOIN `positiontitles` ON `employees`.`position_id` = `positiontitles`.`position_id` WHERE `employees`.`employees_id` = '$employees_id'";
+			$res = $mysqli->query($sql);
+			if ($row = $res->fetch_assoc()) {
+				$position = $row["position"];
+				if (isset($row["functional"]) && $row["functional"] != "CASUAL") {
+					$position .= "- " . $row["functional"];
+				}
+			}
+		}
+		// get position end
 
 		$this->fileStatus = [
 			"name" => $name,
+			"position" => $position,
 			"name_supervisor" => $name_supervisor,
 			"name_department_head" => $name_department_head,
 			"name_head_of_agency" => $name_head_of_agency,
 			"department"  => $department,
-			"form_type" => $form_type
+			"form_type" => $form_type,
 		] + $this->fileStatus;
 	}
 
@@ -84,7 +100,7 @@ class PcrForm
 	}
 
 
-	public function get_rows()
+	public function get_core_functions()
 	{
 		$fileStatus = $this->fileStatus;
 		$mysqli = $this->mysqli;
@@ -105,7 +121,8 @@ class PcrForm
 			$cTotal += $t0[2] + $child[2];
 			$in0++;
 		}
-		// return bcdiv($totalav, 1, 2);
+
+		$final_numerical_rating = bcdiv($totalav, 1, 2);
 		$data = [];
 		# START transform $arr to table rows
 		// top level of array is the parent
@@ -120,7 +137,23 @@ class PcrForm
 		}
 
 		# END transform $arr to table rows
-		return $data;
+
+		$percent = 0;
+		foreach ($data as $value) {
+			$percent += $value["percent"];
+		}
+
+
+		return [
+			"percent" => $percent,
+			"rows" => $data,
+			"final_numerical_rating" => $final_numerical_rating
+		];
+	}
+
+	public function get_core_final_numerical_rating()
+	{
+		return $this->core_final_numerical_rating;
 	}
 
 	private function get_child_row($level, $row, $data)
@@ -238,6 +271,18 @@ class PcrForm
 					}
 				}
 			}
+
+			// parse critics START
+			$critics = null;
+			if (isset($row["critics"])) {
+				$critics = unserialize($row["critics"]);
+				if (!$critics["IS"] and !$critics["DH"] and !$critics["PMT"]) {
+					$critics = false;
+				}
+			}
+			// parse critics END
+
+
 			$row = [
 				"cfd_id" => $row["cfd_id"],
 				"actualAcc" => $row["actualAcc"],
@@ -247,7 +292,7 @@ class PcrForm
 				"average" => $average,
 				"percent" => $percent,
 				"not_applicable" => $row["disable"],
-				"critics" => isset($row["critics"]) ? unserialize($row["critics"]) : NULL
+				"critics" => $critics
 			];
 		} else {
 			$row = [
@@ -436,10 +481,10 @@ class PcrForm
 	}
 
 
-	private function strategicTr($fileStatus)
+	public function get_strategic_function()
 	{
 		$mysqli = $this->mysqli;
-
+		$fileStatus = $this->fileStatus;
 		$period_id = $fileStatus['period_id'];
 		$employee_id = $fileStatus['employees_id'];
 
@@ -447,15 +492,24 @@ class PcrForm
 		$sql = $mysqli->query($sql);
 		$totalCount = 0;
 		$totalAv = 0;
-		while ($row = $sql->fetch_assoc()) {
+		$final_numerical_rating = 0;
+		$major_function = "";
+		$success_indicator = "";
+		$acctual_accomplishment = "";
+		if ($row = $sql->fetch_assoc()) {
 			// $av = $row['Q']+$row['T'];
 			$av = isset($row['average']) && $row['average'] > 0 ? $row['average'] : 0;
-			$col = "";
+			$major_function = $row["mfo"];
+			$success_indicator = $row["succ_in"];
+			$acctual_accomplishment = $row["acc"];
+			$noStrat = isset($row["noStrat"]) && $row["noStrat"] == 1 ? true : false;
+			$remark = $row["remark"];
 			$totalAv += $av;
 			$totalCount++;
 		}
 
 		if ($totalAv > 0) {
+			$final_numerical_rating = $totalAv;
 			$totalAv = $totalAv / $totalCount;
 		} else {
 			$totalAv = 0;
@@ -472,17 +526,31 @@ class PcrForm
 		}
 		// $totalAv = $totalAv*0.20;
 		// $totalAv = $totalAv;
-		return bcdiv($totalAv, 1, 2);
+
+		$final_average_rating =  bcdiv($totalAv, 1, 2);
+
+		return [
+			"row" => $row,
+			"mfo" => $major_function,
+			"success_indicator" => $success_indicator,
+			"acctual_accomplishment" => $acctual_accomplishment,
+			"final_numerical_rating" => $final_numerical_rating,
+			"final_average_rating" => $final_average_rating,
+			"noStrat" => $noStrat,
+			"remark" => $remark,
+		];
 	}
 
-
-	private function supportFunctionTr($fileStatus)
+	public function get_support_functions()
 	{
+		$rows = [];
 		$mysqli = $this->mysqli;
+		$fileStatus = $this->fileStatus;
 		$formType = $fileStatus['formType'];
 		$employee_id = $fileStatus['employees_id'];
 		$period_id = $fileStatus['period_id'];
 		$totalAv = 0;
+
 		if ($formType == '1' || $formType == '5') {
 			$sql = "SELECT * FROM `spms_supportfunctions` where `type`=1";
 		} elseif ($formType == '3') {
@@ -490,12 +558,13 @@ class PcrForm
 		} elseif ($formType == '2' || $formType == '4') {
 			$sql = "SELECT * FROM `spms_supportfunctions` where `type`=2";
 		} else {
-			return bcdiv($totalAv, 1, 2);
+			// return bcdiv($totalAv, 1, 2);
 		}
 
 		$sql = $mysqli->query($sql);
 
 		$emp_count = 0;
+		$total_percentage = 0;
 
 		while ($tr = $sql->fetch_assoc()) {
 			$sqlSelect = "SELECT * from spms_supportfunctiondata where parent_id='$tr[id_suppFunc]' and emp_id='$employee_id' and period_id='$period_id'";
@@ -503,7 +572,9 @@ class PcrForm
 			$sqlSelectCount = $sqlSelect->num_rows;
 			if ($sqlSelectCount > 0) {
 				$fdata = $sqlSelect->fetch_assoc();
+
 				$av = 0;
+				$total_percentage += $fdata['percent'];
 				$per = $fdata['percent'] / 100;
 				$q = 0;
 				$e = 0;
@@ -519,7 +590,17 @@ class PcrForm
 					$q = $fdata['T'] * $per;
 				}
 				$av = $q + $e + $t;
-				$col = "";
+
+				$fdata["critics"] = isset($fdata["critics"]) ? unserialize($fdata["critics"]) : null;
+
+				$rows[] = [
+					"mi_quality" => isset($tr["Q"]) ? unserialize($tr["Q"]) : null,
+					"mi_eff" => isset($tr["E"]) ? unserialize($tr["E"]) : null,
+					"mi_time" => isset($tr["T"]) ? unserialize($tr["T"]) : null,
+					"q" => isset($fdata["Q"]) ? $fdata["Q"] : null,
+					"e" => isset($fdata["E"]) ? $fdata["E"] : null,
+					"t" => isset($fdata["T"]) ? $fdata["T"] : null,
+				] + $fdata + $tr + ["average_rating" => bcdiv($av, 1, 2)];
 
 				$totalAv += $av;
 			} else {
@@ -527,6 +608,54 @@ class PcrForm
 			}
 		}
 
-		return bcdiv($totalAv, 1, 2);
+		return [
+			"rows" => $rows,
+			"final_numerical_rating" => bcdiv($totalAv, 1, 2),
+			"percent" => $total_percentage
+		];
+	}
+
+	public function get_comments_and_reccomendations()
+	{
+		$period_id = $this->fileStatus["period_id"];
+		$employees_id = $this->fileStatus["employees_id"];
+		$comments_and_reccomendations = "";
+		$sql = "SELECT * FROM `spms_commentrec` WHERE `period_id` = '$period_id' AND `emp_id` = '$employees_id'";
+		$res = $this->mysqli->query($sql);
+		if ($row = $res->fetch_assoc()) {
+			$comments_and_reccomendations = $row["comment"];
+		}
+		return $comments_and_reccomendations;
+	}
+
+
+	public function get_overall_final_rating()
+	{
+		$final_numerical_rating = 0;
+		$final_adjectival_rating = null;
+
+		$strategic_function = $this->get_strategic_function();
+		$core_functions = $this->get_core_functions();
+		$support_functions = $this->get_support_functions();
+
+		$final_numerical_rating += isset($strategic_function["final_average_rating"]) ? $strategic_function["final_average_rating"] : 0;
+		$final_numerical_rating += isset($core_functions["final_numerical_rating"]) ? $core_functions["final_numerical_rating"] : 0;
+		$final_numerical_rating += isset($support_functions["final_numerical_rating"]) ? $support_functions["final_numerical_rating"] : 0;
+		$final_numerical_rating = bcdiv($final_numerical_rating, 1, 2);
+
+		if ($final_numerical_rating <= 5 && $final_numerical_rating > 4) {
+			$final_adjectival_rating = "OUTSTANDING";
+		} elseif ($final_numerical_rating <= 4 && $final_numerical_rating > 3) {
+			$final_adjectival_rating = "VERY SATISFACTORY";
+		} elseif ($final_numerical_rating <= 3 && $final_numerical_rating > 2) {
+			$final_adjectival_rating = "SATISFACTORY";
+		} elseif ($final_numerical_rating <= 2 && $final_numerical_rating > 1) {
+			$final_adjectival_rating = "UNSATISFACTORY";
+		}
+
+		return [
+			"final_numerical_rating" => $final_numerical_rating,
+			"final_adjectival_rating" => $final_adjectival_rating
+		];
 	}
 }

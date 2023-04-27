@@ -4,13 +4,13 @@
 		<h2 style="margin-top: 0px;">{{ period + " " + year }}</h2>
 	</div>
 
-	<div class="ui segment" style="margin-left: 20px; margin-right: 20px;">
+	<div class="ui basic segment" style="margin-left: 20px; margin-right: 20px;">
 		<!-- 
 		<p>
 			I, <b>{{ file_status.name }}</b> , _______________________ of the <b>{{ file_status.department }}</b> commit to deliver and agree to be rated on the attainment of the following targets in accordance with the indicated measures for the period {{ period + " " + year }}.
 		</p> -->
 
-		<table style="width: 100%; _background-color:antiquewhite; border: 1px solid grey; border-collapse:collapse;">
+		<table class="ui celled table" style="width: 100%; _background-color:antiquewhite; _border: 1px solid grey; _border-collapse:collapse;">
 			<tr>
 				<td colspan="4" style="text-align: center;">
 					<h4>{{ file_status.form_type }}</h4>
@@ -18,7 +18,7 @@
 			</tr>
 			<tr>
 				<td colspan="4">
-					I, <b>{{ file_status.name }}</b> , _______________________ of the <b>{{ file_status.department }}</b> commit to deliver and agree to be rated on the attainment of the following targets in accordance with the indicated measures for the period {{ period + " " + year }}.
+					I, <b>{{ file_status.name }}</b> , {{ file_status.position }} of the <b>{{ file_status.department }}</b> commit to deliver and agree to be rated on the attainment of the following targets in accordance with the indicated measures for the period {{ period + " " + year }}.
 				</td>
 			</tr>
 			<tr>
@@ -28,29 +28,29 @@
 					Ratee
 				</td>
 			</tr>
-			<tr style="background-color: #86fea0;">
-				<td style="border: 1px solid grey;">
+			<tr style="background-color: #0080003d;">
+				<td>
 					<span style="font-size: 9px;">Received by:</span><br>
 					<div class="ui fluid container center aligned">
 						<u><b>{{file_status.name_supervisor}}</b></u> <br>
 						<span>Immediate Superior</span>
 					</div>
 				</td>
-				<td style="border: 1px solid grey;">
+				<td>
 					<span style="font-size: 9px;">Noted by:</span><br>
 					<div class="ui fluid container center aligned">
 						<u><b>{{file_status.name_department_head}}</b></u> <br>
 						<span>Department Head</span>
 					</div>
 				</td>
-				<td style="border: 1px solid grey;">
+				<td>
 					<span style="font-size: 9px;">Approved by:</span><br>
 					<div class="ui fluid container center aligned">
 						<u><b>{{file_status.name_head_of_agency}}</b></u> <br>
 						<span>Head of Agency</span>
 					</div>
 				</td>
-				<td style="border: 1px solid grey;">
+				<td>
 					<span style="font-size: 9px;">Date:</span><br>
 					<div class="ui fluid container center aligned">
 						<u><b>{{ file_status.dateAccomplished }}</b></u> <br>
@@ -59,7 +59,6 @@
 				</td>
 			</tr>
 		</table>
-		<br>
 
 		<table class="ui structured celled table">
 			<thead style="background-color: #00ffdc14; font-weight: bold; text-align: center;">
@@ -78,7 +77,36 @@
 					<td style="width: 20px;">A</td>
 				</tr>
 			</thead>
-			<template v-for="item,i in items" :key="i">
+
+			<template v-if="!strategic_function.noStrat">
+				<tr>
+					<td colspan="9" style="background: lightyellow;"><b>STRATEGIC FUNCTION <span style="color: blue;">(20%)</span></b></td>
+				</tr>
+				<tr>
+					<td>{{strategic_function.mfo}}</td>
+					<td>{{strategic_function.success_indicator}}</td>
+					<td>{{strategic_function.acctual_accomplishment}}</td>
+					<td colspan="3" class="center aligned">{{strategic_function.final_numerical_rating}}</td>
+					<td>{{strategic_function.final_average_rating}}</td>
+					<td></td>
+					<td></td>
+				</tr>
+			</template>
+			<!-- <template v-else>
+				<tr>
+					<td colspan="9" style="background: lightyellow;"><b>STRATEGIC FUNCTION</b></td>
+				</tr>
+				<tr>
+					<td colspan="9" style="background: #f5f5f5;">
+						<span style="margin-left: 20px;">N/A</span>
+					</td>
+				</tr>
+			</template> -->
+
+			<tr>
+				<td colspan="9" style="background: lightyellow;"><b>CORE FUNCTIONS <span style="color: blue;">({{core_functions.percent}}%)</span></b></td>
+			</tr>
+			<template v-for="item,i in core_functions.rows" :key="i">
 				<!-- if no success indicators -->
 				<tr v-if="item.colspan == 'all'">
 					<td colspan="9">
@@ -87,9 +115,11 @@
 				</tr>
 				<!-- else if has success indicators -->
 				<tr v-else-if="item.colspan == 0">
+
 					<td :rowspan="item.rowspan">
+						<a class="ui red ribbon label" style="margin: 15px;" v-if="item.critics" @click="review(item)">View Comments/s</a>
 						<div :style="getMargin(item.level)">
-							<button class="ui basic button">{{item.percent + "%"}}</button> {{ item.cf_count }} {{ item.cf_title }}
+							<button class="ui basic mini button">{{item.percent + "%"}}</button> {{ item.cf_count }} {{ item.cf_title }}
 						</div>
 					</td>
 					<td>
@@ -146,22 +176,132 @@
 					</template>
 				</tr>
 			</template>
+
+			<!-- <template v-if="!strategic_function.noStrat"> -->
+			<tr>
+				<td colspan="9" style="background: lightyellow;"><b>SUPPORT FUNCTION <span style="color: blue;">(20%)</span></b></td>
+			</tr>
+			<template v-for="item, in support_functions.rows" :key="item.id_suppFunc">
+				<tr>
+					<td>
+						<template v-if="item.critics">
+							<a class="ui red ribbon label" style="margin: 15px;" @click="reviewSupportFunction(item)">View Comments/s</a>
+							<br>
+						</template>
+						<button class="ui basic mini button">{{item.percent + "%"}}</button> {{item.mfo}}
+					</td>
+					<td>{{item.suc_in}}</td>
+					<td>{{item.accomplishment}}</td>
+					<td>{{item.Q}}</td>
+					<td>{{item.E}}</td>
+					<td>{{item.T}}</td>
+					<td>{{item.average_rating}}</td>
+					<td>{{}}</td>
+					<td class="center aligned"><button class="ui small button" @click="reviewSupportFunction(item)"><i class="ui icon edit"></i> Review</button></td>
+				</tr>
+			</template>
+			<!-- </template> -->
+
+
+
 		</table>
 
-		<template v-for="item,i in items" :key="i">
-			<div>{{item}}</div>
-			<hr>
-		</template>
 
+		<table class="ui celled structured table">
+			<tr style="background: lightyellow;">
+				<td style="font-size: 9px;" colspan="2">SUMMARY OF RATING</td>
+				<td style="font-size: 9px;" class="center aligned">TOTAL</td>
+				<td style="font-size: 9px;" width="318">FINAL NUMERICAL RATING</td>
+				<td style="font-size: 9px;" width="380">FINAL ADJECTIVAL RATING</td>
+			</tr>
+			<template v-for="item, i in [
+					{
+						name: 'Strategic Objectives',
+						percent: 20,
+						total: strategic_function.final_average_rating
+					},
+					{
+						name: 'Core Functions',
+						percent: core_functions.percent,
+						total: core_functions.final_numerical_rating
+					},
+					{
+						name: 'Support Functions',
+						percent: support_functions.percent,
+						total: support_functions.final_numerical_rating
+					},
+				]" :key="i">
+				<tr>
+					<td>{{ item.name }}</td>
+					<td>Total Weight Allocation: {{ item.percent }}%</td>
+					<td class="center aligned"><b>{{ item.total }}</b></td>
+					<template v-if="i < 1">
+						<td rowspan="3" class="center aligned"><b>{{overall_final_rating.final_numerical_rating}}</b></td>
+						<td rowspan="3" class="center aligned"><b>{{overall_final_rating.final_adjectival_rating}}</b></td>
+					</template>
+				</tr>
+			</template>
+
+			<tr>
+				<td colspan="5" style="padding: 30px;">
+					<b>Comments and Recommendation For Development Purpose:</b> <br>
+					<p style="min-height: 50px; text-indent: 50px;">
+						{{comments_and_reccomendations}}
+					</p>
+				</td>
+			</tr>
+
+		</table>
+
+		<table class="ui celled structured table" style="background-color: #0080003d;">
+			<tr>
+				<td style="width: 16%; font-size: 9px; padding: 0px; padding-left:5px;">Discussed: Date:</td>
+				<td style="width: 16%; font-size: 9px; padding: 0px; padding-left:5px;">Assessed by: Date:</td>
+				<td style="width: 16%; font-size: 9px; padding: 0px; padding-left:5px;"></td>
+				<td style="width: 16%; font-size: 9px; padding: 0px; padding-left:5px;">Reviewed: Date:</td>
+				<td style="width: 16%; font-size: 9px; padding: 0px; padding-left:5px;">Final Rating by:</td>
+				<td style="width: 16%; font-size: 9px; padding: 0px; padding-left:5px;">Date:</td>
+			</tr>
+			<tr>
+				<td class="center aligned" style="font-size: 11px; _height: 100px; vertical-align:bottom; padding: 0px;"><b>{{file_status.name}}</b></td>
+				<td class="center aligned" style="font-size: 11px; _height: 100px; vertical-align:bottom; padding: 0px;">
+					<p style="font-size: 10px; padding: 10px;">I certified that I discussed my assessment of the performance with the employee:</p>
+					<br>
+					<b>{{file_status.name_supervisor}}</b>
+				</td>
+				<td class="center aligned" style="font-size: 11px; _height: 100px; vertical-align:bottom; padding: 0px;">
+					<p style="font-size: 10px; padding: 10px;">I certified that I discussed my assessment of the performance with the employee:</p>
+					<br>
+					<b>{{file_status.name_department_head}}</b>
+				</td>
+				<td class="center aligned" style="font-size: 11px; _height: 100px; vertical-align:bottom; padding: 0px;">
+					<p style="font-size: 10px; padding: 10px;">(all PMT member will sign)</p>
+				</td>
+				<td class="center aligned" style="font-size: 11px; _height: 100px; vertical-align:bottom; padding: 0px;"><b>{{file_status.HeadAgency}}</b></td>
+				<td class="center aligned" style="font-size: 11px; _height: 100px; vertical-align:bottom; padding: 0px;"></td>
+			</tr>
+			<tr>
+				<td class="center aligned" style="font-size: 9px; padding: 0px; padding-left:5px;">Ratee</td>
+				<td class="center aligned" style="font-size: 9px; padding: 0px; padding-left:5px;">Supervisor</td>
+				<td class="center aligned" style="font-size: 9px; padding: 0px; padding-left:5px;">Department Head</td>
+				<td class="center aligned" style="font-size: 9px; padding: 0px; padding-left:5px;"></td>
+				<td class="center aligned" style="font-size: 9px; padding: 0px; padding-left:5px;">Head of Agency</td>
+				<td class="center aligned" style="font-size: 9px; padding: 0px; padding-left:5px;">Date:</td>
+			</tr>
+		</table>
+
+		<div class="ui fluid container center aligned">
+			<button class="ui primary big teal button"> Approve </button>
+		</div>
 	</div>
 
-	<!-- start reviewForm -->
-	<div class="ui modal" id="reviewForm">
+	<!-- START reviewForm -->
+	<div class="ui scrollable modal" id="reviewForm">
 		<div class="header">
 			<i style="font-weight:lighter; _color:grey;">{{itemForEdit.cf_count}} {{itemForEdit.cf_title}}</i>
 		</div>
 
-		<div class="content">
+		<div class="scrolling content">
 			<div class="ui form">
 				<div class="field">
 					<label>Success Indicators</label>
@@ -170,57 +310,76 @@
 				</div>
 				<div class="field">
 					<label>Actual Accomplishments</label>
-					<textarea rows="2" v-model="itemForEdit.actualAcc"></textarea>
+					<!-- <textarea rows="2" v-model="itemForEdit.actualAcc" disabled></textarea> -->
+					<p style="padding: 20px; background: cyan;">{{itemForEdit.actualAcc}}</p>
 				</div>
 				<div class="field" v-if="itemForEdit.q">
 					<label>Quality</label>
-					<select v-model="itemForEdit.q">
+					<!-- <select v-model="itemForEdit.q">
 						<template v-for="measure,score in itemForEdit.mi_quality" :key="score">
 							<option v-if="measure" :value="score">{{measure}}</option>
 						</template>
-					</select>
+					</select> -->
+					<template v-for="measure,score in itemForEdit.mi_quality" :key="score">
+						<div class="ui compact segment" v-if="measure && itemForEdit.q != score" style="margin: 5px; display:inline-block;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
+						<div class="ui compact segment" v-else-if="measure && itemForEdit.q == score" style="margin: 5px; display:inline-block; background: cyan;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
+					</template>
 				</div>
 				<div class="field" v-if="itemForEdit.e">
 					<label>Efficiency</label>
-					<select v-model="itemForEdit.e">
+					<!-- <select v-model="itemForEdit.e">
 						<template v-for="measure,score in itemForEdit.mi_eff" :key="score">
 							<option v-if="measure" :value="score">{{measure}}</option>
 						</template>
-					</select>
+					</select> -->
+					<template v-for="measure,score in itemForEdit.mi_eff" :key="score">
+						<div class="ui compact segment" v-if="measure && itemForEdit.e != score" style="margin: 5px; display:inline-block;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
+						<div class="ui compact segment" v-else-if="measure && itemForEdit.e == score" style="margin: 5px; display:inline-block; background: cyan;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
+					</template>
+
 				</div>
 				<div class="field" v-if="itemForEdit.t">
 					<label>Timeliness</label>
-					<select v-model="itemForEdit.t">
+					<!-- <select v-model="itemForEdit.t">
 						<template v-for="measure,score in itemForEdit.mi_time" :key="score">
 							<option v-if="measure" :value="score">{{measure}}</option>
 						</template>
-					</select>
+					</select> -->
+
+					<template v-for="measure,score in itemForEdit.mi_time" :key="score">
+						<div class="ui compact segment" v-if="measure && itemForEdit.t != score" style="margin: 5px; display:inline-block;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
+						<div class="ui compact segment" v-else-if="measure && itemForEdit.t == score" style="margin: 5px; display:inline-block; background: cyan;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
+					</template>
+
 				</div>
 				<div class="field">
 					<label>Weight Allocation(%)</label>
-					<input type="number" v-model="itemForEdit.percent">
+					<!-- <input type="number" v-model="itemForEdit.percent"> -->
+					<p style="padding: 20px; background: cyan;">{{itemForEdit.percent}}</p>
 				</div>
 
 
 
 				<div v-if="itemForEdit.critics && itemForEdit.critics.IS">
-					<div class="ui segments field">
-						<div class="ui green inverted segment">Immediate Supervisor</div>
-						<textarea class="ui secondary" rows="2" readonly v-model="itemForEdit.critics.IS"></textarea>
+					<div class="ui segments field" style="margin-bottom: 15px;">
+						<div class="ui green inverted segment">Immediate Supervisor Remark/s:</div>
+						<p style="padding: 20px; color: green;">* {{itemForEdit.critics.IS}}</p>
+						<!-- <textarea class="ui secondary" rows="2" disabled v-model="itemForEdit.critics.IS"></textarea> -->
 					</div>
 				</div>
 
 				<div v-if="itemForEdit.critics && itemForEdit.critics.DH">
-					<div class="ui segments field">
-						<div class="ui orange inverted segment">Department Head</div>
-						<textarea class="ui secondary" rows="2" readonly v-model="itemForEdit.critics.DH"></textarea>
+					<div class="ui segments field" style="margin-bottom: 15px;">
+						<div class="ui orange inverted segment">Department Head Remark/s:</div>
+						<p style="padding: 20px; color: orange;">* {{itemForEdit.critics.DH}}</p>
+						<!-- <textarea class="ui secondary" rows="2" readonly v-model="itemForEdit.critics.DH"></textarea> -->
 					</div>
 				</div>
 
 				<!-- <div v-if="itemForEdit.critics && itemForEdit.critics.PMT"> -->
-				<div class="ui segments field">
-					<div class="ui red inverted segment">PMT</div>
-					<textarea class="ui secondary" rows="2" v-model="pmtComments" placeholder="Enter your comments/corrections here..."></textarea>
+				<div class="ui segments field" style="margin-bottom: 15px;">
+					<div class="ui red inverted segment">PMT Remark/s:</div>
+					<textarea class="ui secondary" v-model="pmtComments" placeholder="Enter your comments/corrections here..."></textarea>
 				</div>
 				<!-- </div> -->
 
@@ -231,13 +390,111 @@
 			<div class="ui deny button">
 				Cancel
 			</div>
-			<div class="ui positive _right _labeled _icon button">
+			<div class="ui positive approve _right _labeled _icon button">
 				Save
 				<!-- <i class="checkmark icon"></i> -->
 			</div>
 		</div>
 	</div>
-	<!-- end reviewForm -->
+	<!-- END reviewForm -->
+
+
+
+	<!-- START reviewForm for Support Function-->
+	<div class="ui scrollable modal" id="reviewFormSupport">
+		<div class="header">
+			<i style="font-weight:lighter; _color:grey;">{{itemForEditSupport.mfo}} ({{itemForEditSupport.percent}}%)</i>
+		</div>
+
+		<div class="scrolling content">
+			<div class="ui form">
+				<div class="field">
+					<label>Success Indicators</label>
+					<p style="margin-left: 17px;">{{itemForEditSupport.suc_in}}</p>
+				</div>
+				<div class="field">
+					<label>Actual Accomplishments</label>
+					<p style="padding: 20px; background: cyan;">{{itemForEditSupport.accomplishment}}</p>
+				</div>
+
+				<template v-for="mi, _mi  in [
+						{
+							id: 'q',
+							name: 'Quality',
+							col: 'mi_quality'
+						},
+						{
+							id: 'e',
+							name: 'Efficiency',
+							col: 'mi_eff'
+						},
+						{
+							id: 't',
+							name: 'Timeliness',
+							col: 'mi_time'
+						},
+					]" :key="_mi">
+
+					<div class="field" v-if="itemForEditSupport[mi.id]">
+						<label>{{mi.name}}</label>
+						<template v-for="measure, score in itemForEditSupport[mi.col]" :key="score">
+							<div v-if="measure && itemForEditSupport[mi.id] != score"><i style="padding: 5px; color:grey;">({{score}})</i> {{measure}}</div>
+							<div v-else-if="measure && itemForEditSupport[mi.id] == score" style="padding: 5px; background: cyan;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
+						</template>
+					</div>
+				</template>
+
+
+				<template v-for="comment, c in [
+						{
+							id: 'IS',
+							label: 'Immediate Supervisor Remark/s:',
+							color: 'green'
+						},
+						{
+							id: 'DH',
+							label: 'Department Head Remark/s:',
+							color: 'orange'
+						},
+						{
+							id: 'PMT',
+							label: 'PMT Remark/s:',
+							color: 'red'
+						}
+					]" :key="c">
+
+					<div v-if="itemForEditSupport.critics && itemForEditSupport.critics[comment.id] && comment.id != 'PMT'">
+						<div class="ui segments field" style="margin-bottom: 15px;">
+							<div class="ui inverted segment" :class="comment.color">{{ comment.label }}</div>
+							<p :style="'padding: 20px; color:'+ comment.color +';'">* {{itemForEditSupport.critics[comment.id]}}</p>
+						</div>
+					</div>
+
+					<div v-else-if="comment.id == 'PMT'">
+						<div class="ui segments field" style="margin-bottom: 15px;">
+							<div class="ui inverted segment" :class="comment.color">{{ comment.label }}</div>
+							<textarea class="ui secondary" v-model="pmtComments" placeholder="Enter your comments/corrections here..."></textarea>
+						</div>
+					</div>
+
+				</template>
+
+			</div>
+		</div>
+		<div class="actions">
+			<div class="ui deny button">
+				Cancel
+			</div>
+			<div class="ui positive approve _right _labeled _icon button">
+				Save
+				<!-- <i class="checkmark icon"></i> -->
+			</div>
+		</div>
+	</div>
+	<!-- END reviewForm for Support Function -->
+
+
+
 
 </div>
 
@@ -256,9 +513,14 @@
 				year: "",
 				department: "",
 				id: new URL(window.location.href).searchParams.get("id"),
-				items: null,
 				itemForEdit: {},
-				pmtComments: ""
+				itemForEditSupport: {},
+				pmtComments: "",
+				strategic_function: {},
+				core_functions: {},
+				support_functions: {},
+				comments_and_reccomendations: "",
+				overall_final_rating: {}
 			}
 		},
 		watch: {
@@ -269,33 +531,98 @@
 		},
 		methods: {
 
+
+			reviewSupportFunction(item) {
+				console.log("item: ", item);
+				this.itemForEditSupport = JSON.parse(JSON.stringify(item))
+				this.pmtComments = "";
+
+				if (this.itemForEditSupport.critics && this.itemForEditSupport.critics.PMT) {
+					this.pmtComments = this.itemForEditSupport.critics.PMT
+				}
+				// console.log(this.itemForEdit);
+				$('#reviewFormSupport').modal({
+					closable: false,
+					onApprove: () => {
+						// console.log("testing");
+						this.setCommentSupport(item.sfd_id, "pmt", this.pmtComments)
+						// prevent close to initLoad first for changes to take effect on view
+						return false;
+					}
+				}).modal('show');
+				// console.log(item);
+			},
+
+
 			review(item) {
+				console.log("item: ", item);
 				this.itemForEdit = JSON.parse(JSON.stringify(item))
 				this.pmtComments = "";
+
 				if (this.itemForEdit.critics && this.itemForEdit.critics.PMT) {
 					this.pmtComments = this.itemForEdit.critics.PMT
 				}
 				// console.log(this.itemForEdit);
 				$('#reviewForm').modal({
-					closable: false
+					closable: false,
+					onApprove: () => {
+						// console.log("testing");
+						this.setComment(item.cfd_id, "pmt", this.pmtComments)
+						// prevent close to initLoad first for changes to take effect on view
+						return false;
+					}
 				}).modal('show');
 				// console.log(item);
 			},
+
+			setComment(cfd_id, commentor, comments) {
+				$.post('?config=PMT', {
+					setComment: true,
+					cfd_id: cfd_id,
+					commentor: commentor,
+					comments: comments
+				}, (data, textStatus, xhr) => {
+					const comms = JSON.parse(data);
+					console.log(comms);
+					this.initLoad()
+				});
+			},
+
+			setCommentSupport(sfd_id, commentor, comments) {
+				$.post('?config=PMT', {
+					setCommentSupport: true,
+					sfd_id: sfd_id,
+					commentor: commentor,
+					comments: comments
+				}, (data, textStatus, xhr) => {
+					const comms = JSON.parse(data);
+					console.log(comms);
+					this.initLoad()
+				});
+			},
+
 			getMargin(level) {
 				const margin = level * 30;
 				return `margin-left:${margin}px;`
 			},
+
 			initLoad(department_id) {
-				console.log(department_id);
 				$.post('?config=PMT', {
 					initLoadForm: true,
 					id: this.id,
 				}, (data, textStatus, xhr) => {
 					const res = JSON.parse(data)
+					console.log(res);
 					this.period = res.period
 					this.year = res.year
-					this.items = res.data
+					this.core_functions = res.core_functions
 					this.file_status = res.file_status
+					this.strategic_function = res.strategic_function
+					this.support_functions = res.support_functions
+					this.comments_and_reccomendations = res.comments_and_reccomendations
+					this.overall_final_rating = res.overall_final_rating
+					$('#reviewForm').modal("hide")
+					$('#reviewFormSupport').modal("hide")
 				});
 			}
 

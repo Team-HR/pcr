@@ -231,11 +231,125 @@ elseif (isset($_POST["initLoadForm"])) {
 
 	echo json_encode([
 		"file_status" => $pcr_form->fileStatus,
+		"strategic_function" => $pcr_form->get_strategic_function(),
 		"period" => $period_info["period"],
 		"year" => $period_info["year"],
 		"form_type" => $pcr_form->get_form_type(),
-		"data" => $pcr_form->get_rows()
+		"core_functions" => $pcr_form->get_core_functions(),
+		"support_functions" => $pcr_form->get_support_functions(),
+		"comments_and_reccomendations" => $pcr_form->get_comments_and_reccomendations(),
+		"overall_final_rating" => $pcr_form->get_overall_final_rating()
 	]);
+} elseif (isset($_POST["setCommentSupport"])) {
+
+	$sfd_id = $_POST["sfd_id"];
+	$commentor = $_POST["commentor"];
+	$comments = $_POST["comments"];
+
+	// array (
+	// 	'IS' => '',
+	// 	'DH' => '',
+	// 	'PMT' => '',
+	//   )
+
+	// check first if sfd_id exists 
+	$sql = "SELECT * FROM `spms_supportfunctiondata` WHERE `sfd_id` = '$sfd_id'";
+	$res = $mysqli->query($sql);
+
+	// if none return null
+	if ($res->num_rows == 0) {
+		echo json_encode(null);
+		return null;
+	}
+	// if exists insert/updatAe
+	$row = $res->fetch_assoc();
+	$critics = $row["critics"];
+
+	// check if IS DH PMT serial exist
+	// if exist unserialize and update existing
+	if ($critics) {
+		$critics = unserialize($critics);
+		// if ($comments) {
+		// $critics["IS"] = $comments;
+		// $critics["DH"] = $comments;
+		$critics["PMT"] = $comments;
+		$critics = serialize($critics);
+		$critics = $mysqli->real_escape_string($critics);
+		$sql = "UPDATE `spms_supportfunctiondata` SET `critics` = '$critics' WHERE `spms_supportfunctiondata`.`sfd_id` = '$sfd_id';";
+		$mysqli->query($sql);
+		echo  json_encode($critics);
+		return null;
+		// }
+	}
+	// if none create with new commentor and comment object then serialize it
+	else {
+		$critics = [
+			"IS" => "",
+			"DH" => "",
+			"PMT" => $comments
+		];
+		$critics = serialize($critics);
+		$critics = $mysqli->real_escape_string($critics);
+		$sql = "UPDATE `spms_supportfunctiondata` SET `critics` = '$critics' WHERE `spms_supportfunctiondata`.`sfd_id` = '$sfd_id';";
+		$mysqli->query($sql);
+		echo  json_encode($critics);
+		return null;
+	}
+} elseif (isset($_POST["setComment"])) {
+
+	$cfd_id = $_POST["cfd_id"];
+	$commentor = $_POST["commentor"];
+	$comments = $_POST["comments"];
+
+	// array (
+	// 	'IS' => '',
+	// 	'DH' => '',
+	// 	'PMT' => '',
+	//   )
+
+	// check first if cfd_id exists 
+	$sql = "SELECT * FROM `spms_corefucndata` WHERE `cfd_id` = '$cfd_id'";
+	$res = $mysqli->query($sql);
+
+	// if none return null
+	if ($res->num_rows == 0) {
+		echo json_encode(null);
+		return null;
+	}
+	// if exists insert/updatAe
+	$row = $res->fetch_assoc();
+	$critics = $row["critics"];
+
+	// check if IS DH PMT serial exist
+	// if exist unserialize and update existing
+	if ($critics) {
+		$critics = unserialize($critics);
+		// if ($comments) {
+		// $critics["IS"] = $comments;
+		// $critics["DH"] = $comments;
+		$critics["PMT"] = $comments;
+		$critics = serialize($critics);
+		$critics = $mysqli->real_escape_string($critics);
+		$sql = "UPDATE `spms_corefucndata` SET `critics` = '$critics' WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id';";
+		$mysqli->query($sql);
+		echo  json_encode($critics);
+		return null;
+		// }
+	}
+	// if none create with new commentor and comment object then serialize it
+	else {
+		$critics = [
+			"IS" => "",
+			"DH" => "",
+			"PMT" => $comments
+		];
+		$critics = serialize($critics);
+		$critics = $mysqli->real_escape_string($critics);
+		$sql = "UPDATE `spms_corefucndata` SET `critics` = '$critics' WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id';";
+		$mysqli->query($sql);
+		echo  json_encode($critics);
+		return null;
+	}
 }
 
 
