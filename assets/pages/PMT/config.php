@@ -238,7 +238,8 @@ elseif (isset($_POST["initLoadForm"])) {
 		"core_functions" => $pcr_form->get_core_functions(),
 		"support_functions" => $pcr_form->get_support_functions(),
 		"comments_and_reccomendations" => $pcr_form->get_comments_and_reccomendations(),
-		"overall_final_rating" => $pcr_form->get_overall_final_rating()
+		"overall_final_rating" => $pcr_form->get_overall_final_rating(),
+		"isApproved" => $pcr_form->get_is_approved(),
 	]);
 } elseif (isset($_POST["setCommentSupport"])) {
 
@@ -350,6 +351,11 @@ elseif (isset($_POST["initLoadForm"])) {
 		echo  json_encode($critics);
 		return null;
 	}
+} elseif (isset($_POST["doApprove"])) {
+	$performanceReviewStatus_id = $_POST["id"];
+	$current_date = date("d-m-Y");
+	$sql = "UPDATE `spms_performancereviewstatus` SET `panelApproved` = '$current_date' WHERE `performanceReviewStatus_id` = '$performanceReviewStatus_id'";
+	echo json_encode($mysqli->query($sql));
 }
 
 

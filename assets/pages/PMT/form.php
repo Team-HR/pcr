@@ -291,7 +291,7 @@
 		</table>
 
 		<div class="ui fluid container center aligned">
-			<button class="ui primary big teal button"> Approve </button>
+			<button class="ui primary big teal button" @click="doApprove()" v-if="!isApproved"> Approve </button>
 		</div>
 	</div>
 
@@ -313,52 +313,40 @@
 					<!-- <textarea rows="2" v-model="itemForEdit.actualAcc" disabled></textarea> -->
 					<p style="padding: 20px; background: cyan;">{{itemForEdit.actualAcc}}</p>
 				</div>
-				<div class="field" v-if="itemForEdit.q">
-					<label>Quality</label>
-					<!-- <select v-model="itemForEdit.q">
-						<template v-for="measure,score in itemForEdit.mi_quality" :key="score">
-							<option v-if="measure" :value="score">{{measure}}</option>
-						</template>
-					</select> -->
-					<template v-for="measure,score in itemForEdit.mi_quality" :key="score">
-						<div class="ui compact segment" v-if="measure && itemForEdit.q != score" style="margin: 5px; display:inline-block;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
-						<div class="ui compact segment" v-else-if="measure && itemForEdit.q == score" style="margin: 5px; display:inline-block; background: cyan;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
-					</template>
-				</div>
-				<div class="field" v-if="itemForEdit.e">
-					<label>Efficiency</label>
-					<!-- <select v-model="itemForEdit.e">
-						<template v-for="measure,score in itemForEdit.mi_eff" :key="score">
-							<option v-if="measure" :value="score">{{measure}}</option>
-						</template>
-					</select> -->
-					<template v-for="measure,score in itemForEdit.mi_eff" :key="score">
-						<div class="ui compact segment" v-if="measure && itemForEdit.e != score" style="margin: 5px; display:inline-block;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
-						<div class="ui compact segment" v-else-if="measure && itemForEdit.e == score" style="margin: 5px; display:inline-block; background: cyan;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
-					</template>
 
-				</div>
-				<div class="field" v-if="itemForEdit.t">
-					<label>Timeliness</label>
-					<!-- <select v-model="itemForEdit.t">
-						<template v-for="measure,score in itemForEdit.mi_time" :key="score">
-							<option v-if="measure" :value="score">{{measure}}</option>
+
+				<template v-for="mi, _mi  in [
+						{
+							id: 'q',
+							name: 'Quality',
+							col: 'mi_quality'
+						},
+						{
+							id: 'e',
+							name: 'Efficiency',
+							col: 'mi_eff'
+						},
+						{
+							id: 't',
+							name: 'Timeliness',
+							col: 'mi_time'
+						},
+					]" :key="_mi">
+
+					<div class="field" v-if="itemForEdit[mi.id]">
+						<label>{{mi.name}}</label>
+						<template v-for="measure, score in itemForEdit[mi.col]" :key="score">
+							<div v-if="measure && itemForEdit[mi.id] != score"><i style="margin-left: 20px; padding: 5px; color:grey;">({{score}})</i> {{measure}}</div>
+							<div v-else-if="measure && itemForEdit[mi.id] == score" style="margin-left: 20px; padding: 5px; background: cyan;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
 						</template>
-					</select> -->
+					</div>
 
-					<template v-for="measure,score in itemForEdit.mi_time" :key="score">
-						<div class="ui compact segment" v-if="measure && itemForEdit.t != score" style="margin: 5px; display:inline-block;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
-						<div class="ui compact segment" v-else-if="measure && itemForEdit.t == score" style="margin: 5px; display:inline-block; background: cyan;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
-					</template>
+				</template>
 
-				</div>
 				<div class="field">
 					<label>Weight Allocation(%)</label>
-					<!-- <input type="number" v-model="itemForEdit.percent"> -->
 					<p style="padding: 20px; background: cyan;">{{itemForEdit.percent}}</p>
 				</div>
-
-
 
 				<div v-if="itemForEdit.critics && itemForEdit.critics.IS">
 					<div class="ui segments field" style="margin-bottom: 15px;">
@@ -520,7 +508,8 @@
 				core_functions: {},
 				support_functions: {},
 				comments_and_reccomendations: "",
-				overall_final_rating: {}
+				overall_final_rating: {},
+				isApproved: false
 			}
 		},
 		watch: {
@@ -621,8 +610,19 @@
 					this.support_functions = res.support_functions
 					this.comments_and_reccomendations = res.comments_and_reccomendations
 					this.overall_final_rating = res.overall_final_rating
+					this.isApproved = res.isApproved
 					$('#reviewForm').modal("hide")
 					$('#reviewFormSupport').modal("hide")
+				});
+			},
+
+			doApprove() {
+				$.post('?config=PMT', {
+					doApprove: true,
+					id: this.id,
+				}, (data, textStatus, xhr) => {
+					console.log(data);
+					this.isApproved = data
 				});
 			}
 

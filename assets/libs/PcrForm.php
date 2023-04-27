@@ -658,4 +658,9 @@ class PcrForm
 			"final_adjectival_rating" => $final_adjectival_rating
 		];
 	}
+
+	public function get_is_approved()
+	{
+		return isset($this->fileStatus["panelApproved"]) && $this->fileStatus["panelApproved"] != "" ? true : false;
+	}
 }
