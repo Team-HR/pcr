@@ -9,7 +9,6 @@
 		<p>
 			I, <b>{{ file_status.name }}</b> , _______________________ of the <b>{{ file_status.department }}</b> commit to deliver and agree to be rated on the attainment of the following targets in accordance with the indicated measures for the period {{ period + " " + year }}.
 		</p> -->
-
 		<table class="ui celled table" style="width: 100%; _background-color:antiquewhite; _border: 1px solid grey; _border-collapse:collapse;">
 			<tr>
 				<td colspan="4" style="text-align: center;">
@@ -59,7 +58,6 @@
 				</td>
 			</tr>
 		</table>
-
 		<table class="ui structured celled table">
 			<thead style="background-color: #00ffdc14; font-weight: bold; text-align: center;">
 				<tr>
@@ -92,16 +90,6 @@
 					<td></td>
 				</tr>
 			</template>
-			<!-- <template v-else>
-				<tr>
-					<td colspan="9" style="background: lightyellow;"><b>STRATEGIC FUNCTION</b></td>
-				</tr>
-				<tr>
-					<td colspan="9" style="background: #f5f5f5;">
-						<span style="margin-left: 20px;">N/A</span>
-					</td>
-				</tr>
-			</template> -->
 
 			<tr>
 				<td colspan="9" style="background: lightyellow;"><b>CORE FUNCTIONS <span style="color: blue;">({{core_functions.percent}}%)</span></b></td>
@@ -176,8 +164,6 @@
 					</template>
 				</tr>
 			</template>
-
-			<!-- <template v-if="!strategic_function.noStrat"> -->
 			<tr>
 				<td colspan="9" style="background: lightyellow;"><b>SUPPORT FUNCTION <span style="color: blue;">(20%)</span></b></td>
 			</tr>
@@ -200,13 +186,7 @@
 					<td class="center aligned"><button class="ui small button" @click="reviewSupportFunction(item)"><i class="ui icon edit"></i> Review</button></td>
 				</tr>
 			</template>
-			<!-- </template> -->
-
-
-
 		</table>
-
-
 		<table class="ui celled structured table">
 			<tr style="background: lightyellow;">
 				<td style="font-size: 9px;" colspan="2">SUMMARY OF RATING</td>
@@ -241,7 +221,6 @@
 					</template>
 				</tr>
 			</template>
-
 			<tr>
 				<td colspan="5" style="padding: 30px;">
 					<b>Comments and Recommendation For Development Purpose:</b> <br>
@@ -250,10 +229,9 @@
 					</p>
 				</td>
 			</tr>
-
 		</table>
 
-		<table class="ui celled structured table" style="background-color: #0080003d;">
+		<table class="ui celled structured table" style="background-color: #c2e1c2;">
 			<tr>
 				<td style="width: 16%; font-size: 9px; padding: 0px; padding-left:5px;">Discussed: Date:</td>
 				<td style="width: 16%; font-size: 9px; padding: 0px; padding-left:5px;">Assessed by: Date:</td>
@@ -522,46 +500,36 @@
 
 
 			reviewSupportFunction(item) {
-				console.log("item: ", item);
 				this.itemForEditSupport = JSON.parse(JSON.stringify(item))
 				this.pmtComments = "";
 
 				if (this.itemForEditSupport.critics && this.itemForEditSupport.critics.PMT) {
 					this.pmtComments = this.itemForEditSupport.critics.PMT
 				}
-				// console.log(this.itemForEdit);
 				$('#reviewFormSupport').modal({
 					closable: false,
 					onApprove: () => {
-						// console.log("testing");
 						this.setCommentSupport(item.sfd_id, "pmt", this.pmtComments)
-						// prevent close to initLoad first for changes to take effect on view
 						return false;
 					}
 				}).modal('show');
-				// console.log(item);
 			},
 
-
 			review(item) {
-				console.log("item: ", item);
 				this.itemForEdit = JSON.parse(JSON.stringify(item))
 				this.pmtComments = "";
 
 				if (this.itemForEdit.critics && this.itemForEdit.critics.PMT) {
 					this.pmtComments = this.itemForEdit.critics.PMT
 				}
-				// console.log(this.itemForEdit);
+
 				$('#reviewForm').modal({
 					closable: false,
 					onApprove: () => {
-						// console.log("testing");
 						this.setComment(item.cfd_id, "pmt", this.pmtComments)
-						// prevent close to initLoad first for changes to take effect on view
 						return false;
 					}
 				}).modal('show');
-				// console.log(item);
 			},
 
 			setComment(cfd_id, commentor, comments) {
@@ -572,7 +540,6 @@
 					comments: comments
 				}, (data, textStatus, xhr) => {
 					const comms = JSON.parse(data);
-					console.log(comms);
 					this.initLoad()
 				});
 			},
@@ -585,7 +552,6 @@
 					comments: comments
 				}, (data, textStatus, xhr) => {
 					const comms = JSON.parse(data);
-					console.log(comms);
 					this.initLoad()
 				});
 			},
@@ -601,7 +567,6 @@
 					id: this.id,
 				}, (data, textStatus, xhr) => {
 					const res = JSON.parse(data)
-					console.log(res);
 					this.period = res.period
 					this.year = res.year
 					this.core_functions = res.core_functions
@@ -621,11 +586,9 @@
 					doApprove: true,
 					id: this.id,
 				}, (data, textStatus, xhr) => {
-					console.log(data);
 					this.isApproved = data
 				});
 			}
-
 
 		},
 		mounted() {

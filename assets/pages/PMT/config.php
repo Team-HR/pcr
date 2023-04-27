@@ -144,6 +144,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 			"date_submitted" => $row["dateAccomplished"],
 			"date_approved" => $row["approved"],
 			"date_certified" => $row["certify"],
+			"panel_approved" => $row["panelApproved"],
 		];
 
 		$data[] = $item;

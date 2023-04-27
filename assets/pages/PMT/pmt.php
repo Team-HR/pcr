@@ -1,6 +1,6 @@
 <div id="pmtIndexApp">
-	<div class="ui segment center aligned" style="margin: 20px;">
-		<h1 class="ui header" v-if="period && year">{{period}} {{year}}</h1>
+	<div class="ui containger center aligned" style="margin: 20px;">
+		<h1 class="ui header center aligned" v-if="period && year">{{period}} {{year}}</h1>
 		<div class="ui form" style="width: 40%; margin: auto;">
 			<div class="ui two column fields">
 				<div class="field">

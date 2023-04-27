@@ -11,8 +11,9 @@
 					<th>Form Type</th>
 					<th>Name</th>
 					<th>Submitted</th>
-					<th>Approved</th>
-					<th>Certified</th>
+					<th>Date Approved by Supervisor</th>
+					<th>Date Certified by Department Head</th>
+					<th>Date Approved by PMT</th>
 					<th></th>
 				</tr>
 			</thead>
@@ -24,6 +25,7 @@
 						<td width="25">{{ item.date_submitted }}
 						<td width="100">{{ item.date_approved}}</td>
 						<td width="100">{{ item.date_certified }}</td>
+						<td width="100">{{ item.panel_approved }}</td>
 						<td width="25">
 							<a class="ui small primary button" :href="`?showForm&id=${item.id}`">Open</button>
 						</td>
