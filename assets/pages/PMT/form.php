@@ -107,7 +107,7 @@
 					<td :rowspan="item.rowspan">
 						<a class="ui red ribbon label" style="margin: 15px;" v-if="item.critics" @click="review(item)">View Comments/s</a>
 						<div :style="getMargin(item.level)">
-							<button class="ui basic mini button">{{item.percent + "%"}}</button> {{ item.cf_count }} {{ item.cf_title }}
+							<button class="ui basic mini dark button" :class="item.corrected_percent?'red':''">{{item.percent + "%"}}</button> {{ item.cf_count }} {{ item.cf_title }}
 						</div>
 					</td>
 					<td>
@@ -115,10 +115,10 @@
 					</td>
 					<!-- if has spms_corefucndata -->
 					<template v-if="item.cfd_id">
-						<td>{{item.actualAcc}}</td>
-						<td>{{item.q}}</td>
-						<td>{{item.e}}</td>
-						<td>{{item.t}}</td>
+						<td :style="item.corrected_actualAcc ? 'color:red':''">{{item.actualAcc}}</td>
+						<td :style="item.corrected_Q ? 'color:red':''">{{item.q}}</td>
+						<td :style="item.corrected_E ? 'color:red':''">{{item.e}}</td>
+						<td :style="item.corrected_T ? 'color:red':''">{{item.t}}</td>
 						<td style="text-align: center;">{{item.average}}</td>
 						<td></td>
 						<td width="150" style="text-align: center;"> <button class="ui small button" @click="review(item)"><i class="ui icon edit"></i> Review</button> </td>
@@ -288,8 +288,8 @@
 				</div>
 				<div class="field">
 					<label>Actual Accomplishments</label>
-					<!-- <textarea rows="2" v-model="itemForEdit.actualAcc" disabled></textarea> -->
-					<p style="padding: 20px; background: cyan;">{{itemForEdit.actualAcc}}</p>
+					<textarea rows="2" v-model="itemForEdit.actualAcc"></textarea>
+					<!-- <p style="padding: 20px; background: cyan;">{{itemForEdit.actualAcc}}</p> -->
 				</div>
 
 
@@ -313,17 +313,24 @@
 
 					<div class="field" v-if="itemForEdit[mi.id]">
 						<label>{{mi.name}}</label>
-						<template v-for="measure, score in itemForEdit[mi.col]" :key="score">
+						<select :name="`${mi.col}_select`" v-model="itemForEdit[mi.id]">
+							<template v-for="measure, score in itemForEdit[mi.col]" :key="score">
+								<option v-if="measure && itemForEdit[mi.id] != score" :value="score">{{measure}}</option>
+								<option v-else-if="measure && itemForEdit[mi.id] == score" selected :value="score">{{measure}}</option>
+							</template>
+						</select>
+						<!-- <template v-for="measure, score in itemForEdit[mi.col]" :key="score">
 							<div v-if="measure && itemForEdit[mi.id] != score"><i style="margin-left: 20px; padding: 5px; color:grey;">({{score}})</i> {{measure}}</div>
 							<div v-else-if="measure && itemForEdit[mi.id] == score" style="margin-left: 20px; padding: 5px; background: cyan;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
-						</template>
+						</template> -->
 					</div>
 
 				</template>
 
 				<div class="field">
 					<label>Weight Allocation(%)</label>
-					<p style="padding: 20px; background: cyan;">{{itemForEdit.percent}}</p>
+					<input type="number" v-model="itemForEdit.percent"></textarea>
+					<!-- <p style="padding: 20px; background: cyan;">{{itemForEdit.percent}}</p> -->
 				</div>
 
 				<div v-if="itemForEdit.critics && itemForEdit.critics.IS">
@@ -345,7 +352,7 @@
 				<!-- <div v-if="itemForEdit.critics && itemForEdit.critics.PMT"> -->
 				<div class="ui segments field" style="margin-bottom: 15px;">
 					<div class="ui red inverted segment">PMT Remark/s:</div>
-					<textarea class="ui secondary" v-model="pmtComments" placeholder="Enter your comments/corrections here..."></textarea>
+					<textarea class="ui secondary" v-model="itemForEdit.critics.PMT" placeholder="Enter your comments/corrections here..."></textarea>
 				</div>
 				<!-- </div> -->
 
@@ -479,7 +486,11 @@
 				year: "",
 				department: "",
 				id: new URL(window.location.href).searchParams.get("id"),
-				itemForEdit: {},
+				itemForEdit: {
+					critics: {
+						PMT: ""
+					}
+				},
 				itemForEditSupport: {},
 				pmtComments: "",
 				strategic_function: {},
@@ -526,20 +537,20 @@
 				$('#reviewForm').modal({
 					closable: false,
 					onApprove: () => {
-						this.setComment(item.cfd_id, "pmt", this.pmtComments)
+						this.setCritics(this.itemForEdit)
+						// console.log(this.itemForEdit);
 						return false;
 					}
 				}).modal('show');
 			},
 
-			setComment(cfd_id, commentor, comments) {
+			setCritics(payload) {
 				$.post('?config=PMT', {
-					setComment: true,
-					cfd_id: cfd_id,
-					commentor: commentor,
-					comments: comments
+					setCritics: true,
+					payload: payload
 				}, (data, textStatus, xhr) => {
-					const comms = JSON.parse(data);
+					const res = JSON.parse(data);
+					console.log("setCritics:", res);
 					this.initLoad()
 				});
 			},
@@ -567,9 +578,13 @@
 					id: this.id,
 				}, (data, textStatus, xhr) => {
 					const res = JSON.parse(data)
+
 					this.period = res.period
 					this.year = res.year
 					this.core_functions = res.core_functions
+
+					console.log(res.core_functions.rows)
+
 					this.file_status = res.file_status
 					this.strategic_function = res.strategic_function
 					this.support_functions = res.support_functions

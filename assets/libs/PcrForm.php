@@ -139,8 +139,11 @@ class PcrForm
 		# END transform $arr to table rows
 
 		$percent = 0;
+
 		foreach ($data as $value) {
-			$percent += $value["percent"];
+			if (isset($value["percent"])) {
+				$percent += $value["percent"];
+			}
 		}
 
 
@@ -273,17 +276,73 @@ class PcrForm
 			}
 
 			// parse critics START
-			$critics = null;
-			if (isset($row["critics"])) {
+			$critics = "";
+			if (isset($row["critics"]) && $row["critics"] !== "") {
 				$critics = unserialize($row["critics"]);
-				if (!$critics["IS"] and !$critics["DH"] and !$critics["PMT"]) {
+				if (!isset($critics["IS"]) && !isset($critics["DH"]) && !isset($critics["PMT"])) {
 					$critics = false;
 				}
 			}
 			// parse critics END
 
+			$corrected_percent = false;
+			$corrected_actualAcc = false;
+			$corrected_Q = false;
+			$corrected_E = false;
+			$corrected_T = false;
+
+			$supEdit = $row["supEdit"];
+			if ($supEdit) {
+				$supEdit = unserialize($supEdit);
+
+				// check if percent is to be corrected
+				foreach ($supEdit[count($supEdit) - 1][1] as $item) {
+					if ($item[0] == 'percent') {
+						$corrected_percent = true;
+						break;
+					}
+				}
+
+				// check if actualAcc is to be corrected
+				foreach ($supEdit[count($supEdit) - 1][1] as $item) {
+					if ($item[0] == 'actualAcc') {
+						$corrected_actualAcc = true;
+						break;
+					}
+				}
+
+				// check if Q is to be corrected
+				foreach ($supEdit[count($supEdit) - 1][1] as $item) {
+					if ($item[0] == 'Q') {
+						$corrected_Q = true;
+						break;
+					}
+				}
+
+				// check if E is to be corrected
+				foreach ($supEdit[count($supEdit) - 1][1] as $item) {
+					if ($item[0] == 'E') {
+						$corrected_E = true;
+						break;
+					}
+				}
+
+				// check if T is to be corrected
+				foreach ($supEdit[count($supEdit) - 1][1] as $item) {
+					if ($item[0] == 'T') {
+						$corrected_T = true;
+						break;
+					}
+				}
+			}
 
 			$row = [
+				// "supEdit" => $supEdit,
+				"corrected_percent" => $corrected_percent,
+				"corrected_actualAcc" => $corrected_actualAcc,
+				"corrected_Q" => $corrected_Q,
+				"corrected_E" => $corrected_E,
+				"corrected_T" => $corrected_T,
 				"cfd_id" => $row["cfd_id"],
 				"actualAcc" => $row["actualAcc"],
 				"q" => $q,

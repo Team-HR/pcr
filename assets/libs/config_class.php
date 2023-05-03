@@ -20,6 +20,15 @@ $password = "teamhrmo2019";
 $database = "ihris";
 $mysqli = new mysqli($host, $usernameDb, $password, $database);
 $mysqli->set_charset("utf8");
+
+
+// MYSQL ERROR REPORTING START
+ini_set('display_errors',1);
+ini_set('display_startup_errors',1);
+error_reporting(E_ALL);
+// MYSQL ERROR REPORTING END
+
+
 class Employee_data extends mysqli
 {
 	public $accountStatus;
