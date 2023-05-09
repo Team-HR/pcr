@@ -105,12 +105,13 @@
 				<tr v-else-if="item.colspan == 0">
 
 					<td :rowspan="item.rowspan">
-						<a class="ui red ribbon label" style="margin: 15px;" v-if="item.critics" @click="review(item)">View Comments/s</a>
 						<div :style="getMargin(item.level)">
-							<button class="ui basic mini button">{{item.percent + "%"}}</button> {{ item.cf_count }} {{ item.cf_title }}
+							{{ item.cf_count }} {{ item.cf_title }}
 						</div>
 					</td>
 					<td>
+						<a class="ui red ribbon label" style="" v-if="item.critics" @click="review(item)">View Comment/s</a>
+						<button class="ui basic mini button">{{item.percent + "%"}}</button>
 						{{item.mi_succIn}}
 					</td>
 					<!-- if has spms_corefucndata -->
@@ -138,6 +139,8 @@
 				</tr>
 				<tr v-else-if="!item.cf_title">
 					<td>
+						<a class="ui red ribbon label" style="" v-if="item.critics" @click="review(item)">View Comment/s</a>
+						<button class="ui basic mini button">{{item.percent + "%"}}</button>
 						{{item.mi_succIn}}
 					</td>
 					<!-- if has spms_corefucndata -->
@@ -148,7 +151,7 @@
 						<td>{{item.t}}</td>
 						<td style="text-align: center;">{{item.average}}</td>
 						<td></td>
-						<td></td>
+						<td width="150" style="text-align: center;"> <button class="ui small button" @click="review(item)"><i class="ui icon edit"></i> Review</button> </td>
 					</template>
 					<!-- else if disabled/not_applicable -->
 					<template v-else-if="item.not_applicable == '1'">
@@ -171,7 +174,7 @@
 				<tr>
 					<td>
 						<template v-if="item.critics">
-							<a class="ui red ribbon label" style="margin: 15px;" @click="reviewSupportFunction(item)">View Comments/s</a>
+							<a class="ui red ribbon label" style="" @click="reviewSupportFunction(item)">View Comment/s</a>
 							<br>
 						</template>
 						<button class="ui basic mini button">{{item.percent + "%"}}</button> {{item.mfo}}
