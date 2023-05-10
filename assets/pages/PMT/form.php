@@ -173,8 +173,8 @@
 			<template v-for="item, in support_functions.rows" :key="item.id_suppFunc">
 				<tr>
 					<td>
-						<template v-if="item.critics">
-							<a class="ui red ribbon label" style="" @click="reviewSupportFunction(item)">View Comment/s</a>
+						<template v-if="item.critics.PMT">
+							<a class="ui red ribbon label" style="margin: 15px;" @click="reviewSupportFunction(item)">View Comment/s</a>
 							<br>
 						</template>
 						<button class="ui basic mini button">{{item.percent + "%"}}</button> {{item.mfo}}
@@ -390,7 +390,9 @@
 				</div>
 				<div class="field">
 					<label>Actual Accomplishments</label>
-					<p style="padding: 20px; background: cyan;">{{itemForEditSupport.accomplishment}}</p>
+					<!-- <p style="padding: 20px; background: cyan;">{{itemForEditSupport.accomplishment}}</p> -->
+					<textarea rows="3" v-model="itemForEditSupport.accomplishment"></textarea>
+
 				</div>
 
 				<template v-for="mi, _mi  in [
@@ -413,10 +415,13 @@
 
 					<div class="field" v-if="itemForEditSupport[mi.id]">
 						<label>{{mi.name}}</label>
-						<template v-for="measure, score in itemForEditSupport[mi.col]" :key="score">
-							<div v-if="measure && itemForEditSupport[mi.id] != score"><i style="padding: 5px; color:grey;">({{score}})</i> {{measure}}</div>
-							<div v-else-if="measure && itemForEditSupport[mi.id] == score" style="padding: 5px; background: cyan;"><i style="color:grey;">({{score}})</i> {{measure}}</div>
-						</template>
+						<select v-model="itemForEditSupport[mi.id]">
+							<template v-for="measure, score in itemForEditSupport[mi.col]" :key="score">
+								<!-- <div v-if="measure && itemForEditSupport[mi.id] != score"><i style="padding: 5px; color:grey;">({{score}})</i> {{measure}}</div>
+							<div v-else-if="measure && itemForEditSupport[mi.id] == score" style="padding: 5px; background: cyan;"><i style="color:grey;">({{score}})</i> {{measure}}</div> -->
+								<option v-if="measure" :value="score">{{measure}}</option>
+							</template>
+						</select>
 					</div>
 				</template>
 
@@ -449,7 +454,7 @@
 					<div v-else-if="comment.id == 'PMT'">
 						<div class="ui segments field" style="margin-bottom: 15px;">
 							<div class="ui inverted segment" :class="comment.color">{{ comment.label }}</div>
-							<textarea class="ui secondary" v-model="pmtComments" placeholder="Enter your comments/corrections here..."></textarea>
+							<textarea class="ui secondary" v-model="pmtCommentsSupport" placeholder="Enter your comments/corrections here..."></textarea>
 						</div>
 					</div>
 
@@ -496,6 +501,7 @@
 				},
 				itemForEditSupport: {},
 				pmtComments: "",
+				pmtCommentsSupport: "",
 				strategic_function: {},
 				core_functions: {},
 				support_functions: {},
@@ -512,18 +518,17 @@
 		},
 		methods: {
 
-
 			reviewSupportFunction(item) {
 				this.itemForEditSupport = JSON.parse(JSON.stringify(item))
-				this.pmtComments = "";
+				this.pmtCommentsSupport = "";
 
 				if (this.itemForEditSupport.critics && this.itemForEditSupport.critics.PMT) {
-					this.pmtComments = this.itemForEditSupport.critics.PMT
+					this.pmtCommentsSupport = this.itemForEditSupport.critics.PMT
 				}
 				$('#reviewFormSupport').modal({
 					closable: false,
 					onApprove: () => {
-						this.setCommentSupport(item.sfd_id, "pmt", this.pmtComments)
+						this.setCriticsSupport("pmt", this.itemForEditSupport)
 						return false;
 					}
 				}).modal('show');
@@ -541,6 +546,7 @@
 					closable: false,
 					onApprove: () => {
 						this.setCritics(this.itemForEdit)
+						// this.itemForEdit["remarks"] = this.pmtComments
 						// console.log(this.itemForEdit);
 						return false;
 					}
@@ -548,24 +554,24 @@
 			},
 
 			setCritics(payload) {
+				console.log(payload);
 				$.post('?config=PMT', {
 					setCritics: true,
 					payload: payload
 				}, (data, textStatus, xhr) => {
 					const res = JSON.parse(data);
-					console.log("setCritics:", res);
 					this.initLoad()
 				});
 			},
 
-			setCommentSupport(sfd_id, commentor, comments) {
+			setCriticsSupport(commentor, payload) {
 				$.post('?config=PMT', {
-					setCommentSupport: true,
-					sfd_id: sfd_id,
+					setCriticsSupport: true,
 					commentor: commentor,
-					comments: comments
+					payload: payload
 				}, (data, textStatus, xhr) => {
 					const comms = JSON.parse(data);
+					console.log(comms);
 					this.initLoad()
 				});
 			},

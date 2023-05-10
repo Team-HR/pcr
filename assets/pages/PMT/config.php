@@ -136,6 +136,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 		} else {
 			$formType = "IPCR (NGA)";
 		}
+
 		$item = [
 			"id" => $row["performanceReviewStatus_id"],
 			"name" => $fullName,
@@ -247,11 +248,20 @@ elseif (isset($_POST["initLoadForm"])) {
 		"overall_final_rating" => $pcr_form->get_overall_final_rating(),
 		"isApproved" => $pcr_form->get_is_approved(),
 	]);
-} elseif (isset($_POST["setCommentSupport"])) {
+} elseif (isset($_POST["setCriticsSupport"])) {
 
-	$sfd_id = $_POST["sfd_id"];
 	$commentor = $_POST["commentor"];
-	$comments = $_POST["comments"];
+	$payload = $_POST["payload"];
+
+	// accomplishment
+	$accomplishment = $payload["accomplishment"];
+	// new measures
+	$q = $payload["q"];
+	$e = $payload["e"];
+	$t = $payload["t"];
+
+	echo  json_encode($payload);
+	return null;
 
 	// array (
 	// 	'IS' => '',
@@ -304,7 +314,6 @@ elseif (isset($_POST["initLoadForm"])) {
 	}
 } elseif (isset($_POST["setCritics"])) {
 
-	// $commentor = $_POST["commentor"];
 	$payload = $_POST["payload"];
 	$cfd_id = $payload["cfd_id"];
 

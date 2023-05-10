@@ -280,7 +280,12 @@ class PcrForm
 			if (isset($row["critics"]) && $row["critics"] !== "") {
 				$critics = unserialize($row["critics"]);
 				if (!isset($critics["IS"]) && !isset($critics["DH"]) && !isset($critics["PMT"])) {
-					$critics = false;
+					// $critics = false;
+					$critics = [
+						"IS" => "",
+						"DH" => "",
+						"PMT" => ""
+					];
 				}
 			}
 			// parse critics END
