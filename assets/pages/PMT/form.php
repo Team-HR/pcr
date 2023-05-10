@@ -111,7 +111,7 @@
 					</td>
 					<td>
 						<a class="ui red ribbon label" style="" v-if="item.critics" @click="review(item)">View Comment/s</a>
-						<button class="ui basic mini button">{{item.percent + "%"}}</button>
+						<button class="ui basic mini button" :class="item.corrected_percent ? 'red':''">{{item.percent + "%"}}</button>
 						{{item.mi_succIn}}
 					</td>
 					<!-- if has spms_corefucndata -->
