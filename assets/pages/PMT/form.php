@@ -110,7 +110,7 @@
 						</div>
 					</td>
 					<td>
-						<a class="ui red ribbon label" style="" v-if="item.critics" @click="review(item)">View Comment/s</a>
+						<a class="ui red ribbon label" style="" v-if="item.critics.PMT" @click="review(item)">View Comment/s</a>
 						<button class="ui basic mini button" :class="item.corrected_percent ? 'red':''">{{item.percent + "%"}}</button>
 						{{item.mi_succIn}}
 					</td>
@@ -139,7 +139,7 @@
 				</tr>
 				<tr v-else-if="!item.cf_title">
 					<td>
-						<a class="ui red ribbon label" style="" v-if="item.critics" @click="review(item)">View Comment/s</a>
+						<a class="ui red ribbon label" style="" v-if="item.critics.PMT" @click="review(item)">View Comment/s</a>
 						<button class="ui basic mini button">{{item.percent + "%"}}</button>
 						{{item.mi_succIn}}
 					</td>
@@ -554,12 +554,13 @@
 			},
 
 			setCritics(payload) {
-				console.log(payload);
+				// console.log(payload);
 				$.post('?config=PMT', {
 					setCritics: true,
 					payload: payload
 				}, (data, textStatus, xhr) => {
 					const res = JSON.parse(data);
+					// console.log(data)
 					this.initLoad()
 				});
 			},
@@ -571,7 +572,7 @@
 					payload: payload
 				}, (data, textStatus, xhr) => {
 					const comms = JSON.parse(data);
-					console.log(comms);
+					// console.log(comms);
 					this.initLoad()
 				});
 			},

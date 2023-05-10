@@ -385,11 +385,30 @@ elseif (isset($_POST["initLoadForm"])) {
 		# work on how to update supEdit where corrections is created and appended
 		// check first if supEdit has existing data if none create if exists update
 
+
+
+		#!!!! test start TO PREVENT REMOVING LAST CORRECTIONS WHEN EDITING CORRECTIONS
+		// if supEdit already has existing data, get most recent one
+		// then add combine the latest correction to it 
+		// then push to supEdit
+		$supEditLength = count($supEdit);
+
+		if ($supEditLength > 0) {
+			$lastSupEdit = $supEdit[$supEditLength - 1];
+			$lastCorrections = $lastSupEdit[1];
+			$corrections =  array_merge($corrections, $lastCorrections);
+		}
+
+		// echo json_encode($corrections);
+		// return false;
+
 		$corrections_made = [
 			$cfd_id,
 			$corrections,
 			date("d-m-Y")
 		];
+
+		#!!!! test end
 
 		$supEdit[] = $corrections_made;
 		// $sql = "UPDATE `spms_corefucndata` SET `supEdit` = '$supEdit' WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id'; ";
@@ -438,8 +457,7 @@ elseif (isset($_POST["initLoadForm"])) {
 
 	$res = $mysqli->query($sql);
 
-	echo json_encode($res);
-
+	echo json_encode($corrections);
 	return null;
 } elseif (isset($_POST["doApprove"])) {
 	$performanceReviewStatus_id = $_POST["id"];
