@@ -121,7 +121,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 	while ($row = $sqlDpcr->fetch_assoc()) {
 		$formOwner = new Employee_data();
 		$formOwner->set_emp($row['employees_id']);
-		$fullName = $formOwner->get_emp('lastName') . " " . $formOwner->get_emp('firstName') . " " . $formOwner->get_emp('middleName');
+		$fullName = $formOwner->get_emp('lastName') . ", " . $formOwner->get_emp('firstName') . " " . $formOwner->get_emp('middleName');
 
 		$formType = "";
 		$form_type = $row["formType"];
@@ -149,6 +149,11 @@ if (isset($_POST['showDepartmentFiles'])) {
 
 		$data[] = $item;
 	}
+
+	// sort employee list by last name from A-Z
+	usort($data, function ($item1, $item2) {
+		return $item1['name'] <=> $item2['name'];
+	});
 
 	echo json_encode([
 		"data" => $data,
