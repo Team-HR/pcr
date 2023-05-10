@@ -136,6 +136,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 		} else {
 			$formType = "IPCR (NGA)";
 		}
+
 		$item = [
 			"id" => $row["performanceReviewStatus_id"],
 			"name" => $fullName,
@@ -247,11 +248,20 @@ elseif (isset($_POST["initLoadForm"])) {
 		"overall_final_rating" => $pcr_form->get_overall_final_rating(),
 		"isApproved" => $pcr_form->get_is_approved(),
 	]);
-} elseif (isset($_POST["setCommentSupport"])) {
+} elseif (isset($_POST["setCriticsSupport"])) {
 
-	$sfd_id = $_POST["sfd_id"];
 	$commentor = $_POST["commentor"];
-	$comments = $_POST["comments"];
+	$payload = $_POST["payload"];
+
+	// accomplishment
+	$accomplishment = $payload["accomplishment"];
+	// new measures
+	$q = $payload["q"];
+	$e = $payload["e"];
+	$t = $payload["t"];
+
+	echo  json_encode($payload);
+	return null;
 
 	// array (
 	// 	'IS' => '',
@@ -302,18 +312,100 @@ elseif (isset($_POST["initLoadForm"])) {
 		echo  json_encode($critics);
 		return null;
 	}
-} elseif (isset($_POST["setComment"])) {
+} elseif (isset($_POST["setCritics"])) {
 
-	$cfd_id = $_POST["cfd_id"];
-	$commentor = $_POST["commentor"];
-	$comments = $_POST["comments"];
+	$payload = $_POST["payload"];
+	$cfd_id = $payload["cfd_id"];
 
-	// array (
-	// 	'IS' => '',
-	// 	'DH' => '',
-	// 	'PMT' => '',
-	//   )
+	// get exisiting cfdata first and compare to check if changes were made
+	$sql = "SELECT * FROM `spms_corefucndata` WHERE `cfd_id` = '$cfd_id'";
+	$res = $mysqli->query($sql);
 
+	$row = $res->fetch_assoc();
+	$current_percent =  $row["percent"];
+	$current_actualAcc =  $row["actualAcc"];
+	$current_Q =  $row["Q"];
+	$current_E =  $row["E"];
+	$current_T =  $row["T"];
+
+	$payload_percent = $payload["percent"];
+	$payload_actualAcc = $payload["actualAcc"];
+	$payload_q = $payload["q"];
+	$payload_e = $payload["e"];
+	$payload_t = $payload["t"];
+
+	$supEdit = $row["supEdit"];
+	if ($supEdit) {
+		$supEdit = unserialize($supEdit);
+	} else {
+		$supEdit = [];
+	}
+
+
+
+	$correction_is_made = false;
+	$corrections = false;
+
+	if ($current_percent != $payload["percent"]) {
+		$correction_is_made = true;
+		$corrections[] = [
+			"percent", $current_percent, $payload["percent"]
+		];
+	}
+
+	if ($current_actualAcc != $payload["actualAcc"]) {
+		$correction_is_made = true;
+		$corrections[] = [
+			"actualAcc", $current_actualAcc, $payload["actualAcc"]
+		];
+	}
+
+	if ($current_Q != $payload["q"]) {
+		$correction_is_made = true;
+		$corrections[] = [
+			"Q", $current_Q, $payload["q"]
+		];
+	}
+
+	if ($current_E != $payload["e"]) {
+		$correction_is_made = true;
+		$corrections[] = [
+			"E", $current_E, $payload["e"]
+		];
+	}
+
+	if ($current_T != $payload["t"]) {
+		$correction_is_made = true;
+		$corrections[] = [
+			"T", $current_T, $payload["t"]
+		];
+	}
+
+	if ($correction_is_made) {
+		# work on how to update supEdit where corrections is created and appended
+		// check first if supEdit has existing data if none create if exists update
+
+		$corrections_made = [
+			$cfd_id,
+			$corrections,
+			date("d-m-Y")
+		];
+
+		$supEdit[] = $corrections_made;
+		// $sql = "UPDATE `spms_corefucndata` SET `supEdit` = '$supEdit' WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id'; ";
+		// $mysqli->query($sql);
+		$supEdit = serialize($supEdit);
+		$supEdit = $mysqli->real_escape_string($supEdit);
+	} else {
+		if ($supEdit == []) {
+			$supEdit = "";
+		} else {
+			$supEdit = serialize($supEdit);
+			$supEdit = $mysqli->real_escape_string($supEdit);
+		}
+	}
+
+	$critics = $payload["critics"];
 	// check first if cfd_id exists 
 	$sql = "SELECT * FROM `spms_corefucndata` WHERE `cfd_id` = '$cfd_id'";
 	$res = $mysqli->query($sql);
@@ -323,40 +415,32 @@ elseif (isset($_POST["initLoadForm"])) {
 		echo json_encode(null);
 		return null;
 	}
-	// if exists insert/updatAe
-	$row = $res->fetch_assoc();
-	$critics = $row["critics"];
 
+	// if exists insert/updatAe
 	// check if IS DH PMT serial exist
 	// if exist unserialize and update existing
-	if ($critics) {
-		$critics = unserialize($critics);
-		// if ($comments) {
-		// $critics["IS"] = $comments;
-		// $critics["DH"] = $comments;
-		$critics["PMT"] = $comments;
+
+	if ($critics == "false") {
+		$critics = "";
+	} else {
 		$critics = serialize($critics);
 		$critics = $mysqli->real_escape_string($critics);
-		$sql = "UPDATE `spms_corefucndata` SET `critics` = '$critics' WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id';";
-		$mysqli->query($sql);
-		echo  json_encode($critics);
-		return null;
-		// }
 	}
-	// if none create with new commentor and comment object then serialize it
-	else {
-		$critics = [
-			"IS" => "",
-			"DH" => "",
-			"PMT" => $comments
-		];
-		$critics = serialize($critics);
-		$critics = $mysqli->real_escape_string($critics);
-		$sql = "UPDATE `spms_corefucndata` SET `critics` = '$critics' WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id';";
-		$mysqli->query($sql);
-		echo  json_encode($critics);
-		return null;
-	}
+
+
+	// payload_percent
+	$payload_actualAcc = $mysqli->real_escape_string($payload_actualAcc);
+	// payload_q
+	// payload_e
+	// payload_t
+
+	$sql = "UPDATE `spms_corefucndata` SET  `percent` = '$payload_percent', `actualAcc` = '$payload_actualAcc', `q` = '$payload_q', `e` = '$payload_e', `t` = '$payload_t', `supEdit` = '$supEdit' ,`critics` = '$critics' WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id';";
+
+	$res = $mysqli->query($sql);
+
+	echo json_encode($res);
+
+	return null;
 } elseif (isset($_POST["doApprove"])) {
 	$performanceReviewStatus_id = $_POST["id"];
 	$current_date = date("d-m-Y");
