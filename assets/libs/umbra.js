@@ -17,22 +17,22 @@ function promp() {
     console.log("false");
   }
 }
+
 function timer() {
+  const timeOut = 30; //mins
   promp();
   s = 0;
   i = setInterval(function () {
-    // console.log('');
     document.onmousemove = function () {
       s = 0;
-      // console.log(s);
     }
-    if (s >= 3000) {
+    if (s >= timeOut) {
       timeoutLog();
       clearInterval(i);
     }
     status = 0;
     s++;
-  }, 100);
+  }, 60000);
 }
 function login_log() {
   event.preventDefault();
