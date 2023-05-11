@@ -454,7 +454,7 @@
 					<div v-else-if="comment.id == 'PMT'">
 						<div class="ui segments field" style="margin-bottom: 15px;">
 							<div class="ui inverted segment" :class="comment.color">{{ comment.label }}</div>
-							<textarea class="ui secondary" v-model="pmtCommentsSupport" placeholder="Enter your comments/corrections here..."></textarea>
+							<textarea class="ui secondary" v-model="itemForEditSupport.critics.PMT" placeholder="Enter your comments/corrections here..."></textarea>
 						</div>
 					</div>
 
@@ -499,7 +499,11 @@
 						PMT: ""
 					}
 				},
-				itemForEditSupport: {},
+				itemForEditSupport: {
+					critics: {
+						PMT: ""
+					}
+				},
 				pmtComments: "",
 				pmtCommentsSupport: "",
 				strategic_function: {},
@@ -566,6 +570,7 @@
 			},
 
 			setCriticsSupport(commentor, payload) {
+				// console.log(payload);
 				$.post('?config=PMT', {
 					setCriticsSupport: true,
 					commentor: commentor,
@@ -593,11 +598,12 @@
 					this.year = res.year
 					this.core_functions = res.core_functions
 
-					console.log(res.core_functions.rows)
-
 					this.file_status = res.file_status
 					this.strategic_function = res.strategic_function
 					this.support_functions = res.support_functions
+
+					console.log(res.support_functions.rows)
+
 					this.comments_and_reccomendations = res.comments_and_reccomendations
 					this.overall_final_rating = res.overall_final_rating
 					this.isApproved = res.isApproved

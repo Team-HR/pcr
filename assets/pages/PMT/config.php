@@ -260,14 +260,16 @@ elseif (isset($_POST["initLoadForm"])) {
 	$e = $payload["e"];
 	$t = $payload["t"];
 
-	echo  json_encode($payload);
-	return null;
+	// echo  json_encode($payload);
+	// return null;
 
 	// array (
 	// 	'IS' => '',
 	// 	'DH' => '',
 	// 	'PMT' => '',
 	//   )
+
+	$sfd_id = $payload["sfd_id"];
 
 	// check first if sfd_id exists 
 	$sql = "SELECT * FROM `spms_supportfunctiondata` WHERE `sfd_id` = '$sfd_id'";
@@ -280,38 +282,13 @@ elseif (isset($_POST["initLoadForm"])) {
 	}
 	// if exists insert/updatAe
 	$row = $res->fetch_assoc();
-	$critics = $row["critics"];
-
-	// check if IS DH PMT serial exist
-	// if exist unserialize and update existing
-	if ($critics) {
-		$critics = unserialize($critics);
-		// if ($comments) {
-		// $critics["IS"] = $comments;
-		// $critics["DH"] = $comments;
-		$critics["PMT"] = $comments;
-		$critics = serialize($critics);
-		$critics = $mysqli->real_escape_string($critics);
-		$sql = "UPDATE `spms_supportfunctiondata` SET `critics` = '$critics' WHERE `spms_supportfunctiondata`.`sfd_id` = '$sfd_id';";
-		$mysqli->query($sql);
-		echo  json_encode($critics);
-		return null;
-		// }
-	}
-	// if none create with new commentor and comment object then serialize it
-	else {
-		$critics = [
-			"IS" => "",
-			"DH" => "",
-			"PMT" => $comments
-		];
-		$critics = serialize($critics);
-		$critics = $mysqli->real_escape_string($critics);
-		$sql = "UPDATE `spms_supportfunctiondata` SET `critics` = '$critics' WHERE `spms_supportfunctiondata`.`sfd_id` = '$sfd_id';";
-		$mysqli->query($sql);
-		echo  json_encode($critics);
-		return null;
-	}
+	$critics = $payload["critics"];
+	$critics = serialize($critics);
+	$critics = $mysqli->real_escape_string($critics);
+	$sql = "UPDATE `spms_supportfunctiondata` SET `critics` = '$critics' WHERE `spms_supportfunctiondata`.`sfd_id` = '$sfd_id';";
+	$res = $mysqli->query($sql);
+	echo  json_encode($res);
+	return null;
 } elseif (isset($_POST["setCritics"])) {
 
 	$payload = $_POST["payload"];

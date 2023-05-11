@@ -655,7 +655,14 @@ class PcrForm
 				}
 				$av = $q + $e + $t;
 
-				$fdata["critics"] = isset($fdata["critics"]) ? unserialize($fdata["critics"]) : null;
+				// $fdata["critics"] = isset($fdata["critics"]) ? unserialize($fdata["critics"]) : null;
+
+
+				$critics = isset($fdata["critics"]) && $fdata["critics"] != "" ? unserialize($fdata["critics"]) : [
+					"IS" => "",
+					"DH" => "",
+					"PMT" => ""
+				];
 
 				$rows[] = [
 					"mi_quality" => isset($tr["Q"]) ? unserialize($tr["Q"]) : null,
@@ -664,6 +671,7 @@ class PcrForm
 					"q" => isset($fdata["Q"]) ? $fdata["Q"] : null,
 					"e" => isset($fdata["E"]) ? $fdata["E"] : null,
 					"t" => isset($fdata["T"]) ? $fdata["T"] : null,
+					"critics" => $critics
 				] + $fdata + $tr + ["average_rating" => bcdiv($av, 1, 2)];
 
 				$totalAv += $av;
