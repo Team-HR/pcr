@@ -110,7 +110,7 @@
 						</div>
 					</td>
 					<td>
-						<a class="ui red ribbon label" style="" v-if="item.critics.PMT" @click="review(item)">View Comment/s</a>
+						<a class="ui red ribbon label" v-if="item.critics.PMT" @click="review(item)">View Comment/s</a>
 						<button class="ui basic mini button" :class="item.corrected_percent ? 'red':''">{{item.percent + "%"}}</button>
 						{{item.mi_succIn}}
 					</td>
@@ -139,7 +139,7 @@
 				</tr>
 				<tr v-else-if="!item.cf_title">
 					<td>
-						<a class="ui red ribbon label" style="" v-if="item.critics.PMT" @click="review(item)">View Comment/s</a>
+						<a class="ui red ribbon label" v-if="item.critics.PMT" @click="review(item)">View Comment/s</a>
 						<button class="ui basic mini button">{{item.percent + "%"}}</button>
 						{{item.mi_succIn}}
 					</td>
