@@ -664,10 +664,63 @@ class PcrForm
 					"PMT" => ""
 				];
 
+
+
+				#############################################
+
+				$corrected_actualAcc = false;
+				$corrected_Q = false;
+				$corrected_E = false;
+				$corrected_T = false;
+
+				$supEdit = $fdata["supEdit"];
+				if ($supEdit) {
+					$supEdit = unserialize($supEdit);
+
+					// check if actualAcc is to be corrected
+					foreach ($supEdit[count($supEdit) - 1][1] as $item) {
+						if ($item[0] == 'accomplishment') {
+							$corrected_actualAcc = true;
+							break;
+						}
+					}
+
+					// check if Q is to be corrected
+					foreach ($supEdit[count($supEdit) - 1][1] as $item) {
+						if ($item[0] == 'Q') {
+							$corrected_Q = true;
+							break;
+						}
+					}
+
+					// check if E is to be corrected
+					foreach ($supEdit[count($supEdit) - 1][1] as $item) {
+						if ($item[0] == 'E') {
+							$corrected_E = true;
+							break;
+						}
+					}
+
+					// check if T is to be corrected
+					foreach ($supEdit[count($supEdit) - 1][1] as $item) {
+						if ($item[0] == 'T') {
+							$corrected_T = true;
+							break;
+						}
+					}
+				}
+				#############################################
+
+
+
 				$rows[] = [
 					"mi_quality" => isset($tr["Q"]) ? unserialize($tr["Q"]) : null,
 					"mi_eff" => isset($tr["E"]) ? unserialize($tr["E"]) : null,
 					"mi_time" => isset($tr["T"]) ? unserialize($tr["T"]) : null,
+					"corrected_accomplishment" => $corrected_actualAcc,
+					"corrected_Q" => $corrected_Q,
+					"corrected_E" => $corrected_E,
+					"corrected_T" => $corrected_T,
 					"q" => isset($fdata["Q"]) ? $fdata["Q"] : null,
 					"e" => isset($fdata["E"]) ? $fdata["E"] : null,
 					"t" => isset($fdata["T"]) ? $fdata["T"] : null,

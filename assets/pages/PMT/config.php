@@ -254,11 +254,124 @@ elseif (isset($_POST["initLoadForm"])) {
 	$payload = $_POST["payload"];
 
 	// accomplishment
-	$accomplishment = $payload["accomplishment"];
+	// $accomplishment = $payload["accomplishment"];
 	// new measures
-	$q = $payload["q"];
-	$e = $payload["e"];
-	$t = $payload["t"];
+	// $q = $payload["q"];
+	// $e = $payload["e"];
+	// $t = $payload["t"];
+
+
+	########################################
+
+	$sfd_id = $payload["sfd_id"];
+
+	// get exisiting cfdata first and compare to check if changes were made
+	$sql = "SELECT * FROM `spms_supportfunctiondata` WHERE `sfd_id` = '$sfd_id'";
+	$res = $mysqli->query($sql);
+
+	$row = $res->fetch_assoc();
+	// $current_percent =  $row["percent"];
+	$current_actualAcc =  $row["accomplishment"];
+	$current_Q =  $row["Q"];
+	$current_E =  $row["E"];
+	$current_T =  $row["T"];
+
+	// $payload_percent = $payload["percent"];
+	$payload_actualAcc = $payload["accomplishment"];
+	$payload_q = $payload["q"];
+	$payload_e = $payload["e"];
+	$payload_t = $payload["t"];
+
+	$supEdit = $row["supEdit"];
+	if ($supEdit) {
+		$supEdit = unserialize($supEdit);
+	} else {
+		$supEdit = [];
+	}
+
+	$correction_is_made = false;
+	$corrections = false;
+
+	// if ($current_percent != $payload["percent"]) {
+	// 	$correction_is_made = true;
+	// 	$corrections[] = [
+	// 		"percent", $current_percent, $payload["percent"]
+	// 	];
+	// }
+
+	if ($current_actualAcc != $payload["accomplishment"]) {
+		$correction_is_made = true;
+		$corrections[] = [
+			"accomplishment", $current_actualAcc, $payload["accomplishment"]
+		];
+	}
+
+	if ($current_Q != $payload["q"]) {
+		$correction_is_made = true;
+		$corrections[] = [
+			"Q", $current_Q, $payload["q"]
+		];
+	}
+
+	if ($current_E != $payload["e"]) {
+		$correction_is_made = true;
+		$corrections[] = [
+			"E", $current_E, $payload["e"]
+		];
+	}
+
+	if ($current_T != $payload["t"]) {
+		$correction_is_made = true;
+		$corrections[] = [
+			"T", $current_T, $payload["t"]
+		];
+	}
+
+	if ($correction_is_made) {
+		# work on how to update supEdit where corrections is created and appended
+		// check first if supEdit has existing data if none create if exists update
+
+
+
+		#!!!! test start TO PREVENT REMOVING LAST CORRECTIONS WHEN EDITING CORRECTIONS
+		// if supEdit already has existing data, get most recent one
+		// then add combine the latest correction to it 
+		// then push to supEdit
+		$supEditLength = count($supEdit);
+
+		if ($supEditLength > 0) {
+			$lastSupEdit = $supEdit[$supEditLength - 1];
+			$lastCorrections = $lastSupEdit[1];
+			$corrections =  array_merge($corrections, $lastCorrections);
+		}
+
+		// echo json_encode($corrections);
+		// return false;
+
+		$corrections_made = [
+			$sfd_id,
+			$corrections,
+			date("d-m-Y")
+		];
+
+		#!!!! test end
+
+		$supEdit[] = $corrections_made;
+		// $sql = "UPDATE `spms_corefucndata` SET `supEdit` = '$supEdit' WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id'; ";
+		// $mysqli->query($sql);
+		$supEdit = serialize($supEdit);
+		$supEdit = $mysqli->real_escape_string($supEdit);
+	} else {
+		if ($supEdit == []) {
+			$supEdit = "";
+		} else {
+			$supEdit = serialize($supEdit);
+			$supEdit = $mysqli->real_escape_string($supEdit);
+		}
+	}
+
+	#####################################
+
 
 	// echo  json_encode($payload);
 	// return null;
@@ -268,8 +381,6 @@ elseif (isset($_POST["initLoadForm"])) {
 	// 	'DH' => '',
 	// 	'PMT' => '',
 	//   )
-
-	$sfd_id = $payload["sfd_id"];
 
 	// check first if sfd_id exists 
 	$sql = "SELECT * FROM `spms_supportfunctiondata` WHERE `sfd_id` = '$sfd_id'";
@@ -285,10 +396,42 @@ elseif (isset($_POST["initLoadForm"])) {
 	$critics = $payload["critics"];
 	$critics = serialize($critics);
 	$critics = $mysqli->real_escape_string($critics);
-	$sql = "UPDATE `spms_supportfunctiondata` SET `critics` = '$critics' WHERE `spms_supportfunctiondata`.`sfd_id` = '$sfd_id';";
+	// $sql = "UPDATE `spms_supportfunctiondata` SET `critics` = '$critics' WHERE `spms_supportfunctiondata`.`sfd_id` = '$sfd_id';";
+	// $res = $mysqli->query($sql);
+	// echo  json_encode($res);
+	// return null;
+
+
+	###########################################################
+
+	// if exists insert/updatAe
+	// check if IS DH PMT serial exist
+	// if exist unserialize and update existing
+
+	// if ($critics == "false") {
+	// 	$critics = "";
+	// } else {
+	// 	$critics = serialize($critics);
+	// 	$critics = $mysqli->real_escape_string($critics);
+	// }
+
+
+	// payload_percent
+	$payload_actualAcc = $mysqli->real_escape_string($payload_actualAcc);
+	// payload_q
+	// payload_e
+	// payload_t
+
+	$sql = "UPDATE `spms_supportfunctiondata` SET `accomplishment` = '$payload_actualAcc', `Q` = '$payload_q', `E` = '$payload_e', `T` = '$payload_t', `supEdit` = '$supEdit' ,`critics` = '$critics' WHERE `spms_supportfunctiondata`.`sfd_id` = '$sfd_id';";
+
 	$res = $mysqli->query($sql);
-	echo  json_encode($res);
+
+	echo json_encode($sql);
 	return null;
+	###########################################################
+
+
+
 } elseif (isset($_POST["setCritics"])) {
 
 	$payload = $_POST["payload"];

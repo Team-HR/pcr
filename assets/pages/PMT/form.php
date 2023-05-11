@@ -180,10 +180,10 @@
 						<button class="ui basic mini button">{{item.percent + "%"}}</button> {{item.mfo}}
 					</td>
 					<td>{{item.suc_in}}</td>
-					<td>{{item.accomplishment}}</td>
-					<td>{{item.Q}}</td>
-					<td>{{item.E}}</td>
-					<td>{{item.T}}</td>
+					<td :style="item.corrected_accomplishment ? 'color:red':''">{{item.accomplishment}}</td>
+					<td :style="item.corrected_Q ? 'color:red':''">{{item.Q}}</td>
+					<td :style="item.corrected_E ? 'color:red':''">{{item.E}}</td>
+					<td :style="item.corrected_T ? 'color:red':''">{{item.T}}</td>
 					<td>{{item.average_rating}}</td>
 					<td>{{}}</td>
 					<td class="center aligned"><button class="ui small button" @click="reviewSupportFunction(item)"><i class="ui icon edit"></i> Review</button></td>
@@ -577,7 +577,7 @@
 					payload: payload
 				}, (data, textStatus, xhr) => {
 					const comms = JSON.parse(data);
-					// console.log(comms);
+					// console.log("comms:", comms);
 					this.initLoad()
 				});
 			},
@@ -602,11 +602,12 @@
 					this.strategic_function = res.strategic_function
 					this.support_functions = res.support_functions
 
-					console.log(res.support_functions.rows)
-
 					this.comments_and_reccomendations = res.comments_and_reccomendations
 					this.overall_final_rating = res.overall_final_rating
 					this.isApproved = res.isApproved
+
+					// console.log(res.support_functions.rows)
+
 					$('#reviewForm').modal("hide")
 					$('#reviewFormSupport').modal("hide")
 				});
