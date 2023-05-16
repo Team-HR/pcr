@@ -1,7 +1,9 @@
 <div id="pcrFormsApplet" class="ui container" style="margin-top: 15px;">
 
-    <h1>Enable/Disable PCR Forms</h1>
 
+    <div class="p-3 d-flex justify-content-center">
+        <h3>LOCK/UNLOCK PCR FORMS</h3>
+    </div>
     <form @submit.prevent="getForms()">
         <div class="row">
             <div class="col-6">
