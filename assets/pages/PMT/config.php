@@ -421,7 +421,7 @@ elseif (isset($_POST["initLoadForm"])) {
 	// payload_q
 	// payload_e
 	// payload_t
-
+	// spms_supportfunctiondata
 	$sql = "UPDATE `spms_supportfunctiondata` SET `accomplishment` = '$payload_actualAcc', `Q` = '$payload_q', `E` = '$payload_e', `T` = '$payload_t', `supEdit` = '$supEdit' ,`critics` = '$critics' WHERE `spms_supportfunctiondata`.`sfd_id` = '$sfd_id';";
 
 	$res = $mysqli->query($sql);
