@@ -45,10 +45,12 @@
         <thead>
             <tr>
                 <td>ID</td>
+                <td>USERNAME</td>
                 <td>LOCK/UNLOCK</td>
                 <td>NAME</td>
                 <td>DEPARTMENT</td>
                 <td>SUBMITTED</td>
+                <td>PANELAPPROVED DATE</td>
                 <td>DATE ACCOMPLISHED</td>
             </tr>
         </thead>
@@ -56,6 +58,7 @@
             <template v-for="item,i in items" :key="i">
                 <tr>
                     <td>{{item.employees_id}}</td>
+                    <td>{{item.username}}</td>
                     <td>
                         <button style="background: #ffb8b8; width: 80px; box-shadow: none; border: 0px; padding: 2px;" v-if="item.submitted || item.panelApproved" @click="unlockForm(item)" class="btn">UNLOCK</button>
                         <button style="background: yellow; width: 80px; box-shadow: none; border: 0px; padding: 2px;" v-else @click="lockForm(item)" class="btn">LOCK</button>
@@ -63,6 +66,7 @@
                     <td>{{item.name}}</td>
                     <td>{{item.department}}</td>
                     <td>{{item.submitted}}</td>
+                    <td>{{item.panelApproved}}</td>
                     <td>{{item.dateAccomplished}}</td>
                 </tr>
             </template>

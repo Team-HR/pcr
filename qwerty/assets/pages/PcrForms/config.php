@@ -41,8 +41,10 @@ if (isset($_POST["getPeriods"])) {
 
     $res = $mysqli->query($sql);
     while ($row = $res->fetch_assoc()) {
-        $nameFormatter->set_employee_id($row["employees_id"]);
+        $employees_id = $row["employees_id"];
+        $nameFormatter->set_employee_id($employees_id);
         $row["name"] = $nameFormatter->getFullNameStandardUpper();
+        $row["username"] = getUsername($mysqli, $employees_id);
         $row["department"] =  $row["department"];
         $data[] = $row;
     }
@@ -62,4 +64,13 @@ if (isset($_POST["getPeriods"])) {
     $sql = "UPDATE `spms_performancereviewstatus` SET `submitted` = '', `panelApproved` = ''  WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$performanceReviewStatus_id';";
     $mysqli->query($sql);
     echo json_encode($performanceReviewStatus_id);
+}
+
+
+function getUsername($mysqli, $employees_id)
+{
+    $username = "N/A";
+    $res = $mysqli->query("SELECT * FROM `spms_accounts` WHERE employees_id = '$employees_id'");
+    $username = $res->fetch_assoc()["username"];
+    return $username;
 }
