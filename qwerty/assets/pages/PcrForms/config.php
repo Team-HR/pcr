@@ -59,7 +59,7 @@ if (isset($_POST["getPeriods"])) {
     echo json_encode($performanceReviewStatus_id);
 } elseif (isset($_POST["unlockForm"])) {
     $performanceReviewStatus_id = $_POST["performanceReviewStatus_id"];
-    $sql = "UPDATE `spms_performancereviewstatus` SET `submitted` = '' WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$performanceReviewStatus_id';";
+    $sql = "UPDATE `spms_performancereviewstatus` SET `submitted` = '', `panelApproved` = ''  WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$performanceReviewStatus_id';";
     $mysqli->query($sql);
     echo json_encode($performanceReviewStatus_id);
 }
