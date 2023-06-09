@@ -57,7 +57,7 @@
                 <tr>
                     <td>{{item.employees_id}}</td>
                     <td>
-                        <button style="background: #ffb8b8; width: 80px; box-shadow: none; border: 0px; padding: 2px;" v-if="item.submitted" @click="unlockForm(item)" class="btn">UNLOCK</button>
+                        <button style="background: #ffb8b8; width: 80px; box-shadow: none; border: 0px; padding: 2px;" v-if="item.submitted || item.panelApproved" @click="unlockForm(item)" class="btn">UNLOCK</button>
                         <button style="background: yellow; width: 80px; box-shadow: none; border: 0px; padding: 2px;" v-else @click="lockForm(item)" class="btn">LOCK</button>
                     </td>
                     <td>{{item.name}}</td>
