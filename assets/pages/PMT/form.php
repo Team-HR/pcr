@@ -542,23 +542,30 @@
 				this.itemForEdit = JSON.parse(JSON.stringify(item))
 				this.pmtComments = "";
 
-				if (this.itemForEdit.critics && this.itemForEdit.critics.PMT) {
-					this.pmtComments = this.itemForEdit.critics.PMT
+				if (!this.itemForEdit.critics.PMT || this.itemForEdit.critics.PMT == "") {
+					this.itemForEdit.critics = {
+						IS: '',
+						DH: '',
+						PMT: ''
+					};
 				}
 
+				// console.log("review(item):", this.itemForEdit);
+				// critics: {IS: '', DH: '', PMT: 'test'}
 				$('#reviewForm').modal({
 					closable: false,
 					onApprove: () => {
-						this.setCritics(this.itemForEdit)
-						// this.itemForEdit["remarks"] = this.pmtComments
 						// console.log(this.itemForEdit);
+						this.setCritics(this.itemForEdit)
+						//// this.itemForEdit["remarks"] = this.pmtComments
+						//// console.log(this.itemForEdit);
 						return false;
 					}
 				}).modal('show');
 			},
 
 			setCritics(payload) {
-				// console.log(payload);
+				// console.log("setCritics(payload):", payload);
 				$.post('?config=PMT', {
 					setCritics: true,
 					payload: payload
