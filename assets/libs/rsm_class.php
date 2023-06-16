@@ -157,7 +157,12 @@ class RsmClass extends mysqli
         $department = $this->department;
         $period  = $this->period;
         $data = [];
-        $sql = "SELECT * from `spms_corefunctions` where `parent_id`='$parent_id' and `dep_id`='$department' and `mfo_periodId`='$period' order by `cf_count` ASC";
+        # 
+        # Better check on children with wrong mfo_periodId OR
+        # disregard since child depends on parent_id with proper mfo_periodId?
+        # and `mfo_periodId`='$period'
+        #
+        $sql = "SELECT * from `spms_corefunctions` where `parent_id`='$parent_id' and `dep_id`='$department' order by `cf_count` ASC";
         $result = parent::query($sql);
         while ($row = $result->fetch_assoc()) {
             $item = [
@@ -198,7 +203,8 @@ class RsmClass extends mysqli
     }
 
     # get_correction_status
-    private function get_correction_status($corrections){
+    private function get_correction_status($corrections)
+    {
         if (!$corrections) return false;
         foreach ($corrections as $key => $correction) {
             if ($correction[1] == 0) {

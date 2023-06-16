@@ -337,8 +337,8 @@
                         period_id: period_id,
                         department_id: department_id
                     }, (data, textStatus, jqXHR) => {
-                        // console.log("get_rating_scale_matrix:", data);
                         this.items = JSON.parse(data);
+                        console.log("get_rating_scale_matrix:", this.items);
                         $('#tbody_rsm')
                             .dimmer('hide')
                     },

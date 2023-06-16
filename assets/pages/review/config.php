@@ -26,11 +26,20 @@ function pendingTable($mysqli)
         $color = "#00FA9A";
         $statusText = "$data[approved] - Approved";
       }
-      $tr .= "
-            <tr onclick='UncriticizedEmpIdFunc(\"$data[employees_id]\")' style='background:$color'>
-            <td>$fsql[firstName] $fsql[lastName]</td>
-            <td>$statusText</td>
-            </tr>";
+
+      if (checkIfCouncilor($mysqli, $data['employees_id'])) {
+        $tr .= "
+        <tr style='background:$color'>
+        <td>$fsql[firstName] $fsql[lastName]</td>
+        <td></td>
+        </tr>";
+      } else {
+        $tr .= "
+        <tr onclick='UncriticizedEmpIdFunc(\"$data[employees_id]\")' style='background:$color'>
+        <td>$fsql[firstName] $fsql[lastName]</td>
+        <td>$statusText</td>
+        </tr>";
+      }
     }
   }
   $DepartmentHeadData = "SELECT * from `spms_performancereviewstatus` where `submitted`= 'Done' 
@@ -50,12 +59,33 @@ function pendingTable($mysqli)
         $statusText = " Certified";
       }
       if ($getDepartmentHeadData['ImmediateSup'] == $getDepartmentHeadData['DepartmentHead'] || $getDepartmentHeadData['ImmediateSup'] == "") {
-        $tr .= "
+        // $tr .= "
+        //     <tr onclick='UncriticizedEmpIdFunc(\"$getDepartmentHeadData[employees_id]\")' style='background:$color'>
+        //     <td>$fsql[firstName] $fsql[lastName]</td>
+        //     <td>$getDepartmentHeadData[dateAccomplished] - $statusText</td>
+        //     </tr>
+        //     ";
+
+
+
+        if (checkIfCouncilor($mysqli, $getDepartmentHeadData['employees_id'])) {
+          $tr .= "
+            <tr style='background:$color'>
+            <td>$fsql[firstName] $fsql[lastName]</td>
+            <td></td>
+            </tr>
+            ";
+        } else {
+          $tr .= "
             <tr onclick='UncriticizedEmpIdFunc(\"$getDepartmentHeadData[employees_id]\")' style='background:$color'>
             <td>$fsql[firstName] $fsql[lastName]</td>
             <td>$getDepartmentHeadData[dateAccomplished] - $statusText</td>
             </tr>
             ";
+        }
+
+
+
         $tr .= subordinates($getDepartmentHeadData['employees_id'], $period);
       }
     }
@@ -131,34 +161,113 @@ function subordinates($dat, $period)
     $fsql = $mysqli->query($fsql);
     $fsql = $fsql->fetch_assoc();
     if ($ipcr['panelApproved'] != "") {
-      $tr .= "
-      <tr onclick='UncriticizedEmpIdFunc(\"$ipcr[employees_id]\")' style='background:#00FA9A'>
-      <td style='padding-left:50px'><i class='minus icon'></i>
-      $fsql[firstName] $fsql[lastName]</td>
-      <td>$ipcr[panelApproved] - Checked by PMT</td>
-      </tr>
-      ";
+      // $tr .= "
+      // <tr onclick='UncriticizedEmpIdFunc(\"$ipcr[employees_id]\")' style='background:#00FA9A'>
+      // <td style='padding-left:50px'><i class='minus icon'></i>
+      // $fsql[firstName] $fsql[lastName]</td>
+      // <td>$ipcr[panelApproved] - Checked by PMT</td>
+      // </tr>
+      // ";
+
+
+
+      if (checkIfCouncilor($mysqli, $ipcr['employees_id'])) {
+        $tr .= "
+        <tr style='background:#00FA9A'>
+        <td style='padding-left:50px'><i class='minus icon'></i>
+        $fsql[firstName] $fsql[lastName]</td>
+        <td></td>
+        </tr>
+        ";
+      } else {
+        $tr .= "
+        <tr onclick='UncriticizedEmpIdFunc(\"$ipcr[employees_id]\")' style='background:#00FA9A'>
+        <td style='padding-left:50px'><i class='minus icon'></i>
+        $fsql[firstName] $fsql[lastName]</td>
+        <td>$ipcr[panelApproved] - Checked by PMT </td>
+        </tr>
+        ";
+      }
+
+      // $tr .= "
+      //   <tr style='background:red'>
+      //   <td style='padding-left:50px'><i class='minus icon'></i>
+      //  TEST</td> 
+      //   <td>TEST</td>
+      //   </tr>
+      //   ";
     } elseif ($ipcr['certify'] != "") {
-      $tr .= "
-      <tr onclick='UncriticizedEmpIdFunc(\"$ipcr[employees_id]\")' style='background:#00FA9A'>
-      <td style='padding-left:50px'><i class='minus icon'></i>
-      $fsql[firstName] $fsql[lastName]</td>
-      <td>$ipcr[certify] - Certified by Department Head</td>
-      </tr>
-      ";
+      // $tr .= "
+      // <tr onclick='UncriticizedEmpIdFunc(\"$ipcr[employees_id]\")' style='background:#00FA9A'>
+      // <td style='padding-left:50px'><i class='minus icon'></i>
+      // $fsql[firstName] $fsql[lastName]</td>
+      // <td>$ipcr[certify] - Certified by Department Head</td>
+      // </tr>
+      // ";
+
+      if (checkIfCouncilor($mysqli, $ipcr['employees_id'])) {
+        $tr .= "
+        <tr style='background:#00FA9A'>
+        <td style='padding-left:50px'><i class='minus icon'></i>
+        $fsql[firstName] $fsql[lastName]</td>
+        <td></td>
+        </tr>
+        ";
+      } else {
+        $tr .= "
+        <tr onclick='UncriticizedEmpIdFunc(\"$ipcr[employees_id]\")' style='background:#00FA9A'>
+        <td style='padding-left:50px'><i class='minus icon'></i>
+        $fsql[firstName] $fsql[lastName]</td>
+        <td>$ipcr[certify] - Certified by Department Head</td>
+        </tr>
+        ";
+      }
+      // $tr .= "
+      //   <tr style='background:red'>
+      //   <td style='padding-left:50px'><i class='minus icon'></i>
+      //  TEST</td> 
+      //   <td>TEST</td>
+      //   </tr>
+      //   ";
     } elseif ($ipcr['approved'] != "") {
-      $tr .= "
-      <tr onclick='UncriticizedEmpIdFunc(\"$ipcr[employees_id]\")' style='background:#E8E8E8'>
-      <td style='padding-left:50px'><i class='minus icon'></i>
-      $fsql[firstName] $fsql[lastName]</td> 
-      <td>$ipcr[approved] - Approved by supervisor</td>
-      </tr>
-      ";
+      // $tr .= "
+      // <tr onclick='UncriticizedEmpIdFunc(\"$ipcr[employees_id]\")' style='background:#E8E8E8'>
+      // <td style='padding-left:50px'><i class='minus icon'></i>
+      // $fsql[firstName] $fsql[lastName]</td> 
+      // <td>$ipcr[approved] - Approved by supervisor</td>
+      // </tr>
+      // ";
+
+
+      if (checkIfCouncilor($mysqli, $ipcr['employees_id'])) {
+        $tr .= "
+        <tr style='background:#E8E8E8'>
+        <td style='padding-left:50px'><i class='minus icon'></i>
+        $fsql[firstName] $fsql[lastName]</td> 
+        <td></td>
+        </tr>
+        ";
+      } else {
+        $tr .= "
+        <tr onclick='UncriticizedEmpIdFunc(\"$ipcr[employees_id]\")' style='background:#E8E8E8'>
+        <td style='padding-left:50px'><i class='minus icon'></i>
+        $fsql[firstName] $fsql[lastName]</td> 
+        <td>$ipcr[approved] - Approved by supervisor</td>
+        </tr>
+        ";
+      }
+      // $tr .= "
+      //   <tr style='background:red'>
+      //   <td style='padding-left:50px'><i class='minus icon'></i>
+      //  TEST</td> 
+      //   <td>TEST</td>
+      //   </tr>
+      //   ";
     } else {
       $tr .= "
       <tr style='background:#f1dbd4'>
       <td style='padding-left:50px'><i class='minus icon'></i>
-      $fsql[firstName] $fsql[lastName] - Unapproved</td>
+      $fsql[firstName] $fsql[lastName] - Unapproved (Needs supervisor's developmental comments/recommendations)</td>
       <td>$ipcr[dateAccomplished] - Accomplished</td>
       </tr>
       ";
@@ -167,6 +276,23 @@ function subordinates($dat, $period)
   return $tr;
 }
 
+
+function checkIfCouncilor($mysqli, $employees_id)
+{
+  // return true;
+  // if (!$employees_id) {
+  //   return false;
+  // }
+  $isCouncilor = false;
+  $department_id = 34; //department_id of vice mayor's office
+
+  $sql = "SELECT * FROM `employees` WHERE employmentStatus = 'ELECTIVE' AND department_id = '$department_id' AND employees_id='$employees_id'";
+  $res = $mysqli->query($sql);
+  if ($res->num_rows > 0) {
+    $isCouncilor = true;
+  }
+  return $isCouncilor;
+}
 
 
 function uncriticizedTable($employee)
