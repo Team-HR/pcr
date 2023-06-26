@@ -205,7 +205,7 @@ class PcrForm
 						"si_corrections" => $si["corrections"],
 						"mi_quality" => unserialize($si["mi_quality"]),
 						"mi_eff" => unserialize($si["mi_eff"]),
-						"mi_time" => unserialize($si["mi_time"])
+						"mi_time" => unserialize($si["mi_time"]),
 					];
 					$data[] = /* $_tr + */ $si;
 				}
