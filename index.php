@@ -43,6 +43,9 @@ if (isset($_SESSION['emp_id'])) {
 				// the rating scale matrix editing page
 				require_once "assets/pages/RSM/rsm_editor.php";
 			}
+		} else if (isset($_GET['test'])) {
+			// period and year selector
+			require_once "assets/pages/test.php";
 		}
 		// else if(isset($_GET['supportFuntion'])){
 		// 	require_once "assets/pages/suppFunc/suppFunc.php";

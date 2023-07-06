@@ -108,12 +108,12 @@ if (isset($_POST['get_prev_rsm'])) {
 } elseif (isset($_POST['copy_to'])) {
   # code...
   $curr_period_id = 10;
-  $curr_department_id = 1;
-  $parent_id = 14776;
+  $curr_department_id = 16;
+  $parent_id = "";
 
   $selected_period_id = 11;
-  $selected_parent_id = 22217;
-  $selected_department_id = 3;
+  $selected_parent_id = "";
+  $selected_department_id = 34;
 
   $data = [];
   $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$curr_period_id' AND `dep_id` = '$curr_department_id' AND `parent_id` = '$parent_id';";
@@ -133,7 +133,55 @@ if (isset($_POST['get_prev_rsm'])) {
   print json_encode($data);
 }
 // copy previous rsm end
-elseif (isset($_POST['period_check'])) {
+
+// for copying prev rsm of prev dept to new dept as requested by SP
+elseif (isset($_POST['copy_to_other_dept'])) {
+
+  $selected_period_id = 11;
+
+  // get selected period data
+  $sql = "SELECT * FROM `spms_mfo_period` WHERE `mfoperiod_id` = '$selected_period_id';";
+  $result = $mysqli->query($sql);
+  $row = $result->fetch_assoc();
+  //  {"mfoperiod_id":"10","month_mfo":"July - December","year_mfo":"2022"}
+
+  $selected_months = $row["month_mfo"];
+  $selected_year = $row["year_mfo"];
+
+  // get previous period data
+  $period_id = 0;
+  $months = "";
+  $year = "";
+  if ($selected_months == "July - December") {
+    $months = "January - June";
+    $year = $selected_year;
+  } else {
+    $months = "July - December";
+    $year = $selected_year - 1;
+  }
+
+  $sql = "SELECT `mfoperiod_id` FROM `spms_mfo_period` WHERE `month_mfo` = '$months' AND `year_mfo` = '$year'";
+  $result = $mysqli->query($sql);
+  $row = $result->fetch_assoc();
+  $period_id = $row["mfoperiod_id"];
+
+  $department_id = 16; //set previous department 
+
+  // get previous period core functions
+  $data = [];
+  $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$period_id' AND `dep_id` = '$department_id' AND `parent_id` = '';";
+  $result = $mysqli->query($sql);
+  while ($row = $result->fetch_assoc()) {
+    $row["children"] = get_children($mysqli, $row['cf_ID']);
+    $data[] = $row;
+  }
+
+  $new_department = 34;
+
+  $data = start_duplicating_to_diff_dept($mysqli, $data, $selected_period_id, "", $new_department);
+
+  echo json_encode($data);
+} elseif (isset($_POST['period_check'])) {
 
   $period = "";
   $statusOK = 0;
@@ -983,6 +1031,43 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
 
   return $data;
 }
+
+
+
+function start_duplicating_to_diff_dept($mysqli, $data, $selected_period_id, $parent_id, $department_id)
+{
+  foreach ($data as $key => $core_function) {
+    // $department_id = $core_function['dep_id'];
+    // if (!$department_id) {
+    //   $department_id = $core_function['dep_id'];
+    // }
+    $parent_id = $parent_id ? $parent_id : NULL;
+    $cf_title = $mysqli->real_escape_string($core_function['cf_title']);
+    $cf_count = $mysqli->real_escape_string($core_function['cf_count']);
+    $sql = "INSERT INTO `spms_corefunctions`(`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`, `corrections`) VALUES ('$selected_period_id','$parent_id','$department_id','$cf_count','$cf_title','')";
+    $mysqli->query($sql);
+    $insert_id = $mysqli->insert_id;
+
+    #get success indicators
+    $success_idicators = get_success_indicators($mysqli, $core_function["cf_ID"]);
+    foreach ($success_idicators as $success_idicator) {
+
+      $mi_succIn = $mysqli->real_escape_string($success_idicator['mi_succIn']);
+
+      $mi_quality = $mysqli->real_escape_string($success_idicator['mi_quality']);
+      $mi_eff = $mysqli->real_escape_string($success_idicator['mi_eff']);
+      $mi_time = $mysqli->real_escape_string($success_idicator['mi_time']);
+
+      $sql = "INSERT INTO `spms_matrixindicators`(`cf_ID`, `mi_succIn`, `mi_quality`, `mi_eff`, `mi_time`, `mi_incharge`, `corrections`) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
+      $mysqli->query($sql);
+    }
+
+    $data[$key]["children"] = start_duplicating_to_diff_dept($mysqli, $core_function["children"], $selected_period_id, $insert_id, $department_id);
+  }
+
+  return $data;
+}
+
 
 function get_success_indicators($mysqli, $cf_ID)
 {
