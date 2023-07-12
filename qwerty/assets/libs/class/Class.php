@@ -539,7 +539,7 @@ class IPCR extends mysqli
             <td colspan='4'>
               <p style='font-weight:bolder;text-align:center'>$title</p>
               <p style='padding:10px;font-size:14px'>
-                 I, <b> $employee[firstName] $employee[lastName] </b>, $employee[position] of the " . $this->fileStatus['department'] . " commit to deliver and agree to be rated on the attainment of the following targets in accordance with the indicated measures for the period " . $this->fileStatus['month_mfo'] . " " . $this->fileStatus['year_mfo'] . "
+                 I, <b> $employee[firstName] $employee[lastName] </b>, $employee[position] of the " . $this->fileStatus['department'] . "commit to deliver and agree to be rated on the attainment of the following targets in accordance with the indicated measures for the period " . $this->fileStatus['month_mfo'] . " " . $this->fileStatus['year_mfo'] . "
               </p>
               <div style='width:500px;text-align:center;float:right'>
               <span style='border-bottom:1px solid black;font-size:14px'>$employee[firstName] $employee[lastName]</span>

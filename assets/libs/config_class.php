@@ -23,8 +23,8 @@ $mysqli->set_charset("utf8");
 
 
 // MYSQL ERROR REPORTING START
-ini_set('display_errors',1);
-ini_set('display_startup_errors',1);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 // MYSQL ERROR REPORTING END
 
@@ -1613,7 +1613,14 @@ class Employee_data extends mysqli
 		$period = $this->period;
 		$fileStatus = $this->fileStatus;
 		$department_id = $fileStatus["department_id"];
+
+
 		$department = $this->get_department_name($department_id);
+
+		if (isset($this->fileStatus['is_cvmo'])) {
+			$department = "CITY VICE MAYOR'S OFFICE";
+		}
+
 		$view = "
 		<table border='1px' style='border-collapse:collapse;width:98%;margin:auto;'>
 		<tr>

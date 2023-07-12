@@ -5,10 +5,6 @@
 	</div>
 
 	<div class="ui basic segment" style="margin-left: 20px; margin-right: 20px;">
-		<!-- 
-		<p>
-			I, <b>{{ file_status.name }}</b> , _______________________ of the <b>{{ file_status.department }}</b> commit to deliver and agree to be rated on the attainment of the following targets in accordance with the indicated measures for the period {{ period + " " + year }}.
-		</p> -->
 		<table class="ui celled table" style="width: 100%; _background-color:antiquewhite; _border: 1px solid grey; _border-collapse:collapse;">
 			<tr>
 				<td colspan="4" style="text-align: center;">
