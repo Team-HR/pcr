@@ -264,10 +264,11 @@ function subordinates($dat, $period)
       //   </tr>
       //   ";
     } else {
+      // - Unapproved (Needs supervisor's developmental comments/recommendations)
       $tr .= "
       <tr style='background:#f1dbd4'>
       <td style='padding-left:50px'><i class='minus icon'></i>
-      $fsql[firstName] $fsql[lastName] - Unapproved (Needs supervisor's developmental comments/recommendations)</td>
+      $fsql[firstName] $fsql[lastName]</td>
       <td>$ipcr[dateAccomplished] - Accomplished</td>
       </tr>
       ";
