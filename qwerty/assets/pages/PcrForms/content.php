@@ -46,6 +46,7 @@
             <tr>
                 <td>ID</td>
                 <td>USERNAME</td>
+                <td>STATUS</td>
                 <td>LOCK/UNLOCK</td>
                 <td>NAME</td>
                 <td>DEPARTMENT</td>
@@ -59,6 +60,10 @@
                 <tr>
                     <td>{{item.employees_id}}</td>
                     <td>{{item.username}}</td>
+                    <td>
+                        <div v-if="item.submitted">LOCKED</div>
+                        <div v-else>UNLOCKED</div>
+                    </td>
                     <td>
                         <button style="background: #ffb8b8; width: 80px; box-shadow: none; border: 0px; padding: 2px;" v-if="item.submitted || item.panelApproved" @click="unlockForm(item)" class="btn">UNLOCK</button>
                         <button style="background: yellow; width: 80px; box-shadow: none; border: 0px; padding: 2px;" v-else @click="lockForm(item)" class="btn">LOCK</button>
