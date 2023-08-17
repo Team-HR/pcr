@@ -545,6 +545,25 @@ elseif (isset($_POST["initLoadForm"])) {
 	}
 
 	$critics = $payload["critics"];
+	$criticize = false;
+	if (isset($critics['DH'])) {
+		if ($critics['DH'] != "") {
+			$criticize = true;
+		}
+	}
+	if (isset($critics['IS'])) {
+		if ($critics['IS'] != "") {
+			$criticize = true;
+		}
+	}
+
+	if (isset($critics['PMT'])) {
+		if ($critics['PMT'] != "") {
+			$criticize = true;
+		}
+	}
+
+
 	// check first if cfd_id exists 
 	$sql = "SELECT * FROM `spms_corefucndata` WHERE `cfd_id` = '$cfd_id'";
 	$res = $mysqli->query($sql);
@@ -558,6 +577,7 @@ elseif (isset($_POST["initLoadForm"])) {
 	// if exists insert/updatAe
 	// check if IS DH PMT serial exist
 	// if exist unserialize and update existing
+
 
 	if ($critics == "false") {
 		$critics = "";
@@ -575,7 +595,9 @@ elseif (isset($_POST["initLoadForm"])) {
 
 	$sql = "UPDATE `spms_corefucndata` SET  `percent` = '$payload_percent', `actualAcc` = '$payload_actualAcc', `q` = '$payload_q', `e` = '$payload_e', `t` = '$payload_t', `supEdit` = '$supEdit' ,`critics` = '$critics' WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id';";
 
-	$res = $mysqli->query($sql);
+	if ($criticize) {
+		$res = $mysqli->query($sql);
+	}
 
 	echo json_encode($corrections);
 	return null;

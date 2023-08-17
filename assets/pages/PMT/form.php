@@ -567,7 +567,7 @@
 					payload: payload
 				}, (data, textStatus, xhr) => {
 					const res = JSON.parse(data);
-					// console.log(data)
+					console.log(data)
 					this.initLoad()
 				});
 			},
