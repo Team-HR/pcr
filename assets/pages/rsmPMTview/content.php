@@ -5,6 +5,13 @@
 // $rsmView->get_rating_scale_matrix();
 ?>
 <div id="rsm_pmt_view">
+
+    <div class="ui teal segment" style="margin: 25px; text-align: center;">
+        <div style="font-size: 32px; color: #1678c2">RATING SCALE MATRIX</div> <br>
+        <div style="font-size: 22px; color: black">{{rsm_details.department}}</div>
+        <div style="font-size: 18px; color: black">{{rsm_details.period}}</div>
+    </div>
+
     <table class="ui mini compact celled structured table" style="border-collapse:collapse;width:98%;margin:auto">
         <thead style="background:#00c4ff36;font-size:14px">
             <tr style="text-align: center;">
@@ -275,7 +282,11 @@
                 si_correction: "",
                 items: [],
                 irm: "",
-                irm_name: ""
+                irm_name: "",
+                rsm_details: {
+                    department: "",
+                    period: ""
+                }
             }
         },
         watch: {
@@ -328,17 +339,30 @@
                     })
                     .dimmer('add content', '<div class="ui text loader">Loading<div>')
                     .dimmer('show ');
+
                 const queryString = window.location.search;
                 const urlParams = new URLSearchParams(queryString);
                 const period_id = urlParams.get('period');
                 const department_id = urlParams.get('department');
+
+                $.get("?config=rsmPMTview", {
+                        get_rsm_details: true,
+                        period_id: period_id,
+                        department_id: department_id
+                    }, (data, textStatus, jqXHR) => {
+                        // console.log(data);
+                        this.rsm_details = data;
+                    },
+                    "json"
+                );
+
                 $.get("?config=rsmPMTview", {
                         get_rating_scale_matrix: true,
                         period_id: period_id,
                         department_id: department_id
                     }, (data, textStatus, jqXHR) => {
                         this.items = JSON.parse(data);
-                        console.log("get_rating_scale_matrix:", this.items);
+                        // console.log("get_rating_scale_matrix:", this.items);
                         $('#tbody_rsm')
                             .dimmer('hide')
                     },
@@ -346,7 +370,7 @@
                 );
             },
             edit_si_corrections(item) {
-                console.log(item);
+                // console.log(item);
                 this.si_edit_item = item
                 $("#si_correction_modal").modal({
                     closable: false,
@@ -428,6 +452,7 @@
         },
         mounted() {
             this.get_rating_scale_matrix()
+
         }
     }).mount('#rsm_pmt_view')
     /* Vue3 End*/

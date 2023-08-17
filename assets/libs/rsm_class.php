@@ -18,17 +18,12 @@
     --> 
     */
 
-
-
 class RsmClass extends mysqli
 {
-
     // the id of the department
     private $department;
-
     // the id of the period being selected
     private $period;
-
     // this ID is the ID of the MFO that you want to change the parent
 
     private $mfoID;

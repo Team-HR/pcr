@@ -151,6 +151,31 @@ elseif (isset($_GET["get_rating_scale_matrix"])) {
     // $rsmView->get_rating_scale_matrix();
     $data = $rsmView->get_rating_scale_matrix_rows();
     echo json_encode($data);
+} elseif (isset($_GET["get_rsm_details"])) {
+    $data = [];
+    $period_id = $_GET["period_id"];
+    $department_id = $_GET["department_id"];
+
+    $period = "";
+    $department = "";
+
+    $sql = "SELECT * FROM `department` WHERE department_id = '$department_id'";
+    $res = $mysqli->query($sql);
+    
+    if ($row = $res->fetch_assoc()) {
+        $department = $row["department"];
+    }
+
+    $sql = "SELECT * FROM `spms_mfo_period` WHERE mfoperiod_id = '$period_id'";
+    $res = $mysqli->query($sql);
+    if ($row = $res->fetch_assoc()) {
+        $period = $row["month_mfo"] . " " . $row["year_mfo"];
+    }
+
+    echo json_encode([
+        "department" => $department,
+        "period" => $period
+    ]);
 } elseif (isset($_POST["add_correction"])) {
     $cf_ID = $_POST["cf_ID"];
     $correction = $_POST["correction"];
