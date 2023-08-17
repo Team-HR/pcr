@@ -247,10 +247,14 @@ class RsmClass extends mysqli
             $query = "SELECT `employees_id`, `lastName`, `firstName`, `middleName`, `extName` FROM `employees` WHERE `employees_id` = '$employee_id';";
             $result = parent::query($query);
             $row = $result->fetch_assoc();
-            $data[] = [
-                "id" => $row["employees_id"],
-                "name" => $row["lastName"] . ", " . $row["firstName"] //. $row["middleName"] ? " " . $row["middleName"][0] : "" . $row["extName"] ? " " . $row["extName"] : ""
-            ];
+            if ($row) {
+                # code...
+                $data[] = [
+                    "id" => $row["employees_id"],
+                    "name" => $row["lastName"] . ", " . $row["firstName"] //. $row["middleName"] ? " " . $row["middleName"][0] : "" . $row["extName"] ? " " . $row["extName"] : ""
+                ];
+            }
+            
         }
         return $data;
     }
