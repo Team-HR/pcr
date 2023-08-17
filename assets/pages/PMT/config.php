@@ -595,9 +595,9 @@ elseif (isset($_POST["initLoadForm"])) {
 
 	$sql = "UPDATE `spms_corefucndata` SET  `percent` = '$payload_percent', `actualAcc` = '$payload_actualAcc', `q` = '$payload_q', `e` = '$payload_e', `t` = '$payload_t', `supEdit` = '$supEdit' ,`critics` = '$critics' WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id';";
 
-	if ($criticize) {
+	// if ($criticize) {
 		$res = $mysqli->query($sql);
-	}
+	// }
 
 	echo json_encode($corrections);
 	return null;
