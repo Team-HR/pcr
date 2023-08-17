@@ -19,20 +19,21 @@ function promp() {
 }
 
 function timer() {
-  const timeOut = 30; //mins
+  const timeOut = 5; //mins
   promp();
   s = 0;
-  i = setInterval(function () {
-    document.onmousemove = function () {
-      s = 0;
-    }
-    if (s >= timeOut) {
-      timeoutLog();
-      clearInterval(i);
-    }
-    status = 0;
-    s++;
-  }, 60000);
+  // i = setInterval(function () {
+  //   document.onmousemove = function () {
+  //     s = 0;
+  //   }
+  //   if (s >= timeOut) {
+  //     timeoutLog();
+  //     clearInterval(i);
+  //   }
+  //   status = 0;
+  //   s++;
+  //   console.log(s);
+  // }, 60000);
 }
 function login_log() {
   event.preventDefault();
@@ -69,6 +70,7 @@ function timeoutLog() {
     }).modal('show');
   });
 }
+
 function timeoutForm(i) {
   pass = $("#timePass").val();
   $.post('assets/pages/login/config.php', {
@@ -84,6 +86,7 @@ function timeoutForm(i) {
     }
   });
 }
+
 // rating scale
 // scripts start
 function rsm_period(i) {
