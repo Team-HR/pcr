@@ -593,11 +593,14 @@ elseif (isset($_POST["initLoadForm"])) {
 	// payload_e
 	// payload_t
 
-	$sql = "UPDATE `spms_corefucndata` SET  `percent` = '$payload_percent', `actualAcc` = '$payload_actualAcc', `q` = '$payload_q', `e` = '$payload_e', `t` = '$payload_t', `supEdit` = '$supEdit' ,`critics` = '$critics' WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id';";
+	$sql_critics = "";
+	if ($criticize) {
+		$sql_critics = ",`critics` = '$critics'";
+	}
 
-	// if ($criticize) {
-		$res = $mysqli->query($sql);
-	// }
+	$sql = "UPDATE `spms_corefucndata` SET  `percent` = '$payload_percent', `actualAcc` = '$payload_actualAcc', `q` = '$payload_q', `e` = '$payload_e', `t` = '$payload_t', `supEdit` = '$supEdit' $sql_critics WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id';";
+
+	$res = $mysqli->query($sql);
 
 	echo json_encode($corrections);
 	return null;
