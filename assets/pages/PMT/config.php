@@ -596,6 +596,8 @@ elseif (isset($_POST["initLoadForm"])) {
 	$sql_critics = "";
 	if ($criticize) {
 		$sql_critics = ",`critics` = '$critics'";
+	} else {
+		$sql_critics = ",`critics` = ''";
 	}
 
 	$sql = "UPDATE `spms_corefucndata` SET  `percent` = '$payload_percent', `actualAcc` = '$payload_actualAcc', `q` = '$payload_q', `e` = '$payload_e', `t` = '$payload_t', `supEdit` = '$supEdit' $sql_critics WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id';";
