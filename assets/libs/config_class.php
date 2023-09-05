@@ -13,7 +13,7 @@
 //	great achievements start from useless ideas  " God Bless "
 //	crazy is what we are
 date_default_timezone_set("Asia/Manila");
-$host = "localhost";
+$host = "db";
 $usernameDb = "admin";
 // $password = "teamhrmo2019";
 $password = "teamhrmo2019";
@@ -85,7 +85,7 @@ class Employee_data extends mysqli
 
 	function __construct()
 	{
-		$host = "localhost";
+		$host = "db";
 		$usernameDb = "admin";
 		$password = "teamhrmo2019";
 		$database = "ihris";
@@ -2211,7 +2211,7 @@ class employees extends mysqli
 {
 	function __construct()
 	{
-		$host = "localhost";
+		$host = "db";
 		$usernameDb = "";
 		// $password = "teamhrmo2019";
 		$password = "teamhrmo2019";
