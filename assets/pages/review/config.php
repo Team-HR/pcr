@@ -92,6 +92,13 @@ function pendingTable($mysqli)
     }
   }
 
+  $data = get_subordinates($mysqli, $period, $empId);
+  $json = json_encode($data, JSON_PRETTY_PRINT);
+  $view =  "<div style='text-align: left; width: 100%; background-color: white'>";
+  $view .=  "<pre>" . $json . "</pre>";
+  $view .= "</div>";
+
+  // return $view;
 
   $table .= "
   <h3> Period of $gperiod[month_mfo] $gperiod[year_mfo] </h3>
@@ -122,6 +129,68 @@ function pendingTable($mysqli)
 }
 
 
+
+function get_employee_name($mysqli, $employee_id)
+{
+  $sql = "SELECT * from employees where employees_id='$employee_id'";
+  $res = $mysqli->query($sql);
+
+  $name = "";
+
+  if ($row = $res->fetch_assoc()) {
+    $name = "$row[lastName], $row[firstName]";
+    if ($row['extName']) {
+      $name .= " " . $row['extName'];
+    }
+    $name = mb_strtoupper($name);
+  }
+
+  return $name;
+}
+
+
+function get_subordinates($mysqli, $period_id, $employee_id)
+{
+  $sql = "SELECT * FROM `spms_performancereviewstatus` where (ImmediateSup = '$employee_id' OR DepartmentHead = '$employee_id') AND period_id = '$period_id' ORDER BY `spms_performancereviewstatus`.`dateAccomplished` ASC
+  ";
+
+  $res = $mysqli->query($sql);
+  $personnel = [];
+
+  while ($row = $res->fetch_assoc()) {
+    $personnel[] = $row;
+  }
+
+  // $tr = "";
+
+  $data = [];
+  foreach ($personnel as $key => $pcr) {
+    $datum = [
+      "employee_id" => $pcr['employees_id'],
+      "employee_id_supervisor" => $pcr['ImmediateSup'],
+      "name" => get_employee_name($mysqli, $pcr['employees_id']),
+      "status" => [
+        "submitted" => $pcr['submitted'],
+        "date_submitted" => $pcr['dateAccomplished'],
+        "date_approved" => $pcr['approved'],
+        "date_certified" => $pcr['certify'],
+        "date_pmt_approved" => $pcr['panelApproved']
+      ]
+    ];
+
+
+    $data[] = $datum;
+
+    // $status = json_encode($status);
+    // $tr .= "<tr onclick='UncriticizedEmpIdFunc(\"$employee_id\")' style='background:_'>";
+    // $tr .= "<td>" . get_employee_name($mysqli, $employee_id) . "</td>";
+    // $tr .= "<td>$status</td>";
+    // $tr .= "</tr>";
+  }
+
+
+  return $data;
+}
 
 
 
@@ -192,6 +261,7 @@ function subordinates($dat, $period)
         ";
       }
 
+      $tr .= subordinates($ipcr['employees_id'], $period);
       // $tr .= "
       //   <tr style='background:red'>
       //   <td style='padding-left:50px'><i class='minus icon'></i>
@@ -225,6 +295,7 @@ function subordinates($dat, $period)
         </tr>
         ";
       }
+      $tr .= subordinates($ipcr['employees_id'], $period);
       // $tr .= "
       //   <tr style='background:red'>
       //   <td style='padding-left:50px'><i class='minus icon'></i>
@@ -259,6 +330,8 @@ function subordinates($dat, $period)
         </tr>
         ";
       }
+      $tr .= subordinates($ipcr['employees_id'], $period);
+      
       // $tr .= "
       //   <tr style='background:red'>
       //   <td style='padding-left:50px'><i class='minus icon'></i>
@@ -272,10 +345,13 @@ function subordinates($dat, $period)
       <tr style='background:#f1dbd4'>
       <td style='padding-left:50px'><i class='minus icon'></i>
       $fsql[firstName] $fsql[lastName]</td>
-      <td>$ipcr[dateAccomplished] - Accomplished</td>
+      <td>$ipcr[dateAccomplished] - Unapproved (Form not submitted or needs supervisor's approval)</td>
       </tr>
       ";
+      $tr .= subordinates($ipcr['employees_id'], $period);
+
     }
+    
   }
   return $tr;
 }
