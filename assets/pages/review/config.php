@@ -8,7 +8,7 @@ function pendingTable($mysqli)
   $gperiod = $mysqli->query($gperiod);
   $gperiod = $gperiod->fetch_assoc();
   $empId = $_SESSION['emp_id'];
-  $sql = "SELECT * from spms_performancereviewstatus where `submitted` like '%Done%' and period_id='$period' and ImmediateSup='$empId'  ORDER BY `spms_performancereviewstatus`.`approved` ASC";
+  $sql = "SELECT * from spms_performancereviewstatus where period_id='$period' and ImmediateSup='$empId'  ORDER BY `spms_performancereviewstatus`.`approved` ASC";
   $sql = $mysqli->query($sql);
   $tr = "";
   while ($data = $sql->fetch_assoc()) {
@@ -37,13 +37,12 @@ function pendingTable($mysqli)
         $tr .= "
         <tr onclick='UncriticizedEmpIdFunc(\"$data[employees_id]\")' style='background:$color'>
         <td>$fsql[firstName] $fsql[lastName]</td>
-        <td>$statusText</td>
+        <td>statusText</td>
         </tr>";
       }
     }
   }
-  $DepartmentHeadData = "SELECT * from `spms_performancereviewstatus` where `submitted`= 'Done' 
-                        and `period_id`= '$period' and `DepartmentHead`='$empId'";
+  $DepartmentHeadData = "SELECT * from `spms_performancereviewstatus` where `period_id`= '$period' and `DepartmentHead`='$empId'";
   $DepartmentHeadData = $mysqli->query($DepartmentHeadData);
   if ($DepartmentHeadData->num_rows > 0) {
     while ($getDepartmentHeadData = $DepartmentHeadData->fetch_assoc()) {
@@ -51,6 +50,8 @@ function pendingTable($mysqli)
       $fsql = $mysqli->query($fsql);
       $fsql = $fsql->fetch_assoc();
       $color = "#BEBEBE";
+
+      # status text start
       $statusText = "Accomplished";
       if (isset($data['panelApproved'])) {
         $statusText = "$data[panelApproved] - Checked by PMT";
@@ -58,6 +59,8 @@ function pendingTable($mysqli)
         $color = "#00FA9A";
         $statusText = " Certified";
       }
+      # status text end
+
       if ($getDepartmentHeadData['ImmediateSup'] == $getDepartmentHeadData['DepartmentHead'] || $getDepartmentHeadData['ImmediateSup'] == "") {
         // $tr .= "
         //     <tr onclick='UncriticizedEmpIdFunc(\"$getDepartmentHeadData[employees_id]\")' style='background:$color'>
@@ -65,8 +68,6 @@ function pendingTable($mysqli)
         //     <td>$getDepartmentHeadData[dateAccomplished] - $statusText</td>
         //     </tr>
         //     ";
-
-
 
         if (checkIfCouncilor($mysqli, $getDepartmentHeadData['employees_id'])) {
           $tr .= "
@@ -90,6 +91,8 @@ function pendingTable($mysqli)
       }
     }
   }
+
+
   $table .= "
   <h3> Period of $gperiod[month_mfo] $gperiod[year_mfo] </h3>
   <table class='ui basic small selectable table' style='width:95%;cursor:pointer;background:white'>
@@ -153,7 +156,7 @@ function pendingTable($mysqli)
 function subordinates($dat, $period)
 {
   $mysqli = $GLOBALS['mysqli'];
-  $sql = "SELECT * from `spms_performancereviewstatus` where `ImmediateSup`='$dat' and `period_id`='$period' and `submitted` like '%DONE%'";
+  $sql = "SELECT * from `spms_performancereviewstatus` where `ImmediateSup`='$dat' and `period_id`='$period'";
   $sql = $mysqli->query($sql);
   $tr = "";
   while ($ipcr = $sql->fetch_assoc()) {
