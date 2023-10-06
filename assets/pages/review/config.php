@@ -222,7 +222,7 @@ function cascade_personnel(array $elements, $margin = 0, $level = 0, &$index = 0
     
 
     $tr .= "<tr onclick='UncriticizedEmpIdFunc(\"$el[id]\")' style='background: $color'>";
-    $tr .= "<td><div style='margin-left: {$margin}px'><i>$index.)</i>$el[id] $el[parent_id]  <b>$el[name]</b> $parent_icon</div></td>";
+    $tr .= "<td><div style='margin-left: {$margin}px'><i>$index.)</i> <b>$el[name]</b> $parent_icon</div></td>";
     $tr .= "<td nowrap>";
     $tr .= get_html_status("Accomplished", $el['status']['date_submitted']);
     $tr .= "</td>";
