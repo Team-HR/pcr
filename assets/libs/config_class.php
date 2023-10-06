@@ -359,7 +359,7 @@ class Employee_data extends mysqli
 
 
 		$accountId = $_SESSION['emp_id'];
-		if ( $perStatus['approved'] AND $perStatus['certify'] AND $perStatus['panelApproved']) {
+		if ($perStatus['approved'] and $perStatus['certify'] and $perStatus['panelApproved']) {
 			$this->hideCol = true;
 		} else {
 			// if employee 
@@ -1813,7 +1813,7 @@ class Employee_data extends mysqli
 		if (!$this->hideCol) {
 			$accountId = $_SESSION['emp_id'];
 			$fileStatus = $this->fileStatus;
-			if ($accountId == $fileStatus['ImmediateSup'] AND $accountId != $fileStatus['DepartmentHead']) {
+			if ($accountId == $fileStatus['ImmediateSup'] and $accountId != $fileStatus['DepartmentHead'] and $accountId != $fileStatus['employees_id']) {
 				if ($fileStatus['ImmediateSup'] == $fileStatus['DepartmentHead']) {
 					$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Approve</button>";
 					// }elseif($fileStatus['formType']==1){

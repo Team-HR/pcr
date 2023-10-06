@@ -149,21 +149,28 @@ function get_subordinates($mysqli, $period_id, $employee_id)
 
   $data = [];
   foreach ($personnel as $key => $pcr) {
-    $datum = [
-      "id" => $pcr['employees_id'],
-      "parent_id" => $pcr['ImmediateSup'] ? $pcr['ImmediateSup'] : $pcr['DepartmentHead'],
-      "name" => get_employee_name($mysqli, $pcr['employees_id']),
-      "status" => [
-        "is_complete" => $pcr['dateAccomplished'] & $pcr['approved'] & $pcr['certify'] & $pcr['panelApproved'] ? true : false,
-        "submitted" => $pcr['submitted'],
-        "date_submitted" => $pcr['dateAccomplished'], //
-        "date_approved" => $pcr['approved'], // yellow
-        "date_certified" => $pcr['certify'], // green
-        "date_pmt_approved" => $pcr['panelApproved'] // purple
-      ]
-      // "children" => []
-    ];
-    $data[] = $datum;
+    if ($pcr['employees_id'] !=  $employee_id) {
+
+      if ($pcr['ImmediateSup'] == $pcr['employees_id']) {
+        $pcr['ImmediateSup'] = $pcr['DepartmentHead'];
+      }
+
+      $datum = [
+        "id" => $pcr['employees_id'],
+        "parent_id" => $pcr['ImmediateSup'] ? $pcr['ImmediateSup'] : $pcr['DepartmentHead'],
+        "name" => get_employee_name($mysqli, $pcr['employees_id']),
+        "status" => [
+          "is_complete" => $pcr['dateAccomplished'] & $pcr['approved'] & $pcr['certify'] & $pcr['panelApproved'] ? true : false,
+          "submitted" => $pcr['submitted'],
+          "date_submitted" => $pcr['dateAccomplished'], //
+          "date_approved" => $pcr['approved'], // yellow
+          "date_certified" => $pcr['certify'], // green
+          "date_pmt_approved" => $pcr['panelApproved'] // purple
+        ]
+        // "children" => []
+      ];
+      $data[] = $datum;
+    }
   }
 
   $data = order_personnel($data);
@@ -176,7 +183,7 @@ function get_subordinates($mysqli, $period_id, $employee_id)
   $_data = buildTree($data, $employee_id);
   // $_data = $data;
 
-  $_data = cascade_personnel($_data);
+  $_data = cascade_personnel($_data, $employee_id);
   return $_data;
 }
 
@@ -196,14 +203,13 @@ function order_personnel($personnel)
   return $personnel;
 }
 
-function cascade_personnel(array $elements, $margin = 0, $level = 0, &$index = 0)
+function cascade_personnel(array $elements, $top_parent_id, $margin = 0, $level = 0, &$index = 0)
 {
-
   $tr = "";
   $margin += 50;
   $level += 1;
   foreach ($elements as $key => $el) {
-    if ($el['parent_id'] == '21072') {
+    if ($el['parent_id'] == $top_parent_id) {
       $margin = 0;
     }
 
@@ -217,9 +223,9 @@ function cascade_personnel(array $elements, $margin = 0, $level = 0, &$index = 0
     // date_approved
     // date_certified
     // date_pmt_approved
-    $color = $el['status']['is_complete'] ? "#b4ffbe":"";
-    
-    
+    $color = $el['status']['is_complete'] ? "#b4ffbe" : "";
+
+
 
     $tr .= "<tr onclick='UncriticizedEmpIdFunc(\"$el[id]\")' style='background: $color'>";
     $tr .= "<td><div style='margin-left: {$margin}px'><i>$index.)</i> <b>$el[name]</b> $parent_icon</div></td>";
@@ -237,7 +243,7 @@ function cascade_personnel(array $elements, $margin = 0, $level = 0, &$index = 0
     $tr .= "</td>";
     $tr .= "</tr>";
     if (isset($el['children'])) {
-      $tr .= cascade_personnel($el['children'], $margin, $level, $index);
+      $tr .= cascade_personnel($el['children'], $top_parent_id, $margin, $level, $index);
     }
   }
 
@@ -278,6 +284,8 @@ function buildTree(array $elements, $parentId)
     //   $branch[] = $element;
     // }
   }
+
+  // $branch = $elements;
 
   return $branch;
 }

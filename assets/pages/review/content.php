@@ -36,10 +36,13 @@ if (isset($_POST['page'])) {
   $date = date('d-m-Y');
   if ($fetchDataSql['PMT'] == $accountId) {
     $UpdateColumn = "`panelApproved` = '$date'";
-  } elseif ($fetchDataSql['ImmediateSup'] == $accountId or $fetchDataSql['DepartmentHead'] == $accountId) {
+  } elseif ($fetchDataSql['ImmediateSup'] == $accountId and $fetchDataSql['DepartmentHead'] == $accountId) {
     $UpdateColumn = "`approved` = '$date', `certify` = '$date'";
   } elseif ($fetchDataSql['DepartmentHead'] == $accountId) {
     $UpdateColumn = "`certify` = '$date'";
+    if ($fetchDataSql['employees_id'] == $fetchDataSql['ImmediateSup']) {
+      $UpdateColumn = "`approved` = '$date', `certify` = '$date'";
+    }
   } elseif ($fetchDataSql['ImmediateSup'] == $accountId) {
     $UpdateColumn = "`approved` = '$date'";
   }

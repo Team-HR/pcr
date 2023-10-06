@@ -4,7 +4,7 @@
       <i class="ui book icon massive"></i>
       <div class="content">
         Performance Commitment Report
-        <div class="sub header">Uncriticized Performance Commitment</div>
+        <div class="sub header">View Section/Department Performance Commitment Reports</div>
       </div>
     </h2>
     <br class='noprint'>
