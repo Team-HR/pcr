@@ -32,16 +32,19 @@ if (isset($_POST['page'])) {
   $fetchDataSql = "SELECT * from `spms_performancereviewstatus` where `performanceReviewStatus_id` = '$dataId'";
   $fetchDataSql = $mysqli->query($fetchDataSql);
   $fetchDataSql = $fetchDataSql->fetch_assoc();
+
+  $date = date('d-m-Y');
   if ($fetchDataSql['PMT'] == $accountId) {
-    $UpdateColumn = 'panelApproved';
+    $UpdateColumn = "`panelApproved` = '$date'";
+  } elseif ($fetchDataSql['ImmediateSup'] == $accountId or $fetchDataSql['DepartmentHead'] == $accountId) {
+    $UpdateColumn = "`approved` = '$date', `certify` = '$date'";
   } elseif ($fetchDataSql['DepartmentHead'] == $accountId) {
-    $UpdateColumn = 'certify';
+    $UpdateColumn = "`certify` = '$date'";
   } elseif ($fetchDataSql['ImmediateSup'] == $accountId) {
-    $UpdateColumn = 'approved';
+    $UpdateColumn = "`approved` = '$date'";
   }
   if ($UpdateColumn != "") {
-    $date = date('d-m-Y');
-    $sql = "UPDATE `spms_performancereviewstatus` SET `$UpdateColumn` = '$date' WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$dataId'";
+    $sql = "UPDATE `spms_performancereviewstatus` SET $UpdateColumn WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$dataId'";
     $sql = $mysqli->query($sql);
     if (!$sql) {
       die($mysqli->error);

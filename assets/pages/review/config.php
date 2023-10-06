@@ -154,6 +154,7 @@ function get_subordinates($mysqli, $period_id, $employee_id)
       "parent_id" => $pcr['ImmediateSup'] ? $pcr['ImmediateSup'] : $pcr['DepartmentHead'],
       "name" => get_employee_name($mysqli, $pcr['employees_id']),
       "status" => [
+        "is_complete" => $pcr['dateAccomplished'] & $pcr['approved'] & $pcr['certify'] & $pcr['panelApproved'] ? true : false,
         "submitted" => $pcr['submitted'],
         "date_submitted" => $pcr['dateAccomplished'], //
         "date_approved" => $pcr['approved'], // yellow
@@ -216,8 +217,12 @@ function cascade_personnel(array $elements, $margin = 0, $level = 0, &$index = 0
     // date_approved
     // date_certified
     // date_pmt_approved
-    $tr .= "<tr onclick='UncriticizedEmpIdFunc(\"$el[id]\")' style='background:_color'>";
-    $tr .= "<td><div style='margin-left: {$margin}px'><i>$index.)</i> <b>$el[name]</b> $parent_icon</div></td>";
+    $color = $el['status']['is_complete'] ? "#b4ffbe":"";
+    
+    
+
+    $tr .= "<tr onclick='UncriticizedEmpIdFunc(\"$el[id]\")' style='background: $color'>";
+    $tr .= "<td><div style='margin-left: {$margin}px'><i>$index.)</i>$el[id] $el[parent_id]  <b>$el[name]</b> $parent_icon</div></td>";
     $tr .= "<td nowrap>";
     $tr .= get_html_status("Accomplished", $el['status']['date_submitted']);
     $tr .= "</td>";
