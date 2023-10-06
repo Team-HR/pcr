@@ -93,19 +93,21 @@ function pendingTable($mysqli)
   }
 
   $data = get_subordinates($mysqli, $period, $empId);
-  $json = json_encode($data, JSON_PRETTY_PRINT);
-  $view =  "<div style='text-align: left; width: 100%; background-color: white'>";
-  $view .=  "<pre>" . $json . "</pre>";
-  $view .= "</div>";
+  // $json = json_encode($data, JSON_PRETTY_PRINT);
+  // $view =  "<div style='text-align: left; width: 100%; background-color: white'>";
+  // $view .=  "<pre>" . $json . "</pre>";
+  // $view .= "</div>";
 
   // return $view;
+  $tr = $data;
+
 
   $table .= "
   <h3> Period of $gperiod[month_mfo] $gperiod[year_mfo] </h3>
   <table class='ui basic small selectable table' style='width:95%;cursor:pointer;background:white'>
   <thead >
   <tr style='background:#0b56ff30;'>
-  <th colspan='2'>
+  <th colspan='5'>
   <h2 class='ui header'>
   <i class='settings icon'></i> 
   <div class='content'>
@@ -117,7 +119,7 @@ function pendingTable($mysqli)
   </tr>
   <tr style='background:#2c193e0d;'>
   <th> Employee Name </th>
-  <th> Date </th>
+  <th colspan='4' style='text-align:center;'> Status </th>
   </tr>
   </thead>
   <tbody>
@@ -126,6 +128,153 @@ function pendingTable($mysqli)
   </table>
   ";
   return $table;
+}
+
+
+
+
+function get_subordinates($mysqli, $period_id, $employee_id)
+{
+  $sql = "SELECT * FROM `spms_performancereviewstatus` where (ImmediateSup = '$employee_id' OR DepartmentHead = '$employee_id') AND period_id = '$period_id' ORDER BY `spms_performancereviewstatus`.`dateAccomplished` ASC
+  ";
+
+  $res = $mysqli->query($sql);
+  $personnel = [];
+
+  while ($row = $res->fetch_assoc()) {
+    $personnel[] = $row;
+  }
+
+  // $tr = "";
+
+  $data = [];
+  foreach ($personnel as $key => $pcr) {
+    $datum = [
+      "id" => $pcr['employees_id'],
+      "parent_id" => $pcr['ImmediateSup'] ? $pcr['ImmediateSup'] : $pcr['DepartmentHead'],
+      "name" => get_employee_name($mysqli, $pcr['employees_id']),
+      "status" => [
+        "submitted" => $pcr['submitted'],
+        "date_submitted" => $pcr['dateAccomplished'], //
+        "date_approved" => $pcr['approved'], // yellow
+        "date_certified" => $pcr['certify'], // green
+        "date_pmt_approved" => $pcr['panelApproved'] // purple
+      ]
+      // "children" => []
+    ];
+    $data[] = $datum;
+  }
+
+  $data = order_personnel($data);
+
+
+
+  # organize personnel with children
+  $_data = [];
+
+  $_data = buildTree($data, $employee_id);
+  // $_data = $data;
+
+  $_data = cascade_personnel($_data);
+  return $_data;
+}
+
+
+function enumerate_arr($arr)
+{
+  $arr = array_values($arr);
+  foreach ($arr as $key => $value) {
+    $arr[$key]["num"] = $key;
+  }
+  return $arr;
+}
+
+function order_personnel($personnel)
+{
+  usort($personnel, fn ($a, $b) => strcmp($a['name'], $b['name']));
+  return $personnel;
+}
+
+function cascade_personnel(array $elements, $margin = 0, $level = 0, &$index = 0)
+{
+
+  $tr = "";
+  $margin += 50;
+  $level += 1;
+  foreach ($elements as $key => $el) {
+    if ($el['parent_id'] == '21072') {
+      $margin = 0;
+    }
+
+    $parent_icon = "";
+    if (isset($el['children'])) {
+      $parent_icon = "<i class='level down alternate icon' style='color: grey;'></i>";
+    }
+    $index++;
+    //     submitted
+    // date_submitted
+    // date_approved
+    // date_certified
+    // date_pmt_approved
+    $tr .= "<tr onclick='UncriticizedEmpIdFunc(\"$el[id]\")' style='background:_color'>";
+    $tr .= "<td><div style='margin-left: {$margin}px'><i>$index.)</i> <b>$el[name]</b> $parent_icon</div></td>";
+    $tr .= "<td nowrap>";
+    $tr .= get_html_status("Accomplished", $el['status']['date_submitted']);
+    $tr .= "</td>";
+    $tr .= "<td nowrap>";
+    $tr .= get_html_status("Sup. Approved", $el['status']['date_approved']);
+    $tr .= "</td>";
+    $tr .= "<td nowrap>";
+    $tr .= get_html_status("DH Certified", $el['status']['date_certified']);
+    $tr .= "</td>";
+    $tr .= "<td nowrap>";
+    $tr .= get_html_status("PMT Validated", $el['status']['date_pmt_approved']);
+    $tr .= "</td>";
+    $tr .= "</tr>";
+    if (isset($el['children'])) {
+      $tr .= cascade_personnel($el['children'], $margin, $level, $index);
+    }
+  }
+
+  return $tr;
+}
+
+function get_html_status($status, $date)
+{
+  $html = "<div style='margin-right: 15px; display: inline;'>";
+  if ($date) {
+    $html .= "<i class='green check circle outline icon'></i> " . $status . ": " . $date;
+  } else {
+    $html .= "<i class='red circle outline icon'></i> " . $status . ": _______";
+  }
+  $html .= "</div>";
+
+  return $html;
+}
+
+
+function buildTree(array $elements, $parentId)
+{
+  $branch = array();
+
+  foreach ($elements as $element) {
+    if ($element['parent_id'] == $parentId) {
+      $children = buildTree($elements, $element['id']);
+      if ($children) {
+        $element['children'] = $children;
+      }
+      $branch[] = $element;
+    }
+    // else if ($element['parent_id'] == "") {
+    //   // $children = buildTree($elements, $element['id']);
+    //   // if ($children) {
+    //   //   $element['children'] = $children;
+    //   // }
+    //   $branch[] = $element;
+    // }
+  }
+
+  return $branch;
 }
 
 
@@ -147,51 +296,6 @@ function get_employee_name($mysqli, $employee_id)
 
   return $name;
 }
-
-
-function get_subordinates($mysqli, $period_id, $employee_id)
-{
-  $sql = "SELECT * FROM `spms_performancereviewstatus` where (ImmediateSup = '$employee_id' OR DepartmentHead = '$employee_id') AND period_id = '$period_id' ORDER BY `spms_performancereviewstatus`.`dateAccomplished` ASC
-  ";
-
-  $res = $mysqli->query($sql);
-  $personnel = [];
-
-  while ($row = $res->fetch_assoc()) {
-    $personnel[] = $row;
-  }
-
-  // $tr = "";
-
-  $data = [];
-  foreach ($personnel as $key => $pcr) {
-    $datum = [
-      "employee_id" => $pcr['employees_id'],
-      "employee_id_supervisor" => $pcr['ImmediateSup'],
-      "name" => get_employee_name($mysqli, $pcr['employees_id']),
-      "status" => [
-        "submitted" => $pcr['submitted'],
-        "date_submitted" => $pcr['dateAccomplished'],
-        "date_approved" => $pcr['approved'],
-        "date_certified" => $pcr['certify'],
-        "date_pmt_approved" => $pcr['panelApproved']
-      ]
-    ];
-
-
-    $data[] = $datum;
-
-    // $status = json_encode($status);
-    // $tr .= "<tr onclick='UncriticizedEmpIdFunc(\"$employee_id\")' style='background:_'>";
-    // $tr .= "<td>" . get_employee_name($mysqli, $employee_id) . "</td>";
-    // $tr .= "<td>$status</td>";
-    // $tr .= "</tr>";
-  }
-
-
-  return $data;
-}
-
 
 
 
@@ -331,7 +435,7 @@ function subordinates($dat, $period)
         ";
       }
       $tr .= subordinates($ipcr['employees_id'], $period);
-      
+
       // $tr .= "
       //   <tr style='background:red'>
       //   <td style='padding-left:50px'><i class='minus icon'></i>
@@ -349,9 +453,7 @@ function subordinates($dat, $period)
       </tr>
       ";
       $tr .= subordinates($ipcr['employees_id'], $period);
-
     }
-    
   }
   return $tr;
 }

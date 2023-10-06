@@ -60,7 +60,6 @@ function gridNotifView()
     $DepartmentHeadData = $mysqli->query($DepartmentHeadData);
 
 
-
     $DepartmentHeadDataCount = $DepartmentHeadData->num_rows;
 
     while ($row = $DepartmentHeadData->fetch_assoc()) {
