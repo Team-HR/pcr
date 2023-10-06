@@ -359,7 +359,7 @@ class Employee_data extends mysqli
 
 
 		$accountId = $_SESSION['emp_id'];
-		if (!isset($perStatus['panelApproved']) || $perStatus['panelApproved'] != "") {
+		if ( $perStatus['approved'] AND $perStatus['certify'] AND $perStatus['panelApproved']) {
 			$this->hideCol = true;
 		} else {
 			// if employee 
@@ -1813,13 +1813,13 @@ class Employee_data extends mysqli
 		if (!$this->hideCol) {
 			$accountId = $_SESSION['emp_id'];
 			$fileStatus = $this->fileStatus;
-			if ($accountId == $fileStatus['ImmediateSup']) {
+			if ($accountId == $fileStatus['ImmediateSup'] AND $accountId != $fileStatus['DepartmentHead']) {
 				if ($fileStatus['ImmediateSup'] == $fileStatus['DepartmentHead']) {
-					$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Add/Edit Comments/Recommendations to Certify Results</button>";
+					$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Approve</button>";
 					// }elseif($fileStatus['formType']==1){
 					// $view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(".$this->period['mfoperiod_id'].",$this->emp_ID)'>Approve Results</button>";
 				} else {
-					$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Add/Edit Comments/Recommendations to Approve Results</button>";
+					$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Approve</button>";
 					// $view ="<button alert='alert(contact toto)'>Something is Wrong</button>";
 					// $view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='approval(".$this->get_status('performanceReviewStatus_id').",$this->emp_ID)'>Approve</button>";
 				}
