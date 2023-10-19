@@ -1,0 +1,326 @@
+<?php
+
+class PmsAppMigrator
+{
+
+	private $mysqli;
+
+	public function __construct($mysqli)
+	{
+		$this->mysqli = $mysqli;
+	}
+
+	private function get_top_parent_of_rsm_success_indicator(&$parents, $cf_ID)
+	{
+		$sql = "SELECT * FROM `spms_corefunctions` WHERE `cf_ID` = '$cf_ID'";
+		$res = $this->mysqli->query($sql);
+		if ($row = $res->fetch_assoc()) {
+			$parents[] = $row;
+			if ($row['parent_id'] != '') {
+				$this->get_top_parent_of_rsm_success_indicator($parents, $row['parent_id']);
+			}
+		}
+	}
+
+	public function migrate_pms_rsm_assignments_table_and_pms_rsm_success_indicators_table()
+	{
+		$sql = "SELECT * FROM `spms_matrixindicators`";
+		// ; --Where mi_id = 10755
+		$res = $this->mysqli->query($sql);
+		$data = [];
+		while ($row = $res->fetch_assoc()) {
+			$mi_quality = unserialize($row['mi_quality']);
+			$mi_eff = unserialize($row['mi_eff']);
+			$mi_time = unserialize($row['mi_time']);
+			$mi_quality = $this->convertSerial($mi_quality);
+			$mi_quality = json_encode($mi_quality);
+			$mi_eff = $this->convertSerial($mi_eff);
+			$mi_eff = json_encode($mi_eff);
+			$mi_time = $this->convertSerial($mi_time);
+			$mi_time = json_encode($mi_time);
+			$id = $row['mi_id'];
+			$pms_rsm_id = $row['cf_ID'];
+			$in_charges = explode(",", $row['mi_incharge']);
+			$parents = [];
+			$this->get_top_parent_of_rsm_success_indicator($parents, $pms_rsm_id);
+			$period_id = $parents ? end($parents)['mfo_periodId'] : 0; //$top_most_parent ? $top_most_parent['mfo_periodId'] : 0;
+
+			if (count($parents) > 0) {
+				if (is_array($in_charges)) {
+					foreach ($in_charges as $employee_id) {
+						$sql = "INSERT INTO `pms_rsm_assignments`(`id`, `period_id`, `pms_rsm_success_indicator_id`, `sys_employee_id`,`created_at`, `updated_at`) VALUES (NULL,'$period_id','$id','$employee_id', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());";
+						$this->mysqli->query($sql);
+					}
+				}
+				$success_indicator = $this->mysqli->real_escape_string($row['mi_succIn']);
+				$quality = $this->mysqli->real_escape_string($mi_quality);
+				$efficiency = $this->mysqli->real_escape_string($mi_eff);
+				$timeliness = $this->mysqli->real_escape_string($mi_time);
+				$sql = "INSERT INTO `pms_rsm_success_indicators`(`id`, `pms_rsm_id`, `index`, `success_indicator`, `quality`, `efficiency`, `timeliness`, `in_charges`, `corrections`, `created_at`, `updated_at`) VALUES ('$id','$pms_rsm_id','0','$success_indicator','$quality','$efficiency','$timeliness','[]','[]', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+				$this->mysqli->query($sql);
+
+				$data[] = [
+					"id" => $id,
+					"pms_rsm_id" => $row['cf_ID'],
+					"index" => 0,
+					"success_indicator" => $success_indicator,
+					"quality" => $mi_quality,
+					"efficiency" => $mi_eff,
+					"timeliness" => $mi_time,
+					"in_charges" => $in_charges,
+					// "parents" => $parents,
+					"period_id" => $period_id
+				];
+			}
+		}
+
+		$json = json_encode($data, JSON_PRETTY_PRINT);
+		echo "<pre>$json</pre>";
+	}
+
+	# create pms_rsm_assignments_table if not existing in current DB
+	public function prepare_sys_employee_assigned_departments()
+	{
+		$sql = "
+        DROP TABLE IF EXISTS `sys_employee_assigned_departments`;
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        CREATE TABLE `sys_employee_assigned_departments` (
+            `id` bigint(20) UNSIGNED NOT NULL,
+            `sys_department_id` bigint(20) UNSIGNED NOT NULL,
+            `sys_employee_id` bigint(20) UNSIGNED NOT NULL,
+            `is_current` tinyint(1) NOT NULL DEFAULT 1,
+            `created_at` timestamp NULL DEFAULT NULL,
+            `updated_at` timestamp NULL DEFAULT NULL
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        ALTER TABLE `sys_employee_assigned_departments`
+            ADD PRIMARY KEY (`id`);
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        ALTER TABLE `sys_employee_assigned_departments`
+            MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+        ";
+		$this->mysqli->query($sql);
+	}
+
+	public function migrate_to_prepare_sys_employee_assigned_departments_table()
+	{
+		$sql = "SELECT * FROM `employees`";
+		$res = $this->mysqli->query($sql);
+		// $debug = "";
+		while ($row = $res->fetch_assoc()) {
+			$sys_employee_id = $row['employees_id'];
+			$sys_department_id = $this->mysqli->real_escape_string($row['department_id']);
+			$sql = "INSERT INTO `sys_employee_assigned_departments`(`id`, `sys_department_id`, `sys_employee_id`, `is_current`, `created_at`, `updated_at`) VALUES (NULL,'$sys_department_id','$sys_employee_id','1', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+			$this->mysqli->query($sql);
+			// $debug .= json_encode($this->mysqli->error) . "<br/>";
+		}
+		// echo $debug;
+	}
+
+	public function prepare_sys_employees_table()
+	{
+		$sql = "
+        DROP TABLE IF EXISTS `sys_employees`;
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        CREATE TABLE `sys_employees` (
+            `id` bigint(20) UNSIGNED NOT NULL,
+            `last_name` varchar(255) NOT NULL,
+            `first_name` varchar(255) NOT NULL,
+            `middle_name` varchar(255) DEFAULT NULL,
+            `ext` varchar(255) DEFAULT NULL,
+            `gender` varchar(255) DEFAULT NULL,
+            `is_employee` tinyint(1) NOT NULL DEFAULT 1,
+            `is_active` tinyint(1) NOT NULL DEFAULT 1,
+            `remarks` varchar(255) DEFAULT NULL,
+            `created_at` timestamp NULL DEFAULT NULL,
+            `updated_at` timestamp NULL DEFAULT NULL
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        ALTER TABLE `sys_employees`
+            ADD PRIMARY KEY (`id`);
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        ALTER TABLE `sys_employees`
+            MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+        ";
+		$this->mysqli->query($sql);
+	}
+
+	public function migrate_to_sys_employees_table()
+	{
+		$sql = "SELECT * FROM `employees`";
+		$res = $this->mysqli->query($sql);
+		// $debug = "";
+		while ($row = $res->fetch_assoc()) {
+			$id = $row['employees_id'];
+			$last_name = $this->mysqli->real_escape_string($row['lastName']);
+			$first_name = $this->mysqli->real_escape_string($row['firstName']);
+			$middle_name = $this->mysqli->real_escape_string($row['middleName']);
+			$ext = $this->mysqli->real_escape_string($row['extName']);
+			$gender = $row['gender'];
+			$is_employee = 1;
+			$is_active = $row['status'] == 'ACTIVE' ? 1 : 0;
+
+			$sql = "INSERT INTO `sys_employees`(`id`, `last_name`, `first_name`, `middle_name`, `ext`, `gender`, `is_employee`, `is_active`, `remarks`, `created_at`, `updated_at`) VALUES ('$id','$last_name','$first_name','$middle_name','$ext','$gender','$is_employee','$is_active', NULL , CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+			$this->mysqli->query($sql);
+			// $debug .= json_encode($this->mysqli->error) . "<br/>";
+		}
+		// echo $debug;
+	}
+
+	public function prepare_sys_departments_table()
+	{
+		$sql = "
+        DROP TABLE IF EXISTS `sys_departments`;
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        CREATE TABLE `sys_departments` (
+            `id` bigint(20) UNSIGNED NOT NULL,
+            `name` varchar(255) NOT NULL,
+            `full_name` varchar(255) DEFAULT NULL,
+            `is_section` tinyint(1) NOT NULL DEFAULT 0,
+            `parent_id` bigint(20) UNSIGNED DEFAULT NULL,
+            `created_at` timestamp NULL DEFAULT NULL,
+            `updated_at` timestamp NULL DEFAULT NULL
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        ALTER TABLE `sys_departments`
+            ADD PRIMARY KEY (`id`);
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        ALTER TABLE `sys_departments`
+            MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+        ";
+		$this->mysqli->query($sql);
+	}
+
+	public function migrate_to_sys_departments_table()
+	{
+		$sql = "SELECT * FROM `department`";
+		$res = $this->mysqli->query($sql);
+		while ($row = $res->fetch_assoc()) {
+			$id = $row['department_id'];
+			$name = $row['alias'];
+			$full_name = $row['department'];
+			$sql = "INSERT INTO `sys_departments` (`id`, `name`, `full_name`, `is_section`, `parent_id`, `created_at`, `updated_at`) VALUES ('$id', '$name', '$full_name', '0', NULL, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+			$this->mysqli->query($sql);
+		}
+	}
+
+	public function prepare_pms_rsm_assignments_table()
+	{
+		$sql = "
+        DROP TABLE IF EXISTS `pms_rsm_assignments`;
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        CREATE TABLE IF NOT EXISTS `pms_rsm_assignments` (
+          `id` bigint(20) UNSIGNED NOT NULL,
+          `period_id` bigint(20) UNSIGNED NOT NULL,
+          `pms_rsm_success_indicator_id` bigint(20) UNSIGNED NOT NULL,
+          `sys_employee_id` bigint(20) UNSIGNED NOT NULL,
+          `created_at` timestamp NULL DEFAULT NULL,
+          `updated_at` timestamp NULL DEFAULT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        ALTER TABLE `pms_rsm_assignments`
+          ADD PRIMARY KEY (`id`);
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+          ALTER TABLE `pms_rsm_assignments`
+          MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+        ";
+		$this->mysqli->query($sql);
+	}
+
+	# prepare_pms_rsm_success_indicators_table
+	public function prepare_pms_rsm_success_indicators_table()
+	{
+		$sql = "
+        DROP TABLE IF EXISTS `pms_rsm_success_indicators`;
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        CREATE TABLE `pms_rsm_success_indicators` (
+            `id` bigint(20) UNSIGNED NOT NULL,
+            `pms_rsm_id` bigint(20) UNSIGNED NOT NULL,
+            `index` int(11) NOT NULL DEFAULT 0,
+            `success_indicator` varchar(255) NOT NULL,
+            `quality` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`quality`)),
+            `efficiency` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`efficiency`)),
+            `timeliness` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`timeliness`)),
+            `in_charges` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`in_charges`)),
+            `corrections` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`corrections`)),
+            `created_at` timestamp NULL DEFAULT NULL,
+            `updated_at` timestamp NULL DEFAULT NULL
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        ALTER TABLE `pms_rsm_success_indicators`
+            ADD PRIMARY KEY (`id`);
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        ALTER TABLE `pms_rsm_success_indicators`
+        MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+        ";
+		$this->mysqli->query($sql);
+	}
+
+	private function convertSerial($metrics)
+	{
+		if (is_array($metrics)) {
+			$null_count = 0;
+			array_shift($metrics);
+			foreach ($metrics as $key => $metric) {
+				if ($metric == "") {
+					$metrics[$key] = null;
+					$null_count += 1;
+				}
+			}
+
+			$metrics = array_reverse($metrics);
+
+			if ($null_count  == 5) {
+				$metrics = [];
+			}
+		} else {
+			$metrics = [];
+		}
+		return $metrics;
+	}
+}
