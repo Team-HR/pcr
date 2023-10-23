@@ -22,6 +22,118 @@ class PmsAppMigrator
 		}
 	}
 
+
+
+	public function prepare_pms_pcr_support_functions_table()
+	{
+		$sql = "
+        	DROP TABLE IF EXISTS `pms_pcr_support_functions`;
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        CREATE TABLE `pms_pcr_support_functions` (
+			`id` bigint(20) UNSIGNED NOT NULL,
+			`order_num` smallint(6) NOT NULL DEFAULT 0,
+			`pms_period_id` bigint(20) UNSIGNED NOT NULL,
+			`support_function` varchar(255) NOT NULL,
+			`success_indicator` varchar(255) NOT NULL,
+			`quality` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`quality`)),
+			`efficiency` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`efficiency`)),
+			`timeliness` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`timeliness`)),
+			`percent` int(11) NOT NULL,
+			`form_type` varchar(255) NOT NULL,
+			`created_at` timestamp NULL DEFAULT NULL,
+			`updated_at` timestamp NULL DEFAULT NULL
+		  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+		ALTER TABLE `pms_pcr_support_functions`
+			ADD PRIMARY KEY (`id`);
+        ";
+		$this->mysqli->query($sql);
+
+		$sql = "
+        ALTER TABLE `pms_pcr_support_functions`
+  			MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+        ";
+		$this->mysqli->query($sql);
+	}
+
+	public function migrate_pms_pcr_support_functions_table()
+	{
+		$sql = "SELECT * FROM `spms_supportfunctions`";
+		$res = $this->mysqli->query($sql);
+		$data = [];
+		$form_typ_cmp_for_order = "";
+		$order_num = 0;
+		while ($row = $res->fetch_assoc()) {
+			$Q = unserialize($row['Q']);
+			$E = unserialize($row['E']);
+			$T = unserialize($row['T']);
+
+			$Q = $this->convertSerial($Q);
+			$Q = json_encode($Q);
+			$row["Q"] = $Q;
+
+			$E = $this->convertSerial($E);
+			$E = json_encode($E);
+			$row["E"] = $E;
+
+			$T = $this->convertSerial($T);
+			$T = json_encode($T);
+			$row["T"] = $T;
+
+			$form_type = "";
+			if ($row['type'] == '1') {
+				$form_type = "ipcr";
+			} elseif ($row['type'] == '2') {
+				$form_type = "spcr";
+			} elseif ($row['type'] == '3') {
+				$form_type = "dpcr";
+			} elseif ($row['type'] == '4') {
+				$form_type = "dspcr";
+			}
+
+
+			if ($form_type == $form_typ_cmp_for_order) {
+				$order_num += 1;
+			} else {
+				$order_num = 0;
+			}
+
+			$form_typ_cmp_for_order = $form_type;
+
+			$data[] = [
+				"id" => $row['id_suppFunc'],
+				"order_num" => $order_num,
+				"pms_period_id" => 11,
+				"support_function" => $row['mfo'],
+				"success_indicator" => $row['suc_in'],
+				"quality" => $row['Q'],
+				"efficiency" => $row['E'],
+				"timeliness" => $row['T'],
+				"percent" => $row['percent'],
+				"form_type" => $form_type,
+				// "created_at" => $row[''],
+				// "updated_at" => $row[''],
+			];
+		}
+
+
+		// INSERT INTO `pms_pcr_support_functions` (`id`, `order_num`, `pms_period_id`, `support_function`, `success_indicator`, `quality`, `efficiency`, `timeliness`, `percent`, `form_type`, `created_at`, `updated_at`) VALUES (NULL, '0', '', '', '', '[]', '[]', '[]', '', '', NULL, NULL)
+
+
+		foreach ($data as $support_function) {
+			$sql = "INSERT INTO `pms_pcr_support_functions` (`id`, `order_num`, `pms_period_id`, `support_function`, `success_indicator`, `quality`, `efficiency`, `timeliness`, `percent`, `form_type`, `created_at`, `updated_at`) VALUES ('$support_function[id]', '$support_function[order_num]', '$support_function[pms_period_id]', '$support_function[support_function]', '$support_function[success_indicator]', '$support_function[quality]', '$support_function[efficiency]', '$support_function[timeliness]', '$support_function[percent]', '$support_function[form_type]', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+			$this->mysqli->query($sql);
+		}
+		// $json = json_encode($data, JSON_PRETTY_PRINT);
+		// echo "<pre>" . $json . "</pre>";
+	}
+
 	public function migrate_pms_rsm_assignments_table_and_pms_rsm_success_indicators_table()
 	{
 		$sql = "SELECT * FROM `spms_matrixindicators`";
