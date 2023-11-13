@@ -29,6 +29,7 @@ $migrator->prepare_sys_employee_assigned_departments();
 $migrator->migrate_to_prepare_sys_employee_assigned_departments_table();
 # prepare and migrate rsm and success indicators
 $migrator->prepare_pms_rsms_table();
+$migrator->migrate_pms_rsms_table();
 $migrator->prepare_pms_rsm_assignments_table();
 $migrator->prepare_pms_rsm_success_indicators_table();
 $migrator->migrate_pms_rsm_assignments_table_and_pms_rsm_success_indicators_table();

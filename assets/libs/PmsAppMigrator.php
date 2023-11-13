@@ -415,6 +415,82 @@ class PmsAppMigrator
 		}
 	}
 
+	public function prepare_pms_rsms_table()
+	{
+		$sql = "
+        DROP TABLE IF EXISTS `pms_rsms`;
+        ";
+		$this->mysqli_new->query($sql);
+
+		$sql = "
+		CREATE TABLE `pms_rsms` (
+			`id` bigint(20) UNSIGNED NOT NULL,
+			`period_id` bigint(20) UNSIGNED NOT NULL,
+			`parent_id` bigint(20) UNSIGNED DEFAULT NULL,
+			`sys_department_id` bigint(20) UNSIGNED NOT NULL,
+			`code` varchar(255) DEFAULT NULL,
+			`title` varchar(255) DEFAULT NULL,
+			`created_at` timestamp NULL DEFAULT NULL,
+			`updated_at` timestamp NULL DEFAULT NULL
+		  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ";
+
+		$this->mysqli_new->query($sql);
+
+		$sql = "
+		ALTER TABLE `pms_rsms`
+			ADD PRIMARY KEY (`id`);
+        ";
+		$this->mysqli_new->query($sql);
+
+		$sql = "
+		ALTER TABLE `pms_rsms`
+				MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+        ";
+		$this->mysqli_new->query($sql);
+	}
+
+	public function migrate_pms_rsms_table()
+	{
+		$sql = "SELECT * FROM `spms_corefunctions`";
+		$res = $this->mysqli->query($sql);
+		$data = [];
+		while ($row = $res->fetch_assoc()) {
+			$data[] = [
+				"id" => $row['cf_ID'],
+				"period_id" => $row['mfo_periodId'],
+				"parent_id" => $row['parent_id'] ? $row['parent_id'] : NULL,
+				"sys_department_id" =>  $row['dep_id'],
+				"code" => $row['cf_count'] ? $row['cf_count'] : NULL,
+				"title" => $row['cf_title'],
+			];
+		}
+
+		$sqls = [];
+		foreach ($data as $mfo) {
+			$parent_id = $parent_id_ = $mfo['parent_id'];
+
+			if (!$parent_id) {
+				$parent_id = "NULL";
+			}
+
+
+
+			$code = $this->mysqli_new->real_escape_string($mfo["code"]);
+			$title = $this->mysqli_new->real_escape_string($mfo["title"]);
+
+			$sql = "INSERT INTO `pms_rsms` (`id`, `period_id`, `parent_id`, `sys_department_id`, `code`, `title`, `created_at`, `updated_at`) VALUES ('$mfo[id]', '$mfo[period_id]', $parent_id, '$mfo[sys_department_id]', '$code', '$title', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+
+			// if (!$parent_id_) {
+			$sqls[] = $sql;
+			$res = $this->mysqli_new->query($sql);
+			// }
+		}
+
+		$json = json_encode($sqls, JSON_PRETTY_PRINT);
+		echo "<pre>$json</pre>";
+	}
+
 	public function prepare_pms_rsm_assignments_table()
 	{
 		$sql = "
