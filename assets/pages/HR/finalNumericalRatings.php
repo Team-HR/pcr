@@ -5,14 +5,27 @@
 		<div class="ui form" style="width: 820px; margin:auto; margin-bottom: 20px;">
 			<div class="fields">
 				<div class="field" style="width: 220px;">
-					<label> Select Period:</label>
-					<div id="periodDropdown" class="ui fluid search selection dropdown">
-						<input type="hidden" name="period">
+					<label>Period:</label>
+					<div id="periodMonthDropdown" class="ui fluid search selection dropdown">
+						<input type="hidden" name="periodMonth">
 						<i class="dropdown icon"></i>
 						<div class="default text">Select Period</div>
 						<div class="menu">
-							<template v-for="period in periods" :key="period.period_id">
-								<div class="item" :data-value="period.period_id">{{period.period}}</div>
+							<template v-for="month, m in period_months" :key="m">
+								<div class="item" :data-value="month">{{month}}</div>
+							</template>
+						</div>
+					</div>
+				</div>
+				<div class="field" style="width: 220px;">
+					<label>Year:</label>
+					<div id="periodYearDropdown" class="ui fluid search selection dropdown">
+						<input type="hidden" name="periodYear">
+						<i class="dropdown icon"></i>
+						<div class="default text">Select Year</div>
+						<div class="menu">
+							<template v-for="year, i in period_years" :key="i">
+								<div class="item" :data-value="year">{{year}}</div>
 							</template>
 						</div>
 					</div>
@@ -87,6 +100,13 @@
 		data() {
 			return {
 				departments: [],
+				period_months: [
+					"January - June",
+					"July - December"
+				],
+				period_years: [],
+				selected_period_year: null,
+				selected_period_month: null,
 				periods: [],
 				isLoading: null,
 				period_id: null,
@@ -99,7 +119,7 @@
 		},
 		computed: {
 			selectedDepartment() {
-				if (this.department_id) return "ALL DEPARTMENTS"
+				if (this.department_id == 'all') return "All DEPARTMENTS"
 				for (let index = 0; index < this.departments.length; index++) {
 					const element = this.departments[index];
 					if (element.department_id == this.department_id) {
@@ -109,12 +129,8 @@
 				}
 			},
 			selectedPeriod() {
-				for (let index = 0; index < this.periods.length; index++) {
-					const element = this.periods[index];
-					if (element.period_id == this.period_id) {
-						return element.period
-						break;
-					}
+				if (this.selected_period_month && this.selected_period_year) {
+					return this.selected_period_month + ", " + this.selected_period_year
 				}
 			},
 		},
@@ -125,9 +141,11 @@
 				if (this.chart) {
 					this.chart.destroy()
 				}
+				// assets/pages/HR/finalNumericalRatingsConfig.php
 				$.post('?config=FinalNumericalRatings', {
 					view: true,
-					period_id: this.period_id,
+					selected_period_month: this.selected_period_month,
+					selected_period_year: this.selected_period_year,
 					department_id: this.department_id
 				}, (data, textStatus, xhr) => {
 					const res = JSON.parse(data)
@@ -191,38 +209,49 @@
 				});
 			},
 			getDepartmentItems() {
+				// assets/pages/HR/finalNumericalRatingsConfig.php
 				$.post('?config=FinalNumericalRatings', {
 					getDepartmentItems: true,
 				}, (data, textStatus, xhr) => {
 					this.departments = JSON.parse(data)
 				});
 			},
-			// getPeriodItems
-			getPeriodItems() {
+
+			getPeriodYears() {
+				// assets/pages/HR/finalNumericalRatingsConfig.php
 				$.post('?config=FinalNumericalRatings', {
-					getPeriodItems: true,
+					getPeriodYears: true,
 				}, (data, textStatus, xhr) => {
-					this.periods = JSON.parse(data)
+					this.period_years = JSON.parse(data)
 				});
-			},
+			}
 		},
 		mounted() {
-			// this.getItems()
-			// $('#appLoader').dimmer({
-			// 	closable: false
-			// }).dimmer('show');
-			this.getDepartmentItems()
-			this.getPeriodItems()
 
-			// periodDropdown
-			$("#periodDropdown").dropdown({
+			this.getPeriodYears()
+			this.getDepartmentItems()
+
+			$("#periodMonthDropdown").dropdown({
 				forceSelection: false,
 				fullTextSearch: true,
 				onChange: (value, text, $choice) => {
-					this.period_id = value;
-					if (this.period_id && this.department_id) {
+					this.selected_period_month = value;
+					if (this.selected_period_month && this.selected_period_year && this.department_id) {
 						this.getItems()
-						console.log(this.period_id + " " + this.department_id);
+						// console.log(this.selected_period_month + " " + this.department_id);
+					}
+				}
+			});
+
+
+			$("#periodYearDropdown").dropdown({
+				forceSelection: false,
+				fullTextSearch: true,
+				onChange: (value, text, $choice) => {
+					this.selected_period_year = value;
+					if (this.selected_period_month && this.selected_period_year && this.department_id) {
+						this.getItems()
+						// console.log(this.selected_period_year + " " + this.department_id);
 					}
 				}
 			});
@@ -233,9 +262,8 @@
 				onChange: (value, text, $choice) => {
 					// console.log(value);
 					this.department_id = value;
-					if (this.period_id && this.department_id) {
+					if (this.selected_period_month && this.selected_period_year && this.department_id) {
 						this.getItems()
-						console.log(this.period_id + " " + this.department_id);
 					}
 				}
 			});

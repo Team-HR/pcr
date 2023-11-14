@@ -68,7 +68,13 @@ else if (isset($_POST['getPeriodItems'])) {
 	print json_encode($data);
 } else if (isset($_POST['view'])) {
 
-	$period_id = $_POST["period_id"];
+	// $period_id = $_POST["period_id"];
+
+	$selected_period_month = $_POST["selected_period_month"];
+	$selected_period_year = $_POST["selected_period_year"];
+
+	$period_id = get_period_id($mysqli, $selected_period_month, $selected_period_year);
+
 	$department_id = $_POST["department_id"];
 
 	$department_filter = "AND `spms_performancereviewstatus`.`department_id` = '$department_id'";
@@ -122,6 +128,15 @@ else if (isset($_POST['getPeriodItems'])) {
 	$period_id = $_POST["period_id"];
 	$department_id = $_POST["department_id"];
 	print table($mysqli, $period_id, $department_id);
+} elseif (isset($_POST["getPeriodYears"])) {
+	$years = array();
+	$sql = "SELECT DISTINCT `year_mfo` FROM `spms_mfo_period` ORDER BY `spms_mfo_period`.`year_mfo` DESC";
+	$res = $mysqli->query($sql);
+	while ($row = $res->fetch_assoc()) {
+		$year = $row['year_mfo'];
+		array_push($years, $year);
+	}
+	print json_encode($years);
 }
 
 
@@ -677,4 +692,15 @@ function get_success_indicators($mysqli, $cf_ID)
 		$data[] = $row;
 	}
 	return $data;
+}
+
+function get_period_id($mysqli, $selected_period_month, $selected_period_year)
+{
+	$period_id = null;
+	$sql = "SELECT `mfoperiod_id` AS `period_id` FROM `spms_mfo_period` WHERE `month_mfo` = '$selected_period_month' AND `year_mfo` = '$selected_period_year'";
+	$res = $mysqli->query($sql);
+	if ($row = $res->fetch_assoc()) {
+		$period_id = $row["period_id"];
+	}
+	return $period_id;
 }
