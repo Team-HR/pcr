@@ -1,41 +1,75 @@
 <?php
-
-require_once "assets/libs/PmsAppMigrator.php";
+require_once "assets/libs/FinalNumericalRatings.php";
 
 date_default_timezone_set("Asia/Manila");
-$host = "db";
+$host = "192.168.50.51";
 $usernameDb = "admin";
+// $password = "teamhrmo2019";
 $password = "teamhrmo2019";
 $database = "ihris";
-$host_new = "192.168.50.51";
-$database_new = "pcr_app";
 $mysqli = new mysqli($host, $usernameDb, $password, $database);
-$mysqli->set_charset("utf8");
-$mysqli_new = new mysqli($host_new, "root", "password", $database_new);
 $mysqli->set_charset("utf8");
 #####################################################################################
 
-$migrator = new PmsAppMigrator($mysqli, $mysqli_new);
+$period_id = 11; //10 - July to Dec 2022
+$finalNumericalRating = new FinalNumericalRating();
 
-##### create necessary tables if not existing in current DB
-# migrate departments
-$migrator->prepare_sys_departments_table();
-$migrator->migrate_to_sys_departments_table();
-# migrate employees
-$migrator->prepare_sys_employees_table();
-$migrator->migrate_to_sys_employees_table();
-# assign employees to sys_employee_assigned_departments
-$migrator->prepare_sys_employee_assigned_departments();
-$migrator->migrate_to_prepare_sys_employee_assigned_departments_table();
-# prepare and migrate rsm and success indicators
-$migrator->prepare_pms_rsms_table();
-$migrator->migrate_pms_rsms_table();
-$migrator->prepare_pms_rsm_assignments_table();
-$migrator->prepare_pms_rsm_success_indicators_table();
-$migrator->migrate_pms_rsm_assignments_table_and_pms_rsm_success_indicators_table();
-# prepare and migrate support functions
-$migrator->prepare_pms_pcr_support_functions_table();
-$migrator->migrate_pms_pcr_support_functions_table();
-# prepare and migrate sys_positions
-$migrator->prepare_sys_positions();
-$migrator->migrate_sys_positions_table();
+# performanceReviewStatus_id = 2434 test fomtype 3 strategic function shoul be excluded from computing final numerical rating
+$sql = "SELECT * FROM `spms_performancereviewstatus` where `period_id` = '$period_id'"; // AND `department_id` = 32 limit 2
+//--`performanceReviewStatus_id` = '2909'
+//--`period_id` = '$period_id' AND `final_numerical_rating` IS NULL LIMIT 1
+$res = $mysqli->query($sql);
+$data = [];
+while ($row = $res->fetch_assoc()) {
+    // $row['final_numerical_rating'] = $finalNumericalRating->getFinalNumericalRating($mysqli, $row);
+    $final_numerical_rating = $finalNumericalRating->getFinalNumericalRating($mysqli, $row);
+    $row['final_numerical_rating'] = $final_numerical_rating;
+    $fileStatusId = $row['performanceReviewStatus_id'];
+    $finalNumericalRating->setFinalNumericalRating($mysqli, $fileStatusId, $final_numerical_rating);
+    // setFinalNumericalRating
+    $data[] = $row;
+}
+
+print("<pre>" . print_r($data, true) . "</pre>");
+
+
+/*
+$fileStatus = [
+    'performanceReviewStatus_id' => '',
+    'period_id' => 11,
+    'employees_id' => 9,
+    'ImmediateSup' => '',
+    'DepartmentHead' => '',
+    'HeadAgency' => '',
+    'PMT' => '',
+    'submitted' => '',
+    'certify' => '',
+    'approved' => '',
+    'panelApproved' => '',
+    'dateAccomplished' => '',
+    'formType' => '1',
+    'department_id' => '32',
+    'assembleAll' => '',
+];
+
+
+$strategic = strategicTr($mysqli, $fileStatus);
+$core = coreRow($mysqli, $fileStatus);
+$support = supportFunctionTr($mysqli, $fileStatus);
+
+$final_numerical_rating = '';
+if ($strategic > 0 && $core > 0 && $support > 0) {
+    $final_numerical_rating = $strategic + $core + $support;
+}
+
+
+print "strategic => " . $strategic;
+print "<br/>";
+print "core =>  " . $core;
+print "<br/>";
+print "support => " . $support;
+print "<br/>";
+print "final => " . $final_numerical_rating;
+
+
+*/

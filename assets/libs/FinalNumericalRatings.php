@@ -6,6 +6,30 @@ class FinalNumericalRating
     // {
     // }
 
+    public function generate($mysqli, $period_id, $department_id)
+    {
+        if ($department_id == "all") {
+            $department_filter = ";";
+        } else {
+            $department_filter = " AND `department_id` = '$department_id';";
+        }
+        $sql = "SELECT * FROM `spms_performancereviewstatus` where `period_id` = '$period_id'" . $department_filter; // AND `department_id` = 32 limit 2
+        //--`performanceReviewStatus_id` = '2909'
+        //--`period_id` = '$period_id' AND `final_numerical_rating` IS NULL LIMIT 1
+        $res = $mysqli->query($sql);
+        $data = [];
+        while ($row = $res->fetch_assoc()) {
+            // $row['final_numerical_rating'] = $finalNumericalRating->getFinalNumericalRating($mysqli, $row);
+            $final_numerical_rating = $this->getFinalNumericalRating($mysqli, $row);
+            $row['final_numerical_rating'] = $final_numerical_rating;
+            $fileStatusId = $row['performanceReviewStatus_id'];
+            $this->setFinalNumericalRating($mysqli, $fileStatusId, $final_numerical_rating);
+            // setFinalNumericalRating
+            // $data[] = $row;
+        }
+        return true;
+    }
+
     public function setFinalNumericalRating($mysqli, $fileStatusId, $final_numerical_rating)
     {
         if (!$final_numerical_rating) {
