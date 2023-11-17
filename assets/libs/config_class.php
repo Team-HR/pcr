@@ -13,7 +13,7 @@
 //	great achievements start from useless ideas  " God Bless "
 //	crazy is what we are
 date_default_timezone_set("Asia/Manila");
-$host = "192.168.50.51";
+$host = "192.168.50.50";
 $usernameDb = "admin";
 // $password = "teamhrmo2019";
 $password = "teamhrmo2019";
