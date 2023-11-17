@@ -8,13 +8,12 @@
 	<link rel="stylesheet" type="text/css" href="assets/libs/ui/dist/semantic.css">
 	<script src="assets/libs/jquery/jquery-3.3.1.min.js"></script>
 	<script src="assets/libs/ui/dist/semantic.min.js"></script>
-	<script src="assets/libs/node_modules/chart.js/dist/Chart.js"></script>
-	<script src="assets/libs/node_modules/chart.js/dist/Chart.min.js"></script>
-	<script src="assets/libs/umbra.js"></script>
+	<!-- Chart.js v4.4.0 -->
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<!-- Addition of Vue3js -->
 	<script src="https://unpkg.com/vue@3"></script>
 	<!-- <script src="https://unpkg.com/vue@3"></script> -->
-
+	<script src="assets/libs/umbra.js"></script>
 	<style media="screen">
 		body {
 			background-color: white;

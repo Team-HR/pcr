@@ -129,14 +129,23 @@ else if (isset($_POST['getPeriodItems'])) {
 	$department_id = $_POST["department_id"];
 	print table($mysqli, $period_id, $department_id);
 } elseif (isset($_POST["getPeriodYears"])) {
-	$years = array();
+	$years = [];
 	$sql = "SELECT DISTINCT `year_mfo` FROM `spms_mfo_period` ORDER BY `spms_mfo_period`.`year_mfo` DESC";
 	$res = $mysqli->query($sql);
 	while ($row = $res->fetch_assoc()) {
 		$year = $row['year_mfo'];
-		array_push($years, $year);
+		$years[] = $year;
 	}
-	print json_encode($years);
+	echo json_encode($years);
+} elseif (isset($_POST["fetchFinalRating"])) {
+	$selected_period_month = $_POST["selected_period_month"];
+	$selected_period_year = $_POST["selected_period_year"];
+	$department_id = $_POST["department_id"];
+
+	$final_numerical_rating = new FinalNumericalRating();
+	$period_id = get_period_id($mysqli, $selected_period_month, $selected_period_year);
+	$generate = $final_numerical_rating->generate($mysqli, $period_id, $department_id);
+	echo json_encode($generate);
 }
 
 

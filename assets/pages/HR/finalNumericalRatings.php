@@ -19,19 +19,21 @@
 				</div>
 				<div class="field" style="width: 220px;">
 					<label>Year:</label>
-					<div id="periodYearDropdown" class="ui fluid search selection dropdown">
-						<input type="hidden" name="periodYear">
-						<i class="dropdown icon"></i>
-						<div class="default text">Select Year</div>
-						<div class="menu">
-							<template v-for="year, i in period_years" :key="i">
-								<div class="item" :data-value="year">{{year}}</div>
-							</template>
-						</div>
-					</div>
+					<select name="periodYearDropdown" id="periodYearDropdown" v-model="selected_period_year">
+						<option value="">Select Year</option>
+						<option v-for="year, i in period_years" :key="i" :value="year">{{year}}</option>
+					</select>
 				</div>
 				<div class="field" style="width: 600px;">
 					<label> Select Department:</label>
+
+					<select name="departmentDropdown" id="departmentDropdown" v-model="department_id">
+						<option value="">Select Department</option>
+						<option value="all">All Departments</option>
+						<option v-for="item, i in departments" :key="i" :value="item.department_id">{{item.department}}</option>
+					</select>
+
+					<!-- 
 					<div id="departmentDropdown" class="ui fluid search selection dropdown">
 						<input type="hidden" name="department">
 						<i class="dropdown icon"></i>
@@ -42,7 +44,9 @@
 								<div class="item" :data-value="dept.department_id">{{dept.department}}</div>
 							</template>
 						</div>
-					</div>
+					</div> -->
+
+
 				</div>
 			</div>
 		</div>
@@ -51,8 +55,23 @@
 
 
 
+
+		<div class="ui basic fluid segment center aligned">
+			<button class="ui primary button" @click="fetchFinalRating()" :disabled="!selected_period_month || !selected_period_year || !department_id || isLoading">Fetch Final Ratings</button>
+		</div>
+
+
+
+
+
+
 		<div style="padding: 20px; position: relative; width:1000px; margin: auto; background-color:azure" :style="chartHeight">
-			<canvas id="myChart"></canvas>
+			<div :style="isLoading ? 'display: none;': ''">
+				<canvas id="myChart"></canvas>
+			</div>
+			<div :style="isLoading ? '': 'display: none;'" class="ui basic segment fluid center aligned">
+				<h1 v-else class="">Loading... Please wait...</h1>
+			</div>
 		</div>
 		<br>
 		<br>
@@ -68,6 +87,7 @@
 					<th width='150'>Final Numerical Rating</th>
 					<th width='150'>Final Adjectival Rating</th>
 				</tr>
+
 				<tr v-if="items && items.length < 1">
 					<td colspan="4" style="text-align: center;"> No Records Found </td>
 				</tr>
@@ -75,44 +95,49 @@
 					<td colspan="4" style="text-align: center;"> Please select the Period and Department </td>
 				</tr>
 				<tr v-else-if="!items && department_id && period_id">
-					<td colspan="4" style="text-align: center;"> Loading... Please wait... </td>
+					<td colspan="5" style="text-align: center;"> Loading... Please wait... </td>
 				</tr>
-				<tr v-for="item,no in items" :key="item.id">
+				<tr v-if="!isLoading" v-for="item,no in items" :key="item.id">
 					<td>{{no+1}}</td>
 					<td>{{item.full_name}}</td>
 					<td>{{item.employmentStatus}}</td>
 					<td>{{item.final_numerical_rating}}</td>
 					<td>{{item.adjectival}}</td>
 				</tr>
+				<tr v-else>
+					<td colspan="5" style="text-align: center;"> Loading... Please wait... </td>
+				</tr>
 			</table>
 	</div>
 </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
 <script>
 	/* Vue3 Start*/
 	const {
-		createApp
+		createApp,
+		ref
 	} = Vue
 
 	createApp({
 		data() {
 			return {
+
 				departments: [],
 				period_months: [
 					"January - June",
 					"July - December"
 				],
 				period_years: [],
-				selected_period_year: null,
+				selected_period_year: 2022,
 				selected_period_month: null,
 				periods: [],
 				isLoading: null,
 				period_id: null,
-				department_id: '',
+				department_id: 1,
 				items: null,
-				chart: null,
+				chart: ref(null),
 				chart_data: null,
 				chartHeight: "height: 200px;"
 			}
@@ -136,78 +161,90 @@
 		},
 		methods: {
 
-			getItems() {
-				this.items = null
+			fetchData() {
+				return new Promise((resolve) => {
+					$.post('?config=FinalNumericalRatings', {
+						view: true,
+						selected_period_month: this.selected_period_month,
+						selected_period_year: this.selected_period_year,
+						department_id: this.department_id
+					}, (data, textStatus, xhr) => {
+						resolve(JSON.parse(data))
+					});
+				});
+			},
+
+
+			async getItems() {
+				const res = JSON.parse(JSON.stringify(await this.fetchData()))
+				this.items = res.table_data
+				let h = 100;
+				let count = res.chart_data.labels.length;
+				if (count > 1) {
+					h = h * count
+				} else {
+					h = 200
+				}
+				this.chartHeight = "height:" + h + "px;";
+
+
 				if (this.chart) {
 					this.chart.destroy()
 				}
-				// assets/pages/HR/finalNumericalRatingsConfig.php
-				$.post('?config=FinalNumericalRatings', {
-					view: true,
-					selected_period_month: this.selected_period_month,
-					selected_period_year: this.selected_period_year,
-					department_id: this.department_id
-				}, (data, textStatus, xhr) => {
-					const res = JSON.parse(data)
-					this.items = res.table_data
-					this.chart_data = res.chart_data
 
+				// else {
 
-					let h = 100;
-					let count = this.chart_data.labels.length;
-					if (count > 1) {
-						h = h * count
-					} else {
-						h = 200
-					}
-					this.chartHeight = "height:" + h + "px;";
-
-					const ctx = document.getElementById('myChart');
-					Chart.defaults.font.size = 18;
-					this.chart = new Chart(ctx, {
-						type: 'bar',
-						data: res.chart_data,
-						options: {
-							responsive: true,
-							maintainAspectRatio: false,
-							indexAxis: 'y',
-							scales: {
-								x: {
-									// stacked: true,
-								},
-								y: {
-									// stacked: true
-								}
+				const ctx = document.getElementById('myChart');
+				// Chart.defaults.font.size = 18;
+				this.chart = new Chart(ctx, {
+					type: 'bar',
+					data: res.chart_data,
+					options: {
+						animation: false,
+						responsive: true,
+						maintainAspectRatio: false,
+						indexAxis: 'y',
+						scales: {
+							x: {
+								// stacked: true,
 							},
-							plugins: {
-								title: {
-									display: true,
-									text: 'Performance Measure vs Percentage of Personnel in a Department'
-								},
-								tooltip: {
-									callbacks: {
-										// title: (context) => {
-										// 	return context.datasetIndex;
-										// },
-										label: (context) => {
-											// let sum = 0;
+							y: {
+								// stacked: true
+							}
+						},
+						plugins: {
+							afterDraw: (chart, easing) => {
+								// This callback will be called after the chart is drawn
+								console.log('Chart has been rendered');
+								// Your additional actions after rendering go here
+							},
+							title: {
+								display: true,
+								text: 'Performance Measure vs Percentage of Personnel in a Department'
+							},
+							tooltip: {
+								callbacks: {
+									// title: (context) => {
+									// 	return context.datasetIndex;
+									// },
+									label: (context) => {
+										// let sum = 0;
 
-											// tooltipItems.forEach(function(tooltipItem) {
-											// 	sum += tooltipItem.parsed.y;
-											// });
-											return " " + context.formattedValue + "% - " + context.dataset.label;
-										}
+										// tooltipItems.forEach(function(tooltipItem) {
+										// 	sum += tooltipItem.parsed.y;
+										// });
+										return " " + context.formattedValue + "% - " + context.dataset.label;
 									}
 								}
 							}
 						}
-					});
-
-					console.log(res.chart_data);
-					// $("#iMatrixCont").html(data);
-					// $('#appLoader').dimmer('hide');
+					}
 				});
+
+				// }
+
 			},
+
 			getDepartmentItems() {
 				// assets/pages/HR/finalNumericalRatingsConfig.php
 				$.post('?config=FinalNumericalRatings', {
@@ -217,18 +254,41 @@
 				});
 			},
 
-			getPeriodYears() {
+			fetchPeriodYears() {
 				// assets/pages/HR/finalNumericalRatingsConfig.php
+				return new Promise(resolve => {
+					$.post('?config=FinalNumericalRatings', {
+						getPeriodYears: true,
+					}, (data, textStatus, xhr) => {
+						resolve(JSON.parse(data))
+						// console.log(this.period_years);
+					});
+				})
+			},
+
+			fetchFinalRating() {
+				this.isLoading = true
+				// simulate fetch
+				// setTimeout(() => {
+				// 	this.isLoading = false
+				// }, 2000);
 				$.post('?config=FinalNumericalRatings', {
-					getPeriodYears: true,
+					fetchFinalRating: true,
+					selected_period_month: this.selected_period_month,
+					selected_period_year: this.selected_period_year,
+					department_id: this.department_id
 				}, (data, textStatus, xhr) => {
-					this.period_years = JSON.parse(data)
+					this.getItems()
+					this.isLoading = false
 				});
 			}
+
 		},
 		mounted() {
+			this.fetchPeriodYears().then(data => {
+				this.period_years = data;
+			})
 
-			this.getPeriodYears()
 			this.getDepartmentItems()
 
 			$("#periodMonthDropdown").dropdown({
@@ -241,8 +301,7 @@
 						// console.log(this.selected_period_month + " " + this.department_id);
 					}
 				}
-			});
-
+			}).dropdown("set selected", "July - December");
 
 			$("#periodYearDropdown").dropdown({
 				forceSelection: false,
@@ -254,7 +313,7 @@
 						// console.log(this.selected_period_year + " " + this.department_id);
 					}
 				}
-			});
+			})
 
 			$("#departmentDropdown").dropdown({
 				forceSelection: false,
