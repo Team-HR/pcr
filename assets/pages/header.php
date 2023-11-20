@@ -124,7 +124,7 @@
 </div>
 <div id="appLoader" class="ui vertical segment">
 	<div class="ui active page dimmer" style="height:200%">
-		<div class="ui medium text loader" style="top:100px;position:fixed">Loading</div>
+		<div id="appLoaderMsg" class="ui medium text loader" style="top:100px;position:fixed">Loading</div>
 	</div>
 
 	<body>

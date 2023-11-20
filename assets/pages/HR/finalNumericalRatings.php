@@ -6,20 +6,14 @@
 			<div class="fields">
 				<div class="field" style="width: 220px;">
 					<label>Period:</label>
-					<div id="periodMonthDropdown" class="ui fluid search selection dropdown">
-						<input type="hidden" name="periodMonth">
-						<i class="dropdown icon"></i>
-						<div class="default text">Select Period</div>
-						<div class="menu">
-							<template v-for="month, m in period_months" :key="m">
-								<div class="item" :data-value="month">{{month}}</div>
-							</template>
-						</div>
-					</div>
+					<select name="periodMonthDropdown" id="periodMonthDropdown" v-model="selected_period_month" :disabled='isLoading'>
+						<option value="">Select Period</option>
+						<option v-for="month, i in period_months" :key="i" :value="month">{{month}}</option>
+					</select>
 				</div>
 				<div class="field" style="width: 220px;">
 					<label>Year:</label>
-					<select name="periodYearDropdown" id="periodYearDropdown" v-model="selected_period_year">
+					<select name="periodYearDropdown" id="periodYearDropdown" v-model="selected_period_year" :disabled='isLoading'>
 						<option value="">Select Year</option>
 						<option v-for="year, i in period_years" :key="i" :value="year">{{year}}</option>
 					</select>
@@ -27,7 +21,7 @@
 				<div class="field" style="width: 600px;">
 					<label> Select Department:</label>
 
-					<select name="departmentDropdown" id="departmentDropdown" v-model="department_id">
+					<select name="departmentDropdown" id="departmentDropdown" v-model="department_id" :disabled='isLoading'>
 						<option value="">Select Department</option>
 						<option value="all">All Departments</option>
 						<option v-for="item, i in departments" :key="i" :value="item.department_id">{{item.department}}</option>
@@ -61,17 +55,13 @@
 		</div>
 
 
-
-
-
-
 		<div style="padding: 20px; position: relative; width:1000px; margin: auto; background-color:azure" :style="chartHeight">
-			<div :style="isLoading ? 'display: none;': ''">
-				<canvas id="myChart"></canvas>
-			</div>
-			<div :style="isLoading ? '': 'display: none;'" class="ui basic segment fluid center aligned">
+			<!-- <div :style="isLoading ? 'display: none;': ''"> -->
+			<canvas id="myChart"></canvas>
+			<!-- </div> -->
+			<!-- <div :style="isLoading ? '': 'display: none;'" class="ui basic segment fluid center aligned">
 				<h1 v-else class="">Loading... Please wait...</h1>
-			</div>
+			</div> -->
 		</div>
 		<br>
 		<br>
@@ -130,12 +120,12 @@
 					"July - December"
 				],
 				period_years: [],
-				selected_period_year: 2022,
+				selected_period_year: null,
 				selected_period_month: null,
 				periods: [],
 				isLoading: null,
 				period_id: null,
-				department_id: 1,
+				department_id: null,
 				items: null,
 				chart: ref(null),
 				chart_data: null,
@@ -158,6 +148,19 @@
 					return this.selected_period_month + ", " + this.selected_period_year
 				}
 			},
+		},
+		watch: {
+			isLoading(val) {
+				if (val) {
+					$('#appLoader').dimmer({
+						closable: false
+					}).dimmer('show');
+					// console.log("is loading...");
+				} else {
+					$('#appLoader').dimmer('hide');
+					// console.log("is loaded...");
+				}
+			}
 		},
 		methods: {
 
@@ -301,7 +304,7 @@
 						// console.log(this.selected_period_month + " " + this.department_id);
 					}
 				}
-			}).dropdown("set selected", "July - December");
+			});
 
 			$("#periodYearDropdown").dropdown({
 				forceSelection: false,
@@ -329,6 +332,7 @@
 
 			// chart start
 
+			$('#appLoaderMsg').html("Consolidating data... Please wait.... This may take 5-10 minutes, please DO NOT CLOSE this page. ");
 
 		}
 
