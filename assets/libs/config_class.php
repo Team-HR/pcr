@@ -85,7 +85,7 @@ class Employee_data extends mysqli
 
 	function __construct()
 	{
-		$host = "192.168.50.51";
+		$host = "192.168.50.50";
 		$usernameDb = "admin";
 		$password = "teamhrmo2019";
 		$database = "ihris";
@@ -2211,7 +2211,7 @@ class employees extends mysqli
 {
 	function __construct()
 	{
-		$host = "192.168.50.51";
+		$host = "192.168.50.50";
 		$usernameDb = "";
 		// $password = "teamhrmo2019";
 		$password = "teamhrmo2019";
