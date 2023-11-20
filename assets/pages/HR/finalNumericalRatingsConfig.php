@@ -77,7 +77,7 @@ else if (isset($_POST['getPeriodItems'])) {
 
 	$department_id = $_POST["department_id"];
 
-	$department_filter = "AND `spms_performancereviewstatus`.`department_id` = '$department_id'";
+	$department_filter = "AND `department_id` = '$department_id'";
 	if ($department_id == 'all') {
 		$department_filter = "";
 	}
@@ -85,25 +85,23 @@ else if (isset($_POST['getPeriodItems'])) {
 
 	// $period_id = 10; //10 - July to Dec 2022
 	# performanceReviewStatus_id = 2434 test fomtype 3 strategic function shoul be excluded from computing final numerical rating
-	$sql = "SELECT *, `spms_performancereviewstatus`.`department_id` AS `dept_id` FROM `spms_performancereviewstatus` LEFT JOIN `employees` ON `spms_performancereviewstatus`.`employees_id` = `employees`.`employees_id` where `spms_performancereviewstatus`.`period_id` = '$period_id' $department_filter AND `spms_performancereviewstatus`.`employees_id` != '432258' AND `spms_performancereviewstatus`.`final_numerical_rating` != '0' AND `employees`.`employmentStatus` != 'ELECTIVE' ORDER BY `spms_performancereviewstatus`.`final_numerical_rating` DESC";
+	$sql = "SELECT * FROM `employees` WHERE `employmentStatus` != 'ELECTIVE' AND `status` = 'ACTIVE' AND `employees_id` NOT IN (432350) $department_filter";
 	//--`performanceReviewStatus_id` = '2909'
 	//--`period_id` = '$period_id' AND `final_numerical_rating` IS NULL LIMIT 1
 	$res = $mysqli->query($sql);
 	$data = [];
 	while ($row = $res->fetch_assoc()) {
-		// $row['final_numerical_rating'] = $finalNumericalRating->getFinalNumericalRating($mysqli, $row);
-		// $final_numerical_rating = $finalNumericalRating->getFinalNumericalRating($mysqli, $row);
-		// $row['final_numerical_rating'] = $final_numerical_rating;
-
+		$fileStatus = get_file_status($mysqli, $period_id, $row["employees_id"]);
+		$row['final_numerical_rating'] = isset($fileStatus['final_numerical_rating']) ? $fileStatus['final_numerical_rating'] : '';
 		$full_name = "";
 		$full_name = $row['lastName'];
 		$full_name .= ", " . $row['firstName'];
 		$row['full_name'] = $full_name;
-		$fileStatusId = $row['performanceReviewStatus_id'];
+		// $fileStatusId = $row['performanceReviewStatus_id'];
 		$row['department_alias'] = isset($row["department_id"]) ? get_department($mysqli, $row["department_id"]) : "";
-		// $finalNumericalRating->setFinalNumericalRating($mysqli, $fileStatusId, $final_numerical_rating);
-		// setFinalNumericalRating
-
+		// // $finalNumericalRating->setFinalNumericalRating($mysqli, $fileStatusId, $final_numerical_rating);
+		// // setFinalNumericalRating
+		// $row["final_numerical_rating"] = "";
 		$scale = "";
 		$final_numerical_rating = $row['final_numerical_rating'];
 		if ($final_numerical_rating <= 5 && $final_numerical_rating > 4) {
@@ -116,11 +114,16 @@ else if (isset($_POST['getPeriodItems'])) {
 			$scale = "Unsatisfactory";
 		}
 		$row['adjectival'] = $scale;
+		$row['dept_id'] = isset($fileStatus['department_id']) ? $fileStatus['department_id'] : $row['department_id'];
 		$data[] = $row;
 	}
 
-	$chart_data = get_distinct_departments($mysqli, $period_id, $department_id, $data);
 
+	usort($data, function ($a, $b) {
+		return strcmp($b["final_numerical_rating"], $a["final_numerical_rating"]);
+	});
+
+	$chart_data = get_distinct_departments($mysqli, $period_id, $department_id, $data);
 	print json_encode([
 		"table_data" => $data,
 		"chart_data" => $chart_data
@@ -153,12 +156,14 @@ else if (isset($_POST['getPeriodItems'])) {
 function get_distinct_departments($mysqli, $period_id, $department_id, $data)
 {
 
-	$department_filter = "AND department_id = $department_id";
+	$department_filter = "WHERE `department_id` = '$department_id'";
 	if ($department_id == "all") {
 		$department_filter = "";
 	}
 
-	$sql = "SELECT * FROM department WHERE department_id IN (SELECT DISTINCT department_id FROM `spms_performancereviewstatus` WHERE period_id = '$period_id' $department_filter) ORDER BY department;";
+	// $sql = "SELECT * FROM department WHERE department_id IN (SELECT DISTINCT department_id FROM `spms_performancereviewstatus` WHERE period_id = '$period_id' $department_filter) ORDER BY department;";
+
+	$sql = "SELECT * FROM `department` $department_filter ORDER BY `department`;";
 	$res = $mysqli->query($sql);
 
 	$departments = [];
@@ -177,6 +182,7 @@ function get_distinct_departments($mysqli, $period_id, $department_id, $data)
 			"Very Satisfactory" => 0,
 			"Satisfactory" => 0,
 			"Unsatisfactory" => 0,
+			"Not Submitted" => 0,
 			"Total" => 0
 		];
 		foreach ($data as $fkey => $filestatus) {
@@ -194,6 +200,9 @@ function get_distinct_departments($mysqli, $period_id, $department_id, $data)
 				} elseif ($filestatus['adjectival'] == 'Unsatisfactory') {
 					$figures['Unsatisfactory']++;
 					$figures['Total']++;
+				} elseif ($filestatus['adjectival'] == '') {
+					$figures['Not Submitted']++;
+					$figures['Total']++;
 				}
 			}
 		}
@@ -203,6 +212,7 @@ function get_distinct_departments($mysqli, $period_id, $department_id, $data)
 			$figures['Very Satisfactory'] = round(($figures['Very Satisfactory'] / $figures['Total']) * 100);
 			$figures['Satisfactory'] = round(($figures['Satisfactory'] / $figures['Total']) * 100);
 			$figures['Unsatisfactory'] = round(($figures['Unsatisfactory'] / $figures['Total']) * 100);
+			$figures['Not Submitted'] = round(($figures['Not Submitted'] / $figures['Total']) * 100);
 		}
 
 		$departments[$key]['figures'] = $figures;
@@ -229,6 +239,11 @@ function get_distinct_departments($mysqli, $period_id, $department_id, $data)
 			"backgroundColor" => "#ff7878",
 			"data" => []
 		],
+		[
+			"label" => "Not Submitted",
+			"backgroundColor" => "grey",
+			"data" => []
+		],
 	];
 
 	foreach ($departments as $key => $dept) {
@@ -236,6 +251,7 @@ function get_distinct_departments($mysqli, $period_id, $department_id, $data)
 		$datasets[1]['data'][] = $dept['figures']['Very Satisfactory'];
 		$datasets[2]['data'][] = $dept['figures']['Satisfactory'];
 		$datasets[3]['data'][] = $dept['figures']['Unsatisfactory'];
+		$datasets[4]['data'][] = $dept['figures']['Not Submitted'];
 	}
 
 	return [
@@ -724,4 +740,18 @@ function get_department($mysqli, $department_id)
 		$department = mb_convert_case($department, MB_CASE_UPPER);
 	}
 	return $department;
+}
+
+
+function get_file_status($mysqli, $period_id, $employees_id)
+{
+	$fileStatus = null;
+
+	$sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `employees_id` = '$employees_id' AND `period_id` = '$period_id'";
+	$res = $mysqli->query($sql);
+	if ($row = $res->fetch_assoc()) {
+		$fileStatus = $row;
+	}
+
+	return $fileStatus;
 }
