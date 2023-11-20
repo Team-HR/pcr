@@ -73,24 +73,26 @@
 					<th>No.</th>
 					<th>Name</th>
 					<th>Employment Status</th>
+					<th>Department</th>
 					<!-- <th>Date Accomplished</th> -->
 					<th width='150'>Final Numerical Rating</th>
 					<th width='150'>Final Adjectival Rating</th>
 				</tr>
 
 				<tr v-if="items && items.length < 1">
-					<td colspan="4" style="text-align: center;"> No Records Found </td>
+					<td colspan="6" style="text-align: center;"> No Records Found </td>
 				</tr>
 				<tr v-else-if="(!items && !department_id) || (!items && !period_id)">
-					<td colspan="4" style="text-align: center;"> Please select the Period and Department </td>
+					<td colspan="6" style="text-align: center;"> Please select the Period and Department </td>
 				</tr>
 				<tr v-else-if="!items && department_id && period_id">
-					<td colspan="5" style="text-align: center;"> Loading... Please wait... </td>
+					<td colspan="6" style="text-align: center;"> Loading... Please wait... </td>
 				</tr>
 				<tr v-if="!isLoading" v-for="item,no in items" :key="item.id">
 					<td>{{no+1}}</td>
 					<td>{{item.full_name}}</td>
 					<td>{{item.employmentStatus}}</td>
+					<td>{{item.department_alias}}</td>
 					<td>{{item.final_numerical_rating}}</td>
 					<td>{{item.adjectival}}</td>
 				</tr>

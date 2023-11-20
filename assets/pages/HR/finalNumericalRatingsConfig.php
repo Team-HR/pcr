@@ -100,6 +100,7 @@ else if (isset($_POST['getPeriodItems'])) {
 		$full_name .= ", " . $row['firstName'];
 		$row['full_name'] = $full_name;
 		$fileStatusId = $row['performanceReviewStatus_id'];
+		$row['department_alias'] = isset($row["department_id"]) ? get_department($mysqli, $row["department_id"]) : "";
 		// $finalNumericalRating->setFinalNumericalRating($mysqli, $fileStatusId, $final_numerical_rating);
 		// setFinalNumericalRating
 
@@ -712,4 +713,15 @@ function get_period_id($mysqli, $selected_period_month, $selected_period_year)
 		$period_id = $row["period_id"];
 	}
 	return $period_id;
+}
+function get_department($mysqli, $department_id)
+{
+	$department = "";
+	$sql = "SELECT * FROM `department` WHERE `department_id` = '$department_id'";
+	$res = $mysqli->query($sql);
+	if ($row = $res->fetch_assoc()) {
+		$department = $row["alias"];
+		$department = mb_convert_case($department, MB_CASE_UPPER);
+	}
+	return $department;
 }
