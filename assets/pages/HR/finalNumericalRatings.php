@@ -67,10 +67,10 @@
 		<br>
 		<h1 style="text-align: center; margin: 0">{{selectedDepartment}}</h1>
 		<h3 style="text-align: center; margin: 0">{{selectedPeriod}}</h1>
-
-			<table class="ui selectable table compact celled structured" style="width: 820px; margin:auto;">
+			<table class="ui selectable table compact collapsing celled structured" style="margin:auto;">
 				<tr>
 					<th>No.</th>
+					<th>ID</th>
 					<th>Name</th>
 					<th>Employment Status</th>
 					<th>Department</th>
@@ -80,16 +80,17 @@
 				</tr>
 
 				<tr v-if="items && items.length < 1">
-					<td colspan="6" style="text-align: center;"> No Records Found </td>
+					<td colspan="7" style="text-align: center;"> No Records Found </td>
 				</tr>
 				<tr v-else-if="(!items && !department_id) || (!items && !period_id)">
-					<td colspan="6" style="text-align: center;"> Please select the Period and Department </td>
+					<td colspan="7" style="text-align: center;"> Please select the Period and Department </td>
 				</tr>
 				<tr v-else-if="!items && department_id && period_id">
-					<td colspan="6" style="text-align: center;"> Loading... Please wait... </td>
+					<td colspan="7" style="text-align: center;"> Loading... Please wait... </td>
 				</tr>
-				<tr v-if="!isLoading" v-for="item,no in items" :key="item.id">
+				<tr v-if="!isLoading" v-for="item,no in items" :key="item.id" :style="!item.final_numerical_rating? 'background: grey' : ''">
 					<td>{{no+1}}</td>
+					<td>{{item.employees_id}}</td>
 					<td>{{item.full_name}}</td>
 					<td>{{item.employmentStatus}}</td>
 					<td>{{item.department_alias}}</td>
@@ -181,8 +182,13 @@
 
 
 			async getItems() {
+				this.isLoading = true;
 				const res = JSON.parse(JSON.stringify(await this.fetchData()))
+				console.log(res);
 				this.items = res.table_data
+
+				if (!res.chart_data) return null;
+
 				let h = 100;
 				let count = res.chart_data.labels.length;
 				if (count > 1) {
@@ -247,6 +253,8 @@
 				});
 
 				// }
+
+				this.isLoading = false;
 
 			},
 
