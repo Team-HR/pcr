@@ -50,8 +50,18 @@ if (isset($_SESSION['emp_id'])) {
 		// else if(isset($_GET['supportFuntion'])){
 		// 	require_once "assets/pages/suppFunc/suppFunc.php";
 		// }
-
-		else if (isset($_GET['RPC'])) {
+		else if (isset($_GET['peerRatingTools'])) {
+			// if (isset($_GET['subordinates']) && !isset($_GET['view'])) {
+			// 	# 2. list of subs
+			// 	require_once "assets/pages/review/subordinates.php";
+			// } else if (isset($_GET['subordinates']) && isset($_GET['view'])) {
+			// 	# 3. formview editor for sup/dh
+			// 	require_once "assets/pages/review/view.php";
+			// } else {
+			# 1. index
+			require_once "assets/pages/HR/Tools/personnelHeirarchy.php";
+			// }
+		} else if (isset($_GET['RPC'])) {
 			if (isset($_GET['subordinates']) && !isset($_GET['view'])) {
 				# 2. list of subs
 				require_once "assets/pages/review/subordinates.php";
@@ -122,6 +132,8 @@ if (isset($_SESSION['emp_id'])) {
 			require_once "assets/pages/PMT/config.php";
 		} elseif ($filePath == "FinalNumericalRatings") {
 			require_once "assets/pages/HR/finalNumericalRatingsConfig.php";
+		} elseif ($filePath == "personnelHeirarchy") {
+			require_once "assets/pages/HR/Tools/personnelHeirarchyConfig.php";
 		} else {
 			echo notFound();
 			die();

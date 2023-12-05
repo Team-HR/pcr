@@ -123,7 +123,11 @@ function pendingTable($mysqli)
   </tr>
   </thead>
   <tbody>
-  $tr
+  <tr>
+  
+    $tr
+  
+  </tr>
   </tbody>
   </table>
   ";
@@ -133,7 +137,7 @@ function pendingTable($mysqli)
 
 
 
-function get_subordinates($mysqli, $period_id, $employee_id)
+function get_subordinates($mysqli, $period_id, $employee_id, $forRPC = true)
 {
   $sql = "SELECT * FROM `spms_performancereviewstatus` where (ImmediateSup = '$employee_id' OR DepartmentHead = '$employee_id') AND period_id = '$period_id' ORDER BY `spms_performancereviewstatus`.`dateAccomplished` ASC
   ";
@@ -173,9 +177,8 @@ function get_subordinates($mysqli, $period_id, $employee_id)
     }
   }
 
+
   $data = order_personnel($data);
-
-
 
   # organize personnel with children
   $_data = [];
@@ -183,7 +186,17 @@ function get_subordinates($mysqli, $period_id, $employee_id)
   $_data = buildTree($data, $employee_id);
   // $_data = $data;
 
-  $_data = cascade_personnel($_data, $employee_id);
+  // return json_encode($_data);
+
+  // $_data = cascade_personnel_names_only($_data, $employee_id);
+  if ($forRPC) {
+    $_data = cascade_personnel($_data, $employee_id);
+  } else {
+    // if $forRPC == false, for peer rating personnel names list only
+    $_data = cascade_personnel_names_only($_data, $employee_id);
+  }
+
+
   return $_data;
 }
 
@@ -201,6 +214,51 @@ function order_personnel($personnel)
 {
   usort($personnel, fn ($a, $b) => strcmp($a['name'], $b['name']));
   return $personnel;
+}
+
+function cascade_personnel_names_only(array $elements, $top_parent_id, $margin = 0, $level = 0, &$index = 0)
+{
+  $tr = "";
+  $margin += 50;
+  $level += 1;
+  foreach ($elements as $key => $el) {
+    if ($el['parent_id'] == $top_parent_id) {
+      $margin = 0;
+    }
+
+    $parent_icon = "";
+    if (isset($el['children'])) {
+      $parent_icon = "<i class='level down alternate yellow icon' style='color: grey;'></i>";
+    }
+
+    $index++;
+    //     submitted
+    // date_submitted
+    // date_approved
+    // date_certified
+    // date_pmt_approved
+    $color = $el['status']['is_complete'] ? "#b4ffbe" : "";
+
+
+
+    // if (isset($el['children'])) {
+    //   $tr .= "<tr>";
+    //   $tr .= "<td colspan='4'>";
+    //   $tr .= "#############################";
+    //   $tr .= "</td>";
+    //   $tr .= "</tr>";
+    // }
+    $tr .= "<tr>";
+    // $tr .= "<td width='10'><div style='margin-left: {$margin}px'><i>$index</i></div></td>";
+    $tr .= "<td width='10'></td>";
+    $tr .= "<td colspan='4'><div style='margin-left: {$margin}px'> <b>$el[name]</b> $parent_icon </div> </td>";
+    $tr .= "</tr>";
+    if (isset($el['children'])) {
+      $tr .= cascade_personnel_names_only($el['children'], $top_parent_id, $margin, $level, $index);
+    }
+  }
+
+  return $tr;
 }
 
 function cascade_personnel(array $elements, $top_parent_id, $margin = 0, $level = 0, &$index = 0)
