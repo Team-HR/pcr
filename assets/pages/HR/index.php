@@ -8,4 +8,14 @@
 			<h1><i class="icon table"></i> MFO Ratings</h1>
 		</a>
 	</div>
+
+	<?php if ($_SESSION['emp_info']['department_id'] == 32) { ?>
+		<h1 class="ui header block">Peer Rating Tools</h1>
+		<div class="ui fluid basic segment center aligned">
+			<a class="ui button primary" style="padding: 100px; width: 565px;" href="?peerRatingTools&personnelHeirarchy">
+				<h1><i class="icon users"></i> Personnel Hierarchy</h1>
+			</a>
+		</div>
+	<?php } ?>
+
 </div>
