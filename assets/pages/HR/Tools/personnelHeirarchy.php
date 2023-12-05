@@ -19,34 +19,20 @@
                     </select>
                 </div>
                 <div class="field" style="width: 600px;">
-                    <label> Select Department:</label>
+                    <label> Select Department Head:</label>
 
-                    <select name="departmentDropdown" id="departmentDropdown" v-model="department_id" :disabled='isLoading'>
-                        <option value="">Select Department</option>
+                    <select name="departmentHeadDropdown" id="departmentHeadDropdown" v-model="departmentHead_id" :disabled='isLoading' class="ui dropdown search">
+                        <option value="">Select Department Head</option>
                         <!-- <option value="all">All Departments</option> -->
-                        <option v-for="item, i in departments" :key="i" :value="item.department_id">{{item.department}}</option>
+                        <option v-for="item, i in departmentHeads" :key="i" :value="item.employee_id">{{item.name}}</option>
                     </select>
-
-                    <!-- 
-					<div id="departmentDropdown" class="ui fluid search selection dropdown">
-						<input type="hidden" name="department">
-						<i class="dropdown icon"></i>
-						<div class="default text">Select Department</div>
-						<div class="menu">
-							<div class="item" data-value="all">All</div>
-							<template v-for="dept in departments" :key="dept.department_id">
-								<div class="item" :data-value="dept.department_id">{{dept.department}}</div>
-							</template>
-						</div>
-					</div> -->
-
 
                 </div>
             </div>
         </div>
         <br>
         <br>
-        <h1 style="text-align: center; margin: 0">{{selectedDepartment}}</h1>
+        <h1 style="text-align: center; margin: 0">{{selectedDepartmentHead}}</h1>
         <h3 style="text-align: center; margin: 0">{{selectedPeriod}}</h1>
 
             <table class="ui compact mini table">
@@ -72,7 +58,7 @@
         data() {
             return {
 
-                departments: [],
+                departmentHeads: [],
                 period_months: [
                     "January - June",
                     "July - December"
@@ -83,17 +69,17 @@
                 periods: [],
                 isLoading: null,
                 period_id: null,
-                department_id: null,
+                departmentHead_id: null,
                 items: null,
             }
         },
         computed: {
-            selectedDepartment() {
-                if (this.department_id == 'all') return "All DEPARTMENTS"
-                for (let index = 0; index < this.departments.length; index++) {
-                    const element = this.departments[index];
-                    if (element.department_id == this.department_id) {
-                        return element.department
+            selectedDepartmentHead() {
+                // if (this.departmentHead_id == 'all') return "All DEPARTMENTS"
+                for (let index = 0; index < this.departmentHeads.length; index++) {
+                    const element = this.departmentHeads[index];
+                    if (element.employee_id == this.departmentHead_id) {
+                        return element.name
                         break;
                     }
                 }
@@ -125,7 +111,7 @@
                         getPersonnelHeirarchy: true,
                         selected_period_month: this.selected_period_month,
                         selected_period_year: this.selected_period_year,
-                        department_id: this.department_id
+                        departmentHead_id: this.departmentHead_id
                     }, (data, textStatus, xhr) => {
                         resolve(JSON.parse(data))
                     });
@@ -139,12 +125,12 @@
                 // console.log(this.items);
             },
 
-            getDepartmentItems() {
+            getDepartmentHeadItems() {
                 // assets/pages/HR/finalNumericalRatingsConfig.php
                 $.post('?config=FinalNumericalRatings', {
-                    getDepartmentItems: true,
+                    getDepartmentHeadItems: true,
                 }, (data, textStatus, xhr) => {
-                    this.departments = JSON.parse(data)
+                    this.departmentHeads = JSON.parse(data)
                 });
             },
 
@@ -166,16 +152,16 @@
                 this.period_years = data;
             })
 
-            this.getDepartmentItems()
+            this.getDepartmentHeadItems()
 
             $("#periodMonthDropdown").dropdown({
                 forceSelection: false,
                 fullTextSearch: true,
                 onChange: (value, text, $choice) => {
                     this.selected_period_month = value;
-                    if (this.selected_period_month && this.selected_period_year && this.department_id) {
+                    if (this.selected_period_month && this.selected_period_year && this.departmentHead_id) {
                         this.getItems()
-                        // console.log(this.selected_period_month + " " + this.department_id);
+                        // console.log(this.selected_period_month + " " + this.departmentHead_id);
                     }
                 }
             });
@@ -185,20 +171,20 @@
                 fullTextSearch: true,
                 onChange: (value, text, $choice) => {
                     this.selected_period_year = value;
-                    if (this.selected_period_month && this.selected_period_year && this.department_id) {
+                    if (this.selected_period_month && this.selected_period_year && this.departmentHead_id) {
                         this.getItems()
-                        // console.log(this.selected_period_year + " " + this.department_id);
+                        // console.log(this.selected_period_year + " " + this.departmentHead_id);
                     }
                 }
             })
 
-            $("#departmentDropdown").dropdown({
+            $("#departmentHeadDropdown").dropdown({
                 forceSelection: false,
                 fullTextSearch: true,
                 onChange: (value, text, $choice) => {
                     // console.log(value);
-                    this.department_id = value;
-                    if (this.selected_period_month && this.selected_period_year && this.department_id) {
+                    this.departmentHead_id = value;
+                    if (this.selected_period_month && this.selected_period_year && this.departmentHead_id) {
                         this.getItems()
                     }
                 }
