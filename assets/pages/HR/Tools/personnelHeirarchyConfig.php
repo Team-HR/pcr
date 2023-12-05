@@ -5,7 +5,7 @@ if (isset($_POST["getPersonnelHeirarchy"])) {
 
     $selected_period_month = $_POST["selected_period_month"];
     $selected_period_year = $_POST["selected_period_year"];
-    $department_id = $_POST["department_id"];
+    $departmentHeadEmployeeId = $_POST["departmentHead_id"];
 
     $period_id = 0;
 
@@ -16,17 +16,17 @@ if (isset($_POST["getPersonnelHeirarchy"])) {
         $period_id = $row["mfoperiod_id"];
     }
 
-    $departmentHeadEmployeeId = 0;
+    // $departmentHeadEmployeeId = 0;
 
-    if ($period_id) {
-        $sql = "SELECT DISTINCT `DepartmentHead` FROM `spms_performancereviewstatus` WHERE `department_id` = '$department_id' and `period_id` = '$period_id'";
+    // if ($period_id) {
+    //     $sql = "SELECT DISTINCT `DepartmentHead` FROM `spms_performancereviewstatus` WHERE `department_id` = '$department_id' and `period_id` = '$period_id'";
 
-        $res = $mysqli->query($sql);
+    //     $res = $mysqli->query($sql);
 
-        if ($row = $res->fetch_assoc()) {
-            $departmentHeadEmployeeId = $row["DepartmentHead"];
-        }
-    }
+    //     if ($row = $res->fetch_assoc()) {
+    //         $departmentHeadEmployeeId = $row["DepartmentHead"];
+    //     }
+    // }
 
     // echo json_encode($departmentHeadEmployeeId);
 

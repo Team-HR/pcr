@@ -43,12 +43,15 @@ print "final => " . $final_numerical_rating;
 */
 
 
-if (isset($_POST['getDepartmentItems'])) {
+if (isset($_POST['getDepartmentHeadItems'])) {
 	$data = [];
-	$sql = "SELECT * FROM `department` WHERE department_id != 28 ORDER BY department ASC;";
+	$sql = "SELECT * FROM `employees` ORDER BY `lastName` ASC;";
 	$res = $mysqli->query($sql);
 	while ($row = $res->fetch_assoc()) {
-		$data[] = $row;
+		$data[] = [
+			"employee_id" => $row["employees_id"],
+			"name" => $row["lastName"].", ".$row["firstName"]." ". $row["middleName"]." ".$row["extName"]
+		];
 	}
 	print json_encode($data);
 }
