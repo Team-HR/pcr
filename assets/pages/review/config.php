@@ -251,7 +251,7 @@ function cascade_personnel_names_only(array $elements, $top_parent_id, $margin =
     $tr .= "<tr>";
     // $tr .= "<td width='10'><div style='margin-left: {$margin}px'><i>$index</i></div></td>";
     $tr .= "<td width='10'></td>";
-    $tr .= "<td colspan='4'><div style='margin-left: {$margin}px'> <b>$el[name]</b> $parent_icon </div> </td>";
+    $tr .= "<td colspan='4'><div style='margin-left: {$margin}px; font-size: 14pt;'>$el[name] $parent_icon </div> </td>";
     $tr .= "</tr>";
     if (isset($el['children'])) {
       $tr .= cascade_personnel_names_only($el['children'], $top_parent_id, $margin, $level, $index);
