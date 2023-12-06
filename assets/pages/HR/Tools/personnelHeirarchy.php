@@ -42,7 +42,7 @@
                         <td colspan="4"></td>
                     </tr>
                 </thead>
-                <tbody v-html="items"></tbody>
+                <tbody v-html="items" style="font-family: Calibri;"></tbody>
             </table>
     </div>
 </div>
