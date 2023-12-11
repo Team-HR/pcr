@@ -42,8 +42,18 @@ print "final => " . $final_numerical_rating;
 
 */
 
+if (isset($_POST['getDepartmentItems'])) {
+	$data = [];
+	$sql = "SELECT * FROM `department` WHERE department_id != 28 ORDER BY department ASC;";
+	$res = $mysqli->query($sql);
+	while ($row = $res->fetch_assoc()) {
+		$data[] = $row;
+	}
+	print json_encode($data);
+}
 
-if (isset($_POST['getDepartmentHeadItems'])) {
+
+else if (isset($_POST['getDepartmentHeadItems'])) {
 	$data = [];
 	$sql = "SELECT * FROM `employees` ORDER BY `lastName` ASC;";
 	$res = $mysqli->query($sql);
