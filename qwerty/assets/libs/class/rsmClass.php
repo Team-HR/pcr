@@ -1,5 +1,7 @@
 <?php
-require_once "/var/www/html/assets/libs/Db.php";
+// require_once "/var/www/html/assets/libs/Db.php";
+
+require_once "Db.php";
 
 class RsmClass extends Db
 {
