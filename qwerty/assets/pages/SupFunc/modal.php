@@ -2,7 +2,7 @@
 if (isset($_POST['updateData'])) {
   $dataId = $_POST['updateData'];
   $data = "SELECT * FROM `spms_supportfunctions` where `id_suppFunc`='$dataId'";
-  $data = $mysqli->get_data($data);
+  $data = $_ipcr->get_data($data);
 
   function indicationInputs($type,$data){
     $count = 5;

@@ -1,14 +1,6 @@
 <?php
-
-/**
- *
- */
-$host = "localhost";
-$password = "teamhrmo2019";
-// $password = "";
-$username = "admin";
-$database = "ihris";
-class IPCR extends mysqli
+require_once "/var/www/html/assets/libs/Db.php";
+class IPCR extends Db
 {
 
   private $EmpId;
@@ -47,17 +39,11 @@ class IPCR extends mysqli
   private $fileType;
   function __construct()
   {
-    $host = "localhost";
-    $password = "teamhrmo2019";
-    // $password = "";
-    $username = "admin";
-    $database = "ihris";
-    parent::__construct($host, $username, $password, $database);
-    parent::set_charset("utf8");
+    parent::__construct();
   }
   public function get_data($sql)
   {
-    $query = parent::query($sql);
+    $query = $this->mysqli->query($sql);
     if ($query->num_rows == 1) {
       $arr = $query->fetch_assoc();
     } else {
@@ -84,7 +70,7 @@ class IPCR extends mysqli
     $this->EmpId = $EmpId;
     if ($this->period && $this->department && $this->EmpId) {
       $sql = "SELECT * from `spms_performancereviewstatus` left join `spms_mfo_period` on `spms_performancereviewstatus`.`period_id`=`spms_mfo_period`.`mfoperiod_id` left join `department` on `spms_performancereviewstatus`.`department_id`=`department`.`department_id` where `spms_performancereviewstatus`.`employees_id`='$this->EmpId' and `spms_performancereviewstatus`.`department_id`='$this->department' and `spms_performancereviewstatus`.`period_id`='$this->period'";
-      $sql = parent::query($sql);
+      $sql = $this->mysqli->query($sql);
       $this->fileStatus = $sql->fetch_assoc();
     }
     $this->build();
@@ -111,7 +97,7 @@ class IPCR extends mysqli
     $view = "";
     if (strtoupper($this->fileType) == "PERFORMANCE") {
       $sql = "SELECT * from `spms_corefucndata` where `p_id`='$indicators[mi_id]' and `empId`='$this->EmpId'";
-      $sql = parent::query($sql);
+      $sql = $this->mysqli->query($sql);
       $dev = 0;
       $av = 0;
       $empData = $sql->fetch_assoc();
@@ -166,10 +152,10 @@ class IPCR extends mysqli
     }
 
     $sql = "SELECT * FROM `spms_corefunctions` where mfo_periodId='$this->period' and dep_id='$this->department' and parent_id=''";
-    $sql = parent::query($sql);
+    $sql = $this->mysqli->query($sql);
     while ($arr = $sql->fetch_assoc()) {
       $matrixindicators = "SELECT * from spms_matrixindicators where cf_ID='$arr[cf_ID]'";
-      $matrixindicators = parent::query($matrixindicators);
+      $matrixindicators = $this->mysqli->query($matrixindicators);
       $view = "";
       $child = $this->child($arr['cf_ID'], 20);
       if ($matrixindicators->num_rows) {
@@ -220,14 +206,14 @@ class IPCR extends mysqli
       $added .= "<td></td>";
     }
     $sql1 = "SELECT * FROM `spms_corefunctions` where parent_id='$p'";
-    $sql1 = parent::query($sql1);
+    $sql1 = $this->mysqli->query($sql1);
     $padding = $s . "px";
     $view = "";
     while ($child_arr = $sql1->fetch_assoc()) {
       $matrixindicators = "SELECT * from spms_matrixindicators where cf_ID='$child_arr[cf_ID]'";
-      $matrixindicators = parent::query($matrixindicators);
+      $matrixindicators = $this->mysqli->query($matrixindicators);
       $sql2 = "SELECT * FROM `spms_corefunctions` where parent_id='$child_arr[cf_ID]'";
-      $sql2 = parent::query($sql2);
+      $sql2 = $this->mysqli->query($sql2);
       $child = "";
       if ($sql2->num_rows) {
         $s += 20;
@@ -282,7 +268,7 @@ class IPCR extends mysqli
       $added .= "<td></td>";
     }
     $sql = "SELECT `spms_supportfunctions`.`mfo`,`spms_supportfunctions`.`percent`,`spms_supportfunctions`.`suc_in`,`spms_supportfunctiondata`.`accomplishment`,`spms_supportfunctiondata`.`Q`,`spms_supportfunctiondata`.`E`,`spms_supportfunctiondata`.`T` FROM `spms_supportfunctiondata` left join `spms_supportfunctions` on `spms_supportfunctiondata`.`parent_id`=`spms_supportfunctions`.`id_suppFunc` where `spms_supportfunctiondata`.`emp_id`='$this->EmpId' and `spms_supportfunctiondata`.`period_id`='$this->period'";
-    $sql = parent::query($sql);
+    $sql = $this->mysqli->query($sql);
     $view = "";
     while ($support = $sql->fetch_assoc()) {
       $av = 0;
@@ -327,7 +313,7 @@ class IPCR extends mysqli
       $added .= "<td></td>";
     }
     $sql = "SELECT * from `spms_strategicfuncdata` where `period_id`='$this->period' and `emp_id`='$this->EmpId'";
-    $sql = parent::query($sql);
+    $sql = $this->mysqli->query($sql);
     $view = "";
     $total = 0;
     $count = 0;
@@ -383,7 +369,7 @@ class IPCR extends mysqli
     $view = '';
     while ($count < count($EmpId)) {
       $sql = "SELECT * FROM `employees` where employees_id='$EmpId[$count]'";
-      $sql = parent::query($sql);
+      $sql = $this->mysqli->query($sql);
       $sql = $sql->fetch_assoc();
       $view .= $sql['firstName'] . " " . $sql['middleName'] . " " . $sql['lastName'] . "<br><br>";
       $count++;
@@ -665,7 +651,7 @@ class IPCR extends mysqli
   {
 
     $sql = "SELECT * from `employees` left join `positiontitles` on `employees`.`position_id`=`positiontitles`.`position_id` where `employees_id`='$DataId'";
-    $sql = parent::query($sql);
+    $sql = $this->mysqli->query($sql);
     $employee = $sql->fetch_assoc();
     return $employee;
     // $empDetails = $employee['firstName']." ".$employee['lastName'];
@@ -676,9 +662,9 @@ class IPCR extends mysqli
   private function accountblePersons($perId)
   {
     $emp = $this->EmpId;
-    $core = mysqli::query("SELECT * FROM `spms_corefunctions` where parent_id='$perId'");
+    $core = $this->mysqli->query("SELECT * FROM `spms_corefunctions` where parent_id='$perId'");
     while ($coreId = $core->fetch_assoc()) {
-      $indicators = mysqli::query("SELECT * FROM `spms_matrixindicators` where cf_ID='$coreId[cf_ID]'");
+      $indicators = $this->mysqli->query("SELECT * FROM `spms_matrixindicators` where cf_ID='$coreId[cf_ID]'");
       while ($empId = $indicators->fetch_assoc()) {
         $emp .= "," . $empId['mi_incharge'];
       }
@@ -696,7 +682,7 @@ class IPCR extends mysqli
   private function comments()
   {
     $sql = "SELECT * from `spms_commentrec` where `emp_id`='$this->EmpId' and `period_id`='$this->period'";
-    $sql = parent::query($sql);
+    $sql = $this->mysqli->query($sql);
     $sql = $sql->fetch_assoc();
     return $sql['comment'];
   }

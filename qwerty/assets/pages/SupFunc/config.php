@@ -37,7 +37,7 @@
     $tableRow = "";
     $tableRowIndi = "";
     $tableRowSupervisor = "";
-    foreach($mysqli->get_data($sql) as $data){
+    foreach($_ipcr->get_data($sql) as $data){
       if($data['type']=='1'){
         $tableRowIndi.= "
         <tr>

@@ -5,7 +5,9 @@ require_once("assets/libs/class/Class.php");
 require_once("assets/libs/class/rsmClass.php");
 require_once "assets/libs/NameFormatter.php";
 
-$mysqli = new IPCR();
+$_ipcr = new IPCR();
+$mysqli = $_ipcr->getMysqli();
+
 if (isset($_SESSION['admin'])) {
   if (isset($_GET['config'])) {
     // configuration files
@@ -49,7 +51,13 @@ if (isset($_SESSION['admin'])) {
       require_once("assets/pages/Users/content.php");
     } elseif (isset($_GET['Logout'])) {
       session_destroy();
-      header("location:?");
+?>
+      <script>
+        window.location.reload()
+      </script>
+<?php
+      // header("Refresh:0");
+      // header("location:?");
     } elseif (isset($_GET['Records'])) {
       $records = $_GET['Records'];
       if ($records != "") {
