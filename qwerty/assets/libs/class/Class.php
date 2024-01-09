@@ -1,10 +1,7 @@
 <?php
 // require_once "/var/www/html/assets/libs/Db.php";
-
-echo json_encode(__DIR__);
-
-return false;
-
+// echo json_encode(__DIR__);
+// return false;
 require_once "Db.php";
 
 class IPCR extends Db
