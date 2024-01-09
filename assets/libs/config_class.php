@@ -2212,7 +2212,7 @@ class employees extends mysqli
 	function __construct()
 	{
 		$host = "localhost";
-		$usernameDb = "";
+		$usernameDb = "admin";
 		// $password = "teamhrmo2019";
 		$password = "teamhrmo2019";
 		$database = "ihris";
