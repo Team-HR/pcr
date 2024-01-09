@@ -1,5 +1,4 @@
 <?php
-
 //	Apache/2.4.39 (Win64) OpenSSL/1.0.2s PHP/7.1.31
 //	DevelopmentYear 2019 -
 //	@Author
@@ -12,24 +11,13 @@
 //  we only need logic That is our power
 //	great achievements start from useless ideas  " God Bless "
 //	crazy is what we are
-date_default_timezone_set("Asia/Manila");
-$host = "localhost";
-$usernameDb = "admin";
-// $password = "teamhrmo2019";
-$password = "teamhrmo2019";
-$database = "ihris";
-$mysqli = new mysqli($host, $usernameDb, $password, $database);
-$mysqli->set_charset("utf8");
 
+require_once "Db.php";
 
-// MYSQL ERROR REPORTING START
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-// MYSQL ERROR REPORTING END
+$db = new Db();
+$mysqli = $db->getMysqli();
 
-
-class Employee_data extends mysqli
+class Employee_data extends Db
 {
 	public $accountStatus;
 	private $rsmStatus;
@@ -80,17 +68,11 @@ class Employee_data extends mysqli
 
 	private $pmt = false;
 
-
 	// method for my objects
 
 	function __construct()
 	{
-		$host = "localhost";
-		$usernameDb = "admin";
-		$password = "teamhrmo2019";
-		$database = "ihris";
-		parent::__construct($host, $usernameDb, $password, $database);
-		parent::set_charset("utf8");
+		parent::__construct();
 	}
 	private function load()
 	{
@@ -110,7 +92,7 @@ class Employee_data extends mysqli
 		$month_mfo = $this->period["month_mfo"];
 		$year_mfo = $this->period["year_mfo"];
 		$sql = "SELECT `prr_id` FROM `prr` WHERE `period` = '$month_mfo' AND `year` = '$year_mfo'";
-		$res = mysqli::query($sql);
+		$res = $this->mysqli->query($sql);
 		$data = [];
 		# since spms_performancereviewstatus table does not identify the personnel to be casual or 
 		# permanent on the time they accomplish their pcrs
@@ -157,7 +139,7 @@ class Employee_data extends mysqli
 		$prr_id = 0;
 		foreach ($prr_ids as $id) {
 			$sql = "SELECT * FROM `prrlist` WHERE `prr_id` = '$id' AND `employees_id` = '$employee_id'";
-			$result = mysqli::query($sql);
+			$result = $this->mysqli->query($sql);
 			if ($result->num_rows > 0) {
 				$prr_id = $id;
 				continue;
@@ -165,10 +147,10 @@ class Employee_data extends mysqli
 		}
 		// $date_submitted = $this->fileStatus["dateAccomplished"];
 		// $date_appraised = $this->fileStatus["panelApproved"];
-		$final_comments = mysqli::real_escape_string($this->final_comments);
+		$final_comments = $this->mysqli->real_escape_string($this->final_comments);
 		// $prr_id = $this->get_prr_id();
 		$sql = "UPDATE `prrlist` SET `numerical` = '$final_numerical_rating', `adjectival` = '$final_adjectival_rating', `comments` = '$final_comments' WHERE `prr_id` = '$prr_id' AND `employees_id` = '$employee_id'";
-		mysqli::query($sql);
+		$this->mysqli->query($sql);
 
 		return [
 			"prr_id" => $prr_id,
@@ -192,13 +174,13 @@ class Employee_data extends mysqli
 		left join department on employees.department_id=department.department_id
 		left join positiontitles on employees.position_id=positiontitles.position_id
 		where employees_id='$this->emp_ID'";
-		$sql = mysqli::query($sql);
+		$sql = $this->mysqli->query($sql);
 		if (!$sql) {
 			die($this->error);
 		}
 		$this->EmpInfo = $sql->fetch_assoc();
 		$authSql = "SELECT * FROM `spms_accounts` where employees_id='$this->emp_ID'";
-		$authSql = mysqli::query($authSql);
+		$authSql = $this->mysqli->query($authSql);
 		$authSql = $authSql->fetch_assoc();
 		if ($authSql['type'] == "") {
 			$this->authorization = "";
@@ -212,7 +194,7 @@ class Employee_data extends mysqli
 		$this->per_ID = $per;
 		//retriving all the data of period
 		$sql = "SELECT  * from spms_mfo_period where mfoperiod_id='$this->per_ID'";
-		$sql = mysqli::query($sql);
+		$sql = $this->mysqli->query($sql);
 		if (!$sql) {
 			die($this->error);
 		}
@@ -224,7 +206,7 @@ class Employee_data extends mysqli
 	{
 		//retriving all the data of period
 		$sql = "SELECT  * from spms_mfo_period where month_mfo='$m' and year_mfo='$y'";
-		$sql = mysqli::query($sql);
+		$sql = $this->mysqli->query($sql);
 		if (!$sql) {
 			die($this->error);
 		}
@@ -270,7 +252,7 @@ class Employee_data extends mysqli
 			return $id;
 		}
 		$sql = "SELECT * from employees where employees_id='$id'";
-		$sql = mysqli::query($sql);
+		$sql = $this->mysqli->query($sql);
 		$sql = $sql->fetch_assoc();
 
 		$firstName = isset($sql["firstName"]) ? $sql["firstName"] : "";
@@ -306,7 +288,7 @@ class Employee_data extends mysqli
 	private function get_department_this_period($department_id)
 	{
 		$sql = "SELECT * FROM department WHERE department_id = $department_id";
-		$res = mysqli::query($sql);
+		$res = $this->mysqli->query($sql);
 		if ($row = $res->fetch_assoc()) {
 			return $row["department"];
 		}
@@ -317,7 +299,7 @@ class Employee_data extends mysqli
 	private function file_status()
 	{
 		$perStatus = "SELECT * from spms_performancereviewstatus where period_id='$this->per_ID' and employees_id='$this->emp_ID'";
-		$perStatus = mysqli::query($perStatus);
+		$perStatus = $this->mysqli->query($perStatus);
 		$countData = $perStatus->num_rows;
 
 		$perStatus = $perStatus->fetch_assoc();
@@ -454,7 +436,7 @@ class Employee_data extends mysqli
 		// $department_id = $this->EmpInfo["department_id"];
 		$main_Arr = [];
 		$sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$this->per_ID' and `dep_id` = '$department_id' ORDER BY `spms_corefunctions`.`cf_count` ASC";
-		$sql = mysqli::query($sql);
+		$sql = $this->mysqli->query($sql);
 		$parent = [[], [], []];
 		while ($core = $sql->fetch_assoc()) {
 			$parent[0] = $core;
@@ -501,7 +483,7 @@ class Employee_data extends mysqli
 	{
 
 		$sql = "SELECT * from spms_corefunctions where parent_id='$i' ORDER BY `spms_corefunctions`.`cf_count` ASC";
-		$sql = mysqli::query($sql);
+		$sql = $this->mysqli->query($sql);
 		if (!$sql) {
 			die($this->error);
 		}
@@ -517,7 +499,7 @@ class Employee_data extends mysqli
 		}
 
 		$sqlSi1 = "SELECT * from spms_matrixindicators where cf_ID='$siId'";
-		$sqlSi1 = mysqli::query($sqlSi1);
+		$sqlSi1 = $this->mysqli->query($sqlSi1);
 		if (!$sqlSi1) {
 			die($this->error);
 		}
@@ -608,7 +590,7 @@ class Employee_data extends mysqli
 		$emp = $this->fileStatus["employees_id"];
 		$superiors_id = $emp;
 
-		$indicators = mysqli::query("SELECT * FROM `spms_matrixindicators` where cf_ID='$perId'");
+		$indicators = $this->mysqli->query("SELECT * FROM `spms_matrixindicators` where cf_ID='$perId'");
 		while ($empId = $indicators->fetch_assoc()) {
 			$emp .= "," . $empId['mi_incharge'];
 		}
@@ -624,9 +606,9 @@ class Employee_data extends mysqli
 			$subordinates = [];
 
 			if ($this->fileStatus["formType"] == 2 || $this->fileStatus["formType"] == 4) { //if spcr division pcr
-				$res = mysqli::query("SELECT `employees_id` FROM `spms_performancereviewstatus` where `period_id` = '$period_id' and `ImmediateSup` = '$superiors_id'");
+				$res = $this->mysqli->query("SELECT `employees_id` FROM `spms_performancereviewstatus` where `period_id` = '$period_id' and `ImmediateSup` = '$superiors_id'");
 			} elseif ($this->fileStatus["formType"] == 3) { //else if dpcr
-				$res = mysqli::query("SELECT `employees_id` FROM `spms_performancereviewstatus` where `period_id` = '$period_id' and `DepartmentHead` = '$superiors_id'");
+				$res = $this->mysqli->query("SELECT `employees_id` FROM `spms_performancereviewstatus` where `period_id` = '$period_id' and `DepartmentHead` = '$superiors_id'");
 			}
 
 			while ($row = $res->fetch_assoc()) {
@@ -660,7 +642,7 @@ class Employee_data extends mysqli
 		$a = 0;
 		if ($si != "") {
 			$check = "SELECT * from spms_corefucndata where p_id='$si[mi_id]' and empId='$this->emp_ID'";
-			$check = mysqli::query($check);
+			$check = $this->mysqli->query($check);
 			$accountableNames = "";
 			if ($this->get_status('formType') > 1) {
 				if (isset($ar['cf_ID'])) {
@@ -853,7 +835,7 @@ class Employee_data extends mysqli
 		} else {
 			$sql = "SELECT * FROM `spms_supportfunctions` where `type`=2";
 		}
-		$sql = mysqli::query($sql);
+		$sql = $this->mysqli->query($sql);
 		$col = "";
 		if (!$this->hideCol) {
 			$col = "<td class='noprint' ></td>";
@@ -866,7 +848,7 @@ class Employee_data extends mysqli
 		$totalAv = 0;
 		while ($tr = $sql->fetch_assoc()) {
 			$sqlSelect = "SELECT * from spms_supportfunctiondata where parent_id='$tr[id_suppFunc]' and emp_id='$this->emp_ID' and period_id='$this->per_ID'";
-			$sqlSelect = mysqli::query($sqlSelect);
+			$sqlSelect = $this->mysqli->query($sqlSelect);
 			$sqlSelectCount = $sqlSelect->num_rows;
 			if ($sqlSelectCount > 0) {
 				$fdata = $sqlSelect->fetch_assoc();
@@ -958,7 +940,7 @@ class Employee_data extends mysqli
 	{
 		$this->strtPercent = "N/A"; //previously N/A
 		$sql = "SELECT * from spms_strategicfuncdata where period_id = '$this->per_ID' and emp_id = '$this->emp_ID'";
-		$sql = mysqli::query($sql);
+		$sql = $this->mysqli->query($sql);
 		$countStrat = $sql->num_rows;
 		if (!$sql) {
 			die($this->error);
@@ -1050,7 +1032,7 @@ class Employee_data extends mysqli
 		# get form filetype
 		$sql = "SELECT `formType` FROM `spms_performancereviewstatus` WHERE `period_id` = '$period_id' and `employees_id` = '$employee_id';
 		";
-		$result = mysqli::query($sql);
+		$result = $this->mysqli->query($sql);
 		$row = $result->fetch_assoc();
 		$formType = $row['formType'];
 		if ($formType == 3) {
@@ -1135,7 +1117,7 @@ class Employee_data extends mysqli
 	private function comment()
 	{
 		$commentsql = "SELECT * from spms_commentrec where period_id='$this->per_ID' and emp_id='$this->emp_ID'";
-		$commentsql = mysqli::query($commentsql);
+		$commentsql = $this->mysqli->query($commentsql);
 		$countRow = $commentsql->num_rows;
 		$commentsql = $commentsql->fetch_assoc();
 		$comment = "";
@@ -1169,7 +1151,7 @@ class Employee_data extends mysqli
 	private function head_of_agency()
 	{
 		$sql = "SELECT * from spms_performancereviewstatus where period_id='$this->per_ID' and employees_id='$this->emp_ID'";
-		$result = mysqli::query($sql);
+		$result = $this->mysqli->query($sql);
 
 		if ($result->num_rows > 0) {
 			$row = $result->fetch_assoc();
@@ -1199,7 +1181,7 @@ class Employee_data extends mysqli
 			$id = 0;
 		}
 		$empSql = "SELECT * from `employees`";
-		$empSql = mysqli::query($empSql);
+		$empSql = $this->mysqli->query($empSql);
 		while ($getData = $empSql->fetch_assoc()) {
 			$val = $getData["employees_id"];
 
@@ -1862,7 +1844,7 @@ class Employee_data extends mysqli
 	public function get_department_name($department_id)
 	{
 		$sql  = "SELECT * FROM `department` where `department_id`='$department_id'";
-		$res = parent::query($sql);
+		$res = $this->mysqli->query($sql);
 		$row = $res->fetch_assoc();
 		return isset($row["department"]) ? $row["department"] : "_______________________________";
 	}
@@ -2207,22 +2189,16 @@ class table
 		return $this->dat;
 	}
 }
-class employees extends mysqli
+class employees extends Db
 {
 	function __construct()
 	{
-		$host = "localhost";
-		$usernameDb = "admin";
-		// $password = "teamhrmo2019";
-		$password = "teamhrmo2019";
-		$database = "ihris";
-		parent::__construct($host, $usernameDb, $password, $database);
-		parent::set_charset("utf8");
+		parent::__construct();
 	}
 	public function get_all()
 	{
 		$sql  = "SELECT * from employees";
-		$sql = parent::query($sql);
+		$sql = $this->mysqli->query($sql);
 		$view = "<option value=''>Search Employee name</option>";
 		while ($data = $sql->fetch_assoc()) {
 			$view .= "<option value='$data[employees_id]'>$data[firstName] $data[middleName] $data[lastName] $data[extName]</option>";
@@ -2232,7 +2208,7 @@ class employees extends mysqli
 	public function get_department($dep)
 	{
 		$sql  = "SELECT * from employees where	department_id='$dep'";
-		$sql = parent::query($sql);
+		$sql = $this->mysqli->query($sql);
 		$view = "<option value=''>Search Employee name</option>";
 		while ($data = $sql->fetch_assoc()) {
 			$view .= "<option value='$data[employees_id]'>$data[firstName] $data[middleName] $data[lastName] $data[extName]</option>";
