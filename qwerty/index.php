@@ -51,13 +51,8 @@ if (isset($_SESSION['admin'])) {
       require_once("assets/pages/Users/content.php");
     } elseif (isset($_GET['Logout'])) {
       session_destroy();
-?>
-      <script>
-        window.location.reload()
-      </script>
-<?php
       // header("Refresh:0");
-      // header("location:?");
+      header("location:?");
     } elseif (isset($_GET['Records'])) {
       $records = $_GET['Records'];
       if ($records != "") {
