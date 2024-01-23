@@ -23,7 +23,7 @@ class RatingScaleMatrixDestroyer
 		$this->department_id = $department_id;
 	}
 
-	public function get_rating_scale_matrix()
+	public function delete_rating_scale_matrix()
 	{
 		$data = [];
 		$data = $this->get_mfos();
