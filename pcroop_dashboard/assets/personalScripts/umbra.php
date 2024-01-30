@@ -1,20 +1,23 @@
 <?php
-$mysqli = new mysqli("localhost","root","","hris");
-class obj extends mysqli
+// $mysqli = new mysqli("localhost","root","","hris");
+require_once "Db.php";
+
+$db = new Db();
+$mysqli = $db->getMysqli();
+
+class obj extends Db
 {
   private $emp;
   function __construct()
   {
-    $host = "localhost";
-    $user = "root";
-    $pass = "";
-    $database = "hris";
-    return parent::__construct($host,$user,$pass,$database);
+    parent::__construct();
   }
-  public function selectOption($sql){
+
+  public function selectOption($sql)
+  {
     $option = "<option value='' disabled selected>--select--</option>";
-    $SQL = parent::query($sql);
-    if(!$SQL){
+    $SQL = $this->mysqli->query($sql);
+    if (!$SQL) {
       die("error:$sql");
     }
     while ($op = $SQL->fetch_assoc()) {
@@ -24,17 +27,18 @@ class obj extends mysqli
   }
 }
 // function for code shortcuts
-function pages($val){
-    return "pages/" . $val . ".php";
+function pages($val)
+{
+  return "pages/" . $val . ".php";
 }
-function unser($data){
-    $data = unserialize($data);
-    $view = "";
-    for ($i=0; $i < count($data) ; $i++) {
-        if($data[$i]){
-            $view .= $i . " = $data[$i]<br>";
-        }
+function unser($data)
+{
+  $data = unserialize($data);
+  $view = "";
+  for ($i = 0; $i < count($data); $i++) {
+    if ($data[$i]) {
+      $view .= $i . " = $data[$i]<br>";
     }
-    return $view;
+  }
+  return $view;
 }
-?>

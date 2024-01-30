@@ -18,7 +18,12 @@
     --> 
     */
 
-class RsmClass extends mysqli
+require_once "Db.php";
+
+$db = new Db();
+$mysqli = $db->getMysqli();
+
+class RsmClass extends Db
 {
     // the id of the department
     private $department;
@@ -33,11 +38,16 @@ class RsmClass extends mysqli
     public $rating_scale_matrix_rows;
 
     // setting up database credentials 
-    function __construct($host, $user, $password, $database)
-    {
-        parent::__construct($host, $user, $password, $database);
-        parent::set_charset("utf8");
-    }
+    // function __construct($host, $user, $password, $database)
+    // {
+    //     parent::__construct($host, $user, $password, $database);
+    //     parent::set_charset("utf8");
+    // }
+
+    function __construct()
+	{
+		parent::__construct();
+	}
 
     // public functions 
 
@@ -86,7 +96,7 @@ class RsmClass extends mysqli
         $period  = $this->period;
         $data = [];
         $query = "SELECT * from `spms_corefunctions` where `parent_id`='' and `dep_id`='$department' and `mfo_periodId`='$period' order by `cf_count` ASC";
-        $result = parent::query($query);
+        $result = $this->mysqli->query($query);
 
         while ($row = $result->fetch_assoc()) {
             $item = [
@@ -133,7 +143,7 @@ class RsmClass extends mysqli
         $department = $this->department;
         $period  = $this->period;
         $query = "SELECT * from `spms_corefunctions` where `parent_id`='' and `dep_id`='$department' and `mfo_periodId`='$period' order by `cf_count` ASC";
-        $query = parent::query($query);
+        $query = $this->mysqli->query($query);
         $view = "";
         while ($row = $query->fetch_assoc()) {
             $btnDis = false;
@@ -158,7 +168,7 @@ class RsmClass extends mysqli
         # and `mfo_periodId`='$period'
         #
         $sql = "SELECT * from `spms_corefunctions` where `parent_id`='$parent_id' and `dep_id`='$department' order by `cf_count` ASC";
-        $result = parent::query($sql);
+        $result = $this->mysqli->query($sql);
         while ($row = $result->fetch_assoc()) {
             $item = [
                 "id" => $row["cf_ID"],
@@ -214,7 +224,7 @@ class RsmClass extends mysqli
     private function get_success_indicators($cf_ID)
     {
         $query = "SELECT * FROM `spms_matrixindicators` WHERE `cf_ID` = '$cf_ID' ORDER BY `mi_id` ASC";
-        $result = parent::query($query);
+        $result = $this->mysqli->query($query);
         $data = [];
         while ($row = $result->fetch_assoc()) {
             $item = [
@@ -240,7 +250,7 @@ class RsmClass extends mysqli
         $data = [];
         foreach ($incharges as $employee_id) {
             $query = "SELECT `employees_id`, `lastName`, `firstName`, `middleName`, `extName` FROM `employees` WHERE `employees_id` = '$employee_id';";
-            $result = parent::query($query);
+            $result = $this->mysqli->query($query);
             $row = $result->fetch_assoc();
             if ($row) {
                 # code...
@@ -249,7 +259,6 @@ class RsmClass extends mysqli
                     "name" => $row["lastName"] . ", " . $row["firstName"] //. $row["middleName"] ? " " . $row["middleName"][0] : "" . $row["extName"] ? " " . $row["extName"] : ""
                 ];
             }
-            
         }
         return $data;
     }
@@ -288,7 +297,7 @@ class RsmClass extends mysqli
     {
         $padding += 20;
         $query = "SELECT * from `spms_corefunctions` where `parent_id`='$id' order by `cf_count` ASC";
-        $query = parent::query($query);
+        $query = $this->mysqli->query($query);
         $view = "";
         while ($row = $query->fetch_assoc()) {
             if ($row["cf_ID"] == $this->mfoID || $btnDis) {
@@ -302,7 +311,7 @@ class RsmClass extends mysqli
     private function indicators($dat, $padding, $btnDis)
     {
         $query  = "SELECT * from `spms_matrixindicators` where `cf_ID`='$dat[cf_ID]'";
-        $query = parent::query($query);
+        $query = $this->mysqli->query($query);
         $view = "";
         $comStyle = "";
         if ($this->addComment) {
@@ -441,7 +450,7 @@ class RsmClass extends mysqli
                 continue;
             }
             $sql = "SELECT * from employees where `employees_id` ='$empDataId'";
-            $res = parent::query($sql);
+            $res = $this->mysqli->query($sql);
             $sqlIncharge = $res->fetch_assoc();
             $view .= "<a class='btn btn-primary button' style='cursor:pointer' data-target='showIRM' data-id='$sqlIncharge[employees_id]||" . $this->period . "||" . $this->department . "'>" . $sqlIncharge['lastName'] . " " . $sqlIncharge['firstName'] . " " . $sqlIncharge['middleName'] . "</a><br>";
         }

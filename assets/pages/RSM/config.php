@@ -353,7 +353,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
     echo 1;
   }
 } elseif (isset($_POST['getRsmparentChange'])) {
-  $rsmMFO = new RsmClass($host, $usernameDb, $password, $database);
+  $rsmMFO = new RsmClass();
   $rsmMFO->set_period($_SESSION["period"]);
   $rsmMFO->set_department($_POST['dept']);
   $rsmMFO->set_mfoID($_POST['getRsmparentChange']);

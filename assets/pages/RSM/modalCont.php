@@ -142,7 +142,7 @@ if (isset($_POST['ModalSiAddCont'])) {
   $employee->set_period($period);
   // $status = $employee->fileStatus;
   // $employee->hideNextBtn();
-  $irm = new IRM($host, $usernameDb, $password, $database);
+  $irm = new IRM();
   $irm->set_cardi($emp, $period, $employee->get_emp('department_id'));
   echo "<table class='ui celled table'>
       <thead>

@@ -1,11 +1,13 @@
 <?php
 // require "./assets/libs/rsm_class.php";
-$rsmView = new RsmClass($host, $usernameDb, $password, $database);
+
+$rsmView = new RsmClass();
+
 
 // echo json_encode($DATA);
 if (isset($_POST['getIRM'])) {
     $getIRM = explode('||', $_POST['getIRM']);
-    $irm = new IRM($host, $usernameDb, $password, $database);
+    $irm = new IRM();
     $irm->set_cardi($getIRM[0], $getIRM[1], $getIRM[2]);
     echo "<table class='ui celled table'>
             <thead>
