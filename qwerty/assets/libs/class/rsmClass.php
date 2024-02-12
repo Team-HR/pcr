@@ -126,8 +126,10 @@ class RsmClass extends Db
         foreach ($dat as $empDataId) {
             $sqlIncharge = "SELECT * from employees where employees_id='$empDataId'";
             $sqlIncharge = $this->mysqli->query($sqlIncharge);
-            $sqlIncharge = $sqlIncharge->fetch_assoc();
-            $view .= $sqlIncharge['lastName'] . " " . $sqlIncharge['firstName'] . " " . $sqlIncharge['middleName'] . "<br>";
+
+            if ($sqlIncharge = $sqlIncharge->fetch_assoc()) {
+                $view .= $sqlIncharge['lastName'] . " " . $sqlIncharge['firstName'] . " " . $sqlIncharge['middleName'] . "<br>";
+            }
         }
         return $view;
     }
