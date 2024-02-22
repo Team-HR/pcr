@@ -15,7 +15,7 @@ $rsm = new RatingScaleMatrixDestroyer($mysqli);
 
 $rsm->set_period_id(12);
 $rsm->set_department_id(1);
-$data = $rsm->delete_rating_scale_matrix();
+// $data = $rsm->delete_rating_scale_matrix();
 
 $json = json_encode($data, JSON_PRETTY_PRINT);
 

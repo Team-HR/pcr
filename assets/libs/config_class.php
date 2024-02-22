@@ -1886,6 +1886,19 @@ class Employee_data extends Db
 		";
 		return $view;
 	}
+
+
+	function getChildrenRows(&$view, $array, $padding = 0)
+	{
+		$padding = $padding + 20;
+		foreach ($array as $key => $ar) {
+			$view .= $this->matrixTable($padding, $array[$key]);
+			if ($ar[2]) {
+				$this->getChildrenRows($view, $ar[2], $padding);
+			}
+		}
+	}
+
 	function RatingScaleRow()
 	{
 		$arr = $this->coreAr();
@@ -1894,41 +1907,31 @@ class Employee_data extends Db
 		$in0 = 0;
 		while ($in0 < $count0) {
 			$view .= $this->matrixTable(0, $arr[$in0]);
-			$a1 = $arr[$in0][2];
-			$in1 = 0;
-			while ($in1 < count($a1)) {
-				$view .= $this->matrixTable(20, $a1[$in1]);
-				$a2 = $a1[$in1][2];
-				$in2 = 0;
-				while ($in2 < count($a2)) {
-					$view .= $this->matrixTable(40, $a2[$in2]);
-					$a3 = $a2[$in2][2];
-					$in3 = 0;
-					while ($in3 < count($a3)) {
-						$view .= $this->matrixTable(60, $a3[$in3]);
-						$in3++;
-					}
-					$in2++;
-				}
-				$in1++;
-			}
+			$this->getChildrenRows($view, $arr[$in0][2]);
 			$in0++;
 		}
 		return $view;
 	}
-	function RatingMat($a)
+
+	function matrixTable($padding, $ar)
 	{
-		$view = '';
-		$a = unserialize($a);
-		$count = 5;
-		while ($count >= 1) {
-			if ($a[$count] != "") {
-				$view .= $count . " - " . $a[$count] . "<br>";
+		$inSi = 0;
+		$view = "";
+		if (count($ar[1]) > 0) {
+			while ($inSi < count($ar[1])) {
+				if ($inSi == 0) {
+					$view .= $this->matrixtr($padding, $ar[0], $ar[1][$inSi]);
+				} else {
+					$view .= $this->matrixtr($padding, ['cf_count' => '', 'cf_title' => ''], $ar[1][$inSi]);
+				}
+				$inSi++;
 			}
-			$count--;
+		} else {
+			$view .= $this->matrixtr($padding, $ar[0], "");
 		}
 		return $view;
 	}
+
 	function matrixtr($padding, $ar, $si)
 	{
 		if ($si != "") {
@@ -1950,21 +1953,17 @@ class Employee_data extends Db
 		}
 		return $view;
 	}
-	function matrixTable($padding, $ar)
+
+	function RatingMat($a)
 	{
-		$inSi = 0;
-		$view = "";
-		if (count($ar[1]) > 0) {
-			while ($inSi < count($ar[1])) {
-				if ($inSi == 0) {
-					$view .= $this->matrixtr($padding, $ar[0], $ar[1][$inSi]);
-				} else {
-					$view .= $this->matrixtr($padding, ['cf_count' => '', 'cf_title' => ''], $ar[1][$inSi]);
-				}
-				$inSi++;
+		$view = '';
+		$a = unserialize($a);
+		$count = 5;
+		while ($count >= 1) {
+			if ($a[$count] != "") {
+				$view .= $count . " - " . $a[$count] . "<br>";
 			}
-		} else {
-			$view .= $this->matrixtr($padding, $ar[0], "");
+			$count--;
 		}
 		return $view;
 	}

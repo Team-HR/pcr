@@ -68,6 +68,11 @@ if (isset($_POST['page'])) {
 
   echo json_encode($res);
 } elseif (isset($_POST["view"])) {
-  $user->set_period($_SESSION['iMatrix_period']);
+  $period_id = $_SESSION['iMatrix_period'];
+  $user->set_period($period_id);
   echo $user->RatingScaleTable();
+  // $irm = new IRM();
+
+  // $irm->set_cardi(432364, $period_id, 17);
+  // echo $irm->get_view();
 }
