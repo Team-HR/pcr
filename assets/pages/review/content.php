@@ -38,7 +38,11 @@ if (isset($_POST['page'])) {
     $UpdateColumn = "`panelApproved` = '$date'";
   } elseif ($fetchDataSql['ImmediateSup'] == $accountId and $fetchDataSql['DepartmentHead'] == $accountId) {
     $UpdateColumn = "`approved` = '$date', `certify` = '$date'";
-  } elseif ($fetchDataSql['DepartmentHead'] == $accountId) {
+  }
+  elseif ($fetchDataSql['ImmediateSup'] == "" and $fetchDataSql['DepartmentHead'] == $accountId) {
+    $UpdateColumn = "`approved` = '$date', `certify` = '$date'";
+  }
+  elseif ($fetchDataSql['DepartmentHead'] == $accountId) {
     $UpdateColumn = "`certify` = '$date'";
     if ($fetchDataSql['employees_id'] == $fetchDataSql['ImmediateSup']) {
       $UpdateColumn = "`approved` = '$date', `certify` = '$date'";

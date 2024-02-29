@@ -341,6 +341,7 @@ class Employee_data extends Db
 
 
 		$accountId = $_SESSION['emp_id'];
+
 		if ($perStatus['approved'] and $perStatus['certify'] and $perStatus['panelApproved']) {
 			$this->hideCol = true;
 		} else {
@@ -362,7 +363,7 @@ class Employee_data extends Db
 						$this->hideCol = false;
 					}
 				} elseif ($accountId == $perStatus['ImmediateSup']) {
-					if ($perStatus['approved'] != "" || $perStatus['certify'] != "") {
+					if ($perStatus['approved'] != "") {
 						$this->hideCol = true;
 					} else {
 						$this->hideCol = false;
@@ -379,15 +380,17 @@ class Employee_data extends Db
 					}
 				}
 			} elseif ($perStatus['formType'] == 2 || $perStatus['formType'] == 4) {
-				if ($accountId == $perStatus['DepartmentHead'] || $accountId == $perStatus['ImmediateSup']) {
-					if ($perStatus['approved'] != "" || $perStatus['certify'] != "") {
+				if ($accountId == $perStatus['ImmediateSup']) {
+					if ($perStatus['approved'] != "") {
 						$this->hideCol = true;
-					} elseif ($accountId == $perStatus['PMT']) {
-						if ($perStatus['panelApproved'] != "") {
-							$this->hideCol = true;
-						} else {
-							$this->hideCol = false;
-						}	//pmt
+					}
+				} elseif ($accountId == $perStatus['DepartmentHead']) {
+					if ($perStatus['certify'] != "") {
+						$this->hideCol = true;
+					}
+				} elseif ($accountId == $perStatus['PMT']) {
+					if ($perStatus['panelApproved'] != "") {
+						$this->hideCol = true;
 					} else {
 						$this->hideCol = false;
 					}
@@ -396,9 +399,13 @@ class Employee_data extends Db
 						$this->hideCol = true;
 					}
 				} else {
+					$this->hideCol = false;
 				}
 			}
 		}
+
+		// $this->hideCol = false;
+
 
 		if (isset($perStatus['formType'])) {
 			if ($perStatus['formType'] == 2) {
