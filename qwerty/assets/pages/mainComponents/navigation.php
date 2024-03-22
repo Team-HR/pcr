@@ -18,7 +18,7 @@
         <a class="nav-link" href="?Records">Performance Records</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="?pcrForms">Enable PCRs</a>
+        <a class="nav-link" href="?pcrForms">PCR Forms Mgt</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="?RSMStatus">RSM Status</a>

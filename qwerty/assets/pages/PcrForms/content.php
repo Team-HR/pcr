@@ -9,7 +9,7 @@
 
 
     <div class="p-3 d-flex justify-content-center">
-        <h3>LOCK/UNLOCK PCR FORMS</h3>
+        <h3>PCR FORMS MANAGEMENT</h3>
     </div>
     <form @submit.prevent="getForms()">
         <div class="row">
@@ -129,15 +129,11 @@
     createApp({
         data() {
             return {
-                selPeriod: "July - December",
-                selYear: "2023",
+                selPeriod: "",
+                selYear: "",
                 periods: [],
                 departments: [],
-                selDepartment: {
-                    department_id: '32',
-                    department: 'HUMAN RESOURCE MANAGEMENT AND DEVELOPMENT OFFICE',
-                    alias: 'OHRMD'
-                },
+                selDepartment: "",
                 items: [],
                 fileToConvert: {},
                 selFormType: ""
@@ -241,7 +237,7 @@
 
         mounted() {
             this.getDepartments()
-            this.getForms()
+            // this.getForms()
         }
 
     }).mount('#pcrFormsApplet')
