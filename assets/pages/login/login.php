@@ -1,6 +1,6 @@
-
-<!DOCTYPE >
+<!DOCTYPE>
 <html>
+
 <head>
 	<title>Login</title>
 	<meta name="viewport" content="width=device-width, height=device-height , initial-scale=1">
@@ -10,16 +10,26 @@
 	<script src="assets/libs/node_modules/chart.js/dist/Chart.js"></script>
 	<script src="assets/libs/node_modules/chart.js/dist/Chart.min.js"></script>
 	<script src="assets/libs/umbra.js"></script>
+
+	<!-- <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/site.webmanifest">
+	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="theme-color" content="#ffffff"> -->
+
 	<style media="screen">
-	body{
-		background:url('assets/img/mainPage.jpg');
-		background-size:cover;
-		background-attachment: fixed;
-		background-repeat: no-repeat;
-		/* color:red; */
-	}
+		body {
+			background: url('assets/img/mainPage.jpg');
+			background-size: cover;
+			background-attachment: fixed;
+			background-repeat: no-repeat;
+			/* color:red; */
+		}
 	</style>
 </head>
+
 <body>
 	<div class="ui three column grid">
 		<div class="centered column" style="margin-top:10%;">
@@ -50,4 +60,5 @@
 		</div>
 	</div>
 </body>
+
 </html>

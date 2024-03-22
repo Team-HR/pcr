@@ -1,3 +1,10 @@
+<style>
+    tr,
+    td {
+        text-align: center;
+    }
+</style>
+
 <div id="pcrFormsApplet" class="ui container" style="margin-top: 15px;">
 
 
@@ -18,7 +25,7 @@
                 <label class="form-label">Select Year:</label> <br>
                 <select v-model="selYear" style="margin-left: 5px; margin-right: 5px;" class="form-control">
                     <option value="" disabled>Select Year</option>
-                    <option value="2023">2023</option>
+                    <option value="2023" seelc>2023</option>
                     <option value="2022">2022</option>
                     <option value="2021">2021</option>
                 </select>
@@ -37,15 +44,14 @@
 
         <div class="p-3 d-flex justify-content-center"> <button style="margin-top: 5px;" type="submit" :disabled="!selPeriod || !selYear" class="btn btn-primary">Get Personnel</button></div>
 
-
     </form>
-
 
     <table class="table table-hover">
         <thead>
             <tr>
                 <td>ID</td>
                 <td>USERNAME</td>
+                <td>TYPE</td>
                 <td>STATUS</td>
                 <td>LOCK/UNLOCK</td>
                 <td>NAME</td>
@@ -60,6 +66,11 @@
                 <tr>
                     <td>{{item.employees_id}}</td>
                     <td>{{item.username}}</td>
+                    <td>
+                        <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#convertFormDialog" @click="convertForm(item)">
+                            {{getFormType(item.formType)}}
+                        </button>
+                    </td>
                     <td>
                         <div v-if="item.submitted">LOCKED</div>
                         <div v-else>UNLOCKED</div>
@@ -78,6 +89,35 @@
         </tbody>
     </table>
 
+
+    <div class="modal" tabindex="-1" id="convertFormDialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Convert Form Type</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- <p>Modal body text goes here.</p> -->
+                    <p>Name: {{fileToConvert.name}}</p>
+                    <p>Form Type: {{getFormType(fileToConvert.formType)}}</p>
+                    <label>Convert to:</label>
+                    <select class="form-select" aria-label="formtype-sel" v-model="selFormType">
+                        <option selected value="" disabled>Convert file to...</option>
+                        <option value="1">IPCR</option>
+                        <option value="2">SPCR</option>
+                        <option value="3">DPCR</option>
+                        <option value="4">Division SPCR</option>
+                        <option value="5">NGA (IPCR)</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="confirmConvert()">Convert</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -89,21 +129,57 @@
     createApp({
         data() {
             return {
-                selPeriod: "",
-                selYear: "",
+                selPeriod: "July - December",
+                selYear: "2023",
                 periods: [],
                 departments: [],
-                selDepartment: "",
-                items: []
+                selDepartment: {
+                    department_id: '32',
+                    department: 'HUMAN RESOURCE MANAGEMENT AND DEVELOPMENT OFFICE',
+                    alias: 'OHRMD'
+                },
+                items: [],
+                fileToConvert: {},
+                selFormType: ""
             }
         },
-        watch: {
-
-        },
-        computed: {
-
-        },
         methods: {
+            convertForm(item) {
+                // console.log("Convert: ", item);
+                this.fileToConvert = item;
+                const convertFormDialog = document.getElementById("convertFormDialog");
+                // // convertFormDialog('show');
+            },
+            confirmConvert() {
+                console.log("Confirm Convert: ", [
+                    this.fileToConvert,
+                    this.selFormType
+                ]);
+
+                $.post("?config=pcrForms", {
+                    convertForm: true,
+                    fileToConvert: this.fileToConvert,
+                    selFormType: this.selFormType,
+                }).then(res => {
+                    // console.log('convertForm: ', res);
+                    this.getForms()
+                });
+
+            },
+            getFormType(formType) {
+                if (formType == '1') {
+                    return "IPCR"
+                } else if (formType == '2') {
+                    return "SPCR"
+                } else if (formType == '3') {
+                    return "DPCR"
+                } else if (formType == '4') {
+                    return "DIVISION SPCR"
+                } else if (formType == '5') {
+                    return "NGA"
+                }
+            },
+
             getPeriods() {
                 $.post("?config=pcrForms", {
                     getPeriods: true
@@ -121,6 +197,7 @@
             },
 
             getForms() {
+                // console.log(this.selDepartment);
                 $.post("?config=pcrForms", {
                     getForms: true,
                     selPeriod: this.selPeriod,
@@ -147,7 +224,6 @@
                 });
             },
 
-
             unlockForm(item) {
                 const performanceReviewStatus_id = item.performanceReviewStatus_id
                 // console.log('unlockForm:', performanceReviewStatus_id);
@@ -165,6 +241,7 @@
 
         mounted() {
             this.getDepartments()
+            this.getForms()
         }
 
     }).mount('#pcrFormsApplet')
