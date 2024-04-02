@@ -632,8 +632,11 @@ function trows($mysqli, $row, $padding, $addDisplay)
         }
         $sqlIncharge = "SELECT * from employees where employees_id='$empDataId'";
         $sqlIncharge = $mysqli->query($sqlIncharge);
-        $sqlIncharge = $sqlIncharge->fetch_assoc();
-        $empincharge .= "<br><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br>";
+
+        if ($sqlIncharge = $sqlIncharge->fetch_assoc()) {
+          $empincharge .= "<br><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br>";
+        }
+
         // if (isset($siDataRow1['mi_id'])) {
         //   $mi_id = $siDataRow1['mi_id'];
         //   $sql = "SELECT * FROM `spms_corefucndata`where `p_id` = '$mi_id' AND `empId` = '$empDataId';";
