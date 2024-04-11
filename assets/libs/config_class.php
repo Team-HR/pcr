@@ -342,9 +342,12 @@ class Employee_data extends Db
 
 		$accountId = $_SESSION['emp_id'];
 
-		if ($perStatus['approved'] and $perStatus['certify'] and $perStatus['panelApproved']) {
+		# if session user is the pcr perfomer and approved, certify, and panelApproved is dated hide submit button
+		if ($accountId == $perStatus['employees_id'] and $perStatus['approved'] and $perStatus['certify'] and $perStatus['panelApproved']) {
 			$this->hideCol = true;
-		} else {
+		} 
+		# else session user is not the pcr perfomer and approved, certify, and panelApproved is dated hide submit button
+		else {
 			// if employee 
 			if ($accountId == $perStatus['employees_id']) {
 				if (strtoupper($perStatus['submitted']) == "DONE") {
@@ -358,19 +361,19 @@ class Employee_data extends Db
 			elseif ($perStatus['formType'] == 1) {
 				if ($accountId == $perStatus['PMT']) {
 					if ($perStatus['panelApproved'] != "") {
-						$this->hideCol = true;
+						$this->hideCol = false; //default true, always show edit button
 					} else {
 						$this->hideCol = false;
 					}
 				} elseif ($accountId == $perStatus['ImmediateSup']) {
-					if ($perStatus['approved'] != "") {
-						$this->hideCol = true;
+					if ($perStatus['approved'] != "" || $perStatus['certify'] != "") {
+						$this->hideCol = false; //default true, always show edit button
 					} else {
 						$this->hideCol = false;
 					}
 				} elseif ($accountId == $perStatus['DepartmentHead']) {
 					if ($perStatus['certify'] != "") {
-						$this->hideCol = true;
+						$this->hideCol = false; //default true, always show edit button
 					} else {
 						$this->hideCol = false;
 					}
@@ -380,23 +383,21 @@ class Employee_data extends Db
 					}
 				}
 			} elseif ($perStatus['formType'] == 2 || $perStatus['formType'] == 4) {
-				if ($accountId == $perStatus['ImmediateSup']) {
-					if ($perStatus['approved'] != "") {
+				if ($accountId == $perStatus['DepartmentHead'] || $accountId == $perStatus['ImmediateSup']) {
+					if ($perStatus['approved'] != "" || $perStatus['certify'] != "") {
 						$this->hideCol = true;
-					}
-				} elseif ($accountId == $perStatus['DepartmentHead']) {
-					if ($perStatus['certify'] != "") {
-						$this->hideCol = true;
-					}
-				} elseif ($accountId == $perStatus['PMT']) {
-					if ($perStatus['panelApproved'] != "") {
-						$this->hideCol = true;
+					} elseif ($accountId == $perStatus['PMT']) {
+						if ($perStatus['panelApproved'] != "") {
+							$this->hideCol = true;
+						} else {
+							$this->hideCol = false;
+						}	//pmt
 					} else {
-						$this->hideCol = false;
+						$this->hideCol = false; //default true, always show edit button
 					}
 				} elseif ($accountId == $perStatus['employees_id']) {
 					if ($perStatus['approved'] != "" || $perStatus['certify'] != "") {
-						$this->hideCol = true;
+						$this->hideCol = false; //default true, always show edit button
 					}
 				} else {
 					$this->hideCol = false;
@@ -1151,6 +1152,8 @@ class Employee_data extends Db
 	}
 	public function get_comment($i)
 	{
+		if (!$this->commentData) return "";
+
 		$dat = $this->commentData;
 		return $dat[$i];
 	}
@@ -1282,7 +1285,7 @@ class Employee_data extends Db
 		<form class='ui form' style='width:50%;padding:20px;margin:auto;' onsubmit='return signatoriesFunc()'>
 		<div class='field'>
 		<label>Form Type</label>
-		<select id='formType' required onchange='reviewFormType()' $fieldDisabled>
+		<select id='formType' required onchange='reviewFormType()'> <!--$fieldDisabled--!>
 		<option value='1' $option[1]>IPCR</option>
 		<option value='2' $option[2]>SPCR</option>
 		<option value='3' $option[3]>DPCR</option>
@@ -1341,7 +1344,7 @@ class Employee_data extends Db
 		<form class='ui form' style='width:50%;padding:20px;margin:auto;' onsubmit='return signatoriesFunc()'>
 		<div class='field'>
 		<label>Form Type</label>
-		<select id='formType' required onchange='reviewFormType()' $fieldDisabled>
+		<select id='formType' required onchange='reviewFormType()'> <!--$fieldDisabled--!>
 		<option value='5' selected>IPCR</option>
 		</select>
 		</div>
@@ -1802,7 +1805,9 @@ class Employee_data extends Db
 		if (!$this->hideCol) {
 			$accountId = $_SESSION['emp_id'];
 			$fileStatus = $this->fileStatus;
-			if ($accountId == $fileStatus['ImmediateSup'] and $accountId != $fileStatus['DepartmentHead'] and $accountId != $fileStatus['employees_id']) {
+			# if session account is the Sup and not the DH and not the PCR performer
+			if ($accountId == $fileStatus['ImmediateSup'] and $accountId != $fileStatus['DepartmentHead'] and $accountId != 	$fileStatus['employees_id']) {
+
 				if ($fileStatus['ImmediateSup'] == $fileStatus['DepartmentHead']) {
 					$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Approve</button>";
 					// }elseif($fileStatus['formType']==1){

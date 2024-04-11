@@ -561,6 +561,6 @@ function uncriticizedTable($employee)
   $table_r->formType($employee->get_status('formType'));
   $table_r->set_head($employee->tableHeader());
   $table_r->set_body($body);
-  $table_r->set_foot($employee->tableFooter() . "<br class='noprint'>" . $employee->get_approveBTN());
+  $table_r->set_foot($employee->tableFooter() . "<br class='noprint'>" ."".$employee->get_approveBTN());
   return $table_r->_get();
 }

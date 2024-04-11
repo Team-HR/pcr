@@ -485,8 +485,10 @@ elseif (isset($_POST['submitPerformance'])) {
 		$query = "UPDATE `spms_commentrec` SET `comment`='$com' WHERE `spms_commentrec`.`comRec_id` = '$sql[comRec_id]'";
 	} else {
 		$query = "INSERT INTO `spms_commentrec` (`comRec_id`, `period_id`, `emp_id`, `comment`)
-		VALUES (NULL, '$_POST[commentReccomendationOfSuppPeriod]', '$_POST[commentReccomendationOfSuppEmpId]', '$comp')";
+		VALUES (NULL, '$_POST[commentReccomendationOfSuppPeriod]', '$_POST[commentReccomendationOfSuppEmpId]', '$com')";
 	}
+
+	// echo $query;
 	$query = $mysqli->query($query);
 	if (!$query) {
 		echo "something went wrong";
