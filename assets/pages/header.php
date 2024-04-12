@@ -11,7 +11,10 @@
 	<!-- Chart.js v4.4.0 -->
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<!-- Addition of Vue3js -->
-	<script src="https://unpkg.com/vue@3"></script>
+	<!-- <script src="https://unpkg.com/vue@3"></script> -->
+	<!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->
+	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
 	<!-- <script src="https://unpkg.com/vue@3"></script> -->
 	<script src="assets/libs/umbra.js"></script>
 	<style media="screen">
