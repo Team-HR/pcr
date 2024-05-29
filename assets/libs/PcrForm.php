@@ -580,6 +580,8 @@ class PcrForm
 		}
 		if ($totalAv > 0) {
 			$totalAv = $totalAv * 0.20;
+			#fix: strat rating now matches from iPcr
+			$totalAv = number_format($totalAv, 2);
 			# format only two decimal places
 			// $totalAv = number_format($totalAv, 2);
 			// $totalAv = bcdiv($totalAv, 1, 2);
@@ -592,7 +594,7 @@ class PcrForm
 		// $totalAv = $totalAv;
 
 		$final_average_rating =  bcdiv($totalAv, 1, 2);
-
+		// bcdiv($this->strategic_totalAv, 1, 2);
 		return [
 			"row" => $row,
 			"mfo" => $major_function,
