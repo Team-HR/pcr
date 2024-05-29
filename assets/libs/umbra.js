@@ -912,6 +912,7 @@ function commentReccomendationOfSupp(period, emp_id, fileStatusId) {
         commentReccomendationOfSuppEmpId: emp_id,
       },
       function (data, textStatus, xhr) {
+        // console.log("commentReccomendationOfSupp: ", data);
         approval(fileStatusId, emp_id);
       }
     );
