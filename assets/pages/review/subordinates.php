@@ -10,6 +10,9 @@
     </h2>
     <br class='noprint'>
     <br class='noprint'>
+    <div style="width: 100%; background-color: _green; text-align: right">
+      <a href="?RPC&subordinates&topPerformers" class="ui button" style="position: relative; top: 0; right: 50px "><i class="ui sort amount down icon"></i>List Top Performers</a>
+    </div>
     <div id="ReviewcontentSubs"></div>
   </center>
 </div>

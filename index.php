@@ -62,10 +62,13 @@ if (isset($_SESSION['emp_id'])) {
 			require_once "assets/pages/HR/Tools/personnelHeirarchy.php";
 			// }
 		} else if (isset($_GET['RPC'])) {
-			if (isset($_GET['subordinates']) && !isset($_GET['view'])) {
+			if (isset($_GET['subordinates']) && !isset($_GET['view']) && !isset($_GET['topPerformers'])) {
 				# 2. list of subs
 				require_once "assets/pages/review/subordinates.php";
-			} else if (isset($_GET['subordinates']) && isset($_GET['view'])) {
+			} else if (isset($_GET['subordinates']) && !isset($_GET['view'])  && isset($_GET['topPerformers'])) {
+				# 2.1 list top performers
+				require_once "assets/pages/review/topPerformers.php";
+			} else if (isset($_GET['subordinates']) && isset($_GET['view'])  && !isset($_GET['topPerformers'])) {
 				# 3. formview editor for sup/dh
 				require_once "assets/pages/review/view.php";
 			} else {
@@ -124,6 +127,8 @@ if (isset($_SESSION['emp_id'])) {
 			require_once "assets/pages/rsmPMTview/config.php";
 		} elseif ($filePath == "revContent") {
 			require_once "assets/pages/review/content.php";
+		} elseif ($filePath == "topPerformers") {
+			require_once "assets/pages/review/topPerformersConfig.php";
 		} elseif ($filePath == "iMatrixConfig") {
 			require_once "assets/pages/iMatrix/config.php";
 		} elseif ($filePath == "BrowseConfig") {

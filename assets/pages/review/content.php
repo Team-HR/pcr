@@ -4,6 +4,9 @@ if (isset($_POST['page'])) {
   $page = $_POST['page'];
   if ($page == "viewPending") {
     echo pendingTable($mysqli);
+  } elseif ($page == 'viewTopPerformers') {
+    // $employee = new   Employee_data();
+    echo json_encode("test");
   } elseif ($page == 'UncriticizedPrTable') {
     $employee = new   Employee_data();
     echo uncriticizedTable($employee);
@@ -38,11 +41,9 @@ if (isset($_POST['page'])) {
     $UpdateColumn = "`panelApproved` = '$date'";
   } elseif ($fetchDataSql['ImmediateSup'] == $accountId and $fetchDataSql['DepartmentHead'] == $accountId) {
     $UpdateColumn = "`approved` = '$date', `certify` = '$date'";
-  }
-  elseif ($fetchDataSql['ImmediateSup'] == "" and $fetchDataSql['DepartmentHead'] == $accountId) {
+  } elseif ($fetchDataSql['ImmediateSup'] == "" and $fetchDataSql['DepartmentHead'] == $accountId) {
     $UpdateColumn = "`approved` = '$date', `certify` = '$date'";
-  }
-  elseif ($fetchDataSql['DepartmentHead'] == $accountId) {
+  } elseif ($fetchDataSql['DepartmentHead'] == $accountId) {
     $UpdateColumn = "`certify` = '$date'";
     if ($fetchDataSql['employees_id'] == $fetchDataSql['ImmediateSup']) {
       $UpdateColumn = "`approved` = '$date', `certify` = '$date'";

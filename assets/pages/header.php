@@ -122,7 +122,7 @@
 		</div>
 	</div>
 </div>
-<div id="appLoader" class="ui vertical segment">
+<div id="appLoader" class="ui vertical segment" >
 	<div class="ui active page dimmer" style="height:200%">
 		<div id="appLoaderMsg" class="ui medium text loader" style="top:100px;position:fixed">Loading</div>
 	</div>
@@ -140,7 +140,7 @@
 					</h3>
 					<div class="field">
 						<label>Password</label>
-						<input type="password" placeholder="" id='timePass'>
+						<input type="password" placeholder="" id='timePass' autocomplete>
 					</div>
 					<button class="ui primary fluid button" type="submit">Login</button>
 				</form>
