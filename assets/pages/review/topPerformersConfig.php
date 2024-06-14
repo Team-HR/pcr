@@ -23,15 +23,39 @@ if (isset($_POST["getList"])) {
 
   $finalNumericalRating = new FinalNumericalRating();
 
+  $departments = [];
+
   foreach ($data as $key => $personnel) {
     $full_name = getPersonnelName($mysqli, $personnel["employees_id"]);
     $data[$key]["full_name"] = $full_name;
     $final_numerical_rating_recomp = $finalNumericalRating->getFinalNumericalRating($mysqli, $personnel);
     $data[$key]["final_numerical_rating_recomp"] = number_format($final_numerical_rating_recomp, 2);
     $data[$key]["final_numerical_rating_recomp_scale"] = getScale($final_numerical_rating_recomp);
+
+    $department_id = $personnel["department_id"];
+
+    if ($index = findObjectIndexByProperty($departments, "department_id", $department_id)) {
+      if ($index != -1) {
+        // $departments[$index]['personnel'][] = $data[$key];
+        array_push($departments[$index]["personnel"], $data[$key]);
+      } else {
+        $departments[] = [
+          "department_id" => $department_id,
+          "personnel" => [
+            $data[$key]
+          ]
+        ];
+      }
+    }
+
+    // $departments[] = $data[$key]["department_id"];
   }
 
-  usort($data, fn ($a, $b) => strcmp($b['final_numerical_rating_recomp'], $a['final_numerical_rating_recomp']));
+
+
+
+  // usort($data, fn ($a, $b) => strcmp($b['final_numerical_rating_recomp'], $a['final_numerical_rating_recomp']));
+
 
   // $data[] = [
   //   "full_name" => "SESSION",
@@ -39,7 +63,7 @@ if (isset($_POST["getList"])) {
   // ];
 
 
-  echo json_encode($data);
+  echo json_encode($departments);
 }
 
 
@@ -75,4 +99,15 @@ function getPersonnelName($mysqli, $empid)
   }
 
   return $full_name;
+}
+
+
+function findObjectIndexByProperty($array, $property, String $value)
+{
+  foreach ($array as $index => $object) {
+    if (isset($object[$property]) && $object[$property] == $value) {
+      return $index; // Return the index if a match is found
+    }
+  }
+  return -1; // Return -1 if no match is found
 }

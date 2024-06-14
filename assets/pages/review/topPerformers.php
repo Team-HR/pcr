@@ -19,7 +19,7 @@
       <tr>
         <th width="5">#</th>
         <th width="500">Name</th>
-        <!-- <th>Performance Rating</th> -->
+        <th>ITEM</th>
         <th class="center aligned">Performance Rating</th>
         <th class="center aligned">Performance Quality</th>
       </tr>
@@ -28,7 +28,7 @@
       <tr v-for="item, i in list" :key="item.id">
         <td>{{ i+1 }}</td>
         <td> {{ item.full_name }} </td>
-        <!-- <td> {{ item.final_numerical_rating }} </td> -->
+        <td> {{ item }} </td>
         <td class="center aligned"> {{ item.final_numerical_rating_recomp }} </td>
         <td class="center aligned">{{ item.final_numerical_rating_recomp_scale }}</td>
       </tr>
