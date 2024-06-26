@@ -25,7 +25,8 @@
                 <label class="form-label">Select Year:</label> <br>
                 <select v-model="selYear" style="margin-left: 5px; margin-right: 5px;" class="form-control">
                     <option value="" disabled>Select Year</option>
-                    <option value="2023" seelc>2023</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
                     <option value="2022">2022</option>
                     <option value="2021">2021</option>
                 </select>
