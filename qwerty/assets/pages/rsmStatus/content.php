@@ -68,10 +68,62 @@
         </tbody>
     </table>
 </div>
+
+
+<div id="warningModal" class="modal fade" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" style="margin-top: 100px;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Warning</h5>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the RSM of this department in this period?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-bs-target="#warningModal" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="warningModalConfirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="confirmModal" class="modal fade" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" style="margin-top: 100px;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm</h5>
+            </div>
+            <div class="modal-body">
+                <p>The RSM will be deleted permanently and cannot be undone. Please confirm.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-bs-target="#confirmModal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmModalConfirm" data-bs-dismiss="modal">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="deletingModal" class="modal fade" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" style="margin-top: 100px;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Deleting...</h5>
+            </div>
+            <div class="modal-body">
+                <p>Deleting RSM. Please wait...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 <!-- js / javascript -->
 <script defer>
     (function() {
         'use strict';
+
+
+
         document.addEventListener('click', function(event) {
             var trgt = event.target;
             if (trgt.name == "nodatSaveRsm") {
@@ -82,8 +134,84 @@
                 enableEdit(trgt, 1);
             } else if (trgt.name == "disableEdit") {
                 enableEdit(trgt, 0)
+            } else if (trgt.name == "deleteRsm") {
+                deleteRsm(trgt)
             }
         });
+
+
+
+        function deleteRsm(trgt) {
+
+
+            // var warningModal = new bootstrap.Modal($("#warningModal"))
+            // var confirmModal = new bootstrap.Modal($("#confirmModal"))
+            // var deletingModal = new bootstrap.Modal(document.getElementById("deletingModal"))
+
+
+
+            var dataTarget = trgt.getAttribute('data-target').split("||");
+            const period_id = dataTarget[0];
+            const department_id = dataTarget[1];
+
+
+            // warningModal.show()
+            // const warningConfirm = document.getElementById("warningModalConfirm");
+            // warningConfirm.addEventListener('click', (event) => {
+            //     warningModal.hide()
+            //     warningModal.destroy()
+            //     confirmModal.show()
+            // }, {
+            //     once: true
+            // })
+
+
+            // const confirmModalConfirm = document.getElementById("confirmModalConfirm");
+            // confirmModalConfirm.addEventListener('click', (event) => {
+            //     confirmModal.hide()
+            //     confirmModal.destroy()
+            //     deletingModal.show()
+            // }, {
+            //     once: true
+            // })
+
+
+
+            if (confirm("Are you sure you want to delete RSM for the selected department and period?")) {
+                console.log("proceed confirmation!");
+                if (confirm("Warning: The RSM will be deleted permanently and cannot be undone. Please confirm.")) {
+                    // deletingModal.show()
+                    // setTimeout(() => {
+                    //     deletingModal.hide()
+                    // }, 1000);
+                    $.post("?config=rsmStatus", {
+                            deleteRsm: true,
+                            period_id: period_id,
+                            department_id: department_id,
+                        }, (data, textStatus, jqXHR) => {
+                            console.log(data);
+                            if (data.length > 0) {
+                                alert("RSM deleted successfully!");
+                                // deletingModal.hide()
+                            } else {
+                                alert("No RSM found hence deleted none!");
+                                // deletingModal.hide()
+                            }
+                        },
+                        "json"
+                    );
+                } else {
+                    console.log("canceled!");
+                }
+            } else {
+                console.log("canceled!");
+            }
+
+
+
+
+
+        }
 
         function _(el) {
             return document.getElementById(el);
@@ -330,3 +458,13 @@ function get_yearOp()
     return $op;
 }
 ?>
+
+
+<style>
+    .rsm.delete.button {
+        border: solid grey 1px;
+        background-color: white;
+        border-radius: 3px;
+        font-size: 12px;
+    }
+</style>
