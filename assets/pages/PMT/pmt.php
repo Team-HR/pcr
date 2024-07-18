@@ -13,6 +13,7 @@
 				<div class="field">
 					<select name="year" id="selectYear" class="ui dropdown" v-model="year">
 						<option value="" selected disabled>Select Year</option>
+						<option value="2024"> 2024</option>
 						<option value="2023"> 2023</option>
 						<option value="2022">2022</option>
 						<option value="2021">2021</option>
