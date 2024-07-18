@@ -105,12 +105,21 @@ if (isset($_POST['get_prev_rsm'])) {
   echo json_encode(true);
 
   // echo json_encode($_SESSION["emp_info"]["department_id"]);
-} elseif (isset($_POST['copy_to'])) {
-  # code...
+} 
+
+/*
+elseif (isset($_POST['copy_to'])) {...
+used to copy rsm or part of rsm with all the children of mfos, 
+success indicators and incharges.
+set the parameters according to period_id, department_id and mfo parent_id
+*/ 
+elseif (isset($_POST['copy_to'])) {
+  //origin period and department
   $curr_period_id = 18;
   $curr_department_id = 15;
   $parent_id = "26499";
 
+  //target period and department
   $selected_period_id = 18;
   $selected_parent_id = "";
   $selected_department_id = 26;
