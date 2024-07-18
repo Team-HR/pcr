@@ -107,13 +107,13 @@ if (isset($_POST['get_prev_rsm'])) {
   // echo json_encode($_SESSION["emp_info"]["department_id"]);
 } elseif (isset($_POST['copy_to'])) {
   # code...
-  $curr_period_id = 10;
-  $curr_department_id = 16;
-  $parent_id = "";
+  $curr_period_id = 18;
+  $curr_department_id = 15;
+  $parent_id = "26499";
 
-  $selected_period_id = 11;
+  $selected_period_id = 18;
   $selected_parent_id = "";
-  $selected_department_id = 34;
+  $selected_department_id = 26;
 
   $data = [];
   $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$curr_period_id' AND `dep_id` = '$curr_department_id' AND `parent_id` = '$parent_id';";
@@ -128,6 +128,14 @@ if (isset($_POST['get_prev_rsm'])) {
     $data[] = $row;
   }
 
+  $sql = "SELECT * FROM `spms_corefunctions` WHERE `cf_ID` = '$parent_id';";
+  $res = $mysqli->query($sql);
+  if ($row = $res->fetch_assoc()) {
+    $row["children"] = $data;
+    $data = [];
+    $data [] = $row;
+  }
+
   $data = start_duplicating($mysqli, $data, $selected_period_id, $selected_parent_id, $selected_department_id);
 
   print json_encode($data);
@@ -137,7 +145,7 @@ if (isset($_POST['get_prev_rsm'])) {
 // for copying prev rsm of prev dept to new dept as requested by SP
 elseif (isset($_POST['copy_to_other_dept'])) {
 
-  $selected_period_id = 11;
+  $selected_period_id = 12;
 
   // get selected period data
   $sql = "SELECT * FROM `spms_mfo_period` WHERE `mfoperiod_id` = '$selected_period_id';";
@@ -165,7 +173,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   $row = $result->fetch_assoc();
   $period_id = $row["mfoperiod_id"];
 
-  $department_id = 16; //set previous department 
+  $department_id = 15; //set previous department 
 
   // get previous period core functions
   $data = [];
@@ -176,7 +184,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
     $data[] = $row;
   }
 
-  $new_department = 34;
+  $new_department = 26;
 
   $data = start_duplicating_to_diff_dept($mysqli, $data, $selected_period_id, "", $new_department);
 
@@ -1005,9 +1013,9 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
   // $department_id = 3;
   foreach ($data as $key => $core_function) {
     // $department_id = $core_function['dep_id'];
-    if (!$department_id) {
-      $department_id = $core_function['dep_id'];
-    }
+    // if (!$department_id) {
+    //   $department_id = $core_function['dep_id'];
+    // }
     $parent_id = $parent_id ? $parent_id : NULL;
     $cf_title = $mysqli->real_escape_string($core_function['cf_title']);
     $cf_count = $mysqli->real_escape_string($core_function['cf_count']);

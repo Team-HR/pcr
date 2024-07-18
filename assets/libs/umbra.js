@@ -1575,14 +1575,14 @@ function copyRSM() {
   // console.log("copy RSM");
 }
 
-function copy_to_other_dept() {
+function copy_to() {
   $.post(
     "?config=rsm",
     {
-      copy_to_other_dept: true,
+      copy_to: true,
     },
     function (data, textStatus, xhr) {
-      console.log("copy_to_other_dept success!");
+      console.log("copy_to success!");
     }
   );
 }
