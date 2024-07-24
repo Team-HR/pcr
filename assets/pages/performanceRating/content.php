@@ -392,9 +392,11 @@ elseif (isset($_POST['submitPerformance'])) {
 		SET `ImmediateSup` = '$immediateSup', `DepartmentHead` = '$departmentHead', `HeadAgency` = '$headAgency',`formType`='$formType'
 		WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$check[performanceReviewStatus_id]'";
 	} else {
+		#
 		$sql = "INSERT INTO `spms_performancereviewstatus`
 		(`performanceReviewStatus_id`, `period_id`, `employees_id`, `ImmediateSup`, `DepartmentHead`, `HeadAgency`, `PMT`, `submitted`,`panelApproved`, `approved`, `dateAccomplished`,`formType`,`department_id`)
 		VALUES (NULL, '$period', '$empId', '$immediateSup', '$departmentHead', '$headAgency', '0','','', '', '','$formType','$department')";
+		#
 	}
 	$sql = $mysqli->query($sql);
 	if (!$sql) {

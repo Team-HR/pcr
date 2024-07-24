@@ -1562,7 +1562,7 @@ function copyRSM() {
                 copy_prev_rsm: true,
               },
               function (data, textStatus, xhr) {
-                location.reload();
+                // location.reload();
               }
             );
             return false;

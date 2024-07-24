@@ -102,18 +102,17 @@ if (isset($_POST['get_prev_rsm'])) {
   // $data[$i]['core_function_data']['insert_id'] = '9';
   // }
 
-  echo json_encode(true);
+  echo json_encode([$data, $selected_period_id, ""]);
 
   // echo json_encode($_SESSION["emp_info"]["department_id"]);
-} 
+}
 
 /*
 elseif (isset($_POST['copy_to'])) {...
 used to copy rsm or part of rsm with all the children of mfos, 
 success indicators and incharges.
 set the parameters according to period_id, department_id and mfo parent_id
-*/ 
-elseif (isset($_POST['copy_to'])) {
+*/ elseif (isset($_POST['copy_to'])) {
   //origin period and department
   $curr_period_id = 18;
   $curr_department_id = 15;
@@ -142,10 +141,10 @@ elseif (isset($_POST['copy_to'])) {
   if ($row = $res->fetch_assoc()) {
     $row["children"] = $data;
     $data = [];
-    $data [] = $row;
+    $data[] = $row;
   }
 
-  $data = start_duplicating($mysqli, $data, $selected_period_id, $selected_parent_id, $selected_department_id);
+  $data = start_duplicating_copy_to($mysqli, $data, $selected_period_id, $selected_parent_id, $selected_department_id);
 
   print json_encode($data);
 }
@@ -1021,10 +1020,10 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
 {
   // $department_id = 3;
   foreach ($data as $key => $core_function) {
-    // $department_id = $core_function['dep_id'];
-    // if (!$department_id) {
-    //   $department_id = $core_function['dep_id'];
-    // }
+    $department_id = $core_function['dep_id'];
+    if (!$department_id) {
+      $department_id = $core_function['dep_id'];
+    }
     $parent_id = $parent_id ? $parent_id : NULL;
     $cf_title = $mysqli->real_escape_string($core_function['cf_title']);
     $cf_count = $mysqli->real_escape_string($core_function['cf_count']);
@@ -1052,6 +1051,40 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
   return $data;
 }
 
+function start_duplicating_copy_to($mysqli, $data, $selected_period_id, $parent_id, $department_id = null)
+{
+  // $department_id = 3;
+  foreach ($data as $key => $core_function) {
+    // $department_id = $core_function['dep_id'];
+    // if (!$department_id) {
+    //   $department_id = $core_function['dep_id'];
+    // }
+    $parent_id = $parent_id ? $parent_id : NULL;
+    $cf_title = $mysqli->real_escape_string($core_function['cf_title']);
+    $cf_count = $mysqli->real_escape_string($core_function['cf_count']);
+    $sql = "INSERT INTO `spms_corefunctions`(`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`, `corrections`) VALUES ('$selected_period_id','$parent_id','$department_id','$cf_count','$cf_title','')";
+    $mysqli->query($sql);
+    $insert_id = $mysqli->insert_id;
+
+    #get success indicators
+    $success_idicators = get_success_indicators($mysqli, $core_function["cf_ID"]);
+    foreach ($success_idicators as $success_idicator) {
+
+      $mi_succIn = $mysqli->real_escape_string($success_idicator['mi_succIn']);
+
+      $mi_quality = $mysqli->real_escape_string($success_idicator['mi_quality']);
+      $mi_eff = $mysqli->real_escape_string($success_idicator['mi_eff']);
+      $mi_time = $mysqli->real_escape_string($success_idicator['mi_time']);
+
+      $sql = "INSERT INTO `spms_matrixindicators`(`cf_ID`, `mi_succIn`, `mi_quality`, `mi_eff`, `mi_time`, `mi_incharge`, `corrections`) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
+      $mysqli->query($sql);
+    }
+
+    $data[$key]["children"] = start_duplicating_copy_to($mysqli, $core_function["children"], $selected_period_id, $insert_id);
+  }
+
+  return $data;
+}
 
 
 function start_duplicating_to_diff_dept($mysqli, $data, $selected_period_id, $parent_id, $department_id)
