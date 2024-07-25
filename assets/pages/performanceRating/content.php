@@ -475,7 +475,7 @@ elseif (isset($_POST['submitPerformance'])) {
 	<label>Comments and Recommendation</label>
 	<textarea id='comRec' onkeyup='commentRecInputType()' required>$comment</textarea>
 	</div>
-	<button class='ui fluid primary button' type='submit' name='commentBtn'>Send</button>
+	<button class='ui fluid primary button' type='submit' name='commentBtn'>Approve</button>
 	</form>
 	";
 } elseif (isset($_POST["commentReccomendationOfSuppSave"])) {

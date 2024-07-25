@@ -1809,11 +1809,11 @@ class Employee_data extends Db
 			if ($accountId == $fileStatus['ImmediateSup'] and $accountId != $fileStatus['DepartmentHead'] and $accountId != 	$fileStatus['employees_id']) {
 
 				if ($fileStatus['ImmediateSup'] == $fileStatus['DepartmentHead']) {
-					$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Approve</button>";
+					$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Add/Edit Recommendation</button>";
 					// }elseif($fileStatus['formType']==1){
 					// $view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(".$this->period['mfoperiod_id'].",$this->emp_ID)'>Approve Results</button>";
 				} else {
-					$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Approve</button>";
+					$view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='commentRecModalShow(" . $this->period['mfoperiod_id'] . ",$this->emp_ID)'>Add/Edit Recommendation</button>";
 					// $view ="<button alert='alert(contact toto)'>Something is Wrong</button>";
 					// $view = "<button class='ui teal massive fluid button noprint' style='width:95%' onclick='approval(".$this->get_status('performanceReviewStatus_id').",$this->emp_ID)'>Approve</button>";
 				}
