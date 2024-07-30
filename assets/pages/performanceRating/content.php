@@ -128,9 +128,9 @@ if (isset($_POST['page'])) {
 	$sqlCheck = "SELECT * from spms_corefucndata where cfd_id='$dataId'";
 	$sqlCheck = $mysqli->query($sqlCheck);
 	$sqlCheck = $sqlCheck->fetch_assoc();
-	$accCore = addslashes($_POST['acc']);
+	$accCore = $mysqli->real_escape_string($_POST['acc']);
 	$effCore = addslashes($_POST['eff']);
-	$remarkCore = addslashes($_POST['remark']);
+	$remarkCore =  $mysqli->real_escape_string($_POST['remark']);
 	if ($userId != $sqlCheck['empId']) {
 		if ($sqlCheck['critics']) {
 			$critics = unserialize($sqlCheck['critics']);
@@ -138,7 +138,7 @@ if (isset($_POST['page'])) {
 			$critics = ['IS' => "", 'DH' => "", 'PMT' => ""];
 		}
 		$critics[$criticInputTarget] = $criticInput;
-		$critics = serialize($critics);
+		$critics = $mysqli->real_escape_string(serialize($critics));
 		$storeArr = [];
 		$ar = ["", [], ""];
 		$ar[0] = $dataId;
@@ -166,9 +166,11 @@ if (isset($_POST['page'])) {
 				$storeArr = unserialize($sqlCheck['supEdit']);
 				array_push($storeArr, $ar);
 				$storeArr = serialize($storeArr);
+				$storeArr = $mysqli->real_escape_string($storeArr);
 			} else {
 				array_push($storeArr, $ar);
 				$storeArr = serialize($storeArr);
+				$storeArr = $mysqli->real_escape_string($storeArr);
 			}
 			$sql = "UPDATE `spms_corefucndata`
 							SET `actualAcc` = '$accCore', `Q` = '$_POST[qual]',
