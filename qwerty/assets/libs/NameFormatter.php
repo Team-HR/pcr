@@ -24,12 +24,18 @@ class NameFormatter
 	{
 		$sql = "SELECT * FROM `employees` WHERE `employees_id` = '$employee_id'";
 		$res = $this->mysqli->query($sql);
-		$row = $res->fetch_assoc();
 
-		$this->firstName = $row["firstName"] ? $row["firstName"] : '';
-		$this->lastName = $row["lastName"] ? $row["lastName"] : '';
-		$this->middleName = $row["middleName"] ? $row["middleName"] : '';
-		$this->extName = $row["extName"] ? $row["extName"] : '';
+		if ($row = $res->fetch_assoc()) {
+			$this->firstName = $row["firstName"] ? $row["firstName"] : '';
+			$this->lastName = $row["lastName"] ? $row["lastName"] : '';
+			$this->middleName = $row["middleName"] ? $row["middleName"] : '';
+			$this->extName = $row["extName"] ? $row["extName"] : '';
+		} else {
+			$this->firstName = '';
+			$this->lastName = '';
+			$this->middleName = '';
+			$this->extName = '';
+		}
 	}
 
 
