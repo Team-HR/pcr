@@ -345,7 +345,7 @@ class Employee_data extends Db
 		# if session user is the pcr perfomer and approved, certify, and panelApproved is dated hide submit button
 		if ($accountId == $perStatus['employees_id'] and $perStatus['approved'] and $perStatus['certify'] and $perStatus['panelApproved']) {
 			$this->hideCol = true;
-		} 
+		}
 		# else session user is not the pcr perfomer and approved, certify, and panelApproved is dated hide submit button
 		else {
 			// if employee 
@@ -699,7 +699,13 @@ class Employee_data extends Db
 						$a += $SiData['T'];
 						$div += 1;
 					}
-					$a = ($a / $div) * ($SiData['percent'] / 100);
+
+					if ($div != 0) {
+						$a = ($a / $div) * ($SiData['percent'] / 100);
+					} else {
+						$a = 0;
+					}
+
 					$a = mb_substr($a, 0, 4);
 				}
 				$col = "";
