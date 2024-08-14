@@ -733,6 +733,7 @@ class Employee_data extends Db
 				$percentBadge = "";
 				if (!$coreDisable) {
 					$this->percent += $SiData['percent'];
+					// $this->percent = floatval($this->percent);
 					$openModPercent = "";
 					if (!$this->hideCol && $this->hide == "") {
 						$openModPercent = "onclick='changePercent($SiData[cfd_id])'";
@@ -1842,6 +1843,7 @@ class Employee_data extends Db
 					$strat = 20;
 				}
 				$total = $this->percent + $this->supportPercent + $strat;
+				$total = number_format($total, 0);
 				$btnStatus = "disabled";
 				$btnColor = "red";
 				$btnMsg = "Your Percentage Allocation is Lacking:(" . $total . "/100)";
@@ -1852,7 +1854,8 @@ class Employee_data extends Db
 				} elseif ($total > 100) {
 					$btnMsg = "Your Percentage Allocation is too much:(" . $total . "/100)";
 				}
-				$view = "<center><button class='ui $btnColor massive fluid button noprint' style='width:95%' $btnStatus>$btnMsg</button></center>";
+				$view = "
+				<center><button class='ui $btnColor massive fluid button noprint' style='width:95%' $btnStatus>$btnMsg</button></center>";
 			}
 		}
 		return $view;
