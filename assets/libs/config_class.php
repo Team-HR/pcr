@@ -294,6 +294,34 @@ class Employee_data extends Db
 		}
 	}
 
+	private function getEmployeeName($employee_id)
+	{
+		if (!$employee_id) return null;
+		$sql = "SELECT * FROM `employees` WHERE `employees_id` = '$employee_id'";
+		$res = $this->mysqli->query($sql);
+		if ($row = $res->fetch_assoc()) {
+			$lastName = $row['lastName'];
+			$firstName = $row['firstName'];
+			$middleName = $row['middleName'];
+			$extName = $row['extName'];
+			if ($middleName && $middleName != '.') {
+				if (strlen($middleName) > 0) {
+					$middleName = $middleName[0] . ". ";
+				}
+			} else {
+				$middleName = "";
+			}
+
+			if ($extName) {
+				$extName = ", " . $extName;
+			} else {
+				$extName = "";
+			}
+			return mb_convert_case($firstName . " " . $middleName  . $lastName . $extName, MB_CASE_UPPER);
+		} else {
+			return "";
+		}
+	}
 
 	// method made for reviewing status of the file
 	private function file_status()
@@ -312,6 +340,8 @@ class Employee_data extends Db
 				'period_id' => $this->per_ID,
 				'employees_id' => $this->emp_ID,
 				'ImmediateSup' => '',
+				'DivisionHead' => '',
+				'DivisionHeadName' => '',
 				'DepartmentHead' => '',
 				'HeadAgency' => '',
 				'PMT' => '',
@@ -324,7 +354,14 @@ class Employee_data extends Db
 				'department_id' => $department_id,
 				'assembleAll' => '',
 			];
+		} else {
+			if (is_numeric($perStatus['DivisionHead'])) {
+				$employee_id = $perStatus['DivisionHead'];
+				$perStatus['DivisionHeadName'] = $this->getEmployeeName($employee_id);
+			}
 		}
+
+
 
 
 		$this->fileStatus = $perStatus;
@@ -345,7 +382,7 @@ class Employee_data extends Db
 		# if session user is the pcr perfomer and approved, certify, and panelApproved is dated hide submit button
 		if ($accountId == $perStatus['employees_id'] and $perStatus['approved'] and $perStatus['certify'] and $perStatus['panelApproved']) {
 			$this->hideCol = true;
-		} 
+		}
 		# else session user is not the pcr perfomer and approved, certify, and panelApproved is dated hide submit button
 		else {
 			// if employee 
@@ -1386,6 +1423,14 @@ class Employee_data extends Db
 		}
 		$formType = $this->fileStatus;
 
+		$certified_by = $this->get_fullname($this->get_status('DepartmentHead'));
+		$certify_type = "Department Head";
+
+		if (is_numeric($formType['DivisionHead'])) {
+			$certified_by = $this->get_fullname($formType['DivisionHead']);
+			$certify_type = "Division Head";
+		}
+
 		$ipcr = "<tr style='background:#0080003d'>
 		<td style='width:28%'>
 		<p style='font-size:10px'>
@@ -1404,10 +1449,10 @@ class Employee_data extends Db
 		Noted By:
 		</p>
 		<p style='text-align:center'>
-		<u>" . $this->get_fullname($this->get_status('DepartmentHead')) . "</u>
+		<u>" . $certified_by . "</u>
 		<br>
 		<span style='font-size:10px'>
-		Department Head
+		$certify_type
 		</span>
 		</p>
 		</td>
@@ -1687,6 +1732,14 @@ class Employee_data extends Db
 		}
 
 		// <td>Formula:(Total of all average ratings / no. of entries)x20%</td>
+
+		$certifier = "Department Head";
+		if ($fileStatus) {
+			if ($fileStatus['DivisionHead']) {
+				$DepartmentHead = $fileStatus['DivisionHeadName'];
+				$certifier = "Division Head";
+			}
+		}
 		$view = "
 		<table border='1px' style='border-collapse:collapse;width:98%;margin:auto'>
 		<tbody>
@@ -1786,7 +1839,7 @@ class Employee_data extends Db
 		<tr style='font-size:9px'>
 		<td style='text-align:center;width:16%'>Ratee</td>
 		<td style='text-align:center;width:16%'>Supervisor</td>
-		<td style='text-align:center;width:16%'>Department Head</td>
+		<td style='text-align:center;width:16%'>$certifier</td>
 		<td style='text-align:center;width:16%'></td>
 		<td style='text-align:center;width:16%'>Head of Agency</td>
 		<td style='text-align:center;width:9.2%'></td>
