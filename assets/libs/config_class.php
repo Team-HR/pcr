@@ -1438,6 +1438,10 @@ class Employee_data extends Db
 			$certify_type = "Division Head";
 		}
 
+		if ($formType['department_id'] == '3' && $formType['DepartmentHead'] == '21919') {
+			$certify_type = "Division Head";
+		}
+
 		$ipcr = "<tr style='background:#0080003d'>
 		<td style='width:28%'>
 		<p style='font-size:10px'>
@@ -1747,6 +1751,11 @@ class Employee_data extends Db
 				$certifier = "Division Head";
 			}
 		}
+
+		if ($fileStatus['department_id'] == '3' && $fileStatus['DepartmentHead'] == '21919') {
+			$certifier = "Division Head";
+		}
+
 		$view = "
 		<table border='1px' style='border-collapse:collapse;width:98%;margin:auto'>
 		<tbody>
