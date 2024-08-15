@@ -290,6 +290,10 @@ function getUsername($mysqli, $employees_id)
 {
     $username = "N/A";
     $res = $mysqli->query("SELECT * FROM `spms_accounts` WHERE employees_id = '$employees_id'");
-    $username = $res->fetch_assoc()["username"];
+    if ($row = $res->fetch_assoc()) {
+        $username = $row["username"];
+    } else {
+        $username = '';
+    };
     return $username;
 }
