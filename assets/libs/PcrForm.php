@@ -350,6 +350,7 @@ class PcrForm
 				"corrected_T" => $corrected_T,
 				"cfd_id" => $row["cfd_id"],
 				"actualAcc" => $row["actualAcc"],
+				"remarks" => $row["remarks"],
 				"q" => $q,
 				"e" => $e,
 				"t" => $t,

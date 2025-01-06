@@ -90,6 +90,17 @@
 			<tr>
 				<td colspan="9" style="background: lightyellow;"><b>CORE FUNCTIONS <span style="color: blue;">({{core_functions.percent}}%)</span></b></td>
 			</tr>
+
+
+
+			<!-- 
+#			
+#
+#	Core function with no success indicator (Title) Start
+#
+#
+-->
+
 			<template v-for="item,i in core_functions.rows" :key="i">
 				<!-- if no success indicators -->
 				<tr v-if="item.colspan == 'all'">
@@ -97,8 +108,30 @@
 						<div :style="getMargin(item.level)">{{ item.cf_count }} {{ item.cf_title }}</div>
 					</td>
 				</tr>
+
+
+				<!-- 
+#			
+#
+#	Core function with no success indicator (Title) END
+#
+#
+-->
+
+
+
+
+				<!-- 
+#			
+#
+#	Core function with only one success indicator START
+#
+#
+-->
+
+
 				<!-- else if has success indicators -->
-				<tr v-else-if="item.colspan == 0">
+				<tr v-else-if="item.colspan == 0" :style="item.not_applicable ? 'color:blue':''">
 
 					<td :rowspan="item.rowspan">
 						<div :style="getMargin(item.level)">
@@ -106,12 +139,14 @@
 						</div>
 					</td>
 					<td>
-						<a class="ui red ribbon label" v-if="item.critics && item.critics.PMT" @click="review(item)">View Comment/s</a>
-						<button class="ui basic mini button" :class="item.corrected_percent ? 'red':''">{{item.percent + "%"}}</button>
+						<template v-if="!item.not_applicable">
+							<a class="ui red ribbon label" v-if="item.critics && item.critics.PMT" @click="review(item)">View Comment/s</a>
+							<button class="ui basic mini button" :class="item.corrected_percent ? 'red':''">{{item.percent + "%"}}</button>
+						</template>
 						{{item.mi_succIn}}
 					</td>
 					<!-- if has spms_corefucndata -->
-					<template v-if="item.cfd_id">
+					<template v-if="item.cfd_id && !item.not_applicable">
 						<td :style="item.corrected_actualAcc ? 'color:red':''">{{item.actualAcc}}</td>
 						<td :style="item.corrected_Q ? 'color:red':''">{{item.q}}</td>
 						<td :style="item.corrected_E ? 'color:red':''">{{item.e}}</td>
@@ -121,9 +156,9 @@
 						<td width="150" style="text-align: center;"> <button class="ui small button" @click="review(item)"><i class="ui icon edit"></i> Review</button> </td>
 					</template>
 					<!-- else if disabled/not_applicable -->
-					<template v-else-if="item.not_applicable == '1'">
+					<template v-else-if="item.not_applicable">
 						<td colspan="5" style="color:blue; text-align: center;"> Not Applicable </td>
-						<td></td>
+						<td>{{item.remarks}}</td>
 						<td></td>
 					</template>
 					<!-- else not accomplished/filled out -->
@@ -133,14 +168,41 @@
 						<td></td>
 					</template>
 				</tr>
-				<tr v-else-if="!item.cf_title">
+
+
+
+				<!-- 
+#			
+#
+#	Core function with only one success indicator END
+#
+#
+-->
+
+
+
+
+
+				<!-- 
+#			
+#
+#	Row with only  success indicator with parent Core function above START
+#
+#
+-->
+
+
+
+				<tr v-else-if="!item.cf_title" :style="item.not_applicable ? 'color:blue':''">
 					<td>
-						<a class="ui red ribbon label" v-if="item.critics && item.critics.PMT" @click="review(item)">View Comment/s</a>
-						<button class="ui basic mini button">{{item.percent + "%"}}</button>
+						<template v-if="!item.not_applicable">
+							<a class="ui red ribbon label" v-if="item.critics && item.critics.PMT" @click="review(item)">View Comment/s</a>
+							<button class="ui basic mini button">{{item.percent + "%"}}</button>
+						</template>
 						{{item.mi_succIn}}
 					</td>
 					<!-- if has spms_corefucndata -->
-					<template v-if="item.cfd_id">
+					<template v-if="item.cfd_id && !item.not_applicable">
 						<td>{{item.actualAcc}}</td>
 						<td>{{item.q}}</td>
 						<td>{{item.e}}</td>
@@ -150,9 +212,9 @@
 						<td width="150" style="text-align: center;"> <button class="ui small button" @click="review(item)"><i class="ui icon edit"></i> Review</button> </td>
 					</template>
 					<!-- else if disabled/not_applicable -->
-					<template v-else-if="item.not_applicable == '1'">
+					<template v-else-if="item.not_applicable">
 						<td colspan="5" style="color:blue; text-align: center;"> Not Applicable </td>
-						<td></td>
+						<td>{{item.remarks}}</td>
 						<td></td>
 					</template>
 					<!-- else not accomplished/filled out -->
@@ -163,6 +225,18 @@
 					</template>
 				</tr>
 			</template>
+
+
+			<!-- 
+#			
+#
+#	Row with only  success indicator with parent Core function above END
+#
+#
+-->
+
+
+
 			<tr>
 				<td colspan="9" style="background: lightyellow;"><b>SUPPORT FUNCTION <span style="color: blue;">(20%)</span></b></td>
 			</tr>
