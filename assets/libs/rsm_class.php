@@ -45,9 +45,9 @@ class RsmClass extends Db
     // }
 
     function __construct()
-	{
-		parent::__construct();
-	}
+    {
+        parent::__construct();
+    }
 
     // public functions 
 
@@ -268,6 +268,9 @@ class RsmClass extends Db
 
         $empty = true;
         $scales = unserialize($rating);
+        if (!is_array($scales)) {
+            return [];
+        }
         foreach ($scales as $scale) {
             if ($scale) {
                 $empty = false;
@@ -287,7 +290,7 @@ class RsmClass extends Db
             }
         }
 
-        usort($data, fn ($a, $b) => strcmp($b["score"], $a["score"]));
+        usort($data, fn($a, $b) => strcmp($b["score"], $a["score"]));
 
 
         return $data;

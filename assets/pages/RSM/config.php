@@ -570,19 +570,18 @@ function editInputs($dataId, $count, $title)
   </div>";
   return $view;
 }
+
 function unserData($ser_arr)
 {
   $count = 5;
   $data = "";
   $arr = unserialize($ser_arr);
   while ($count >= 1) {
-    if ($arr[$count]) {
+    if (isset($arr[$count]) && $arr[$count] != "") {
       $data .= "<b>" . $count . "</b> - " . $arr[$count] . "<br>";
     }
     $count--;
   }
-
-
 
   // foreach ($arr as $unser) {
   //   if($unser!=""){
