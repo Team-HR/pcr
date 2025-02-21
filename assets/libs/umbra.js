@@ -1,4 +1,7 @@
+
 status = 0;
+
+
 function promp() {
   if (status == 1) {
     return (window.onbeforeunload = function (e) {
@@ -35,39 +38,39 @@ function timer() {
   //   console.log(s);
   // }, 60000);
 }
-function login_log() {
-  event.preventDefault();
-  elements = event.target.elements;
-  btn = elements.submitBtn;
-  user = elements.user.value;
-  pass = elements.pass.value;
-  if (user && pass) {
-    btn.disabled = true;
-    $.post(
-      "assets/pages/login/config.php",
-      {
-        p_user: user,
-        p_pass: pass,
-      },
-      function (data, textStatus, xhr) {
-        if (data == 1) {
-          location.href = "?home";
-        } else {
-          btn.disabled = false;
-          $("#loginAlertMsg").append(
-            "<div class='ui negative message' id='msg_div' ><i class='close icon' onclick='this.parentElement.remove()'></i><div id='msg_promp'>" +
-              data +
-              "</div></div>"
-          );
-        }
-      }
-    );
-  } else {
-    $("#loginAlertMsg").append(
-      "<div class='ui negative message' id='msg_div' ><i class='close icon' onclick='this.parentElement.remove()'></i><div id='msg_promp'>Empty Field/s</div></div>"
-    );
-  }
-}
+// function login_log() {
+//   event.preventDefault();
+//   elements = event.target.elements;
+//   btn = elements.submitBtn;
+//   user = elements.user.value;
+//   pass = elements.pass.value;
+//   if (user && pass) {
+//     btn.disabled = true;
+//     $.post(
+//       "assets/pages/login/config.php",
+//       {
+//         p_user: user,
+//         p_pass: pass,
+//       },
+//       function (data, textStatus, xhr) {
+//         if (data == 1) {
+//           location.href = "?home";
+//         } else {
+//           btn.disabled = false;
+//           $("#loginAlertMsg").append(
+//             "<div class='ui negative message' id='msg_div' ><i class='close icon' onclick='this.parentElement.remove()'></i><div id='msg_promp'>" +
+//               data +
+//               "</div></div>"
+//           );
+//         }
+//       }
+//     );
+//   } else {
+//     $("#loginAlertMsg").append(
+//       "<div class='ui negative message' id='msg_div' ><i class='close icon' onclick='this.parentElement.remove()'></i><div id='msg_promp'>Empty Field/s</div></div>"
+//     );
+//   }
+// }
 function timeoutLog() {
   status = 1;
   promp();

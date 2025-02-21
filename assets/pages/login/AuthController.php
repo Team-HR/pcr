@@ -1,11 +1,17 @@
 <?php
-session_start();
 
-require_once "Auth.php";
+require_once "AuthModal.php";
 
-	if (isset($_POST['timeOut'])) {
 
-		$renew = new Auth();
+class AuthController
+{
+	public function __construct()
+	{
+	}
+
+	public function renew()
+	{
+		$renew = new AuthModal();
 		$renew->setBasic($_POST['timeOut'], $_POST['pass'], true);
 		$renew = $renew->login();
 		if ($renew) {
@@ -15,22 +21,39 @@ require_once "Auth.php";
 		} else {
 			echo "Wrong password";
 		}
-	} elseif (isset($_POST['p_user']) && isset($_POST['p_pass'])) {
-		# code...
+	}
+
+	public function login(){
+
 		$user = $_POST['p_user'];
 		$pass = $_POST['p_pass'];
 
-		$login = new Auth();
+		$login = new AuthModal();
 		$login->setBasic($user, $pass);
 		$login = $login->login();
 		if ($login) {
 			$_SESSION['emp_id'] = $login['employees_id'];
 			$_SESSION['emp_info'] = $login;
-			print('1');
-		} else {
-			echo "Unable To Login";
-		}
 
-	} else {
-		echo "page not found";
+			$response = array(
+				"data" => $login,
+				"status" => "success",
+				"message" => "Login Successful"
+			);
+
+			echo json_encode($response);
+		} else {
+			$response = array(
+				"status" => "error",
+				"message" => "Unable To Login"
+			);
+
+			echo json_encode($response);
+		}
 	}
+
+
+}
+
+
+?>

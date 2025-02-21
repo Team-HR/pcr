@@ -1,5 +1,17 @@
 <?php
 session_start();
+
+require_once "assets/libs/Route.php";
+
+//
+Route::getPage('login', 'assets/pages/login/AuthController.php');
+
+
+
+// this is the main file that will be loaded when the user visits the site 
+// need to mofidiy the code to make it more readable and maintainable
+// must use the MVC pattern
+// must use the OOP pattern
 require_once "assets/libs/config_class.php";
 require_once "assets/libs/rsm_class.php";
 require_once "assets/libs/irm_class.php";

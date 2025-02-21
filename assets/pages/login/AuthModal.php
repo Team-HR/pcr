@@ -1,9 +1,9 @@
 <?php
 
-    include "../../libs/Db.php";
+    // include "assets/libs/Db.php";
 
 
-    class Auth extends Db {
+    class AuthModal extends Db {
 
         private $password;
         private $userAccount;

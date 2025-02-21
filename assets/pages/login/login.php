@@ -9,7 +9,7 @@
 	<script src="assets/libs/ui/dist/semantic.min.js"></script>
 	<script src="assets/libs/node_modules/chart.js/dist/Chart.js"></script>
 	<script src="assets/libs/node_modules/chart.js/dist/Chart.min.js"></script>
-	<script src="assets/libs/umbra.js"></script>
+	<script src="assets/pages/login/Auth.js"></script>
 
 	<!-- <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -40,15 +40,15 @@
 					<h1>Login</h1>
 				</div>
 				<div class="content">
-					<form class="noSubmit" onsubmit="login_log()">
+					<form onsubmit="login_log(event)">
 						<div class="ui form">
 							<div class="field">
 								<label>Username:</label>
-								<input style="border:1px solid #4075a9;background:#4075a9;font-weight:bold" type="text" name="user" placeholder="">
+								<input style="border:1px solid #4075a9;background:#4075a9;font-weight:bold" type="text" name="user" placeholder="" required>
 							</div>
 							<div class="field">
 								<label>Password:</label>
-								<input style="border:1px solid #4075a9;background:#4075a9;font-weight:bold" type="password" name="pass" placeholder="">
+								<input style="border:1px solid #4075a9;background:#4075a9;font-weight:bold" type="password" name="pass" placeholder="" required>
 							</div>
 							<div class="field">
 								<input type="submit" name='submitBtn' class="ui primary button">
