@@ -229,11 +229,11 @@ if (isset($_POST['page'])) {
 	}
 } elseif (isset($_POST['editSuppAccomplishementdataPost'])) {
 	$dataId = $_POST['editSuppAccomplishementdataPost'];
-	$acc = $mysqli->real_escape_string($_POST['acc']);
+	$acc = addslashes($_POST['acc']);
 	$efficiency = $_POST['efficiency'];
 	$quality = $_POST['quality'];
 	$timeliness = $_POST['timeliness'];
-	$remarks = $mysqli->real_escape_string($_POST['remarks']);
+	$remarks = addslashes($_POST['remarks']);
 	$sqlCheck = "SELECT * from spms_supportfunctiondata where sfd_id='$dataId'";
 	$sqlCheck = $mysqli->query($sqlCheck);
 	$sqlCheck = $sqlCheck->fetch_assoc();
@@ -261,11 +261,11 @@ if (isset($_POST['page'])) {
 		if ($sqlCheck['supEdit'] != "") {
 			$supAr = unserialize($sqlCheck['supEdit']);
 			array_push($supAr, $a);
-			$supAr = $mysqli->real_escape_string(serialize($supAr));
+			$supAr = serialize($supAr);
 		} else {
 			// editng
 			array_push($supAr, $a);
-			$supAr = $mysqli->real_escape_string(serialize($supAr));
+			$supAr = serialize($supAr);
 		}
 		$sql = "UPDATE `spms_supportfunctiondata`
 		SET `accomplishment` = '$acc', `Q` = '$quality', `E` = '$efficiency', `T` = '$timeliness', `remark` = '$remarks', `supEdit` = '$supAr'
