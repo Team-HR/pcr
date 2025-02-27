@@ -550,7 +550,8 @@ class Employee_data extends Db
 		// if (!$sqlSi1) {
 		// 	die($this->error);
 		// }
-		$cachedResults = getCachedQueryResult($this->mysqli, $cacheKey, $sqlSi1);
+
+		$cachedResults = getCachedQueryResultRedis($this->mysqli, $cacheKey, $sqlSi1);
 
 		if (count($cachedResults) > 0) {
 			foreach ($cachedResults as $a) {
@@ -2320,31 +2321,25 @@ function Authorization_Error()
 
 /**
  * 
- * File-Based Caching
+ * Redis Caching
  * USAGE: 
- * getCachedQueryResult($mysqli, $cacheKey, $query);
+ * getCachedQueryResultRedis($mysqli, $cacheKey, $query);
  * 
  * */
 
 
-function getCachedQueryResult($mysqli, $cacheKey, $query, $expiry = 300)
+function getCachedQueryResultRedis($mysqli, $cacheKey, $query, $expiry = 300)
 {
-	// $cacheFile = "cache/{$cacheKey}.json";
-	$cacheDir = __DIR__ . "/cache/";  // Define cache directory
-	$cacheFile = $cacheDir . "{$cacheKey}.json";
+	$redis = new Redis();
+	$redis->connect('redis', 6379);
 
-	// Create the cache directory if it doesn't exist
-	if (!is_dir($cacheDir)) {
-		mkdir($cacheDir, 0777, true); // Creates the directory with full permissions
-	}
-
-	// Check if cache exists and is still valid
-	if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $expiry) {
-		return json_decode(file_get_contents($cacheFile), true);
+	// Check if data is in cache
+	if ($redis->exists($cacheKey)) {
+		return json_decode($redis->get($cacheKey), true);
 	}
 
 	// Execute the query
-	$mysqli = $mysqli;
+	// $mysqli = new mysqli("localhost", "username", "password", "database");
 	$result = $mysqli->query($query);
 
 	if (!$result) {
@@ -2353,8 +2348,8 @@ function getCachedQueryResult($mysqli, $cacheKey, $query, $expiry = 300)
 
 	$data = $result->fetch_all(MYSQLI_ASSOC);
 
-	// Save the data in cache
-	file_put_contents($cacheFile, json_encode($data));
+	// Store in Redis
+	$redis->setex($cacheKey, $expiry, json_encode($data));
 
 	return $data;
 }
