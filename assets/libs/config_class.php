@@ -544,12 +544,16 @@ class Employee_data extends Db
 		}
 
 		$sqlSi1 = "SELECT * from spms_matrixindicators where cf_ID='$siId'";
-		$sqlSi1 = $this->mysqli->query($sqlSi1);
-		if (!$sqlSi1) {
-			die($this->error);
-		}
-		if ($sqlSi1->num_rows > 0) {
-			while ($a = $sqlSi1->fetch_assoc()) {
+		$cacheKey = "spms_matrixindicators_$siId";
+		// $sqlSi1 = $this->mysqli->query($sqlSi1);
+		// if (!$sqlSi1) {
+		// 	die($this->error);
+		// }
+
+		$cachedResults = getCachedQueryResult($this->mysqli, $cacheKey, $sqlSi1);
+		// return $cachedResults;
+		if (count($cachedResults) > 0) {
+			while ($a = $cachedResults) {
 				$incharge = explode(',', $a['mi_incharge']);
 				$cIn = 0;
 				while ($cIn < count($incharge)) {
@@ -2311,4 +2315,46 @@ function Authorization_Error()
 	</h1>
 	</div>";
 	return $view;
+}
+
+
+/**
+ * 
+ * File-Based Caching
+ * USAGE: 
+ * getCachedQueryResult($mysqli, $cacheKey, $query);
+ * 
+ * */
+
+
+function getCachedQueryResult($mysqli, $cacheKey, $query, $expiry = 300)
+{
+	// $cacheFile = "cache/{$cacheKey}.json";
+	$cacheDir = __DIR__ . "/cache/";  // Define cache directory
+	$cacheFile = $cacheDir . "{$cacheKey}.json";
+
+	// Create the cache directory if it doesn't exist
+	if (!is_dir($cacheDir)) {
+		mkdir($cacheDir, 0777, true); // Creates the directory with full permissions
+	}
+
+	// Check if cache exists and is still valid
+	if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $expiry) {
+		return json_decode(file_get_contents($cacheFile), true);
+	}
+
+	// Execute the query
+	$mysqli = $mysqli;
+	$result = $mysqli->query($query);
+
+	if (!$result) {
+		return false;
+	}
+
+	$data = $result->fetch_all(MYSQLI_ASSOC);
+
+	// Save the data in cache
+	file_put_contents($cacheFile, json_encode($data));
+
+	return $data;
 }
