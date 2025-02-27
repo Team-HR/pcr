@@ -2331,7 +2331,7 @@ function Authorization_Error()
 function getCachedQueryResultRedis($mysqli, $cacheKey, $query, $expiry = 300)
 {
 	$redis = new Redis();
-	$redis->connect('redis', 6379);
+	$redis->connect('redis');
 
 	// Check if data is in cache
 	if ($redis->exists($cacheKey)) {
