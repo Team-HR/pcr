@@ -17,6 +17,8 @@ require_once "Db.php";
 $db = new Db();
 $mysqli = $db->getMysqli();
 
+
+
 class Employee_data extends Db
 {
 	public $accountStatus;
@@ -63,6 +65,7 @@ class Employee_data extends Db
 	//signatories
 	private $signa_form;
 	public $signatoriesCount;
+	private $redis;
 
 	// pmt 
 
@@ -73,6 +76,9 @@ class Employee_data extends Db
 	function __construct()
 	{
 		parent::__construct();
+
+		$this->redis = new Redis();
+		$this->redis->connect('redis', 6379);
 	}
 	private function load()
 	{
@@ -544,12 +550,17 @@ class Employee_data extends Db
 		}
 
 		$sqlSi1 = "SELECT * from spms_matrixindicators where cf_ID='$siId'";
-		$sqlSi1 = $this->mysqli->query($sqlSi1);
-		if (!$sqlSi1) {
-			die($this->error);
-		}
-		if ($sqlSi1->num_rows > 0) {
-			while ($a = $sqlSi1->fetch_assoc()) {
+		$cacheKey = "spms_matrixindicators_$siId";
+
+		// $sqlSi1 = $this->mysqli->query($sqlSi1);
+		// if (!$sqlSi1) {
+		// 	die($this->error);
+		// }
+
+		$cachedResults = getCachedQueryResultRedis($this->mysqli, $this->redis, $cacheKey, $sqlSi1);
+
+		if (count($cachedResults) > 0) {
+			foreach ($cachedResults as $a) {
 				$incharge = explode(',', $a['mi_incharge']);
 				$cIn = 0;
 				while ($cIn < count($incharge)) {
@@ -2311,4 +2322,40 @@ function Authorization_Error()
 	</h1>
 	</div>";
 	return $view;
+}
+
+
+/**
+ * 
+ * Redis Caching
+ * USAGE: 
+ * getCachedQueryResultRedis($mysqli, $cacheKey, $query);
+ * 
+ * */
+
+
+function getCachedQueryResultRedis($mysqli, $redis, $cacheKey, $query, $expiry = 300)
+{
+	// $redis = new Redis();
+	// $redis->connect('redis');
+
+	// Check if data is in cache
+	if ($redis->exists($cacheKey)) {
+		return json_decode($redis->get($cacheKey), true);
+	}
+
+	// Execute the query
+	// $mysqli = new mysqli("localhost", "username", "password", "database");
+	$result = $mysqli->query($query);
+
+	if (!$result) {
+		return false;
+	}
+
+	$data = $result->fetch_all(MYSQLI_ASSOC);
+
+	// Store in Redis
+	$redis->setex($cacheKey, $expiry, json_encode($data));
+
+	return $data;
 }
