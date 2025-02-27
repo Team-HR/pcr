@@ -545,15 +545,15 @@ class Employee_data extends Db
 
 		$sqlSi1 = "SELECT * from spms_matrixindicators where cf_ID='$siId'";
 		$cacheKey = "spms_matrixindicators_$siId";
+
 		// $sqlSi1 = $this->mysqli->query($sqlSi1);
 		// if (!$sqlSi1) {
 		// 	die($this->error);
 		// }
-
 		$cachedResults = getCachedQueryResult($this->mysqli, $cacheKey, $sqlSi1);
-		// return $cachedResults;
+
 		if (count($cachedResults) > 0) {
-			while ($a = $cachedResults) {
+			foreach ($cachedResults as $a) {
 				$incharge = explode(',', $a['mi_incharge']);
 				$cIn = 0;
 				while ($cIn < count($incharge)) {
