@@ -17,6 +17,8 @@ require_once "Db.php";
 $db = new Db();
 $mysqli = $db->getMysqli();
 
+
+
 class Employee_data extends Db
 {
 	public $accountStatus;
@@ -63,6 +65,7 @@ class Employee_data extends Db
 	//signatories
 	private $signa_form;
 	public $signatoriesCount;
+	private $redis;
 
 	// pmt 
 
@@ -73,6 +76,9 @@ class Employee_data extends Db
 	function __construct()
 	{
 		parent::__construct();
+
+		$this->redis = new Redis();
+		$this->redis->connect('redis', 6379);
 	}
 	private function load()
 	{
@@ -551,7 +557,7 @@ class Employee_data extends Db
 		// 	die($this->error);
 		// }
 
-		$cachedResults = getCachedQueryResultRedis($this->mysqli, $cacheKey, $sqlSi1);
+		$cachedResults = getCachedQueryResultRedis($this->mysqli, $this->redis, $cacheKey, $sqlSi1);
 
 		if (count($cachedResults) > 0) {
 			foreach ($cachedResults as $a) {
@@ -2328,10 +2334,10 @@ function Authorization_Error()
  * */
 
 
-function getCachedQueryResultRedis($mysqli, $cacheKey, $query, $expiry = 300)
+function getCachedQueryResultRedis($mysqli, $redis, $cacheKey, $query, $expiry = 300)
 {
-	$redis = new Redis();
-	$redis->connect('redis');
+	// $redis = new Redis();
+	// $redis->connect('redis');
 
 	// Check if data is in cache
 	if ($redis->exists($cacheKey)) {
