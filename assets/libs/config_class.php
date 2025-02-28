@@ -13,11 +13,10 @@
 //	crazy is what we are
 
 require_once "Db.php";
+require_once "DbRedis.php";
 
 $db = new Db();
 $mysqli = $db->getMysqli();
-
-
 
 class Employee_data extends Db
 {
@@ -76,10 +75,49 @@ class Employee_data extends Db
 	function __construct()
 	{
 		parent::__construct();
-
-		$this->redis = new Redis();
-		$this->redis->connect('redis', 6379);
+		// $redis = new DbRedis();
+		$this->redis = new DbRedis($this->mysqli);
+		// $this->redis->connect('redis', 6379);
 	}
+
+	public function set_emp($emp)
+	{
+		$this->emp_ID = $emp;
+		// getting all the data of the employee
+		$sql = "SELECT * from employees
+		left join department on employees.department_id=department.department_id
+		left join positiontitles on employees.position_id=positiontitles.position_id
+		where employees_id='$this->emp_ID'";
+		$sql = $this->mysqli->query($sql);
+		if (!$sql) {
+			die($this->error);
+		}
+		$this->EmpInfo = $sql->fetch_assoc();
+		$authSql = "SELECT * FROM `spms_accounts` where employees_id='$this->emp_ID'";
+		$authSql = $this->mysqli->query($authSql);
+		$authSql = $authSql->fetch_assoc();
+		if ($authSql['type'] == "") {
+			$this->authorization = "";
+		} else {
+			$this->authorization = explode(',', $authSql['type']);
+		}
+	}
+
+	public function set_period($per)
+	{
+		$this->per_ID = $per;
+		//retriving all the data of period
+		$sql = "SELECT  * from spms_mfo_period where mfoperiod_id='$this->per_ID'";
+		$sql = $this->mysqli->query($sql);
+		if (!$sql) {
+			die($this->error);
+		}
+		$this->period = $sql->fetch_assoc();
+		$this->coreData = $this->coreAr();
+		$this->load();
+	}
+
+
 	private function load()
 	{
 		$this->file_status();
@@ -92,6 +130,7 @@ class Employee_data extends Db
 		# update prrlist from ihris
 		$this->update_prrlist();
 	}
+
 	public function get_prr_id()
 	{
 		if (!$this->fileStatus["period_id"]) return null;
@@ -112,6 +151,7 @@ class Employee_data extends Db
 		// 	return $row["prr_id"];
 		// } else return null;
 	}
+
 	public function update_prrlist()
 	{
 		if (!$this->fileStatus["formType"]) return null;
@@ -172,42 +212,7 @@ class Employee_data extends Db
 		$this->hide = $h;
 		$this->load();
 	}
-	public function set_emp($emp)
-	{
-		$this->emp_ID = $emp;
-		// getting all the data of the employee
-		$sql = "SELECT * from employees
-		left join department on employees.department_id=department.department_id
-		left join positiontitles on employees.position_id=positiontitles.position_id
-		where employees_id='$this->emp_ID'";
-		$sql = $this->mysqli->query($sql);
-		if (!$sql) {
-			die($this->error);
-		}
-		$this->EmpInfo = $sql->fetch_assoc();
-		$authSql = "SELECT * FROM `spms_accounts` where employees_id='$this->emp_ID'";
-		$authSql = $this->mysqli->query($authSql);
-		$authSql = $authSql->fetch_assoc();
-		if ($authSql['type'] == "") {
-			$this->authorization = "";
-		} else {
-			$this->authorization = explode(',', $authSql['type']);
-		}
-	}
 
-	public function set_period($per)
-	{
-		$this->per_ID = $per;
-		//retriving all the data of period
-		$sql = "SELECT  * from spms_mfo_period where mfoperiod_id='$this->per_ID'";
-		$sql = $this->mysqli->query($sql);
-		if (!$sql) {
-			die($this->error);
-		}
-		$this->period = $sql->fetch_assoc();
-		$this->coreData = $this->coreAr();
-		$this->load();
-	}
 	public function set_periodMY($m, $y)
 	{
 		//retriving all the data of period
@@ -257,6 +262,11 @@ class Employee_data extends Db
 		if (!is_numeric($id)) {
 			return $id;
 		}
+
+		$cacheKey = "get_fullname_$id";
+
+		if ($fullName = $this->redis->getCachedData($cacheKey)) return $fullName;
+
 		$sql = "SELECT * from employees where employees_id='$id'";
 		$sql = $this->mysqli->query($sql);
 		$sql = $sql->fetch_assoc();
@@ -287,7 +297,8 @@ class Employee_data extends Db
 
 
 		$fullname =  mb_convert_case("$firstName$middleName$lastName$extName", MB_CASE_UPPER, "UTF-8");
-
+		
+		$this->redis->setCachedData($cacheKey, $fullName);
 		return $fullname;
 	}
 
@@ -304,8 +315,9 @@ class Employee_data extends Db
 	{
 		if (!$employee_id) return null;
 		$sql = "SELECT * FROM `employees` WHERE `employees_id` = '$employee_id'";
-		$res = $this->mysqli->query($sql);
-		if ($row = $res->fetch_assoc()) {
+		$res = $this->redis("getEmployeeName_$employee_id", $sql);
+		// $res = $this->mysqli->query($sql);
+		if ($row = $res) {
 			$lastName = $row['lastName'];
 			$firstName = $row['firstName'];
 			$middleName = $row['middleName'];
@@ -557,7 +569,7 @@ class Employee_data extends Db
 		// 	die($this->error);
 		// }
 
-		$cachedResults = getCachedQueryResultRedis($this->mysqli, $this->redis, $cacheKey, $sqlSi1);
+		$cachedResults = $this->redis->getCachedQueryResultRedis($cacheKey, $sqlSi1);
 
 		if (count($cachedResults) > 0) {
 			foreach ($cachedResults as $a) {
@@ -1172,11 +1184,13 @@ class Employee_data extends Db
 
 		return $view;
 	}
+
 	public function hideNextBtn()
 	{
 		$this->strtBtn = 'display:none';
 		$this->load();
 	}
+
 	private function comment()
 	{
 		$commentsql = "SELECT * from spms_commentrec where period_id='$this->per_ID' and emp_id='$this->emp_ID'";
@@ -2322,40 +2336,4 @@ function Authorization_Error()
 	</h1>
 	</div>";
 	return $view;
-}
-
-
-/**
- * 
- * Redis Caching
- * USAGE: 
- * getCachedQueryResultRedis($mysqli, $cacheKey, $query);
- * 
- * */
-
-
-function getCachedQueryResultRedis($mysqli, $redis, $cacheKey, $query, $expiry = 300)
-{
-	// $redis = new Redis();
-	// $redis->connect('redis');
-
-	// Check if data is in cache
-	if ($redis->exists($cacheKey)) {
-		return json_decode($redis->get($cacheKey), true);
-	}
-
-	// Execute the query
-	// $mysqli = new mysqli("localhost", "username", "password", "database");
-	$result = $mysqli->query($query);
-
-	if (!$result) {
-		return false;
-	}
-
-	$data = $result->fetch_all(MYSQLI_ASSOC);
-
-	// Store in Redis
-	$redis->setex($cacheKey, $expiry, json_encode($data));
-
-	return $data;
 }
