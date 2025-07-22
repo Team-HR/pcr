@@ -2341,7 +2341,7 @@ function Authorization_Error()
  * */
 
 
-function getCachedQueryResultRedis($mysqli, $redis, $cacheKey, $query, $expiry = 300)
+function getCachedQueryResultRedis($mysqli, $redis, $cacheKey, $query, $expiry = 30)
 {
 	// $redis = new Redis();
 	// $redis->connect('redis');
