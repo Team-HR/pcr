@@ -1087,8 +1087,10 @@ class Employee_data extends Db
 	{
 		return $this->strategicView;
 	}
+	// strategic form page
 	public function form_strategicView()
 	{
+		$exemptedPeriods = [22];
 
 		$period_id = $_SESSION['period_pr'];
 		$employee_id = $_SESSION['emp_id'];
@@ -1098,8 +1100,13 @@ class Employee_data extends Db
 		$result = $this->mysqli->query($sql);
 		$row = $result->fetch_assoc();
 		$formType = $row['formType'];
-		if ($formType == 3) {
-			$not_applicable_button = "<div class='ui container' style='margin-auto: 50px; margin-top: 15px;'><button hidden class='ui fluid button red' onclick='noStrategicFunc()'>Not Applicable</button></div>";
+		if ($formType == 3 || in_array($period_id, $exemptedPeriods)) {
+			$not_applicable_button = "<div class='ui container' style='margin-auto: 50px; margin-top: 15px; text-align:center;'>";
+			if (in_array($period_id, $exemptedPeriods)) {
+				$not_applicable_button .= "<div style='margin:none; margin-bottom: 10px; padding:none; font-size: 18pt;'>No Strategic Function for this Period</div><div>Click below to proceed.</div>";
+			}
+			$not_applicable_button .= "<button hidden class='ui fluid button red' onclick='noStrategicFunc()'>Not Applicable</button>";
+			$not_applicable_button .= "</div>";
 		} else {
 			$not_applicable_button = "";
 		}
@@ -1166,7 +1173,7 @@ class Employee_data extends Db
 		</div>	
 		";
 
-		if ($formType == 3) {
+		if ($formType == 3 || in_array($period_id, $exemptedPeriods)) {
 			$view = $not_applicable_button;
 		}
 

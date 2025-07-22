@@ -476,6 +476,7 @@ if (isset($_POST['coreFucntionInput'])) {
     </div>
   ";
 } elseif (isset($_POST['strategicModalContentPost'])) {
+  // strategic form modal
   $dataId = $_POST['strategicModalContentPost'];
   $sql = "SELECT * from spms_strategicfuncdata where strategicFunc_id='$dataId'";
   $sql = $mysqli->query($sql);
