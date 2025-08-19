@@ -164,7 +164,7 @@ function sort_mfo_periods($periods)
 
   rsort($years);
   # remove current year +1
-  array_splice($years, 0, 1);
+  // array_splice($years, 0, 1);
 
   // $mfos = $years;
 
