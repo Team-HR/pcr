@@ -649,7 +649,18 @@ function trows($mysqli, $row, $padding, $addDisplay)
         $sqlIncharge = $mysqli->query($sqlIncharge);
 
         if ($sqlIncharge = $sqlIncharge->fetch_assoc()) {
-          $empincharge .= "<br><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br>";
+          $firstName  = $sqlIncharge['firstName']  ?? '';
+          $lastName   = $sqlIncharge['lastName']   ?? '';
+          $middleName = $sqlIncharge['middleName'] ?? '';
+          $extName    = $sqlIncharge['extName']    ?? '';
+
+          $middleInitial = $middleName !== '' ? $middleName[0] . '.' : '';
+          $extFormatted  = $extName !== '' ? ", $extName" : '';
+
+          $parts = array_filter([$lastName, $firstName, $middleInitial]);
+          $fullName = implode(' ', $parts) . $extFormatted;
+
+          $empincharge .= "<br><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$fullName</a><br>";
         }
 
         // if (isset($siDataRow1['mi_id'])) {

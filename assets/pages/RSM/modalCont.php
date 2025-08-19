@@ -246,7 +246,7 @@ function employFunc($mysqli)
   $sql = "SELECT * from `employees`";
   $sql = $mysqli->query($sql);
   while ($row = $sql->fetch_assoc()) {
-    $view .= "<div class='item' data-value='$row[employees_id]'>$row[firstName] $row[lastName]</div>";
+    $view .= "<div class='item' data-value='$row[employees_id]'>$row[firstName] $row[lastName] $row[middleName] $row[extName]</div>";
   }
   return $view;
 }
