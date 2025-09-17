@@ -8,7 +8,8 @@ if(isset($_POST['pcrBrowseView'])){
   $employee_browse->set_periodMY($period,$year);
   $status = $employee_browse->fileStatus;
   $employee_browse->hideNextBtn();
-  if($status['approved']==""||$status==null){
+  // if($status['approved']==""||$status==null){
+    if($status==null){
     echo "
     <br>
     <br>

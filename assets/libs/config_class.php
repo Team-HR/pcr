@@ -2297,11 +2297,11 @@ class employees extends Db
 	}
 	public function get_all()
 	{
-		$sql  = "SELECT * from employees";
+		$sql  = "SELECT * from employees WHERE department_id = '37' ORDER BY lastName ASC";
 		$sql = $this->mysqli->query($sql);
-		$view = "<option value=''>Search Employee name</option>";
+		$view = "<option value=''>Search name</option>";
 		while ($data = $sql->fetch_assoc()) {
-			$view .= "<option value='$data[employees_id]'>$data[firstName] $data[middleName] $data[lastName] $data[extName]</option>";
+			$view .= "<option value='$data[employees_id]'> $data[lastName], $data[firstName] $data[middleName] $data[extName]</option>";
 		}
 		return $view;
 	}

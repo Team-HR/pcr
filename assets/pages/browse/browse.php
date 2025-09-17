@@ -1,34 +1,59 @@
 <div id="browseCont">
   <?php
-  if($user->authorization){
-    for ($index = 0; $index <= count($user->authorization) ; $index++) {
-      if($index == count($user->authorization)){
-        echo	Authorization_Error();
-      }
-      else if($user->authorization[$index]=="Matrix") {
-        ?>
+  if ($user->authorization) {
+    for ($index = 0; $index <= count($user->authorization); $index++) {
+      if ($index == count($user->authorization)) {
+        echo  Authorization_Error();
+      } else if ($user->authorization[$index] == "Matrix") {
+  ?>
         <script type="text/javascript">
-        $(document).ready(function() {
-          $(".dropdown").dropdown();
-        });
+          $(document).ready(function() {
+            $(".dropdown").dropdown({
+              fullTextSearch: true
+            });
+          });
         </script>
         <h1 class="ui center aligned icon header">
           <i class="find icon"></i>
-          Looking for a Record? Ask me
+          Browse PCRs
         </h1>
         <?php
         $option = new employees();
         ?>
         <div class="ui inverted segment" style="width:50%;margin:auto;">
           <form class="ui form noSubmit " style="text-align:center" onsubmit="Get_info_browse()">
-            <h3>I'm looking for</h3>
+            <h1>BAYAWAN CITY COLLEGE</h1>
+            <h3>Select Personnel:</h3>
             <div class="field">
-              <select class="ui fluid search dropdown" id="browse_emp" >
-                <?=$option->get_all()?>
+              <select class="ui fluid search dropdown" id="browse_emp">
+                <?= $option->get_all() ?>
               </select>
+
+              <!-- 
+              <table class="ui table fluid">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>PCR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{name here}</td>
+                    <td>{department}</td>
+                    <td>
+                      <button class="ui mini primary button">Open</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table> -->
+
+
+
             </div>
             <h3>In the period of</h3>
-            <div  class="field">
+            <div class="field">
               <select class="ui fluid search dropdown" id="browse_period">
                 <option value="January - June">January - June</option>
                 <option value="July - December">July - December</option>
@@ -37,24 +62,24 @@
             <h3>In the year of</h3>
             <div class="field">
               <select class="ui fluid search dropdown" id="browse_year">
-                <?=$year->get_year()?>
+                <?= $year->get_year() ?>
               </select>
             </div>
             <br>
             <button class="blue ui fluid button" type="submit" name="button">Find <i class="ui search icon"></i></button>
           </form>
         </div>
-        <?php
+  <?php
         break;
       }
     }
-  }else{
+  } else {
     echo Authorization_Error();
   }
   ?>
 </div>
 <script type="text/javascript">
-  function Get_info_browse(){
+  function Get_info_browse() {
     formEl = event.srcElement.elements;
     empName = formEl.browse_emp.value;
     period = formEl.browse_period.value;
@@ -62,18 +87,16 @@
     formEl.button.disabled = true;
     xml = new XMLHttpRequest;
     fd = new FormData();
-    fd.append('pcrBrowseView',true);
-    fd.append('emp',empName);
-    fd.append('period',period);
-    fd.append('year',year);
-    xml.onreadystatechange = function(){
-      if(xml.readyState === 4 && this.status === 200) {
+    fd.append('pcrBrowseView', true);
+    fd.append('emp', empName);
+    fd.append('period', period);
+    fd.append('year', year);
+    xml.onreadystatechange = function() {
+      if (xml.readyState === 4 && this.status === 200) {
         document.getElementById('browseCont').innerHTML = this.responseText;
       }
     }
-    xml.open("POST","?config=BrowseConfig",true);
+    xml.open("POST", "?config=BrowseConfig", true);
     xml.send(fd);
   }
-
-
 </script>
