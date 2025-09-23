@@ -92,6 +92,20 @@ class Employee_data extends Db
 		# update prrlist from ihris
 		$this->update_prrlist();
 	}
+
+	public function get_period_and_year($period_id)
+	{
+		$sql = "SELECT * FROM spms_mfo_period WHERE mfoperiod_id = '$period_id'";
+		$res = $this->mysqli->query($sql);
+		if ($row = $res->fetch_assoc()) {
+			return [
+				'month' => $row['month_mfo'],
+				'year'	=> $row['year_mfo']
+			];
+		}
+		return null;
+	}
+
 	public function get_prr_id()
 	{
 		if (!$this->fileStatus["period_id"]) return null;
@@ -1570,7 +1584,7 @@ class Employee_data extends Db
 		Reviewed By:
 		</p>
 		<p style='text-align:center'>
-		<u>" . $this->get_fullname($this->get_status('DepartmentHead')) . "</u>
+		<u>" . $this->get_fullname($this->get_status('ImmediateSup')) . "</u>
 		<br>
 		<span style='font-size:10px'>
 		Immediate Superior/Dept. Head
@@ -2295,9 +2309,10 @@ class employees extends Db
 	{
 		parent::__construct();
 	}
+
 	public function get_all()
 	{
-		$sql  = "SELECT * from employees WHERE department_id = '37' ORDER BY lastName ASC";
+		$sql  = "SELECT * from employees WHERE department_id = '8' ORDER BY lastName ASC";
 		$sql = $this->mysqli->query($sql);
 		$view = "<option value=''>Search name</option>";
 		while ($data = $sql->fetch_assoc()) {
@@ -2305,6 +2320,105 @@ class employees extends Db
 		}
 		return $view;
 	}
+
+	/**
+	 * 
+	 * get all personnel from a department
+	 * tabulated and cascaded according to formtype
+	 * START
+	 * 
+	 * */
+
+	public function get_all_department($period_id)
+	{
+		$data = [];
+
+		$sql  = "SELECT 
+            prs.performanceReviewStatus_id as id, 
+            prs.period_id, 
+            prs.employees_id, 
+            prs.ImmediateSup, 
+            prs.DivisionHead, 
+            prs.DepartmentHead, 
+            prs.formType, 
+            prs.department_id,
+			emp.employees_id,
+			emp.lastName,
+			emp.firstName,
+			emp.middleName,
+			emp.extName
+         FROM spms_performancereviewstatus prs LEFT JOIN employees emp
+			ON prs.employees_id = emp.employees_id
+         WHERE prs.department_id = 8 AND prs.period_id = '$period_id' 
+         ORDER BY prs.formType DESC";
+
+		$sql = $this->mysqli->query($sql);
+
+		while ($row = $sql->fetch_assoc()) {
+			$row["full_name"] =
+				$row["lastName"] . ", " .
+				$row["firstName"] . " " .
+				(!empty($row["middleName"]) ? strtoupper($row["middleName"][0]) . "." : "") .
+				(!empty($row["extName"]) ? " " . $row["extName"] : "");
+
+			$formTypes = [
+				1 => "IPCR",
+				2 => "SPCR",
+				3 => "DPCR",
+				4 => "DIVISION PCR"
+			];
+
+			$row["formType_"] = $formTypes[$row["formType"]] ?? "";
+
+			$data[] = $row;
+		}
+
+		// Step 1: Index by employee_id
+		$indexed = [];
+		foreach ($data as $row) {
+			$row['subordinates'] = [];
+			$indexed[$row['employees_id']] = $row;
+		}
+
+		// Step 2: Build hierarchy with fallback logic
+		$tree = [];
+		foreach ($indexed as $id => &$row) {
+			// Determine supervisor with fallback
+			$supervisorId = null;
+			if (!empty($row['ImmediateSup']) && isset($indexed[$row['ImmediateSup']])) {
+				$supervisorId = $row['ImmediateSup'];
+			} elseif (!empty($row['DivisionHead']) && isset($indexed[$row['DivisionHead']])) {
+				$supervisorId = $row['DivisionHead'];
+			} elseif (!empty($row['DepartmentHead']) && isset($indexed[$row['DepartmentHead']])) {
+				$supervisorId = $row['DepartmentHead'];
+			}
+
+			if ($supervisorId) {
+				$indexed[$supervisorId]['subordinates'][] = &$row;
+			} else {
+				// No valid supervisor → top-level
+				$tree[] = &$row;
+			}
+		}
+		unset($row); // break reference
+
+		// Apply to tree
+		assignLevels($tree);
+
+		// flatten the tree
+		$flatList = flattenTree($tree);
+
+		// return json_encode($flatList, JSON_PRETTY_PRINT);
+		return $flatList;
+	}
+
+	/**
+	 * 
+	 * 
+	 * END
+	 * 
+	 * */
+
 	public function get_department($dep)
 	{
 		$sql  = "SELECT * from employees where	department_id='$dep'";
@@ -2316,6 +2430,40 @@ class employees extends Db
 		return $view;
 	}
 }
+
+
+// Step 3: Recursive function to assign levels
+function assignLevels(&$nodes, $level = 0)
+{
+	foreach ($nodes as &$node) {
+		$node['level'] = $level;
+		if (!empty($node['subordinates'])) {
+			assignLevels($node['subordinates'], $level + 1);
+		}
+	}
+}
+
+// Recursive function to flatten the tree
+function flattenTree($nodes, &$flat = [])
+{
+	foreach ($nodes as $node) {
+		// Copy node but remove nested subordinates
+		$copy = $node;
+		unset($copy['subordinates']);
+
+		// Add to flat list
+		$flat[] = $copy;
+
+		// Process children
+		if (!empty($node['subordinates'])) {
+			flattenTree($node['subordinates'], $flat);
+		}
+	}
+	return $flat;
+}
+
+
+
 function Authorization_Error()
 {
 	$view = "

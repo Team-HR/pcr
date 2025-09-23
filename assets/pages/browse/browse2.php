@@ -6,52 +6,14 @@
         echo  Authorization_Error();
       } else if ($user->authorization[$index] == "Matrix") {
   ?>
-        <script type="text/javascript">
-          $(document).ready(function() {
-            $(".dropdown").dropdown({
-              fullTextSearch: true
-            });
-          });
-        </script>
         <h1 class="ui center aligned icon header">
           <i class="find icon"></i>
           Browse PCRs
         </h1>
-        <?php
-        $option = new employees();
-        ?>
+
         <div class="ui inverted segment" style="width:50%;margin:auto;">
-          <form class="ui form noSubmit " style="text-align:center" onsubmit="Get_info_browse()">
+          <form class="ui form noSubmit " style="text-align:center" onsubmit="getList()">
             <h1>CITY SOCIAL WELFARE & DEVELOPMENT OFFICE</h1>
-            <h3>Select Personnel:</h3>
-            <div class="field">
-              <select class="ui fluid search dropdown" id="browse_emp">
-                <?= $option->get_all() ?>
-              </select>
-
-              <!-- 
-              <table class="ui table fluid">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Department</th>
-                    <th>PCR</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{name here}</td>
-                    <td>{department}</td>
-                    <td>
-                      <button class="ui mini primary button">Open</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table> -->
-
-
-
-            </div>
             <h3>In the period of</h3>
             <div class="field">
               <select class="ui fluid search dropdown" id="browse_period">
@@ -78,22 +40,28 @@
   }
   ?>
 </div>
-<script type="text/javascript">
-  function Get_info_browse() {
+
+
+<script>
+  // $(document).ready(function() {
+  //   $(".dropdown").dropdown({
+  //     fullTextSearch: true
+  //   });
+  // });
+
+  function getList() {
     formEl = event.srcElement.elements;
-    empName = formEl.browse_emp.value;
     period = formEl.browse_period.value;
     year = formEl.browse_year.value;
-    formEl.button.disabled = true;
+    // formEl.button.disabled = true;
     xml = new XMLHttpRequest;
     fd = new FormData();
-    fd.append('pcrBrowseView', true);
-    fd.append('emp', empName);
+    fd.append('showList', true);
     fd.append('period', period);
     fd.append('year', year);
     xml.onreadystatechange = function() {
       if (xml.readyState === 4 && this.status === 200) {
-        document.getElementById('browseCont').innerHTML = this.responseText;
+        window.open("/index.php?browse-list&periodId=" + this.responseText, "_blank");
       }
     }
     xml.open("POST", "?config=BrowseConfig", true);
