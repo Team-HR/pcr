@@ -267,7 +267,6 @@ if (isset($_POST['coreFucntionInput'])) {
     $criticInput = $immediateSuppCriticInput;
   }
 
-
   $sqlChildSucIn = "SELECT * FROM `spms_corefucndata` where cfd_id='$_POST[EditCoreFuncDataPost]'";
   $sqlChildSucIn = $mysqli->query($sqlChildSucIn);
   $sqlChildSucIn = $sqlChildSucIn->fetch_assoc();
@@ -292,8 +291,8 @@ if (isset($_POST['coreFucntionInput'])) {
     <label>Weight Allocation(%)</label>
     <input type='text' id='percEdit' value='$sql[percent]'>
   </div>
-  <div class='field' style='display:none'>
-  <label>Remark</label>
+  <div class='field' style='_display:none'>
+  <label>Remarks</label>
   <textarea id='remarkEdit'>$sql[remarks]</textarea>
   </div>
   <div id='criticInput'>

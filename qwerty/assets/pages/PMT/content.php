@@ -2,6 +2,7 @@
 $sql = "SELECT * from `spms_accounts` left join `employees` on `spms_accounts`.`employees_id`=`employees`.`employees_id` where `type` like '%PMT%'";
 $sql = $mysqli->query($sql);
 $col = "";
+$index = 0;
 while ($a = $sql->fetch_assoc()) {
   $assignSql = "SELECT * from `spms_departmentassignedtopmt` 
                 left join `department` on `spms_departmentassignedtopmt`.`department_id`=`department`.`department_id`
@@ -17,28 +18,40 @@ while ($a = $sql->fetch_assoc()) {
     </li>
     ";
   }
+
   $col .= "<div class='col-md-4 col-sm-6 pmtCard'>
-  <div class='card'>
-  <div class='card-header' style='padding-top:25px'>
-  <h5 class='card-title' style='float:left'>$a[lastName] $a[firstName] $a[middleName]</h5>
-  <button class='btn btn-primary pmtHiddenToggle' data-content='hiddenContent' style='float:right;margin-top:-10px'>+</button>
-  </div>
-  <div class='hiddenContent' style='padding:20px;display:none'>
-  <div class='form-group'>
-  <div class='input-group mb-3'>
-  <div class='input-group-prepend'>
-  <span class='input-group-text'>Search</span>
-  </div>
-  <input type='text' class='form-control searchDep'>
-  </div>
-  <div class='result' style='position:relative;' data-id='$a[employees_id]'></div>
-  </div>
-  <ul class='list-group' data-id='$a[employees_id]'>
-    $assignedDep
-  </ul>
-  </div>
-  </div>
+    <div class='card'>
+      <div class='accordion' id='accordionExample{$index}'>
+        <div class='accordion-item'>
+          <h2 class='accordion-header' id='headingOne{$index}'>
+            <button class='accordion-button' type='button' data-bs-toggle='collapse' data-bs-target='#collapseOne{$index}'
+                    aria-expanded='true' aria-controls='collapseOne{$index}'>
+              <h5>$a[lastName] $a[firstName] $a[middleName]</h5>
+            </button>
+          </h2>
+          <div id='collapseOne{$index}' class='accordion-collapse collapse' aria-labelledby='headingOne{$index}'
+              data-bs-parent='#accordionExample{$index}'>
+            <div class='accordion-body'>
+              <div class='form-group'>
+                <div class='input-group mb-3'>
+                  <div class='input-group-prepend'>
+                    <span class='input-group-text'>Search</span>
+                  </div>
+                  <input type='text' class='form-control searchDep'>
+                </div>
+                <div class='result' style='position:relative;' data-id='$a[employees_id]'></div>
+              </div>
+              <ul class='list-group' data-id='$a[employees_id]'>
+                $assignedDep
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>";
+
+  $index += 1;
 }
 ?>
 <div class="jumbotron" style="background-image:url('assets/image/pmt.png');background-size:100% 100%;background-repeat: no-repeat;">
@@ -66,36 +79,54 @@ while ($a = $sql->fetch_assoc()) {
     }
 
     function showDepAvialable() {
-      var displayTo = event.path[2].children[1];
-      var el = event.target.value;
-      if (el.length >= 3) {
-        $.post('?config=PMT', {
-          searchDep: el,
-        }, function(data, textStatus, xhr) {
-          displayTo.innerHTML = data;
-          var searchResult = document.getElementsByClassName('searchResult');
-          var count = 0;
-          while (count < searchResult.length) {
-            searchResult[count].addEventListener('click', selectedSearchResult);
-            count++;
-          }
-        });
-      } else {
-        displayTo.innerHTML = "";
+      var path = event.composedPath()
+      //event.path[2].children[1];
+      // Check if path[2] exists first
+      if (path[2] && path[2].children[1]) {
+        const displayTo = path[2].children[1];
+        var el = event.target.value;
+        if (el.length >= 3) {
+          $.post('?config=PMT', {
+            searchDep: el,
+          }, function(data, textStatus, xhr) {
+            displayTo.innerHTML = data;
+            var searchResult = document.getElementsByClassName('searchResult');
+            var count = 0;
+            while (count < searchResult.length) {
+              searchResult[count].addEventListener('click', selectedSearchResult);
+              count++;
+            }
+          });
+        } else {
+          displayTo.innerHTML = "";
+        }
       }
     }
 
     function selectedSearchResult() {
-      var empId = event.path[2].attributes['data-id'].value;
-      var depToAssign = event.target.attributes['data-id'].value;
-      var targetFile = event.path[4];
-      event.path[2].innerHTML = "";
-      $.post('?config=PMT', {
-        assignDepartmentToPMT: empId,
-        depToAssign: depToAssign,
-      }, function(data, textStatus, xhr) {
-        refreshCard(empId, targetFile);
-      });
+
+      var path = event.composedPath()
+
+      if (path[2] && path[2].attributes['data-id'].value) {
+
+        var empId = path[2].attributes['data-id'].value;
+        console.log('PMT ID:', empId);
+
+        var depToAssign = event.target.attributes['data-id'].value;
+        console.log('depToAssign:', depToAssign);
+
+        var targetFile = path[4];
+        path[2].innerHTML = "";
+
+        $.post('?config=PMT', {
+          assignDepartmentToPMT: empId,
+          depToAssign: depToAssign,
+        }, function(data, textStatus, xhr) {
+          refreshCard(empId, targetFile);
+        });
+
+      }
+
     }
 
     function refreshCard(empId, targetFile) {
@@ -121,15 +152,18 @@ while ($a = $sql->fetch_assoc()) {
     }
 
     function removeList() {
-      var elements = event.path;
-      var empId = elements[3].attributes['data-id'].value;
-      var dataId = elements[1].attributes['data-id'].value;
-      $.post('?config=PMT', {
-        deleteAssignDep: dataId,
-      }, function(data, textStatus, xhr) {
-        refreshCard(empId, elements[4]);
-      });
+      var elements = event.composedPath();
+      if (elements[3] && elements[3]?.attributes['data-id']?.value) {
+        var empId = elements[3].attributes['data-id'].value;
+        var dataId = elements[1].attributes['data-id'].value;
+        $.post('?config=PMT', {
+          deleteAssignDep: dataId,
+        }, function(data, textStatus, xhr) {
+          refreshCard(empId, elements[4]);
+        });
+      }
     }
+
     document.addEventListener('keyup', keyEvents);
 
     function keyEvents() {
@@ -157,6 +191,7 @@ while ($a = $sql->fetch_assoc()) {
         }
       });
     }
+
     var pmtHiddenToggle = document.getElementsByClassName('pmtHiddenToggle');
     var count = 0;
     while (count < pmtHiddenToggle.length) {
@@ -166,7 +201,10 @@ while ($a = $sql->fetch_assoc()) {
 
     function pmtHiddenTogglefunc() {
       var targetCont = event.target.attributes['data-content'].value;
-      targetCont = event.path[3].getElementsByClassName(targetCont);
+      // targetCont = event.path; //[3].getElementsByClassName(targetCont);
+      console.log(targetCont);
+
+      return false
       if (targetCont[0].style.display) {
         targetCont[0].style.display = "";
       } else {
