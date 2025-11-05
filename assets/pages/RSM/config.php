@@ -565,7 +565,7 @@ function editInputs($dataId, $count, $title)
   <div class='ui right labeled input' >
   <textarea  type='text' style='width:50px;height:50px' id='EditcountRsm$dataId'>$count</textarea>
   <textarea  type='text' style='width:250px;height:50px'  id='EdittitleRsm$dataId'>$title</textarea>
-  <div class='mini green ui basic icon button' onclick='EditRsmTitle($dataId)'><i class='edit icon'></i></div>
+  <div><button class='mini green ui basic icon button' style='margin-top: 10px; margin-left:2px;' onclick='EditRsmTitle($dataId)'><i class='save icon'></i> Save</button></div>
   </div>
   </div>";
   return $view;
@@ -887,7 +887,7 @@ function AddInputs($mysqli, $dataId)
     <label>Title</label>
     <div class='ui right labeled input'>
     <input type='text' style='width:200px' placeholder='Type Here.....' id='titleRsm$dataId'>
-    <div class='mini ui primary basic icon button' onclick='addMFoRsm(\"$dataId\")'><i class='save icon'></i></div>
+    <div> <button class='mini ui primary basic icon button' onclick='addMFoRsm(\"$dataId\")' style='margin-left: 2px;'> <i class='save icon'></i> Save</button></div>
     </div>
     </div>
     </div>

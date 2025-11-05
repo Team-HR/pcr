@@ -1701,6 +1701,25 @@ class Employee_data extends Db
 			$department = "CITY VICE MAYOR'S OFFICE";
 		}
 
+		/**
+		 * 
+		 * 10/23/2025
+		 * JUNRIE R MAHINAY
+		 * custom period for 
+		 * for applicant request
+		 * 
+		 * */
+
+
+		$periodStr = "";
+		if ($this->fileStatus['period_id'] == 19 && $this->fileStatus['employees_id'] == 432415) {
+			$periodStr = "November 18, 2024 - December 31, 2024";
+		} elseif ($this->fileStatus['period_id'] == 22 && $this->fileStatus['employees_id'] == 432415) {
+			$periodStr = "January 1, 2025 - September 30, 2025";
+		} else {
+			$periodStr = "$period[month_mfo] $period[year_mfo]";
+		}
+
 		$view = "
 		<table border='1px' style='border-collapse:collapse;width:98%;margin:auto;'>
 		<tr>
@@ -1709,7 +1728,7 @@ class Employee_data extends Db
 		<p>
 		I, <b>$empInfo[firstName] $empInfo[middleName] $empInfo[lastName] $empInfo[extName]</b>, $empInfo[position] of the <b>$department</b>
 		commit to deliver and agree to be rated on the attainment of the following targets in accordance with the indicated measures for the
-		period $period[month_mfo] $period[year_mfo]
+		period $periodStr. 
 		</p>
 		<p style='width:25%;text-align:center;float:right'>
 		<b><u>$empInfo[firstName] $empInfo[middleName] $empInfo[lastName] $empInfo[extName]</u></b><br>
