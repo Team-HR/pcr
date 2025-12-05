@@ -141,7 +141,7 @@ class PcrForm
 		$percent = 0;
 
 		foreach ($data as $value) {
-			if (isset($value["percent"])) {
+			if (isset($value["percent"]) && !isset($value["not_applicable"])) {
 				$percent += $value["percent"];
 			}
 		}
