@@ -2331,7 +2331,8 @@ class employees extends Db
 
 	public function get_all()
 	{
-		$sql  = "SELECT * from employees WHERE department_id = '8' ORDER BY lastName ASC";
+		// WHERE department_id = '7'
+		$sql  = "SELECT * from employees ORDER BY lastName ASC";
 		$sql = $this->mysqli->query($sql);
 		$view = "<option value=''>Search name</option>";
 		while ($data = $sql->fetch_assoc()) {

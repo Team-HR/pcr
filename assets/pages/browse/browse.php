@@ -22,7 +22,7 @@
         ?>
         <div class="ui inverted segment" style="width:50%;margin:auto;">
           <form class="ui form noSubmit " style="text-align:center" onsubmit="Get_info_browse()">
-            <h1>CITY SOCIAL WELFARE & DEVELOPMENT OFFICE</h1>
+            <!-- <h1>CITY SOCIAL WELFARE & DEVELOPMENT OFFICE</h1> -->
             <h3>Select Personnel:</h3>
             <div class="field">
               <select class="ui fluid search dropdown" id="browse_emp">

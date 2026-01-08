@@ -22,6 +22,7 @@ if (isset($_POST['showList'])) {
   $employee_browse = new Employee_data();
   $employee_browse->set_emp($emp);
   $employee_browse->set_periodMY($period, $year);
+  $employee_browse->hideCol = true; // hide action buttons
   $status = $employee_browse->fileStatus;
   $employee_browse->hideNextBtn();
   // if($status['approved']==""||$status==null){
