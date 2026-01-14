@@ -20,7 +20,7 @@ if (isset($_POST['page'])) {
 			$step->_set('core');
 		} elseif ($user->support_countEmpty > 0) {
 			$step->_set('support');
-		} elseif ($user->get_status('assembleAll') == "0") {
+		} elseif ($user->get_status('assembleAll') == "") {
 			$step->_set('strategic');
 		} elseif ($user->commentCount < 1) {
 			$step->_set('comment');
@@ -36,7 +36,7 @@ if (isset($_POST['page'])) {
 		} elseif ($user->support_countEmpty > 0 || $go == "support") {
 			$table->set_body($user->get_supportView());
 			$view = $table->_get();
-		} elseif ($user->get_status('assembleAll') == "0" || $go == "strategic") {
+		} elseif ($user->get_status('assembleAll') == "" || $go == "strategic") {
 			$table->set_body($user->get_strategicView());
 			if ($user->strategic_count >= 1) {
 				$view .= $table->_get();
