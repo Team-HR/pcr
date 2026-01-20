@@ -19,7 +19,7 @@ function promp() {
 }
 
 function timer() {
-  const timeOut = 5; //mins
+  const timeOut = 480; //mins (8 hours)
   promp();
   s = 0;
   // i = setInterval(function () {
