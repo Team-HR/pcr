@@ -1104,7 +1104,7 @@ class Employee_data extends Db
 	// strategic form page
 	public function form_strategicView()
 	{
-		$exemptedPeriods = [22];
+		$exemptedPeriods = [22, 23];
 
 		$period_id = $_SESSION['period_pr'];
 		$employee_id = $_SESSION['emp_id'];
