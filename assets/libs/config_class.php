@@ -1247,12 +1247,9 @@ class Employee_data extends Db
 		}
 
 
-
-
-
 		# if vice mayor & sp head of agency = vice mayor
 		if ($department_id == 16) {
-			$lgu_head = "HENRY E. CARREON, JR.";
+			$lgu_head = "RUSMAR IAN D. TIJING";
 		} else {
 			$lgu_head = "JOHN T. RAYMOND, JR.";
 		}
