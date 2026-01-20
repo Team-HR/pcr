@@ -56,8 +56,8 @@ function login_log() {
           btn.disabled = false;
           $("#loginAlertMsg").append(
             "<div class='ui negative message' id='msg_div' ><i class='close icon' onclick='this.parentElement.remove()'></i><div id='msg_promp'>" +
-              data +
-              "</div></div>"
+            data +
+            "</div></div>"
           );
         }
       }
@@ -1178,7 +1178,7 @@ function completeHandler(dataCheckPoint) {
 function errorHandler() {
   alert("something wemt wrong");
 }
-function abortHandler() {}
+function abortHandler() { }
 function uploadMore() {
   btn = event.srcElement.parentElement;
   btn.style.display = "none";

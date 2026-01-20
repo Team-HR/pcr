@@ -372,7 +372,7 @@ class Employee_data extends Db
 				'dateAccomplished' => '',
 				'formType' => '',
 				'department_id' => $department_id,
-				'assembleAll' => '',
+				'assembleAll' => '0',
 			];
 		} else {
 			if (is_numeric($perStatus['DivisionHead'])) {
