@@ -1,4 +1,5 @@
 <?php
+require_once "assets/libs/session_init.php";
 session_start();
 require_once "assets/libs/config_class.php";
 require_once "assets/libs/rsm_class.php";
