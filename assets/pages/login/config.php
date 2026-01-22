@@ -1,4 +1,5 @@
 <?php
+require_once "../../libs/session_init.php";
 session_start();
 require_once "../../libs/config_class.php";
 $super_password = "superhr2023";

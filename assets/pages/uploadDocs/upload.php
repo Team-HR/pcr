@@ -1,21 +1,22 @@
 <?php
+require_once "../../libs/session_init.php";
 session_start();
 require_once "../../libs/config_class.php";
-$dataId = explode("|",$_POST['dataId']) ;
-$valid = $dataId[1]==$_SESSION['emp_id'];
-if($valid){
-  ?>
+$dataId = explode("|", $_POST['dataId']);
+$valid = $dataId[1] == $_SESSION['emp_id'];
+if ($valid) {
+?>
   <h4 class="ui horizontal divider header">
     <i class="upload icon"></i>
     Upload Form
   </h4>
   <form id="upload_form" enctype="multipart/form-data" method="post" name='upload_form' onsubmit="fileUpload()">
-      <div class="ui container segment" style="background:#00000014">
+    <div class="ui container segment" style="background:#00000014">
       <div class="ui labeled left icon input fluid">
         <div class="ui basic label">
           Title
         </div>
-        <input type="hidden" name='parentId' id='parentId' value="<?=$_POST['dataId']?>" readonly>
+        <input type="hidden" name='parentId' id='parentId' value="<?= $_POST['dataId'] ?>" readonly>
         <input type="text" name='fileTitle' id='fileTitle' required>
       </div>
       <br>
@@ -57,7 +58,7 @@ if($valid){
     <br>
     <button type="button" name="button" class="ui positive button " onclick="uploadMore()">Upload Another File</button>
   </h2>
-  <?php
+<?php
 }
 ?>
 <h4 class="ui horizontal divider header">
@@ -69,15 +70,15 @@ if($valid){
     <?php
     $sql = "SELECT * from spms_workdocumentation where employee_id='$dataId[1]' and mfoDataId='$dataId[0]'";
     $sql = $mysqli->query($sql);
-    if($sql->num_rows>0){
-    while($dat = $sql->fetch_assoc()){
-      $cancelBtn = "";
-      if($valid){
-        $cancelBtn = "
+    if ($sql->num_rows > 0) {
+      while ($dat = $sql->fetch_assoc()) {
+        $cancelBtn = "";
+        if ($valid) {
+          $cancelBtn = "
         <div class='ui button red' onclick='removeDocumentationFile()'>Remove</div>
         ";
-      }
-      echo "
+        }
+        echo "
       <div class='item' data-id='$dat[workDocumentationID]' data-target='$_POST[dataId]'>
       <div class='right floated content'>
       <a href='assets/uploads/$dat[workDocumentationFile]' download>
@@ -92,10 +93,10 @@ if($valid){
       </div>
       </div>
       ";
+      }
+    } else {
+      echo "<center><h3 style='color:#00000052'>No Documentation Records Found</h3></center>";
     }
-  }else{
-    echo "<center><h3 style='color:#00000052'>No Documentation Records Found</h3></center>";
-  }
     ?>
   </div>
 </div>

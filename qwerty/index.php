@@ -1,4 +1,5 @@
 <?php
+require_once("../assets/libs/session_init.php");
 session_start();
 
 require_once("assets/libs/class/Class.php");

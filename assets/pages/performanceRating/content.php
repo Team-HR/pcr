@@ -2,15 +2,19 @@
 require_once "assets/pages/performanceRating/config.php";
 if (isset($_POST['page'])) {
 	$page = $_POST['page'];
+	$period_id = $_POST['period_id'];
 	if ($page == 'coreFunction') {
 		$go = "";
 		if (isset($_POST['gotoStep'])) {
 			$go = $_POST['gotoStep'];
 		}
-		$user->set_period($_SESSION['period_pr']);
+
+		$user->set_period($period_id);
 		$period = $user->get_period('mfoperiod_id');
 		$empId = $user->get_emp('employees_id');
+
 		$view = "";
+
 		$table = new table($user->hideCol);
 		$table->formType($user->get_status('formType'));
 		//step
@@ -27,6 +31,9 @@ if (isset($_POST['page'])) {
 		} elseif ($user->get_status('assembleAll') == "1") {
 			$step->_set('final');
 		}
+
+
+
 		// pagecontent
 		if ($user->signatoriesCount < 1 || $go == "signatories") {
 			$view = $user->form_signatories();
@@ -94,9 +101,10 @@ if (isset($_POST['page'])) {
 		die();
 	} else {
 		$sql = $sql->fetch_assoc();
-		$_SESSION['period_pr'] = $sql['mfoperiod_id'];
+		$period_id = $sql['mfoperiod_id'];
+		$_SESSION['period_pr'] = $period_id;
 		$_SESSION['iMatrix_period'] = $sql['mfoperiod_id'];
-		print(1);
+		echo $period_id;
 	}
 } elseif (isset($_POST['saveSiData'])) {
 	$acc = addslashes($_POST['acc']);
@@ -198,7 +206,7 @@ if (isset($_POST['page'])) {
 	}
 } elseif (isset($_POST['addSuppAccomplishementSave'])) {
 	$empId = $_SESSION['emp_id'];
-	$period = $_SESSION['period_pr'];
+	$period = $_POST['period_id'];
 	$parentId = $_POST['addSuppAccomplishementSave'];
 	$parent = "SELECT * from `spms_supportfunctions` where `id_suppFunc`='$parentId'";
 	$parent = $mysqli->query($parent);
@@ -283,7 +291,7 @@ if (isset($_POST['page'])) {
 	}
 } elseif (isset($_POST['saveStrategicFuncPost'])) {
 	$emp = $_SESSION['emp_id'];
-	$period = $_SESSION['period_pr'];
+	$period = $_POST['period_id'];
 	$mfo = addslashes($_POST['mfo']);
 	$suc_in = addslashes($_POST['suc_in']);
 	$acc = addslashes($_POST['acc']);
@@ -318,7 +326,7 @@ if (isset($_POST['page'])) {
 	}
 } elseif (isset($_POST['finishperformanceReviewPost'])) {
 	$empId = $_SESSION['emp_id'];
-	$period = $_SESSION['period_pr'];
+	$period = $_POST['period_id'];
 	$assembleAll = $_POST['assembleAll'];
 	$approved = $_POST['approved'];
 	$sql = "UPDATE `spms_performancereviewstatus` SET `assembleAll` = '1', `approved` = '$approved'  WHERE `period_id` = '$period' and `employees_id`='$empId'";
@@ -366,7 +374,7 @@ if (isset($_POST['page'])) {
 # should also update prrlist from ihris
 elseif (isset($_POST['submitPerformance'])) {
 	$empId = $_SESSION['emp_id'];
-	$period = $_SESSION['period_pr'];
+	$period = $_POST['period_id'];
 	$date = date("m/d/y");
 	$sql = "UPDATE `spms_performancereviewstatus` SET `submitted` = 'Done', `dateAccomplished`='$date'  WHERE `period_id` = '$period' and `employees_id`='$empId'";
 	$sql = $mysqli->query($sql);
@@ -378,7 +386,7 @@ elseif (isset($_POST['submitPerformance'])) {
 } elseif (isset($_POST['signatoriesAddPost'])) {
 	$department = $user->get_emp('department_id');
 	$empId = $_SESSION['emp_id'];
-	$period = $_SESSION['period_pr'];
+	$period = $_POST['period_id'];
 	$immediateSup = $_POST['immediateSup'];
 	$departmentHead = $_POST['departmentHead'];
 	$formType = $_POST['formType'];
@@ -396,8 +404,8 @@ elseif (isset($_POST['submitPerformance'])) {
 	} else {
 		#
 		$sql = "INSERT INTO `spms_performancereviewstatus`
-		(`performanceReviewStatus_id`, `period_id`, `employees_id`, `ImmediateSup`, `DepartmentHead`, `HeadAgency`, `PMT`, `submitted`,`panelApproved`, `approved`, `dateAccomplished`,`formType`,`department_id`)
-		VALUES (NULL, '$period', '$empId', '$immediateSup', '$departmentHead', '$headAgency', '0','','', '', '','$formType','$department')";
+	(`performanceReviewStatus_id`, `period_id`, `employees_id`, `ImmediateSup`, `DepartmentHead`, `HeadAgency`, `PMT`, `submitted`,`panelApproved`, `approved`, `dateAccomplished`,`formType`,`department_id`,`assembleAll`)
+	VALUES (NULL, '$period', '$empId', '$immediateSup', '$departmentHead', '$headAgency', '0','','', '', '','$formType','$department','0')";
 		#
 	}
 	$sql = $mysqli->query($sql);
@@ -408,7 +416,7 @@ elseif (isset($_POST['submitPerformance'])) {
 	}
 } elseif (isset($_POST['commentRecPost'])) {
 	$empId = $_SESSION['emp_id'];
-	$period = $_SESSION['period_pr'];
+	$period = $_POST['period_id'];
 	// $com = addslashes($_POST['commentRecPost']);
 	$com = $mysqli->real_escape_string($_POST['commentRecPost']);
 	$sql = "SELECT * from	spms_commentrec where period_id='$period' and emp_id='$empId'";

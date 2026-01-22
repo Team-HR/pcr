@@ -372,7 +372,7 @@ class Employee_data extends Db
 				'dateAccomplished' => '',
 				'formType' => '',
 				'department_id' => $department_id,
-				'assembleAll' => '',
+				'assembleAll' => '0',
 			];
 		} else {
 			if (is_numeric($perStatus['DivisionHead'])) {
@@ -1104,7 +1104,7 @@ class Employee_data extends Db
 	// strategic form page
 	public function form_strategicView()
 	{
-		$exemptedPeriods = [22];
+		$exemptedPeriods = [22, 23];
 
 		$period_id = $_SESSION['period_pr'];
 		$employee_id = $_SESSION['emp_id'];
@@ -1247,12 +1247,9 @@ class Employee_data extends Db
 		}
 
 
-
-
-
 		# if vice mayor & sp head of agency = vice mayor
 		if ($department_id == 16) {
-			$lgu_head = "HENRY E. CARREON, JR.";
+			$lgu_head = "RUSMAR IAN D. TIJING";
 		} else {
 			$lgu_head = "JOHN T. RAYMOND, JR.";
 		}
@@ -2114,12 +2111,14 @@ class year
 	private $show;
 	function __construct()
 	{
+		// 1st period: 01-06
+		// 2nd period: 07-12
 		$dnow = date('Y') + 1;
 		$dpast = date('Y') - 50;
 		$view = "";
 		while ($dnow >= $dpast) {
 
-			if ($dnow == date('Y')) {
+			if ($dnow == 2025) {
 				$view .= "<option value='$dnow' selected>$dnow</option>";
 			} else {
 				$view .= "<option value='$dnow'>$dnow</option>";

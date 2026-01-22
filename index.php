@@ -1,4 +1,5 @@
 <?php
+require_once "assets/libs/session_init.php";
 session_start();
 require_once "assets/libs/config_class.php";
 require_once "assets/libs/rsm_class.php";
@@ -19,10 +20,12 @@ if (isset($_SESSION['emp_id'])) {
 			require_once "assets/pages/logout.php";
 		} else if (isset($_GET['performanceRating'])) {
 			if (!isset($_GET['form']) && !isset($_GET['error'])) {
+				// period and year selection
 				require_once "assets/pages/performanceRating/Index.php";
 			} else if (!isset($_GET['form']) && isset($_GET['error'])) {
 				require_once "assets/pages/performanceRating/matrixError.php";
 			} else {
+				// pcr form
 				require_once "assets/pages/performanceRating/form.php";
 			}
 		} else if (isset($_GET['home'])) {
