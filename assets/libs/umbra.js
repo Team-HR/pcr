@@ -56,8 +56,8 @@ function login_log() {
           btn.disabled = false;
           $("#loginAlertMsg").append(
             "<div class='ui negative message' id='msg_div' ><i class='close icon' onclick='this.parentElement.remove()'></i><div id='msg_promp'>" +
-              data +
-              "</div></div>"
+            data +
+            "</div></div>"
           );
         }
       }
@@ -394,7 +394,7 @@ function performanceRatingCore() {
     function (data, textStatus, xhr) {
       // coreFunctionForm
       if (data) {
-        window.location.href = "?performanceRating&form";
+        window.location.href = "?performanceRating&form&periodId=" + data;
       }
       // showPr("coreFunction", "");
     }
@@ -402,11 +402,14 @@ function performanceRatingCore() {
 }
 function showPr(page, go) {
   $("#appLoader").dimmer({ closable: false }).dimmer("show");
+  const urlParams = new URLSearchParams(window.location.search);
+  const periodId = urlParams.get('periodId');
   $.post(
     "?config=prContent",
     {
       page: page,
       gotoStep: go,
+      period_id: periodId,
     },
     function (data, textStatus, xhr) {
       console.log(data);
@@ -634,10 +637,13 @@ function addSuppAccomplishementSaveData(i) {
   time = $("#sup_inTimeliness").val();
   acc = $("#acc_supp").val();
   remark = $("#remarks_supp").val();
+  const urlParams = new URLSearchParams(window.location.search);
+  const periodId = urlParams.get('periodId');
   $.post(
     "?config=prContent",
     {
       addSuppAccomplishementSave: i,
+      period_id: periodId,
       qual: quality,
       eff: eff,
       time: time,
@@ -730,10 +736,13 @@ function saveStrategicFunc() {
   // time    = $("#time").val();
   stratAverage = $("#stratAverage").val();
   remark = $("#remark").val();
+  const urlParams = new URLSearchParams(window.location.search);
+  const periodId = urlParams.get('periodId');
   $.post(
     "?config=prContent",
     {
       saveStrategicFuncPost: true,
+      period_id: periodId,
       mfo: mfo,
       suc_in: suc_in,
       acc: acc,
@@ -760,10 +769,13 @@ function noStrategicFunc() {
   acc = "N/A";
   stratAverage = 0;
   remark = "N/A";
+  const urlParams = new URLSearchParams(window.location.search);
+  const periodId = urlParams.get('periodId');
   $.post(
     "?config=prContent",
     {
       saveStrategicFuncPost: true,
+      period_id: periodId,
       mfo: mfo,
       suc_in: suc_in,
       acc: acc,
@@ -803,10 +815,13 @@ function strategicDeleteFunc(i) {
   }
 }
 function finishperformanceReview(s, r, a) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const periodId = urlParams.get('periodId');
   $.post(
     "?config=prContent",
     {
       finishperformanceReviewPost: true,
+      period_id: periodId,
       assembleAll: s,
       reviewed: r,
       approved: a,
@@ -823,6 +838,9 @@ function finishperformanceReview(s, r, a) {
 }
 
 function signatoriesFunc() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const periodId = urlParams.get('periodId');
+
   formType = $("#formType").val();
   immediateSup = $("#immediateSup").val();
   departmentHead = $("#departmentHead").val();
@@ -838,6 +856,7 @@ function signatoriesFunc() {
     "?config=prContent",
     {
       signatoriesAddPost: true,
+      period_id: periodId,
       immediateSup: immediateSup,
       departmentHead: departmentHead,
       headAgency: headAgency,
@@ -856,10 +875,13 @@ function signatoriesFunc() {
 }
 function commentRecFunc() {
   comRec = $("#comRec").val();
+  const urlParams = new URLSearchParams(window.location.search);
+  const periodId = urlParams.get('periodId');
   $.post(
     "?config=prContent",
     {
       commentRecPost: comRec,
+      period_id: periodId,
     },
     function (data, textStatus, xhr) {
       if (data == 1) {
@@ -1178,7 +1200,7 @@ function completeHandler(dataCheckPoint) {
 function errorHandler() {
   alert("something wemt wrong");
 }
-function abortHandler() {}
+function abortHandler() { }
 function uploadMore() {
   btn = event.srcElement.parentElement;
   btn.style.display = "none";
@@ -1475,10 +1497,13 @@ function closeRsm(datID) {
   }
 }
 function submitPerformance() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const periodId = urlParams.get('periodId');
   $.post(
     "?config=prContent",
     {
       submitPerformance: true,
+      period_id: periodId,
     },
     function (data, textStatus, xhr) {
       showPr("coreFunction", "");

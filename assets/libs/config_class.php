@@ -2114,12 +2114,14 @@ class year
 	private $show;
 	function __construct()
 	{
+		// 1st period: 01-06
+		// 2nd period: 07-12
 		$dnow = date('Y') + 1;
 		$dpast = date('Y') - 50;
 		$view = "";
 		while ($dnow >= $dpast) {
 
-			if ($dnow == date('Y')) {
+			if ($dnow == 2025) {
 				$view .= "<option value='$dnow' selected>$dnow</option>";
 			} else {
 				$view .= "<option value='$dnow'>$dnow</option>";
