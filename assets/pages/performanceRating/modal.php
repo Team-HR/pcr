@@ -305,6 +305,8 @@ if (isset($_POST['coreFucntionInput'])) {
 } elseif (isset($_POST['addSuppAccomplishementModalContent'])) {
 
   $dataId = $_POST['addSuppAccomplishementModalContent'];
+  $periodId = $_POST['period_id'];
+
   function cb($mysqli, $type, $col)
   {
     $dataId = $_POST['addSuppAccomplishementModalContent'];
@@ -336,9 +338,37 @@ if (isset($_POST['coreFucntionInput'])) {
     return $view;
   }
 
+
   $sqlSuc = "SELECT * FROM `spms_supportfunctions` where id_suppFunc='$dataId'";
   $sqlSuc = $mysqli->query($sqlSuc);
   $sqlSuc = $sqlSuc->fetch_assoc();
+
+  // Apply support function success indicator logic (from config_class.php)
+  $successIndicator = $sqlSuc["suc_in"];
+
+  // Check if this support function needs activity counts
+  if (in_array($dataId, ["3", "5", "19", "20"])) {
+    $totalSupportSi = getSupportFunctionActivitiesCount($mysqli, $periodId);
+    $totalMM = "";
+    $totalLGUAct = "";
+
+    if ($totalSupportSi) {
+      foreach ($totalSupportSi as $act) {
+        if ($act["type"] == "mm") {
+          $totalMM = $act["total"];
+        } else if ($act["type"] == "lgu_acts") {
+          $totalLGUAct = $act["total"];
+        }
+      }
+    }
+
+    // Determine which total to use based on support function ID
+    $totalToUse = ($dataId == "5" || $dataId == "20") ? $totalMM : $totalLGUAct;
+
+    $successIndicator = explode("of", $sqlSuc["suc_in"]);
+    $successIndicator = $successIndicator[0] . " of (__/" . $totalToUse . ") " . $successIndicator[1];
+  }
+
   echo "
   <script>
   $('.ui.dropdown').dropdown();
@@ -350,7 +380,7 @@ if (isset($_POST['coreFucntionInput'])) {
   <div class='ui form'>
   <div class='field'>
   <label>Success Indicators</label>
-  <p style='padding:10px;border:1px solid #dedede;border-radius:5px 5px 5px 5px'>$sqlSuc[suc_in]</p>
+  <p style='padding:10px;border:1px solid #dedede;border-radius:5px 5px 5px 5px'>$successIndicator</p>
   </div>
   <div class='field'>
   <label>Accomplishments</label>
@@ -366,12 +396,15 @@ if (isset($_POST['coreFucntionInput'])) {
   </div>
   ";
 } elseif (isset($_POST['suppFuncEditEmpDataPost'])) {
+
   $empdataId = $_POST['suppFuncEditEmpDataPost'];
   $sqldata = "SELECT * from spms_supportfunctiondata where sfd_id='$empdataId'";
   $sqldata = $mysqli->query($sqldata);
   $sqldata = $sqldata->fetch_assoc();
   $pmtCheck = false;
   $supportFunction = new Employee_data();
+  $period_id =  $_POST['period_id'];
+  // $period_id = $user->get_status('period_id');
 
   if (isset($_SESSION['empIdPending']) && isset($_SESSION['periodPending'])) {
     $emp = $_SESSION['empIdPending'];
@@ -448,6 +481,33 @@ if (isset($_POST['coreFucntionInput'])) {
   $sqlSuccIn = $mysqli->query($sqlSuccIn);
   $sqlSuccIn = $sqlSuccIn->fetch_assoc();
 
+  // Apply support function success indicator logic (from config_class.php)
+  $successIndicatorEdit = $sqlSuccIn["suc_in"];
+
+  // Check if this support function needs activity counts
+  if (in_array($sqldataSuccIn['parent_id'], ["3", "5", "19", "20"])) {
+    $totalSupportSi = getSupportFunctionActivitiesCount($mysqli, $period_id);
+    $totalMM = "";
+    $totalLGUAct = "";
+
+    if ($totalSupportSi) {
+      foreach ($totalSupportSi as $act) {
+        if ($act["type"] == "mm") {
+          $totalMM = $act["total"];
+        } else if ($act["type"] == "lgu_acts") {
+          $totalLGUAct = $act["total"];
+        }
+      }
+    }
+
+    // Determine which total to use based on support function ID
+    $totalToUse = ($sqldataSuccIn['parent_id'] == "5" || $sqldataSuccIn['parent_id'] == "20") ? $totalMM : $totalLGUAct;
+
+    $successIndicatorEdit = explode("of", $sqlSuccIn["suc_in"]);
+    $successIndicatorEdit = $successIndicatorEdit[0] . " of (__/" . $totalToUse . ") " . $successIndicatorEdit[1];
+  }
+
+
   echo "
     <script>
     $('.ui.dropdown').dropdown();
@@ -459,7 +519,7 @@ if (isset($_POST['coreFucntionInput'])) {
     <div class='ui form'>
     <div class='field'>
     <label>Success Indicators</label>
-    <p style='padding:10px;border:1px solid #dedede;border-radius:5px 5px 5px 5px'>$sqlSuccIn[suc_in]</p>
+    <p style='padding:10px;border:1px solid #dedede;border-radius:5px 5px 5px 5px'>$successIndicatorEdit</p>
     </div>
     <div class='field'>
     <label>Accomplishments</label>

@@ -9,7 +9,7 @@
 	<script src="assets/libs/ui/dist/semantic.min.js"></script>
 	<script src="assets/libs/node_modules/chart.js/dist/Chart.js"></script>
 	<script src="assets/libs/node_modules/chart.js/dist/Chart.min.js"></script>
-	<script src="assets/libs/umbra.js"></script>
+	<script src="assets/libs/umbra.js?v=<?= time() ?>"></script>
 
 	<!-- <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">

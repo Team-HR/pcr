@@ -13,7 +13,7 @@
 	<!-- Addition of Vue3js -->
 	<script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.min.js"></script>
 
-	<script src="assets/libs/umbra.js"></script>
+	<script src="assets/libs/umbra.js?v=<?= time() ?>"></script>
 	<style media="screen">
 		body {
 			background-color: white;
@@ -122,7 +122,7 @@
 		</div>
 	</div>
 </div>
-<div id="appLoader" class="ui vertical segment" >
+<div id="appLoader" class="ui vertical segment">
 	<div class="ui active page dimmer" style="height:200%">
 		<div id="appLoaderMsg" class="ui medium text loader" style="top:100px;position:fixed">Loading</div>
 	</div>
