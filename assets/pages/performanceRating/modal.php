@@ -305,6 +305,8 @@ if (isset($_POST['coreFucntionInput'])) {
 } elseif (isset($_POST['addSuppAccomplishementModalContent'])) {
 
   $dataId = $_POST['addSuppAccomplishementModalContent'];
+  $periodId = $_POST['period_id'];
+
   function cb($mysqli, $type, $col)
   {
     $dataId = $_POST['addSuppAccomplishementModalContent'];
@@ -349,7 +351,7 @@ if (isset($_POST['coreFucntionInput'])) {
   <form onsubmit='return addSuppAccomplishementSaveData($dataId)'>
   <div class='ui form'>
   <div class='field'>
-  <label>Success Indicators</label>
+  <label>Success Indicators - $periodId</label>
   <p style='padding:10px;border:1px solid #dedede;border-radius:5px 5px 5px 5px'>$sqlSuc[suc_in]</p>
   </div>
   <div class='field'>
@@ -366,12 +368,15 @@ if (isset($_POST['coreFucntionInput'])) {
   </div>
   ";
 } elseif (isset($_POST['suppFuncEditEmpDataPost'])) {
+
   $empdataId = $_POST['suppFuncEditEmpDataPost'];
   $sqldata = "SELECT * from spms_supportfunctiondata where sfd_id='$empdataId'";
   $sqldata = $mysqli->query($sqldata);
   $sqldata = $sqldata->fetch_assoc();
   $pmtCheck = false;
   $supportFunction = new Employee_data();
+  $period_id =  $_POST['period_id'];
+  // $period_id = $user->get_status('period_id');
 
   if (isset($_SESSION['empIdPending']) && isset($_SESSION['periodPending'])) {
     $emp = $_SESSION['empIdPending'];
@@ -458,7 +463,7 @@ if (isset($_POST['coreFucntionInput'])) {
     <form onsubmit='return editSuppAccomplishementdatafunc($empdataId)'>
     <div class='ui form'>
     <div class='field'>
-    <label>Success Indicators</label>
+    <label>Success Indicators - $period_id</label>
     <p style='padding:10px;border:1px solid #dedede;border-radius:5px 5px 5px 5px'>$sqlSuccIn[suc_in]</p>
     </div>
     <div class='field'>

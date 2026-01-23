@@ -612,6 +612,8 @@ function EditCoreFuncDataSaveChanges(i) {
   );
 }
 function addSuppAccomplishement(i) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const periodId = urlParams.get('periodId');
   $("#modalContLFull").html(
     "<div style='text-align: center'><img src='assets/img/loading.gif' style='transform: scale(.1);height:500px'></div>"
   );
@@ -624,6 +626,7 @@ function addSuppAccomplishement(i) {
     "?config=prModalL",
     {
       addSuppAccomplishementModalContent: i,
+      period_id: periodId
     },
     function (data, textStatus, xhr) {
       $("#modalContL").html(data);
@@ -684,11 +687,13 @@ function suppFuncEditEmpData(i) {
   $("#modalContL").html(
     "<div style='text-align: center'><img src='assets/img/loading.gif' style='transform: scale(.1);height:500px'></div>"
   );
-
+  const urlParams = new URLSearchParams(window.location.search);
+  const periodId = urlParams.get('periodId');
   $.post(
     "?config=prModalL",
     {
       suppFuncEditEmpDataPost: i,
+      period_id: periodId
     },
     function (data, textStatus, xhr) {
       $("#modalContL").html(data);

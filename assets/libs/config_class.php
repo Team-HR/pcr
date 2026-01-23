@@ -904,6 +904,8 @@ class Employee_data extends Db
 	// methods for support function
 	private function supportFunctionTr()
 	{
+		$period_id = $this->get_status('period_id');
+
 		$this->supportPercent = 0;
 		if ($this->get_status('formType') == '1' || $this->get_status('formType') == '5') {
 			$sql = "SELECT * FROM `spms_supportfunctions` where `type`=1";
@@ -927,6 +929,32 @@ class Employee_data extends Db
 			$sqlSelect = "SELECT * from spms_supportfunctiondata where parent_id='$tr[id_suppFunc]' and emp_id='$this->emp_ID' and period_id='$this->per_ID'";
 			$sqlSelect = $this->mysqli->query($sqlSelect);
 			$sqlSelectCount = $sqlSelect->num_rows;
+
+			$supportSi = $tr["suc_in"];
+
+			// Check if this support function needs activity counts
+			if (in_array($tr["id_suppFunc"], ["3", "5", "19", "20"])) {
+				$totalSupportSi = getSupportFunctionActivitiesCount($this->mysqli, $period_id);
+				$totalMM = "";
+				$totalLGUAct = "";
+
+				if ($totalSupportSi) {
+					foreach ($totalSupportSi as $act) {
+						if ($act["type"] == "mm") {
+							$totalMM = $act["total"];
+						} else if ($act["type"] == "lgu_acts") {
+							$totalLGUAct = $act["total"];
+						}
+					}
+				}
+
+				// Determine which total to use based on support function ID
+				$totalToUse = ($tr["id_suppFunc"] == "5" || $tr["id_suppFunc"] == "20") ? $totalMM : $totalLGUAct;
+
+				$supportSi = explode("of", $tr["suc_in"]);
+				$supportSi = $supportSi[0] . " of (__/" . $totalToUse . ") " . $supportSi[1];
+			}
+
 			if ($sqlSelectCount > 0) {
 				$fdata = $sqlSelect->fetch_assoc();
 				$av = 0;
@@ -979,7 +1007,7 @@ class Employee_data extends Db
 				$viewTr .= "
 				<tr>
 				<td style='width:25%'>$tr[mfo] = $fdata[percent] %</td>
-				<td style='width:25%'>$tr[suc_in]</td>
+				<td style='width:25%'>$supportSi</td>
 				<td style='$this->budgetView'></td>
 				<td style='$this->accountableView'></td>
 				<td style='$acc_row'>" . nl2br($fdata['accomplishment']) . "</td>
@@ -997,11 +1025,10 @@ class Employee_data extends Db
 				$emp_count++;
 				$viewTr .= "
 				<tr>
-				<td style='width:25%'>$tr[mfo] = $tr[percent] %</td>
-				<td style='width:25%'>$tr[suc_in]</td>
-				<td style='width:25%;padding:10px' colspan='10'><button class='ui basic primary fluid button' onclick='addSuppAccomplishement($tr[id_suppFunc])'> Add Accomplishments for your Support Function</button></td>
-				</tr>
-				";
+					<td style='width:25%'>$tr[mfo] = $tr[percent] %</td>
+					<td style='width:25%'>$supportSi</td>
+					<td style='width:25%;padding:10px' colspan='10'><button class='ui basic primary fluid button' onclick='addSuppAccomplishement($tr[id_suppFunc])'> Add Accomplishments for your Support Function</button></td>
+				</tr>";
 			}
 		}
 		$this->supportView = $viewTr;
@@ -2496,6 +2523,22 @@ function Authorization_Error()
 	</h1>
 	</div>";
 	return $view;
+}
+
+
+function getSupportFunctionActivitiesCount($mysqli, $period_id)
+{
+	$query = "SELECT * FROM `spms_supportfunctions_acts` WHERE `period_id` = ?";
+	try {
+		$stmt = $mysqli->prepare($query);
+		$stmt->bind_param('i', $period_id);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		return $result->fetch_all(MYSQLI_ASSOC);
+	} catch (Exception $e) {
+		echo "Error: " . $e->getMessage();
+		return [];
+	}
 }
 
 
