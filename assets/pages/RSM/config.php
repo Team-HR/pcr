@@ -362,33 +362,17 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   }
 } elseif (isset($_POST['closeRsm'])) {
   $rsmStatusId = (int)$_POST['closeRsm'];
-  $employeeId = (int)($_SESSION['emp_info']['employees_id'] ?? 0);
-
+ 
   $sqlQuery = "UPDATE `spms_rsmstatus` SET `edit` = '0' , `done`='1' WHERE `spms_rsmstatus`.`rsmStatus_id` = '$rsmStatusId'";
   $sql = $mysqli->query($sqlQuery);
 
   if (!$sql) {
     die($mysqli->error);
   } else {
-    $createLogTableSql = "CREATE TABLE IF NOT EXISTS `spms_system_logs` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `employee_id` int(11) NOT NULL,
-      `query` longtext NOT NULL,
-      `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-      PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
-    $createLogTable = $mysqli->query($createLogTableSql);
-    if (!$createLogTable) {
+    require_once __DIR__ . '/../../libs/SystemLogger.php';
+    $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
+    if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
       die($mysqli->error);
-    }
-
-    if ($employeeId > 0) {
-      $logQuery = $mysqli->real_escape_string($sqlQuery);
-      $insertLogSql = "INSERT INTO `spms_system_logs` (`employee_id`, `query`) VALUES ('$employeeId', '$logQuery')";
-      $insertLog = $mysqli->query($insertLogSql);
-      if (!$insertLog) {
-        die($mysqli->error);
-      }
     }
 
     echo 1;
