@@ -1,8 +1,7 @@
 <?php
 
 // Minimal test harness for assets/libs/RsmDuplicator.php
-
-$connectFile = __DIR__ . '/_connect.db.php';
+$connectFile = __DIR__ . '/../_connect.db.php';
 if (!file_exists($connectFile)) {
     http_response_code(500);
     echo "Missing _connect.db.php. Create it based on _connect.db.php.example";
@@ -10,7 +9,7 @@ if (!file_exists($connectFile)) {
 }
 
 require_once $connectFile;
-require_once __DIR__ . '/assets/libs/RsmDuplicator.php';
+require_once __DIR__ . '/../assets/libs/RsmDuplicator.php';
 
 try {
     $dsn = "mysql:host={$host};dbname={$database};charset=utf8";

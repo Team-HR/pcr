@@ -2093,6 +2093,12 @@ class Employee_data extends Db
 	function matrixtr($padding, $ar, $si)
 	{
 		if ($si != "") {
+			// $view = "
+			// 	<tr>
+			// 		<td colspan='5'>" . json_encode($ar) . "</td>
+			// 	</tr>
+			// ";
+
 			$view = "<tr>
 			<td style='padding-left:$padding;width:25%'>" . $ar['cf_count'] . " " . $ar['cf_title'] . "</td>
 			<td style='width:25%'>" . nl2br($si['mi_succIn']) . "</td>
@@ -2101,6 +2107,12 @@ class Employee_data extends Db
 			<td style='width:15%'>" . $this->RatingMat($si['mi_time']) . "</td>
 			</tr>";
 		} else {
+			// $view = "
+			// 	<tr>
+			// 		<td colspan='5'>" . json_encode($ar) . "</td>
+			// 	</tr>
+			// ";
+
 			$view = "<tr>
 			<td style='padding-left:$padding;width:25%'>" . $ar['cf_count'] . " " . $ar['cf_title'] . "</td>
 			<td style='width:25%'></td>
