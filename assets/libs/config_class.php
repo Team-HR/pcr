@@ -2531,10 +2531,33 @@ function getSupportFunctionActivitiesCount($mysqli, $period_id)
 	$query = "SELECT * FROM `spms_supportfunctions_acts` WHERE `period_id` = ?";
 	try {
 		$stmt = $mysqli->prepare($query);
-		$stmt->bind_param('i', $period_id);
-		$stmt->execute();
+		if ($stmt === false) {
+			error_log("MySQL prepare failed in getSupportFunctionActivitiesCount(): " . $mysqli->error . " | SQL: " . $query);
+			return [];
+		}
+
+		if ($stmt->bind_param('i', $period_id) === false) {
+			error_log("MySQL bind_param failed in getSupportFunctionActivitiesCount(): " . $stmt->error);
+			$stmt->close();
+			return [];
+		}
+
+		if ($stmt->execute() === false) {
+			error_log("MySQL execute failed in getSupportFunctionActivitiesCount(): " . $stmt->error);
+			$stmt->close();
+			return [];
+		}
+
 		$result = $stmt->get_result();
-		return $result->fetch_all(MYSQLI_ASSOC);
+		if ($result === false) {
+			error_log("MySQL get_result failed in getSupportFunctionActivitiesCount(): " . $stmt->error);
+			$stmt->close();
+			return [];
+		}
+
+		$data = $result->fetch_all(MYSQLI_ASSOC);
+		$stmt->close();
+		return $data;
 	} catch (Exception $e) {
 		echo "Error: " . $e->getMessage();
 		return [];
