@@ -1,5 +1,6 @@
 <?php
 // copy previous rsm start
+require_once __DIR__ . '/../../libs/SystemLogger.php';
 
 if (isset($_POST['get_prev_rsm'])) {
   $data = [];
@@ -251,11 +252,15 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   if ($rsmCount != "" && $addRSMData != "") {
     $dep_id = $_SESSION['emp_info']['department_id'];
     $pid = $_POST['pid'];
-    $sql = "INSERT INTO `spms_corefunctions` (`cf_ID`,`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`) VALUES ('','$_SESSION[period]', '$pid','$dep_id', '$rsmCount', '$addRSMData')";
-    $sql = $mysqli->query($sql);
+    $sqlQuery = "INSERT INTO `spms_corefunctions` (`cf_ID`,`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`) VALUES ('','$_SESSION[period]', '$pid','$dep_id', '$rsmCount', '$addRSMData')";
+    $sql = $mysqli->query($sqlQuery);
     if (!$sql) {
       die($mysqli->error);
     } else {
+      $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
+      if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
+        die($mysqli->error);
+      }
       print(1);
     }
   } else {
@@ -282,20 +287,32 @@ elseif (isset($_POST['copy_to_other_dept'])) {
 
   $editRsmTitle = $mysqli->real_escape_string($editRsmTitle);
   $update_correction = $mysqli->real_escape_string($update_correction);
-  $sql = "UPDATE `spms_corefunctions` SET `cf_count` = '$editcountRsm', `cf_title` = '$editRsmTitle',`corrections`='$update_correction' WHERE `spms_corefunctions`.`cf_ID` = '$dataId'";
-  $sql = $mysqli->query($sql);
+  $sqlQuery = "UPDATE `spms_corefunctions` SET `cf_count` = '$editcountRsm', `cf_title` = '$editRsmTitle',`corrections`='$update_correction' WHERE `spms_corefunctions`.`cf_ID` = '$dataId'";
+  $sql = $mysqli->query($sqlQuery);
   if (!$sql) {
     die($mysqli->error);
   } else {
+
+    $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
+    if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
+      die($mysqli->error);
+    }
+
     print(1);
   }
 } elseif (isset($_POST['MfoSiDelete'])) {
   $dataId = $_POST['MfoSiDelete'];
-  $sql = "DELETE FROM `spms_corefunctions` WHERE `spms_corefunctions`.`cf_ID` ='$dataId'";
-  $sql = $mysqli->query($sql);
+  $sqlQuery = "DELETE FROM `spms_corefunctions` WHERE `spms_corefunctions`.`cf_ID` ='$dataId'";
+  $sql = $mysqli->query($sqlQuery);
   if (!$sql) {
     die($mysqli->error);
   } else {
+
+    $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
+    if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
+      die($mysqli->error);
+    }
+
     print(1);
   }
 } elseif (isset($_POST['SaveMfoSI'])) {
@@ -305,14 +322,18 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   $timeliness = $mysqli->real_escape_string(serialize($_POST['timeliness']));
   $successIn = $mysqli->real_escape_string($_POST['successIn']);
   $incharge = $mysqli->real_escape_string($_POST['incharge']);
-  $sql = "INSERT INTO `spms_matrixindicators`
+  $sqlQuery = "INSERT INTO `spms_matrixindicators`
   (`mi_id`, `cf_ID`, `mi_succIn`, `mi_quality`, `mi_eff`, `mi_time`, `mi_incharge`)
   VALUES
   (NULL, '$dataId', '$successIn', '$quality', '$efficiency', '$timeliness', '$incharge')";
-  $sql = $mysqli->query($sql);
+  $sql = $mysqli->query($sqlQuery);
   if (!$sql) {
     die($mysqli->error);
   } else {
+    $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
+    if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
+      die($mysqli->error);
+    }
     print(1);
   }
 } elseif (isset($_POST['SaveMfoSIEdit'])) {
@@ -337,7 +358,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
     $update_correction = serialize($update_correction);
   }
   $update_correction = $mysqli->real_escape_string($update_correction);
-  $sql = "UPDATE `spms_matrixindicators` SET
+  $sqlQuery = "UPDATE `spms_matrixindicators` SET
   `mi_succIn` = '$successIn',
   `mi_quality` = '$quality',
   `mi_eff` = '$efficiency',
@@ -346,30 +367,43 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   `corrections` = '$update_correction'
   WHERE `spms_matrixindicators`.`mi_id` = $dataId;
   ";
-  $sql = $mysqli->query($sql);
+  $sql = $mysqli->query($sqlQuery);
   if (!$sql) {
     die($mysqli->error);
   } else {
+
+    $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
+    if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
+      die($mysqli->error);
+    }
+
     print(1);
   }
 } elseif (isset($_POST['removeSi'])) {
-  $sql = "DELETE FROM `spms_matrixindicators` WHERE `spms_matrixindicators`.`mi_id` = '$_POST[removeSi]'";
-  $sql = $mysqli->query($sql);
+  $sqlQuery = "DELETE FROM `spms_matrixindicators` WHERE `spms_matrixindicators`.`mi_id` = '$_POST[removeSi]'";
+
+  $sql = $mysqli->query($sqlQuery);
   if (!$sql) {
     die($mysqli->error);
   } else {
+
+    $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
+    if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
+      die($mysqli->error);
+    }
+
     print(1);
   }
 } elseif (isset($_POST['closeRsm'])) {
   $rsmStatusId = (int)$_POST['closeRsm'];
- 
+
   $sqlQuery = "UPDATE `spms_rsmstatus` SET `edit` = '0' , `done`='1' WHERE `spms_rsmstatus`.`rsmStatus_id` = '$rsmStatusId'";
   $sql = $mysqli->query($sqlQuery);
 
   if (!$sql) {
     die($mysqli->error);
   } else {
-    require_once __DIR__ . '/../../libs/SystemLogger.php';
+
     $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
     if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
       die($mysqli->error);
