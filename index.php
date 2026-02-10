@@ -78,20 +78,23 @@ if (isset($_SESSION['emp_id'])) {
 				# 1. index
 				require_once "assets/pages/review/review.php";
 			}
-		} else if (isset($_GET['Browse'])) {
-			require_once "assets/pages/browse/browse.php";
 		}
-		// START
-		// request from maam lak2x of IASS reviewing CSWD
+		
 		// else if (isset($_GET['Browse'])) {
-		// 	require_once "assets/pages/browse/browse2.php";
-		// } else if (isset($_GET['Browse2'])) {
-		// 	require_once "assets/pages/browse/browse2.php";
-		// } else if (isset($_GET['browse-list'])) {
-		// 	require_once "assets/pages/browse/browse-list.php";
-		// } else if (isset($_GET['browse-pcr'])) {
-		// 	require_once "assets/pages/browse/browse-pcr.php";
+		// 	require_once "assets/pages/browse/browse.php";
 		// }
+
+		// START
+		// request from maam lak2x of IASS reviewing GSO
+		else if (isset($_GET['Browse'])) {
+			require_once "assets/pages/browse/browse2.php";
+		} else if (isset($_GET['Browse2'])) {
+			require_once "assets/pages/browse/browse2.php";
+		} else if (isset($_GET['browse-list'])) {
+			require_once "assets/pages/browse/browse-list.php";
+		} else if (isset($_GET['browse-pcr'])) {
+			require_once "assets/pages/browse/browse-pcr.php";
+		}
 		// END
 
 		else if (isset($_GET['PMT'])) {

@@ -10,7 +10,7 @@
           <i class="find icon"></i>
           Browse PCRs
         </h1>
-        <h2 class="ui center aligned icon header">CITY SOCIAL WELFARE & DEVELOPMENT OFFICE</h2>
+        <h2 class="ui center aligned icon header">CITY GENERAL SERVICES OFFICE</h2>
 
         <?php
         $option = new employees();

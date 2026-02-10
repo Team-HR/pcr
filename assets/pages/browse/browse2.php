@@ -13,7 +13,7 @@
 
         <div class="ui inverted segment" style="width:50%;margin:auto;">
           <form class="ui form noSubmit " style="text-align:center" onsubmit="getList()">
-            <h1>CITY SOCIAL WELFARE & DEVELOPMENT OFFICE</h1>
+            <h1>CITY GENERAL SERVICES OFFICE</h1>
             <h3>In the period of</h3>
             <div class="field">
               <select class="ui fluid search dropdown" id="browse_period">

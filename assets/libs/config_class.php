@@ -2407,7 +2407,7 @@ class employees extends Db
 			emp.extName
          FROM spms_performancereviewstatus prs LEFT JOIN employees emp
 			ON prs.employees_id = emp.employees_id
-         WHERE prs.department_id = 8 AND prs.period_id = '$period_id' 
+         WHERE prs.department_id = 21 AND prs.period_id = '$period_id' 
          ORDER BY prs.formType DESC";
 
 		$sql = $this->mysqli->query($sql);
