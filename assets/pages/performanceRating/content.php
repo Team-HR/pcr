@@ -216,8 +216,16 @@ if (isset($_POST['page'])) {
 	$time = $_POST['time'];
 	$acc = addslashes($_POST['acc']);
 	$remark = addslashes($_POST['remark']);
+	$not_applicable = $_POST['not_applicable'] ?? 0;
+
 	$sql = "INSERT INTO `spms_supportfunctiondata` (`sfd_id`,`parent_id`,`emp_id`,`period_id`,`accomplishment`, `Q`, `E`, `T`, `remark`,`percent`)
 	VALUES (NULL, '$parentId','$empId', '$period', '$acc', '$qual', '$eff', '$time', '$remark','$parent[percent]')";
+
+	if ($not_applicable) {
+		$sql = "INSERT INTO `spms_supportfunctiondata` (`sfd_id`,`parent_id`,`emp_id`,`period_id`,`accomplishment`, `Q`, `E`, `T`, `not_applicable`, `remark`,`percent`)
+	VALUES (NULL, '$parentId','$empId', '$period', '', NULL, NULL, NULL, 1,'No PIGs this period. (Weight has been redistributed)','$parent[percent]')";
+	}
+
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
 		die($mysqli->error);
