@@ -907,10 +907,14 @@ class Employee_data extends Db
 		$period_id = $this->get_status('period_id');
 
 		$this->supportPercent = 0;
+		$isDpcr = false;
+
+
 		if ($this->get_status('formType') == '1' || $this->get_status('formType') == '5') {
 			$sql = "SELECT * FROM `spms_supportfunctions` where `type`=1";
 		} elseif ($this->get_status('formType') == '3') {
 			$sql = "SELECT * FROM `spms_supportfunctions` where `type`=3";
+			$isDpcr = true;
 		} else {
 			$sql = "SELECT * FROM `spms_supportfunctions` where `type`=2";
 		}
@@ -955,6 +959,19 @@ class Employee_data extends Db
 				$supportSi = $supportSi[0] . " of (__/" . $totalToUse . ") " . $supportSi[1];
 			}
 
+
+			/**
+			 * 
+			 * ADD CONDITIONS FOR $tr[id_suppFunc] = 15 OR THE
+			 * "Oversight monitoring of PIGS = 5 %"
+			 * WHICH IS EXCLUDED IN DPCRS FOR NO STRAT PERIODS
+			 * 
+			 * */
+
+			$exemptedPeriods = [22, 23];
+
+
+
 			if ($sqlSelectCount > 0) {
 				$fdata = $sqlSelect->fetch_assoc();
 				$av = 0;
@@ -993,6 +1010,8 @@ class Employee_data extends Db
 				if ($fdata['T'] != "") {
 					$q = $fdata['T'] * $per;
 				}
+
+
 				$av = $q + $e + $t;
 				$col = "";
 				if (!$this->hideCol) {
@@ -1003,36 +1022,76 @@ class Employee_data extends Db
 					<i style='$this->hide' class='inverted circular grey undo icon' onclick='suppFuncRemoveEmpData($fdata[sfd_id])'></i>
 					</td>";
 				}
-				$this->supportPercent += $fdata['percent'];
-				$viewTr .= "
+
+				$percent = $fdata['percent'];
+				$this->supportPercent += $percent;
+
+				if (in_array($period_id, $exemptedPeriods) && $tr['id_suppFunc'] == '15') {
+					$viewTr .= "
+								<tr>
+									<td style='width:25%'>$tr[mfo] = N/A</td>
+									<td style='text-align: center;' colspan='10'>No PIGs this period. (Weight has been redistributed)</td>
+									<td class='noprint'></td>
+								</tr>
+							";
+				} else {
+					$viewTr .= "
 				<tr>
-				<td style='width:25%'>$tr[mfo] = $fdata[percent] %</td>
-				<td style='width:25%'>$supportSi</td>
-				<td style='$this->budgetView'></td>
-				<td style='$this->accountableView'></td>
-				<td style='$acc_row'>" . nl2br($fdata['accomplishment']) . "</td>
-				<td style='$q_row'>$fdata[Q]</td>
-				<td style='$e_row'>$fdata[E]</td>
-				<td style='$t_row'>$fdata[T]</td>
-				<td>$av</td>
-				<td>" . nl2br($fdata['remark']) . "</td>
-				<td class='noprint'></td>
-				$col
+					<td style='width:25%'>$tr[mfo] = $percent%</td>
+					<td style='width:25%'>$supportSi</td>
+					<td style='$this->budgetView'></td>
+					<td style='$this->accountableView'></td>
+					<td style='$acc_row'>" . nl2br($fdata['accomplishment']) . "</td>
+					<td style='$q_row'>$fdata[Q]</td>
+					<td style='$e_row'>$fdata[E]</td>
+					<td style='$t_row'>$fdata[T]</td>
+					<td>$av</td>
+					<td>" . nl2br($fdata['remark']) . "</td>
+					<td class='noprint'></td>
+					$col
 				</tr>
 				";
+				}
 				$totalAv += $av;
 			} else {
 				$emp_count++;
-				$viewTr .= "
-				<tr>
-					<td style='width:25%'>$tr[mfo] = $tr[percent] %</td>
-					<td style='width:25%'>$supportSi</td>
-					<td style='width:25%;padding:10px' colspan='10'><button class='ui basic primary fluid button' onclick='addSuppAccomplishement($tr[id_suppFunc])'> Add Accomplishments for your Support Function</button></td>
-				</tr>";
+
+				if (in_array($period_id, $exemptedPeriods) && $tr['id_suppFunc'] == '15') {
+					$viewTr .= "
+						<tr>
+							<td style='width:25%'>$tr[mfo] = N/A</td>
+							<td style='width:25%;text-align:center'>
+								(No Strategic Function during this period.)
+							</td>
+							<td style='width:25%;padding:10px' colspan='10'><button class='ui red fluid button' onclick='addSuppAccomplishementNotApplicable($tr[id_suppFunc])'>Not Applicable</button></td>
+						</tr>";
+				} else {
+					$viewTr .= "
+						<tr>
+							<td style='width:25%'>$tr[mfo] = $tr[percent]%</td>
+							<td style='width:25%'>$supportSi</td>
+							<td style='width:25%;padding:10px' colspan='10'><button class='ui basic primary fluid button' onclick='addSuppAccomplishement($tr[id_suppFunc])'> Add Accomplishments for your Support Function</button></td>
+						</tr>";
+				}
 			}
 		}
 		$this->supportView = $viewTr;
 		$this->support_countEmpty = $emp_count;
+
+
+		/**
+		 * When Strategic Function is not available in the period
+		 * then Oversight monitoring of PIGS (5%) whill excluded from the calculation
+		 * The Proportional Redistribution Method
+		 * Total Av = (Total Ratings / Total Weights) * Original Total Weight (Support Func: 20%)
+		 * 
+		 * */
+
+		if (in_array($period_id, $exemptedPeriods) && $isDpcr) {
+			$totalAv = ($totalAv / 0.15) * 0.2;
+			$totalAv = bcdiv($totalAv, 1, 2);
+		}
+
 		$this->support_totalAv = $totalAv;
 	}
 	public function get_supportView()

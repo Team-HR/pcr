@@ -611,6 +611,7 @@ function EditCoreFuncDataSaveChanges(i) {
     }
   );
 }
+
 function addSuppAccomplishement(i) {
   const urlParams = new URLSearchParams(window.location.search);
   const periodId = urlParams.get('periodId');
@@ -633,6 +634,53 @@ function addSuppAccomplishement(i) {
     }
   );
 }
+
+
+
+
+function addSuppAccomplishementNotApplicable(i) {
+  this.event.preventDefault();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const periodId = urlParams.get('periodId');
+
+  quality = 0;
+  eff = "";
+  time = "";
+  acc = "";
+  remark = "";
+
+  $.post(
+    "?config=prContent",
+    {
+      addSuppAccomplishementSave: i,
+      period_id: periodId,
+      qual: quality,
+      eff: eff,
+      time: time,
+      acc: acc,
+      remark: remark,
+      not_applicable: 1
+    },
+
+    function (data, textStatus, xhr) {
+      if (data == 1) {
+        // $("#allModal").modal("hide");
+        showPr("coreFunction", "");
+      } else {
+        alert(data);
+      }
+    }
+  );
+
+
+
+
+
+}
+
+
+
 function addSuppAccomplishementSaveData(i) {
   this.event.preventDefault();
   quality = $("#sup_inQuality").val();
