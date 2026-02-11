@@ -11,7 +11,7 @@ if (isset($_POST['searchEmp'])) {
     $query = "where `firstName` like '$first%' or `lastName` like '$first%'";
   }
 
-  $sql = "SELECT * from `employees` $query limit 5";
+  $sql = "SELECT * from `employees` $query limit 10";
   $sql = $mysqli->query($sql);
   $row = "";
   if ($sql->num_rows >= 1) {
