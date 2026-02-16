@@ -1660,6 +1660,10 @@ class Employee_data extends Db
 		</tr>";
 
 
+		//if department_id is 11 (CHOP) then DepartmentHead else ImmediateSup 
+		$deptSignatory = $this->fileStatus['department_id'] == 11 ? $this->get_fullname($this->get_status('DepartmentHead')) : $this->get_fullname($this->get_status('ImmediateSup'));
+
+
 		$spcr = "
 		<tr style='background:#0080003d'>
 		<td style='width:28%'>
@@ -1667,7 +1671,7 @@ class Employee_data extends Db
 		Reviewed By:
 		</p>
 		<p style='text-align:center'>
-		<u>" . $this->get_fullname($this->get_status('ImmediateSup')) . "</u>
+		<u>" . $deptSignatory . "</u>
 		<br>
 		<span style='font-size:10px'>
 		Immediate Superior/Dept. Head
