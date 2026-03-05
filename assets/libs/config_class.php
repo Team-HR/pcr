@@ -1051,8 +1051,8 @@ class Employee_data extends Db
 					$col
 				</tr>
 				";
+					$totalAv += $av;
 				}
-				$totalAv += $av;
 			} else {
 				$emp_count++;
 
@@ -1088,7 +1088,11 @@ class Employee_data extends Db
 		 * */
 
 		if (in_array($period_id, $exemptedPeriods) && $isDpcr) {
-			$totalAv = ($totalAv / 0.15) * 0.2;
+			if ($period_id > 22) {
+				$totalAv = ($totalAv / 0.15) * 0.2; // Original calculation (proportional redistribution for new period from 23 onwards)
+			} else {
+				$totalAv += 0.25; // Adding the excluded 5% to the total (perfect 0.25 ave, for old period from 22, since hard copies already submitted to HR)
+			}
 			$totalAv = bcdiv($totalAv, 1, 2);
 		}
 
