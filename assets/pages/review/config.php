@@ -107,7 +107,7 @@ function pendingTable($mysqli)
   <table class='ui basic small selectable table' style='width:95%;cursor:pointer;background:white'>
   <thead >
   <tr style='background:#0b56ff30;'>
-  <th colspan='5'>
+  <th colspan='6'>
   <h2 class='ui header'>
   <i class='settings icon'></i> 
   <div class='content'>
@@ -119,22 +119,18 @@ function pendingTable($mysqli)
   </tr>
   <tr style='background:#2c193e0d;'>
   <th> Employee Name </th>
-  <th colspan='4' style='text-align:center;'> Status </th>
+  <th colspan='5' style='text-align:center;'> Status </th>
   </tr>
   </thead>
   <tbody>
   <tr>
-  
     $tr
-  
   </tr>
   </tbody>
   </table>
   ";
   return $table;
 }
-
-
 
 
 function get_subordinates($mysqli, $period_id, $employee_id, $forRPC = true)
@@ -212,7 +208,7 @@ function enumerate_arr($arr)
 
 function order_personnel($personnel)
 {
-  usort($personnel, fn ($a, $b) => strcmp($a['name'], $b['name']));
+  usort($personnel, fn($a, $b) => strcmp($a['name'], $b['name']));
   return $personnel;
 }
 
@@ -251,7 +247,7 @@ function cascade_personnel_names_only(array $elements, $top_parent_id, $margin =
     $tr .= "<tr>";
     // $tr .= "<td width='10'><div style='margin-left: {$margin}px'><i>$index</i></div></td>";
     $tr .= "<td width='10'></td>";
-    $tr .= "<td colspan='4'><div style='margin-left: {$margin}px; font-size: 14pt;'>$el[name] $parent_icon </div> </td>";
+    $tr .= "<td colspan='5'><div style='margin-left: {$margin}px; font-size: 14pt;'>$el[name] $parent_icon </div> </td>";
     $tr .= "</tr>";
     if (isset($el['children'])) {
       $tr .= cascade_personnel_names_only($el['children'], $top_parent_id, $margin, $level, $index);
@@ -287,6 +283,16 @@ function cascade_personnel(array $elements, $top_parent_id, $margin = 0, $level 
 
     $tr .= "<tr onclick='UncriticizedEmpIdFunc(\"$el[id]\")' style='background: $color'>";
     $tr .= "<td><div style='margin-left: {$margin}px'><i>$index.)</i> <b>$el[name]</b> $parent_icon</div></td>";
+    $tr .= "<td nowrap>";
+
+
+    if ($el['status']['submitted'] == "Done") {
+      $tr .= "<div style='color: green;'><i class='green paper plane outline icon'></i> Submitted</div>";
+    } else {
+      $tr .= "<i class='yellow edit outline icon'></i> Editing";
+    }
+
+    $tr .= "</td>";
     $tr .= "<td nowrap>";
     $tr .= get_html_status("Accomplished", $el['status']['date_submitted']);
     $tr .= "</td>";
@@ -561,6 +567,6 @@ function uncriticizedTable($employee)
   $table_r->formType($employee->get_status('formType'));
   $table_r->set_head($employee->tableHeader());
   $table_r->set_body($body);
-  $table_r->set_foot($employee->tableFooter() . "<br class='noprint'>" ."".$employee->get_approveBTN());
+  $table_r->set_foot($employee->tableFooter() . "<br class='noprint'>" . "" . $employee->get_approveBTN());
   return $table_r->_get();
 }
