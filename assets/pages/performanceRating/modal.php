@@ -87,7 +87,7 @@ if (isset($_POST['coreFucntionInput'])) {
 } elseif (isset($_POST['accOpenAdd'])) {
   function s($mysqli, $type)
   {
-    $sql = "SELECT * from spms_matrixindicators where mi_id='$_POST[accOpenAdd]'";
+    $sql = "SELECT * from spms_pcr_indicators where mi_id='$_POST[accOpenAdd]'";
     $sql = $mysqli->query($sql);
     $sql = $sql->fetch_assoc();
     if ($type == 'Quality') {
@@ -120,7 +120,7 @@ if (isset($_POST['coreFucntionInput'])) {
     </div>";
     return $view;
   }
-  $sqlSuccess = "SELECT * from spms_matrixindicators where mi_id='$_POST[accOpenAdd]'";
+  $sqlSuccess = "SELECT * from spms_pcr_indicators where mi_id='$_POST[accOpenAdd]'";
   $sqlSuccess = $mysqli->query($sqlSuccess);
   $sqlSuccess = $sqlSuccess->fetch_assoc();
 
@@ -160,7 +160,7 @@ if (isset($_POST['coreFucntionInput'])) {
     $sqlChild = "SELECT * FROM spms_pcr_indicator_accomplishments where cfd_id='$_POST[EditCoreFuncDataPost]'";
     $sqlChild = $mysqli->query($sqlChild);
     $sqlChild = $sqlChild->fetch_assoc();
-    $sql = "SELECT * from spms_matrixindicators where mi_id='$sqlChild[p_id]'";
+    $sql = "SELECT * from spms_pcr_indicators where mi_id='$sqlChild[p_id]'";
     $sql = $mysqli->query($sql);
     $sql = $sql->fetch_assoc();
     if ($type == 'Quality') {
@@ -245,7 +245,7 @@ if (isset($_POST['coreFucntionInput'])) {
   </div>";
 
   // dont look its just to dump
-  $getPeriodId = "SELECT 	* from spms_matrixindicators where mi_id='$sql[p_id]'";
+  $getPeriodId = "SELECT 	* from spms_pcr_indicators where mi_id='$sql[p_id]'";
   $getPeriodId = $mysqli->query($getPeriodId);
   $getPeriodId = $getPeriodId->fetch_assoc();
   $getPeriodId = "SELECT * from spms_pcr_mfos where cf_ID='$getPeriodId[cf_ID]'";
@@ -270,7 +270,7 @@ if (isset($_POST['coreFucntionInput'])) {
   $sqlChildSucIn = "SELECT * FROM spms_pcr_indicator_accomplishments where cfd_id='$_POST[EditCoreFuncDataPost]'";
   $sqlChildSucIn = $mysqli->query($sqlChildSucIn);
   $sqlChildSucIn = $sqlChildSucIn->fetch_assoc();
-  $sqlSucIn = "SELECT * from spms_matrixindicators where mi_id='$sqlChildSucIn[p_id]'";
+  $sqlSucIn = "SELECT * from spms_pcr_indicators where mi_id='$sqlChildSucIn[p_id]'";
   $sqlSucIn = $mysqli->query($sqlSucIn);
   $sqlSucIn = $sqlSucIn->fetch_assoc();
   echo "

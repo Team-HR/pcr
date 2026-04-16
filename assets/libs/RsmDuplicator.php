@@ -116,7 +116,7 @@ function duplicateSpmsData(
             $insertedCfCount++;
 
             // B. Duplicate Matrix Indicators
-            $miSql = "SELECT * FROM spms_matrixindicators WHERE cf_ID = :old_cf_id";
+            $miSql = "SELECT * FROM spms_pcr_indicators WHERE cf_ID = :old_cf_id";
             $stmtMiGet = $pdo->prepare($miSql);
             $stmtMiGet->execute([':old_cf_id' => $currentId]);
             $indicators = $stmtMiGet->fetchAll(PDO::FETCH_ASSOC);
@@ -130,7 +130,7 @@ function duplicateSpmsData(
                     }
                 }
 
-                $insertMiSql = "INSERT INTO spms_matrixindicators 
+                $insertMiSql = "INSERT INTO spms_pcr_indicators 
                     (cf_ID, mi_succIn, mi_quality, mi_eff, mi_time, mi_incharge, corrections) 
                     VALUES (:new_cf, :succ, :qual, :eff, :time, :inc, :cor)";
                 

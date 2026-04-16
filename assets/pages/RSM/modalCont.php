@@ -44,7 +44,7 @@ if (isset($_POST['ModalSiAddCont'])) {
   ";
 } elseif (isset($_POST['siEditnModalCont'])) {
   $dataId = $_POST['siEditnModalCont'];
-  $sql = "SELECT * from spms_matrixindicators where mi_id ='$_POST[siEditnModalCont]'";
+  $sql = "SELECT * from spms_pcr_indicators where mi_id ='$_POST[siEditnModalCont]'";
   $sql = $mysqli->query($sql);
   $sql = $sql->fetch_assoc();
   $dataId = $sql['mi_id'];

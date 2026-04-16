@@ -208,7 +208,7 @@ class PmsAppMigrator
 
 	public function migrate_pms_rsm_assignments_table_and_pms_rsm_success_indicators_table()
 	{
-		$sql = "SELECT * FROM spms_matrixindicators";
+		$sql = "SELECT * FROM spms_pcr_indicators";
 		// ; --Where mi_id = 10755
 		$res = $this->mysqli->query($sql);
 		$data = [];

@@ -10,7 +10,7 @@
         $dbcolname = "mi_time";
     }
     $a = [];
-    $sql = "SELECT $dbcolname as result from spms_matrixindicators  where $dbcolname like '%$search%' ORDER BY mi_id DESC limit 100";
+    $sql = "SELECT $dbcolname as result from spms_pcr_indicators  where $dbcolname like '%$search%' ORDER BY mi_id DESC limit 100";
     $sql = $mysqli->query($sql);
     if($sql->num_rows){
         while($ftch = $sql->fetch_assoc()){

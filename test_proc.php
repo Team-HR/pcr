@@ -200,7 +200,7 @@ function si($mysqli, $employee_id, $siId)
     if (!$siId || $siId == null) {
         return $i;
     }
-    $sqlSi1 = "SELECT * from spms_matrixindicators where cf_ID='$siId'";
+    $sqlSi1 = "SELECT * from spms_pcr_indicators where cf_ID='$siId'";
     $sqlSi1 = $mysqli->query($sqlSi1);
     if ($sqlSi1->num_rows > 0) {
         while ($a = $sqlSi1->fetch_assoc()) {

@@ -563,8 +563,8 @@ class Employee_data extends Db
 			return $i;
 		}
 
-		$sqlSi1 = "SELECT * from spms_matrixindicators where cf_ID='$siId'";
-		$cacheKey = "spms_matrixindicators_$siId";
+		$sqlSi1 = "SELECT * from spms_pcr_indicators where cf_ID='$siId'";
+		$cacheKey = "spms_pcr_indicators_$siId";
 
 		// $sqlSi1 = $this->mysqli->query($sqlSi1);
 		// if (!$sqlSi1) {
@@ -660,7 +660,7 @@ class Employee_data extends Db
 		$emp = $this->fileStatus["employees_id"];
 		$superiors_id = $emp;
 
-		$indicators = $this->mysqli->query("SELECT * FROM spms_matrixindicators where cf_ID='$perId'");
+		$indicators = $this->mysqli->query("SELECT * FROM spms_pcr_indicators where cf_ID='$perId'");
 		while ($empId = $indicators->fetch_assoc()) {
 			$emp .= "," . $empId['mi_incharge'];
 		}

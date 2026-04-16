@@ -223,7 +223,7 @@ class RsmClass extends Db
     # get_success_indicators
     private function get_success_indicators($cf_ID)
     {
-        $query = "SELECT * FROM spms_matrixindicators WHERE cf_ID = '$cf_ID' ORDER BY mi_id ASC";
+        $query = "SELECT * FROM spms_pcr_indicators WHERE cf_ID = '$cf_ID' ORDER BY mi_id ASC";
         $result = $this->mysqli->query($query);
         $data = [];
         while ($row = $result->fetch_assoc()) {
@@ -313,7 +313,7 @@ class RsmClass extends Db
     }
     private function indicators($dat, $padding, $btnDis)
     {
-        $query  = "SELECT * from spms_matrixindicators where cf_ID='$dat[cf_ID]'";
+        $query  = "SELECT * from spms_pcr_indicators where cf_ID='$dat[cf_ID]'";
         $query = $this->mysqli->query($query);
         $view = "";
         $comStyle = "";

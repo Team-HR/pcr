@@ -158,7 +158,7 @@ class IPCR extends Db
     $sql = "SELECT * FROM spms_pcr_mfos where mfo_periodId='$this->period' and dep_id='$this->department' and parent_id=''";
     $sql = $this->mysqli->query($sql);
     while ($arr = $sql->fetch_assoc()) {
-      $matrixindicators = "SELECT * from spms_matrixindicators where cf_ID='$arr[cf_ID]'";
+      $matrixindicators = "SELECT * from spms_pcr_indicators where cf_ID='$arr[cf_ID]'";
       $matrixindicators = $this->mysqli->query($matrixindicators);
       $view = "";
       $child = $this->child($arr['cf_ID'], 20);
@@ -214,7 +214,7 @@ class IPCR extends Db
     $padding = $s . "px";
     $view = "";
     while ($child_arr = $sql1->fetch_assoc()) {
-      $matrixindicators = "SELECT * from spms_matrixindicators where cf_ID='$child_arr[cf_ID]'";
+      $matrixindicators = "SELECT * from spms_pcr_indicators where cf_ID='$child_arr[cf_ID]'";
       $matrixindicators = $this->mysqli->query($matrixindicators);
       $sql2 = "SELECT * FROM spms_pcr_mfos where parent_id='$child_arr[cf_ID]'";
       $sql2 = $this->mysqli->query($sql2);
@@ -668,7 +668,7 @@ class IPCR extends Db
     $emp = $this->EmpId;
     $core = $this->mysqli->query("SELECT * FROM spms_pcr_mfos where parent_id='$perId'");
     while ($coreId = $core->fetch_assoc()) {
-      $indicators = $this->mysqli->query("SELECT * FROM spms_matrixindicators where cf_ID='$coreId[cf_ID]'");
+      $indicators = $this->mysqli->query("SELECT * FROM spms_pcr_indicators where cf_ID='$coreId[cf_ID]'");
       while ($empId = $indicators->fetch_assoc()) {
         $emp .= "," . $empId['mi_incharge'];
       }

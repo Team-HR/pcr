@@ -38,7 +38,7 @@ class RatingScaleMatrixDestroyer
 			// call function destroy_si($mi_id)
 			foreach ($mfo['success_indicators'] as $success_indicator) {
 				$mi_id = $success_indicator['mi_id'];
-				$sql = "DELETE FROM spms_matrixindicators WHERE mi_id = '$mi_id'";
+				$sql = "DELETE FROM spms_pcr_indicators WHERE mi_id = '$mi_id'";
 				$this->mysqli->query($sql);
 				# delete mfo data
 				// call function destroy_cfd($cfd_id)
@@ -93,7 +93,7 @@ class RatingScaleMatrixDestroyer
 	private function get_success_indicators($parent_id)
 	{
 		$data = [];
-		$sql = "SELECT * from spms_matrixindicators where cf_ID='$parent_id'";
+		$sql = "SELECT * from spms_pcr_indicators where cf_ID='$parent_id'";
 		$res = $this->mysqli->query($sql);
 		while ($row = $res->fetch_assoc()) {
 

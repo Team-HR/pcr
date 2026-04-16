@@ -64,7 +64,7 @@ class IRM extends Db
 
     private function indicators($dat, $padding)
     {
-        $query  = "SELECT * from spms_matrixindicators where cf_ID='$dat[cf_ID]'";
+        $query  = "SELECT * from spms_pcr_indicators where cf_ID='$dat[cf_ID]'";
         $query = $this->mysqli->query($query);
         $a = [];
         $IndiCount = 0;

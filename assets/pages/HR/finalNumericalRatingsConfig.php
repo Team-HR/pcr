@@ -428,7 +428,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
 		$set_drop = settingDrop($mysqli, $row, '', $addDisplay, '');
 	}
 	$view = "";
-	$siData1 = "SELECT * from spms_matrixindicators where cf_ID='$row[cf_ID]'";
+	$siData1 = "SELECT * from spms_pcr_indicators where cf_ID='$row[cf_ID]'";
 	$siData1 = $mysqli->query($siData1);
 	$siDatacount1 = $siData1->num_rows;
 	$count = 1;
@@ -712,7 +712,7 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
 			$mi_eff = $mysqli->real_escape_string($success_idicator['mi_eff']);
 			$mi_time = $mysqli->real_escape_string($success_idicator['mi_time']);
 
-			$sql = "INSERT INTO spms_matrixindicators(cf_ID, mi_succIn, mi_quality, mi_eff, mi_time, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
+			$sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_quality, mi_eff, mi_time, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
 			$mysqli->query($sql);
 		}
 
@@ -725,7 +725,7 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
 function get_success_indicators($mysqli, $cf_ID)
 {
 	$data = [];
-	$sql = "SELECT * FROM spms_matrixindicators WHERE cf_ID = '$cf_ID'";
+	$sql = "SELECT * FROM spms_pcr_indicators WHERE cf_ID = '$cf_ID'";
 	$result = $mysqli->query($sql);
 	while ($row = $result->fetch_assoc()) {
 		$data[] = $row;
