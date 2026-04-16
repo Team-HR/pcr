@@ -1290,7 +1290,7 @@ class Employee_data extends Db
 	}
 	private function comment()
 	{
-		$commentsql = "SELECT * from spms_commentrec where period_id='$this->per_ID' and emp_id='$this->emp_ID'";
+		$commentsql = "SELECT * from spms_pcr_recommendations where period_id='$this->per_ID' and emp_id='$this->emp_ID'";
 		$commentsql = $this->mysqli->query($commentsql);
 		$countRow = $commentsql->num_rows;
 		$commentsql = $commentsql->fetch_assoc();

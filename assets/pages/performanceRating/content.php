@@ -427,14 +427,14 @@ elseif (isset($_POST['submitPerformance'])) {
 	$period = $_POST['period_id'];
 	// $com = addslashes($_POST['commentRecPost']);
 	$com = $mysqli->real_escape_string($_POST['commentRecPost']);
-	$sql = "SELECT * from	spms_commentrec where period_id='$period' and emp_id='$empId'";
+	$sql = "SELECT * from	spms_pcr_recommendations where period_id='$period' and emp_id='$empId'";
 	$sql = $mysqli->query($sql);
 	$count = $sql->num_rows;
 	if ($count > 0) {
 		$sql = $sql->fetch_assoc();
-		$q = "UPDATE spms_commentrec SET comment = '$com' WHERE spms_commentrec.comRec_id ='$sql[comRec_id]' ";
+		$q = "UPDATE spms_pcr_recommendations SET comment = '$com' WHERE spms_pcr_recommendations.comRec_id ='$sql[comRec_id]' ";
 	} else {
-		$q = "INSERT INTO spms_commentrec (comRec_id, period_id, emp_id, comment)
+		$q = "INSERT INTO spms_pcr_recommendations (comRec_id, period_id, emp_id, comment)
 		VALUES ('', '$period', '$empId', '$com')";
 	}
 	$q = $mysqli->query($q);
@@ -467,7 +467,7 @@ elseif (isset($_POST['submitPerformance'])) {
 		print(1);
 	}
 } elseif (isset($_POST['getCommentRecommendationForm'])) {
-	$commentsql = "SELECT * from spms_commentrec where period_id='$_POST[commentRecommendationPeriod]' and emp_id='$_POST[commentRecommendationEmpId]'";
+	$commentsql = "SELECT * from spms_pcr_recommendations where period_id='$_POST[commentRecommendationPeriod]' and emp_id='$_POST[commentRecommendationEmpId]'";
 	$commentsql = $mysqli->query($commentsql);
 	$countRow = $commentsql->num_rows;
 	$comment = "";
@@ -497,14 +497,14 @@ elseif (isset($_POST['submitPerformance'])) {
 	</form>
 	";
 } elseif (isset($_POST["commentReccomendationOfSuppSave"])) {
-	$sql = "SELECT * from spms_commentrec where period_id='$_POST[commentReccomendationOfSuppPeriod]' and emp_id='$_POST[commentReccomendationOfSuppEmpId]'";
+	$sql = "SELECT * from spms_pcr_recommendations where period_id='$_POST[commentReccomendationOfSuppPeriod]' and emp_id='$_POST[commentReccomendationOfSuppEmpId]'";
 	$sql = $mysqli->query($sql);
 	$com = $mysqli->real_escape_string($_POST['commentReccomendationOfSuppSave']);
 	if ($sql->num_rows) {
 		$sql = $sql->fetch_assoc();
-		$query = "UPDATE spms_commentrec SET comment='$com' WHERE spms_commentrec.comRec_id = '$sql[comRec_id]'";
+		$query = "UPDATE spms_pcr_recommendations SET comment='$com' WHERE spms_pcr_recommendations.comRec_id = '$sql[comRec_id]'";
 	} else {
-		$query = "INSERT INTO spms_commentrec (comRec_id, period_id, emp_id, comment)
+		$query = "INSERT INTO spms_pcr_recommendations (comRec_id, period_id, emp_id, comment)
 		VALUES (NULL, '$_POST[commentReccomendationOfSuppPeriod]', '$_POST[commentReccomendationOfSuppEmpId]', '$com')";
 	}
 

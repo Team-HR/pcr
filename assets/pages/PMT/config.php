@@ -464,7 +464,7 @@ elseif (isset($_POST["initLoadForm"])) {
 
 
 	$correction_is_made = false;
-	$corrections = false;
+	$corrections = [];
 
 	if ($current_percent != $payload["percent"]) {
 		$correction_is_made = true;

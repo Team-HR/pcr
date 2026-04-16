@@ -748,7 +748,7 @@ class PcrForm
 		$period_id = $this->fileStatus["period_id"];
 		$employees_id = $this->fileStatus["employees_id"];
 		$comments_and_reccomendations = "";
-		$sql = "SELECT * FROM spms_commentrec WHERE period_id = '$period_id' AND emp_id = '$employees_id'";
+		$sql = "SELECT * FROM spms_pcr_recommendations WHERE period_id = '$period_id' AND emp_id = '$employees_id'";
 		$res = $this->mysqli->query($sql);
 		if ($row = $res->fetch_assoc()) {
 			$comments_and_reccomendations = $row["comment"];

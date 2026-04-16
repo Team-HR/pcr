@@ -685,7 +685,7 @@ class IPCR extends Db
 
   private function comments()
   {
-    $sql = "SELECT * from spms_commentrec where emp_id='$this->EmpId' and period_id='$this->period'";
+    $sql = "SELECT * from spms_pcr_recommendations where emp_id='$this->EmpId' and period_id='$this->period'";
     $sql = $this->mysqli->query($sql);
     $sql = $sql->fetch_assoc();
     return $sql['comment'];
