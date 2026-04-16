@@ -8,7 +8,7 @@ function pendingTable($mysqli)
   $gperiod = $mysqli->query($gperiod);
   $gperiod = $gperiod->fetch_assoc();
   $empId = $_SESSION['emp_id'];
-  $sql = "SELECT * from spms_performancereviewstatus where period_id='$period' and ImmediateSup='$empId'  ORDER BY `spms_performancereviewstatus`.`approved` ASC";
+  $sql = "SELECT * from spms_pcr_status where period_id='$period' and ImmediateSup='$empId'  ORDER BY `spms_pcr_status`.`approved` ASC";
   $sql = $mysqli->query($sql);
   $tr = "";
   while ($data = $sql->fetch_assoc()) {
@@ -42,7 +42,7 @@ function pendingTable($mysqli)
       }
     }
   }
-  $DepartmentHeadData = "SELECT * from `spms_performancereviewstatus` where `period_id`= '$period' and `DepartmentHead`='$empId'";
+  $DepartmentHeadData = "SELECT * from `spms_pcr_status` where `period_id`= '$period' and `DepartmentHead`='$empId'";
   $DepartmentHeadData = $mysqli->query($DepartmentHeadData);
   if ($DepartmentHeadData->num_rows > 0) {
     while ($getDepartmentHeadData = $DepartmentHeadData->fetch_assoc()) {
@@ -135,7 +135,7 @@ function pendingTable($mysqli)
 
 function get_subordinates($mysqli, $period_id, $employee_id, $forRPC = true)
 {
-  $sql = "SELECT * FROM `spms_performancereviewstatus` where (ImmediateSup = '$employee_id' OR DepartmentHead = '$employee_id') AND period_id = '$period_id' ORDER BY `spms_performancereviewstatus`.`dateAccomplished` ASC
+  $sql = "SELECT * FROM `spms_pcr_status` where (ImmediateSup = '$employee_id' OR DepartmentHead = '$employee_id') AND period_id = '$period_id' ORDER BY `spms_pcr_status`.`dateAccomplished` ASC
   ";
 
   $res = $mysqli->query($sql);
@@ -406,7 +406,7 @@ function get_employee_name($mysqli, $employee_id)
 function subordinates($dat, $period)
 {
   $mysqli = $GLOBALS['mysqli'];
-  $sql = "SELECT * from `spms_performancereviewstatus` where `ImmediateSup`='$dat' and `period_id`='$period'";
+  $sql = "SELECT * from `spms_pcr_status` where `ImmediateSup`='$dat' and `period_id`='$period'";
   $sql = $mysqli->query($sql);
   $tr = "";
   while ($ipcr = $sql->fetch_assoc()) {

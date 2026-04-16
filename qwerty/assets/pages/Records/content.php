@@ -24,7 +24,7 @@ while ($tableAr = $sqlSelectDep->fetch_assoc()) {
 	$departmentHead = 0;
 	$pmt = 0;
 	while ($empArr = $EmpInDepartment->fetch_assoc()) {
-		$submittedForms = "SELECT * from `spms_performancereviewstatus` where `period_id`='$period' and `employees_id`='$empArr[employees_id]'";
+		$submittedForms = "SELECT * from `spms_pcr_status` where `period_id`='$period' and `employees_id`='$empArr[employees_id]'";
 		$submittedForms = $mysqli->query($submittedForms);
 		if ($submittedForms->num_rows > 0) {
 			$submittedForms = $submittedForms->fetch_assoc();

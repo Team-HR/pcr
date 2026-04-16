@@ -114,7 +114,7 @@ class Employee_data extends Db
 		$sql = "SELECT `prr_id` FROM `prr` WHERE `period` = '$month_mfo' AND `year` = '$year_mfo'";
 		$res = $this->mysqli->query($sql);
 		$data = [];
-		# since spms_performancereviewstatus table does not identify the personnel to be casual or 
+		# since spms_pcr_status table does not identify the personnel to be casual or 
 		# permanent on the time they accomplish their pcrs
 		# return two ids of prr for casual and permanent and find out later which of the two was the 
 		# personnel appointed to from the prrlist generated 
@@ -346,7 +346,7 @@ class Employee_data extends Db
 	// method made for reviewing status of the file
 	private function file_status()
 	{
-		$perStatus = "SELECT * from spms_performancereviewstatus where period_id='$this->per_ID' and employees_id='$this->emp_ID'";
+		$perStatus = "SELECT * from spms_pcr_status where period_id='$this->per_ID' and employees_id='$this->emp_ID'";
 		$perStatus = $this->mysqli->query($perStatus);
 		$countData = $perStatus->num_rows;
 
@@ -495,7 +495,7 @@ class Employee_data extends Db
 		# for more compact and faster query
 		# ... and `dep_id` = '$department_id'
 		$fileStatus = $this->fileStatus;
-		# department_id from spms_performancereviewstatus
+		# department_id from spms_pcr_status
 		$department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
 		# not recommended department_id from employees table
 		// $department_id = $this->EmpInfo["department_id"];
@@ -670,15 +670,15 @@ class Employee_data extends Db
 		$emp_length = count($emp);
 		$view = "<br>";
 		# filter here only employee_id what with immediate supervisor $emp
-		// SELECT `employees_id` FROM `spms_performancereviewstatus` where period_id = $period_id and ImmediateSup = $ImmediateSup;
+		// SELECT `employees_id` FROM `spms_pcr_status` where period_id = $period_id and ImmediateSup = $ImmediateSup;
 
 		if ($this->fileStatus["formType"] != 5) {
 			$subordinates = [];
 
 			if ($this->fileStatus["formType"] == 2 || $this->fileStatus["formType"] == 4) { //if spcr division pcr
-				$res = $this->mysqli->query("SELECT `employees_id` FROM `spms_performancereviewstatus` where `period_id` = '$period_id' and `ImmediateSup` = '$superiors_id'");
+				$res = $this->mysqli->query("SELECT `employees_id` FROM `spms_pcr_status` where `period_id` = '$period_id' and `ImmediateSup` = '$superiors_id'");
 			} elseif ($this->fileStatus["formType"] == 3) { //else if dpcr
-				$res = $this->mysqli->query("SELECT `employees_id` FROM `spms_performancereviewstatus` where `period_id` = '$period_id' and `DepartmentHead` = '$superiors_id'");
+				$res = $this->mysqli->query("SELECT `employees_id` FROM `spms_pcr_status` where `period_id` = '$period_id' and `DepartmentHead` = '$superiors_id'");
 			}
 
 			while ($row = $res->fetch_assoc()) {
@@ -1199,7 +1199,7 @@ class Employee_data extends Db
 		$period_id = $_SESSION['period_pr'];
 		$employee_id = $_SESSION['emp_id'];
 		# get form filetype
-		$sql = "SELECT `formType` FROM `spms_performancereviewstatus` WHERE `period_id` = '$period_id' and `employees_id` = '$employee_id';
+		$sql = "SELECT `formType` FROM `spms_pcr_status` WHERE `period_id` = '$period_id' and `employees_id` = '$employee_id';
 		";
 		$result = $this->mysqli->query($sql);
 		$row = $result->fetch_assoc();
@@ -1326,7 +1326,7 @@ class Employee_data extends Db
 	// strat
 	private function head_of_agency()
 	{
-		$sql = "SELECT * from spms_performancereviewstatus where period_id='$this->per_ID' and employees_id='$this->emp_ID'";
+		$sql = "SELECT * from spms_pcr_status where period_id='$this->per_ID' and employees_id='$this->emp_ID'";
 		$result = $this->mysqli->query($sql);
 
 		if ($result->num_rows > 0) {
@@ -2472,7 +2472,7 @@ class employees extends Db
 			emp.firstName,
 			emp.middleName,
 			emp.extName
-         FROM spms_performancereviewstatus prs LEFT JOIN employees emp
+         FROM spms_pcr_status prs LEFT JOIN employees emp
 			ON prs.employees_id = emp.employees_id
          WHERE prs.department_id = 21 AND prs.period_id = '$period_id' 
          ORDER BY prs.formType DESC";

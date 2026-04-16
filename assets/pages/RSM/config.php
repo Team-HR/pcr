@@ -499,7 +499,7 @@ function table($mysqli)
   $employee_id = $_SESSION['emp_info']['employees_id'];
   $period_id = $_SESSION['period'];
 
-  $sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `employees_id` = '$employee_id' AND `period_id` = '$period_id'";
+  $sql = "SELECT * FROM `spms_pcr_status` WHERE `employees_id` = '$employee_id' AND `period_id` = '$period_id'";
   $res = $mysqli->query($sql);
   if ($row = $res->fetch_assoc()) {
     $department_id = $row['department_id'];
@@ -561,7 +561,7 @@ function tbody($mysqli)
   $employee_id = $_SESSION['emp_info']['employees_id'];
   $period_id = $_SESSION['period'];
 
-  $sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `employees_id` = '$employee_id' AND `period_id` = '$period_id'";
+  $sql = "SELECT * FROM `spms_pcr_status` WHERE `employees_id` = '$employee_id' AND `period_id` = '$period_id'";
   $res = $mysqli->query($sql);
   if ($row = $res->fetch_assoc()) {
     $dep_id = $row['department_id'];
@@ -891,7 +891,7 @@ function AddInputs($mysqli, $dataId)
   $period_id = $_SESSION["period"];
   $employee_id = $_SESSION['emp_info']['employees_id'];
 
-  $sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `employees_id` = '$employee_id' AND `period_id` = '$period_id'";
+  $sql = "SELECT * FROM `spms_pcr_status` WHERE `employees_id` = '$employee_id' AND `period_id` = '$period_id'";
   $res = $mysqli->query($sql);
   if ($row = $res->fetch_assoc()) {
     $department_id = $row['department_id'];

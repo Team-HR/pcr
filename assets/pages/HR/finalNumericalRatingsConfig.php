@@ -174,7 +174,7 @@ function get_distinct_departments($mysqli, $period_id, $department_id, $data)
 		$department_filter = "";
 	}
 
-	// $sql = "SELECT * FROM department WHERE department_id IN (SELECT DISTINCT department_id FROM `spms_performancereviewstatus` WHERE period_id = '$period_id' $department_filter) ORDER BY department;";
+	// $sql = "SELECT * FROM department WHERE department_id IN (SELECT DISTINCT department_id FROM `spms_pcr_status` WHERE period_id = '$period_id' $department_filter) ORDER BY department;";
 
 	$sql = "SELECT * FROM `department` $department_filter ORDER BY `department`;";
 	$res = $mysqli->query($sql);
@@ -760,7 +760,7 @@ function get_file_status($mysqli, $period_id, $employees_id)
 {
 	$fileStatus = null;
 
-	$sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `employees_id` = '$employees_id' AND `period_id` = '$period_id'";
+	$sql = "SELECT * FROM `spms_pcr_status` WHERE `employees_id` = '$employees_id' AND `period_id` = '$period_id'";
 	$res = $mysqli->query($sql);
 	if ($row = $res->fetch_assoc()) {
 		$fileStatus = $row;

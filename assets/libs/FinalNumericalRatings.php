@@ -13,7 +13,7 @@ class FinalNumericalRating
         } else {
             $department_filter = " AND `department_id` = '$department_id';";
         }
-        $sql = "SELECT * FROM `spms_performancereviewstatus` where `period_id` = '$period_id'" . $department_filter; // AND `department_id` = 32 limit 2
+        $sql = "SELECT * FROM `spms_pcr_status` where `period_id` = '$period_id'" . $department_filter; // AND `department_id` = 32 limit 2
         //--`performanceReviewStatus_id` = '2909'
         //--`period_id` = '$period_id' AND `final_numerical_rating` IS NULL LIMIT 1
         $res = $mysqli->query($sql);
@@ -35,7 +35,7 @@ class FinalNumericalRating
         if (!$final_numerical_rating) {
             $final_numerical_rating = NULL;
         }
-        $sql = "UPDATE `spms_performancereviewstatus` SET `final_numerical_rating` = '$final_numerical_rating' WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$fileStatusId';";
+        $sql = "UPDATE `spms_pcr_status` SET `final_numerical_rating` = '$final_numerical_rating' WHERE `spms_pcr_status`.`performanceReviewStatus_id` = '$fileStatusId';";
         $mysqli->query($sql);
     }
     public function getFinalNumericalRating($mysqli, $fileStatus)
@@ -106,7 +106,7 @@ class FinalNumericalRating
         # for more compact and faster query
         # ... and `dep_id` = '$department_id'
 
-        # department_id from spms_performancereviewstatus
+        # department_id from spms_pcr_status
         $department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
         $period_id = $fileStatus["period_id"];
         $employee_id = $fileStatus["employees_id"];

@@ -18,7 +18,7 @@ class PcrForm
 	{
 		$mysqli = $this->mysqli;
 		$file_status = [];
-		$sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `performanceReviewStatus_id` = '$id'";
+		$sql = "SELECT * FROM `spms_pcr_status` WHERE `performanceReviewStatus_id` = '$id'";
 		$res = $mysqli->query($sql);
 		if ($row = $res->fetch_assoc()) {
 			$file_status = $row;
@@ -374,7 +374,7 @@ class PcrForm
 		$mysqli = $this->mysqli;
 		# for more compact and faster query
 		# ... and `dep_id` = '$department_id'
-		# department_id from spms_performancereviewstatus
+		# department_id from spms_pcr_status
 		$department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
 		$period_id = $fileStatus["period_id"];
 		$employee_id = $fileStatus["employees_id"];

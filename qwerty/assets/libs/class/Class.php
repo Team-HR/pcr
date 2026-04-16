@@ -73,7 +73,7 @@ class IPCR extends Db
   {
     $this->EmpId = $EmpId;
     if ($this->period && $this->department && $this->EmpId) {
-      $sql = "SELECT * from `spms_performancereviewstatus` left join `spms_mfo_period` on `spms_performancereviewstatus`.`period_id`=`spms_mfo_period`.`mfoperiod_id` left join `department` on `spms_performancereviewstatus`.`department_id`=`department`.`department_id` where `spms_performancereviewstatus`.`employees_id`='$this->EmpId' and `spms_performancereviewstatus`.`department_id`='$this->department' and `spms_performancereviewstatus`.`period_id`='$this->period'";
+      $sql = "SELECT * from `spms_pcr_status` left join `spms_mfo_period` on `spms_pcr_status`.`period_id`=`spms_mfo_period`.`mfoperiod_id` left join `department` on `spms_pcr_status`.`department_id`=`department`.`department_id` where `spms_pcr_status`.`employees_id`='$this->EmpId' and `spms_pcr_status`.`department_id`='$this->department' and `spms_pcr_status`.`period_id`='$this->period'";
       $sql = $this->mysqli->query($sql);
       $this->fileStatus = $sql->fetch_assoc();
     }

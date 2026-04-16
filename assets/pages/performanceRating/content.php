@@ -337,7 +337,7 @@ if (isset($_POST['page'])) {
 	$period = $_POST['period_id'];
 	$assembleAll = $_POST['assembleAll'];
 	$approved = $_POST['approved'];
-	$sql = "UPDATE `spms_performancereviewstatus` SET `assembleAll` = '1', `approved` = '$approved'  WHERE `period_id` = '$period' and `employees_id`='$empId'";
+	$sql = "UPDATE `spms_pcr_status` SET `assembleAll` = '1', `approved` = '$approved'  WHERE `period_id` = '$period' and `employees_id`='$empId'";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
 		die($mysqli->error);
@@ -384,7 +384,7 @@ elseif (isset($_POST['submitPerformance'])) {
 	$empId = $_SESSION['emp_id'];
 	$period = $_POST['period_id'];
 	$date = date("m/d/y");
-	$sql = "UPDATE `spms_performancereviewstatus` SET `submitted` = 'Done', `dateAccomplished`='$date'  WHERE `period_id` = '$period' and `employees_id`='$empId'";
+	$sql = "UPDATE `spms_pcr_status` SET `submitted` = 'Done', `dateAccomplished`='$date'  WHERE `period_id` = '$period' and `employees_id`='$empId'";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
 		die($mysqli->error);
@@ -400,18 +400,18 @@ elseif (isset($_POST['submitPerformance'])) {
 	$formType = $_POST['formType'];
 	$headAgency =  addslashes(strtoupper($_POST['headAgency']));
 	$date = date('m-d-Y');
-	$check = "SELECT * FROM spms_performancereviewstatus where period_id='$period' and employees_id='$empId'";
+	$check = "SELECT * FROM spms_pcr_status where period_id='$period' and employees_id='$empId'";
 	$check = $mysqli->query($check);
 	$countCheck = $check->num_rows;
 	if ($countCheck > 0) {
 		$check = $check->fetch_assoc();
 		// , `department_id` = '$department'
-		$sql = "UPDATE `spms_performancereviewstatus`
+		$sql = "UPDATE `spms_pcr_status`
 		SET `ImmediateSup` = '$immediateSup', `DepartmentHead` = '$departmentHead', `HeadAgency` = '$headAgency',`formType`='$formType'
-		WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$check[performanceReviewStatus_id]'";
+		WHERE `spms_pcr_status`.`performanceReviewStatus_id` = '$check[performanceReviewStatus_id]'";
 	} else {
 		#
-		$sql = "INSERT INTO `spms_performancereviewstatus`
+		$sql = "INSERT INTO `spms_pcr_status`
 	(`performanceReviewStatus_id`, `period_id`, `employees_id`, `ImmediateSup`, `DepartmentHead`, `HeadAgency`, `PMT`, `submitted`,`panelApproved`, `approved`, `dateAccomplished`,`formType`,`department_id`,`assembleAll`)
 	VALUES (NULL, '$period', '$empId', '$immediateSup', '$departmentHead', '$headAgency', '0','','', '', '','$formType','$department','0')";
 		#

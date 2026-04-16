@@ -8,7 +8,7 @@
 	$emp = $mysqli->query($emp);
 	$tableRow ="";
 	while ($empAr = $emp->fetch_assoc()) {
-		$files = "SELECT * from `spms_performancereviewstatus` where `period_id`='$utlPeriod' and `department_id`='$utlDepartment'";
+		$files = "SELECT * from `spms_pcr_status` where `period_id`='$utlPeriod' and `department_id`='$utlDepartment'";
 		$files = $mysqli->query($files);
 		if($files->num_rows){
 			$count = 0;

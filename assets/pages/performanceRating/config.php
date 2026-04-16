@@ -26,7 +26,7 @@ function signatories($mysqli){
 		}
 		return $emps;
 	}
-	$sql = "SELECT * from spms_performancereviewstatus where period_id='$_SESSION[period_pr]' and employees_id='$_SESSION[emp_id]'";
+	$sql = "SELECT * from spms_pcr_status where period_id='$_SESSION[period_pr]' and employees_id='$_SESSION[emp_id]'";
 	$sql = $mysqli->query($sql);
 	$sql = $sql->fetch_assoc();
 	$view = "

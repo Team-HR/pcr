@@ -11,7 +11,7 @@ $mysqli->set_charset("utf8");
 
 
 if (isset($_POST['test'])) {
-    $sql = "SELECT * FROM `spms_performancereviewstatus` where `period_id` = '10' and `department_id` = '32'";
+    $sql = "SELECT * FROM `spms_pcr_status` where `period_id` = '10' and `department_id` = '32'";
     $res = $mysqli->query($sql);
     print($res->num_rows);
 }
@@ -23,7 +23,7 @@ $period_id = 10; //10 - July to Dec 2022
 
 
 # performanceReviewStatus_id = 2434 test fomtype 3 strategic function shoul be excluded from computing final numerical rating
-$sql = "SELECT * FROM `spms_performancereviewstatus` where period_id = '$period_id' LIMIT 1 -- and performanceReviewStatus_id = '2434';";
+$sql = "SELECT * FROM `spms_pcr_status` where period_id = '$period_id' LIMIT 1 -- and performanceReviewStatus_id = '2434';";
 $res = $mysqli->query($sql);
 $data = [];
 while ($row = $res->fetch_assoc()) {
@@ -142,7 +142,7 @@ function coreAr($mysqli, $fileStatus = [])
     # for more compact and faster query
     # ... and `dep_id` = '$department_id'
 
-    # department_id from spms_performancereviewstatus
+    # department_id from spms_pcr_status
     $department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
     $period_id = $fileStatus["period_id"];
     $employee_id = $fileStatus["employees_id"];

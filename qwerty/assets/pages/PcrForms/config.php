@@ -34,9 +34,9 @@ if (isset($_POST["getPeriods"])) {
 
     if ($selDepartment) {
         $department_id = $selDepartment["department_id"];
-        $sql = "SELECT `spms_performancereviewstatus`.*, `department`.* FROM `spms_performancereviewstatus` LEFT JOIN `department` ON `spms_performancereviewstatus`.`department_id` = `department`.`department_id` WHERE `spms_performancereviewstatus`.`period_id` = '$period_id' AND `spms_performancereviewstatus`.`department_id` = '$department_id'";
+        $sql = "SELECT `spms_pcr_status`.*, `department`.* FROM `spms_pcr_status` LEFT JOIN `department` ON `spms_pcr_status`.`department_id` = `department`.`department_id` WHERE `spms_pcr_status`.`period_id` = '$period_id' AND `spms_pcr_status`.`department_id` = '$department_id'";
     } else {
-        $sql = "SELECT `spms_performancereviewstatus`.*, `department`.* FROM `spms_performancereviewstatus` LEFT JOIN `department` ON `spms_performancereviewstatus`.`department_id` = `department`.`department_id` WHERE `spms_performancereviewstatus`.`period_id` = '$period_id'";
+        $sql = "SELECT `spms_pcr_status`.*, `department`.* FROM `spms_pcr_status` LEFT JOIN `department` ON `spms_pcr_status`.`department_id` = `department`.`department_id` WHERE `spms_pcr_status`.`period_id` = '$period_id'";
     }
 
     $res = $mysqli->query($sql);
@@ -56,12 +56,12 @@ if (isset($_POST["getPeriods"])) {
     echo json_encode($data);
 } elseif (isset($_POST["lockForm"])) {
     $performanceReviewStatus_id = $_POST["performanceReviewStatus_id"];
-    $sql = "UPDATE `spms_performancereviewstatus` SET `submitted` = 'Done' WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$performanceReviewStatus_id';";
+    $sql = "UPDATE `spms_pcr_status` SET `submitted` = 'Done' WHERE `spms_pcr_status`.`performanceReviewStatus_id` = '$performanceReviewStatus_id';";
     $mysqli->query($sql);
     echo json_encode($performanceReviewStatus_id);
 } elseif (isset($_POST["unlockForm"])) {
     $performanceReviewStatus_id = $_POST["performanceReviewStatus_id"];
-    $sql = "UPDATE `spms_performancereviewstatus` SET `submitted` = '', `panelApproved` = ''  WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$performanceReviewStatus_id';";
+    $sql = "UPDATE `spms_pcr_status` SET `submitted` = '', `panelApproved` = ''  WHERE `spms_pcr_status`.`performanceReviewStatus_id` = '$performanceReviewStatus_id';";
     $mysqli->query($sql);
     echo json_encode($performanceReviewStatus_id);
 } elseif (isset($_POST["convertForm"])) {
@@ -75,7 +75,7 @@ if (isset($_POST["getPeriods"])) {
     $period_id = $fileToConvert["period_id"];
 
 
-    $sql = "UPDATE `spms_performancereviewstatus` SET `formType` = '$selFormType' WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$performanceReviewStatus_id';
+    $sql = "UPDATE `spms_pcr_status` SET `formType` = '$selFormType' WHERE `spms_pcr_status`.`performanceReviewStatus_id` = '$performanceReviewStatus_id';
     ";
     $mysqli->query($sql);
 

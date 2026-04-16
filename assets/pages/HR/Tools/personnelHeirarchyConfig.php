@@ -19,7 +19,7 @@ if (isset($_POST["getPersonnelHeirarchy"])) {
     // $departmentHeadEmployeeId = 0;
 
     // if ($period_id) {
-    //     $sql = "SELECT DISTINCT `DepartmentHead` FROM `spms_performancereviewstatus` WHERE `department_id` = '$department_id' and `period_id` = '$period_id'";
+    //     $sql = "SELECT DISTINCT `DepartmentHead` FROM `spms_pcr_status` WHERE `department_id` = '$department_id' and `period_id` = '$period_id'";
 
     //     $res = $mysqli->query($sql);
 

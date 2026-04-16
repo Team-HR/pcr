@@ -11,7 +11,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 	// FETCH all validated spcr and ipcr 
 	// fetch all dpcr
 	// dpcr query 
-	$sqlDpcr = "SELECT * FROM `spms_performancereviewstatus` where 
+	$sqlDpcr = "SELECT * FROM `spms_pcr_status` where 
 		`period_id` = '$period_id' and `department_id` = '$department'";
 	$sqlDpcr = $mysqli->query($sqlDpcr);
 	while ($data = $sqlDpcr->fetch_assoc()) {
@@ -113,7 +113,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 	// FETCH all validated spcr and ipcr 
 	// fetch all dpcr
 	// dpcr query 
-	$query = "SELECT * FROM `spms_performancereviewstatus` where `period_id` = '$period_id' and `department_id` = '$department_id'";
+	$query = "SELECT * FROM `spms_pcr_status` where `period_id` = '$period_id' and `department_id` = '$department_id'";
 	$sqlDpcr = $mysqli->query($query);
 
 	$data = [];
@@ -163,7 +163,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 		"year" => $period_info["year"]
 	]);
 } else if (isset($_POST["viewFile"])) {
-	$sql = "SELECT * from `spms_performancereviewstatus` WHERE `performanceReviewStatus_id`='$_POST[dataId]'";
+	$sql = "SELECT * from `spms_pcr_status` WHERE `performanceReviewStatus_id`='$_POST[dataId]'";
 	$sql = $mysqli->query($sql);
 	$sql = $sql->fetch_assoc();
 	$_SESSION['empIdPending'] = $sql['employees_id'];
@@ -171,7 +171,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 	// $_SESSION['deptIdPending'] = $sql['department_id'];
 	if ($sql['PMT'] == 0 || $sql['PMT'] == '0') {
 		$empId = $user->get_emp('employees_id');
-		$sqlNullRep = "UPDATE `spms_performancereviewstatus` SET `PMT` = '$empId' WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id`='$sql[performanceReviewStatus_id]'";
+		$sqlNullRep = "UPDATE `spms_pcr_status` SET `PMT` = '$empId' WHERE `spms_pcr_status`.`performanceReviewStatus_id`='$sql[performanceReviewStatus_id]'";
 		$mysqli->query($sqlNullRep);
 	}
 	$formData = new Employee_data();
@@ -227,7 +227,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 // show form 
 elseif (isset($_POST["initLoadForm"])) {
 	$id = $_POST["id"];
-	$sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `performanceReviewStatus_id` = '$id'";
+	$sql = "SELECT * FROM `spms_pcr_status` WHERE `performanceReviewStatus_id` = '$id'";
 	$res = $mysqli->query($sql);
 	$row = $res->fetch_assoc();
 	$period_id = $row["period_id"];
@@ -609,7 +609,7 @@ elseif (isset($_POST["initLoadForm"])) {
 } elseif (isset($_POST["doApprove"])) {
 	$performanceReviewStatus_id = $_POST["id"];
 	$current_date = date("d-m-Y");
-	$sql = "UPDATE `spms_performancereviewstatus` SET `panelApproved` = '$current_date' WHERE `performanceReviewStatus_id` = '$performanceReviewStatus_id'";
+	$sql = "UPDATE `spms_pcr_status` SET `panelApproved` = '$current_date' WHERE `performanceReviewStatus_id` = '$performanceReviewStatus_id'";
 	echo json_encode($mysqli->query($sql));
 }
 
