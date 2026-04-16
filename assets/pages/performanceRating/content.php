@@ -109,7 +109,7 @@ if (isset($_POST['page'])) {
 } elseif (isset($_POST['saveSiData'])) {
 	$acc = addslashes($_POST['acc']);
 	if ($acc != "") {
-		$sql = "INSERT INTO spms_corefucndata (cfd_id, type, p_id, empId, actualAcc, Q, E, T, remarks,percent)
+		$sql = "INSERT INTO spms_pcr_indicator_accomplishments (cfd_id, type, p_id, empId, actualAcc, Q, E, T, remarks,percent)
 		VALUES (NULL, '', '$_POST[saveSiData]', '$_SESSION[emp_id]', '$acc', '$_POST[qual]', '$_POST[eff]', '$_POST[time]', '$_POST[remark]','$_POST[perc]')";
 		$sql = $mysqli->query($sql);
 		if (!$sql) {
@@ -121,7 +121,7 @@ if (isset($_POST['page'])) {
 		echo "Please Add Your Actual Accomplishments";
 	}
 } elseif (isset($_POST['RemoveCoreFuncDataPost'])) {
-	$sql = "DELETE FROM spms_corefucndata WHERE spms_corefucndata.cfd_id = '$_POST[RemoveCoreFuncDataPost]'";
+	$sql = "DELETE FROM spms_pcr_indicator_accomplishments WHERE spms_pcr_indicator_accomplishments.cfd_id = '$_POST[RemoveCoreFuncDataPost]'";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
 		die($mysqli->error);
@@ -133,7 +133,7 @@ if (isset($_POST['page'])) {
 	$criticInputTarget = $_POST['criticInputTarget'];
 	$dataId = $_POST['EditCoreFuncDataSaveChangesPost'];
 	$userId = $_SESSION['emp_id'];
-	$sqlCheck = "SELECT * from spms_corefucndata where cfd_id='$dataId'";
+	$sqlCheck = "SELECT * from spms_pcr_indicator_accomplishments where cfd_id='$dataId'";
 	$sqlCheck = $mysqli->query($sqlCheck);
 	$sqlCheck = $sqlCheck->fetch_assoc();
 	$accCore = $mysqli->real_escape_string($_POST['acc']);
@@ -180,11 +180,11 @@ if (isset($_POST['page'])) {
 				$storeArr = serialize($storeArr);
 				$storeArr = $mysqli->real_escape_string($storeArr);
 			}
-			$sql = "UPDATE spms_corefucndata
+			$sql = "UPDATE spms_pcr_indicator_accomplishments
 							SET actualAcc = '$accCore', Q = '$_POST[qual]',
 							E = '$effCore', T = '$_POST[time]',
 							remarks = '$remarkCore', supEdit = '$storeArr',
-							critics='$critics',percent='$_POST[percEdit]' WHERE spms_corefucndata.cfd_id ='$dataId'";
+							critics='$critics',percent='$_POST[percEdit]' WHERE spms_pcr_indicator_accomplishments.cfd_id ='$dataId'";
 			$sql = $mysqli->query($sql);
 			if (!$sql) {
 				die($mysqli->error);
@@ -195,8 +195,8 @@ if (isset($_POST['page'])) {
 			print(1);
 		}
 	} else {
-		$sql = "UPDATE spms_corefucndata SET actualAcc = '$accCore', Q = '$_POST[qual]', E = '$effCore',
-		T = '$_POST[time]', remarks = '$remarkCore',percent='$_POST[percEdit]' WHERE spms_corefucndata.cfd_id ='$dataId'";
+		$sql = "UPDATE spms_pcr_indicator_accomplishments SET actualAcc = '$accCore', Q = '$_POST[qual]', E = '$effCore',
+		T = '$_POST[time]', remarks = '$remarkCore',percent='$_POST[percEdit]' WHERE spms_pcr_indicator_accomplishments.cfd_id ='$dataId'";
 		$sql = $mysqli->query($sql);
 		if (!$sql) {
 			die($mysqli->error);
@@ -518,7 +518,7 @@ elseif (isset($_POST['submitPerformance'])) {
 } elseif (isset($_POST['editPercent'])) {
 	$percent = $_POST['percent'];
 	$dataId = $_POST['dataId'];
-	$sql = "UPDATE spms_corefucndata SET percent = '$percent' WHERE spms_corefucndata.cfd_id = $dataId";
+	$sql = "UPDATE spms_pcr_indicator_accomplishments SET percent = '$percent' WHERE spms_pcr_indicator_accomplishments.cfd_id = $dataId";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
 		echo $mysqli->error;

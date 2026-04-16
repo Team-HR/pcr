@@ -43,7 +43,7 @@ class RatingScaleMatrixDestroyer
 				# delete mfo data
 				// call function destroy_cfd($cfd_id)
 				foreach ($success_indicator['cfd_ids'] as $cfd_id) {
-					$sql = "DELETE FROM spms_corefucndata WHERE cfd_id = '$cfd_id'";
+					$sql = "DELETE FROM spms_pcr_indicator_accomplishments WHERE cfd_id = '$cfd_id'";
 					$this->mysqli->query($sql);
 				}
 			}
@@ -99,16 +99,16 @@ class RatingScaleMatrixDestroyer
 
 			$data[] = [
 				"mi_id" => $row["mi_id"],
-				"cfd_ids" => $this->get_spms_corefucndata($row["mi_id"])
+				"cfd_ids" => $this->get_spms_pcr_indicator_accomplishments($row["mi_id"])
 			];
 		}
 		return $data;
 	}
 
-	private function get_spms_corefucndata($p_id)
+	private function get_spms_pcr_indicator_accomplishments($p_id)
 	{
 		$data = [];
-		$sql = "SELECT * FROM spms_corefucndata WHERE p_id = '$p_id'";
+		$sql = "SELECT * FROM spms_pcr_indicator_accomplishments WHERE p_id = '$p_id'";
 		$res = $this->mysqli->query($sql);
 
 		while ($row = $res->fetch_assoc()) {

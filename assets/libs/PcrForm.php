@@ -230,7 +230,7 @@ class PcrForm
 
 		$mysqli = $this->mysqli;
 		$employee_id = $this->fileStatus["employees_id"];
-		$sql = "SELECT * FROM spms_corefucndata WHERE p_id = '$mi_id' AND empId = '$employee_id' LIMIT 1";
+		$sql = "SELECT * FROM spms_pcr_indicator_accomplishments WHERE p_id = '$mi_id' AND empId = '$employee_id' LIMIT 1";
 		$res = $mysqli->query($sql);
 		$row = $res->fetch_assoc();
 
@@ -515,7 +515,7 @@ class PcrForm
 		$cTotal = 0;
 		$a = 0;
 		if ($si != "") {
-			$check = "SELECT * from spms_corefucndata where p_id='$si[mi_id]' and empId='$employee_id'";
+			$check = "SELECT * from spms_pcr_indicator_accomplishments where p_id='$si[mi_id]' and empId='$employee_id'";
 			$check = $mysqli->query($check);
 			if ($check->num_rows > 0) {
 				$SiData = $check->fetch_assoc();

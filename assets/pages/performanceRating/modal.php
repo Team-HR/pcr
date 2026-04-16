@@ -157,7 +157,7 @@ if (isset($_POST['coreFucntionInput'])) {
   $dataId = $_POST['EditCoreFuncDataPost'];
   function s($mysqli, $type, $ind, $pmtCheck)
   {
-    $sqlChild = "SELECT * FROM spms_corefucndata where cfd_id='$_POST[EditCoreFuncDataPost]'";
+    $sqlChild = "SELECT * FROM spms_pcr_indicator_accomplishments where cfd_id='$_POST[EditCoreFuncDataPost]'";
     $sqlChild = $mysqli->query($sqlChild);
     $sqlChild = $sqlChild->fetch_assoc();
     $sql = "SELECT * from spms_matrixindicators where mi_id='$sqlChild[p_id]'";
@@ -208,7 +208,7 @@ if (isset($_POST['coreFucntionInput'])) {
   }
 
 
-  $sql = "SELECT * FROM spms_corefucndata where cfd_id='$dataId'";
+  $sql = "SELECT * FROM spms_pcr_indicator_accomplishments where cfd_id='$dataId'";
   $sql = $mysqli->query($sql);
   $sql = $sql->fetch_assoc();
   $IS  = "";
@@ -267,7 +267,7 @@ if (isset($_POST['coreFucntionInput'])) {
     $criticInput = $immediateSuppCriticInput;
   }
 
-  $sqlChildSucIn = "SELECT * FROM spms_corefucndata where cfd_id='$_POST[EditCoreFuncDataPost]'";
+  $sqlChildSucIn = "SELECT * FROM spms_pcr_indicator_accomplishments where cfd_id='$_POST[EditCoreFuncDataPost]'";
   $sqlChildSucIn = $mysqli->query($sqlChildSucIn);
   $sqlChildSucIn = $sqlChildSucIn->fetch_assoc();
   $sqlSucIn = "SELECT * from spms_matrixindicators where mi_id='$sqlChildSucIn[p_id]'";
@@ -590,7 +590,7 @@ if (isset($_POST['coreFucntionInput'])) {
   ";
 } elseif (isset($_POST['showcommentOfSignatoriesPost'])) {
   $dataId = $_POST['showcommentOfSignatoriesPost'];
-  $sql = "SELECT * from spms_corefucndata where cfd_id = '$dataId' ";
+  $sql = "SELECT * from spms_pcr_indicator_accomplishments where cfd_id = '$dataId' ";
   $sql = $mysqli->query($sql);
   $sqlData = $sql->fetch_assoc();
   if ($sqlData['critics']) {
@@ -641,7 +641,7 @@ if (isset($_POST['coreFucntionInput'])) {
     ";
   }
 } elseif (isset($_POST['changePercent'])) {
-  $sql = "SELECT * from spms_corefucndata where cfd_id='$_POST[dataId]'";
+  $sql = "SELECT * from spms_pcr_indicator_accomplishments where cfd_id='$_POST[dataId]'";
   $sql = $mysqli->query($sql);
   $dat = $sql->fetch_assoc();
   $view = "

@@ -100,7 +100,7 @@ class IPCR extends Db
   {
     $view = "";
     if (strtoupper($this->fileType) == "PERFORMANCE") {
-      $sql = "SELECT * from spms_corefucndata where p_id='$indicators[mi_id]' and empId='$this->EmpId'";
+      $sql = "SELECT * from spms_pcr_indicator_accomplishments where p_id='$indicators[mi_id]' and empId='$this->EmpId'";
       $sql = $this->mysqli->query($sql);
       $dev = 0;
       $av = 0;

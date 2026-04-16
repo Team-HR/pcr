@@ -462,7 +462,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
 				$empincharge = "";
 				if (isset($siDataRow1['mi_id'])) {
 					$mi_id = $siDataRow1['mi_id'];
-					$sql = "SELECT * FROM spms_corefucndatawhere p_id = '$mi_id' AND empId = '$empDataId';";
+					$sql = "SELECT * FROM spms_pcr_indicator_accomplishmentswhere p_id = '$mi_id' AND empId = '$empDataId';";
 					$res = $mysqli->query($sql);
 					if ($rowdata = $res->fetch_assoc()) {
 						// $empincharge .= " -- " . json_encode($rowdata);

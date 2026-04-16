@@ -357,7 +357,7 @@ elseif (isset($_POST["initLoadForm"])) {
 		#!!!! test end
 
 		$supEdit[] = $corrections_made;
-		// $sql = "UPDATE spms_corefucndata SET supEdit = '$supEdit' WHERE spms_corefucndata.cfd_id = '$cfd_id'; ";
+		// $sql = "UPDATE spms_pcr_indicator_accomplishments SET supEdit = '$supEdit' WHERE spms_pcr_indicator_accomplishments.cfd_id = '$cfd_id'; ";
 		// $mysqli->query($sql);
 		$supEdit = serialize($supEdit);
 		$supEdit = $mysqli->real_escape_string($supEdit);
@@ -438,7 +438,7 @@ elseif (isset($_POST["initLoadForm"])) {
 	$cfd_id = $payload["cfd_id"];
 
 	// get exisiting cfdata first and compare to check if changes were made
-	$sql = "SELECT * FROM spms_corefucndata WHERE cfd_id = '$cfd_id'";
+	$sql = "SELECT * FROM spms_pcr_indicator_accomplishments WHERE cfd_id = '$cfd_id'";
 	$res = $mysqli->query($sql);
 
 	$row = $res->fetch_assoc();
@@ -531,7 +531,7 @@ elseif (isset($_POST["initLoadForm"])) {
 		#!!!! test end
 
 		$supEdit[] = $corrections_made;
-		// $sql = "UPDATE spms_corefucndata SET supEdit = '$supEdit' WHERE spms_corefucndata.cfd_id = '$cfd_id'; ";
+		// $sql = "UPDATE spms_pcr_indicator_accomplishments SET supEdit = '$supEdit' WHERE spms_pcr_indicator_accomplishments.cfd_id = '$cfd_id'; ";
 		// $mysqli->query($sql);
 		$supEdit = serialize($supEdit);
 		$supEdit = $mysqli->real_escape_string($supEdit);
@@ -565,7 +565,7 @@ elseif (isset($_POST["initLoadForm"])) {
 
 
 	// check first if cfd_id exists 
-	$sql = "SELECT * FROM spms_corefucndata WHERE cfd_id = '$cfd_id'";
+	$sql = "SELECT * FROM spms_pcr_indicator_accomplishments WHERE cfd_id = '$cfd_id'";
 	$res = $mysqli->query($sql);
 
 	// if none return null
@@ -600,7 +600,7 @@ elseif (isset($_POST["initLoadForm"])) {
 		$sql_critics = ",critics = ''";
 	}
 
-	$sql = "UPDATE spms_corefucndata SET  percent = '$payload_percent', actualAcc = '$payload_actualAcc', q = '$payload_q', e = '$payload_e', t = '$payload_t', supEdit = '$supEdit' $sql_critics WHERE spms_corefucndata.cfd_id = '$cfd_id';";
+	$sql = "UPDATE spms_pcr_indicator_accomplishments SET  percent = '$payload_percent', actualAcc = '$payload_actualAcc', q = '$payload_q', e = '$payload_e', t = '$payload_t', supEdit = '$supEdit' $sql_critics WHERE spms_pcr_indicator_accomplishments.cfd_id = '$cfd_id';";
 
 	$res = $mysqli->query($sql);
 

@@ -711,7 +711,7 @@ class Employee_data extends Db
 		$cTotal = 0;
 		$a = 0;
 		if ($si != "") {
-			$check = "SELECT * from spms_corefucndata where p_id='$si[mi_id]' and empId='$this->emp_ID'";
+			$check = "SELECT * from spms_pcr_indicator_accomplishments where p_id='$si[mi_id]' and empId='$this->emp_ID'";
 			$check = $this->mysqli->query($check);
 			$accountableNames = "";
 			if ($this->get_status('formType') > 1) {
