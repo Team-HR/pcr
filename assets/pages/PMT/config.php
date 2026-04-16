@@ -198,8 +198,8 @@ if (isset($_POST['showDepartmentFiles'])) {
 	// $res = $mysqli->query($sql);
 	// $periodSql = $res->fetch_assoc();
 	$employee_id_auth = $user->get_emp('employees_id');
-	$sql = "SELECT * FROM spms_departmentassignedtopmt left join department on 
-			spms_departmentassignedtopmt.department_id=department.department_id
+	$sql = "SELECT * FROM spms_pmt_department_assignments left join department on 
+			spms_pmt_department_assignments.department_id=department.department_id
 			where employees_id='$employee_id_auth'";
 	$res = $mysqli->query($sql);
 	// echo json_encode($employee_id_auth);

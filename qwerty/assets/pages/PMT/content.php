@@ -4,8 +4,8 @@ $sql = $mysqli->query($sql);
 $col = "";
 $index = 0;
 while ($a = $sql->fetch_assoc()) {
-  $assignSql = "SELECT * from spms_departmentassignedtopmt 
-                left join department on spms_departmentassignedtopmt.department_id=department.department_id
+  $assignSql = "SELECT * from spms_pmt_department_assignments 
+                left join department on spms_pmt_department_assignments.department_id=department.department_id
                 where employees_id='$a[employees_id]'";
   $assignSql = $mysqli->query($assignSql);
   echo $mysqli->error;
