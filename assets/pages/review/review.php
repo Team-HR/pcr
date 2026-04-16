@@ -34,7 +34,7 @@ function gridNotifView()
 {
   global $mysqli;
   $empId = $_SESSION['emp_id'];
-  $getAllPeriod = "SELECT * from `spms_mfo_period`";
+  $getAllPeriod = "SELECT * from spms_mfo_period";
   $getAllPeriod = $mysqli->query($getAllPeriod);
   $department_id = $_SESSION['emp_info']['department_id'];
 
@@ -45,7 +45,7 @@ function gridNotifView()
     $DepartmentHeadDataCount = 0;
     $count = 0;
     $periodId = $period['mfoperiod_id'];
-    $ImmediateSupData = "SELECT * from `spms_pcr_status` where `submitted`= 'Done' and `period_id`= '$period[mfoperiod_id]' and `ImmediateSup`='$empId' and `approved`=''";
+    $ImmediateSupData = "SELECT * from spms_pcr_status where submitted= 'Done' and period_id= '$period[mfoperiod_id]' and ImmediateSup='$empId' and approved=''";
     $ImmediateSupData = $mysqli->query($ImmediateSupData);
     $imCount = 0;
     $test = [];
@@ -58,7 +58,7 @@ function gridNotifView()
     $ImmediateSupData = $imCount;
     // $ImmediateSupData = $ImmediateSupData->num_rows;
 
-    $DepartmentHeadData = "SELECT * from `spms_pcr_status` where `submitted`= 'Done' and `period_id`= '$period[mfoperiod_id]' and `DepartmentHead`='$empId' and `certify`=''";
+    $DepartmentHeadData = "SELECT * from spms_pcr_status where submitted= 'Done' and period_id= '$period[mfoperiod_id]' and DepartmentHead='$empId' and certify=''";
     $DepartmentHeadData = $mysqli->query($DepartmentHeadData);
 
     $DepartmentHeadDataCount = $DepartmentHeadData->num_rows;

@@ -111,7 +111,7 @@ class Employee_data extends Db
 		if (!$this->fileStatus["period_id"]) return null;
 		$month_mfo = $this->period["month_mfo"];
 		$year_mfo = $this->period["year_mfo"];
-		$sql = "SELECT `prr_id` FROM `prr` WHERE `period` = '$month_mfo' AND `year` = '$year_mfo'";
+		$sql = "SELECT prr_id FROM prr WHERE period = '$month_mfo' AND year = '$year_mfo'";
 		$res = $this->mysqli->query($sql);
 		$data = [];
 		# since spms_pcr_status table does not identify the personnel to be casual or 
@@ -158,7 +158,7 @@ class Employee_data extends Db
 		# personnel appointed to from the prrlist generated 
 		$prr_id = 0;
 		foreach ($prr_ids as $id) {
-			$sql = "SELECT * FROM `prrlist` WHERE `prr_id` = '$id' AND `employees_id` = '$employee_id'";
+			$sql = "SELECT * FROM prrlist WHERE prr_id = '$id' AND employees_id = '$employee_id'";
 			$result = $this->mysqli->query($sql);
 			if ($result->num_rows > 0) {
 				$prr_id = $id;
@@ -169,7 +169,7 @@ class Employee_data extends Db
 		// $date_appraised = $this->fileStatus["panelApproved"];
 		$final_comments = $this->mysqli->real_escape_string($this->final_comments);
 		// $prr_id = $this->get_prr_id();
-		$sql = "UPDATE `prrlist` SET `numerical` = '$final_numerical_rating', `adjectival` = '$final_adjectival_rating', `comments` = '$final_comments' WHERE `prr_id` = '$prr_id' AND `employees_id` = '$employee_id'";
+		$sql = "UPDATE prrlist SET numerical = '$final_numerical_rating', adjectival = '$final_adjectival_rating', comments = '$final_comments' WHERE prr_id = '$prr_id' AND employees_id = '$employee_id'";
 		$this->mysqli->query($sql);
 
 		return [
@@ -199,7 +199,7 @@ class Employee_data extends Db
 			die($this->error);
 		}
 		$this->EmpInfo = $sql->fetch_assoc();
-		$authSql = "SELECT * FROM `spms_accounts` where employees_id='$this->emp_ID'";
+		$authSql = "SELECT * FROM spms_accounts where employees_id='$this->emp_ID'";
 		$authSql = $this->mysqli->query($authSql);
 		$authSql = $authSql->fetch_assoc();
 		if ($authSql['type'] == "") {
@@ -317,7 +317,7 @@ class Employee_data extends Db
 	private function getEmployeeName($employee_id)
 	{
 		if (!$employee_id) return null;
-		$sql = "SELECT * FROM `employees` WHERE `employees_id` = '$employee_id'";
+		$sql = "SELECT * FROM employees WHERE employees_id = '$employee_id'";
 		$res = $this->mysqli->query($sql);
 		if ($row = $res->fetch_assoc()) {
 			$lastName = $row['lastName'];
@@ -484,7 +484,7 @@ class Employee_data extends Db
 	{
 		$period = $this->period;
 		$department = $this->get_emp('department_id');
-		$sql = "SELECT * `spms_rsmstatus` where `period_id`='$period[mfoperiod_id]' and `department_id`='$department'";
+		$sql = "SELECT * spms_rsmstatus where period_id='$period[mfoperiod_id]' and department_id='$department'";
 		$sql = mysql::query($sql);
 		$this->rsmStatus = $sql->fetch_assoc();
 	}
@@ -493,14 +493,14 @@ class Employee_data extends Db
 	private function coreAr()
 	{
 		# for more compact and faster query
-		# ... and `dep_id` = '$department_id'
+		# ... and dep_id = '$department_id'
 		$fileStatus = $this->fileStatus;
 		# department_id from spms_pcr_status
 		$department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
 		# not recommended department_id from employees table
 		// $department_id = $this->EmpInfo["department_id"];
 		$main_Arr = [];
-		$sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$this->per_ID' and `dep_id` = '$department_id' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+		$sql = "SELECT * from spms_pcr_mfos where parent_id='' and mfo_periodId='$this->per_ID' and dep_id = '$department_id' ORDER BY spms_pcr_mfos.cf_count ASC";
 		$sql = $this->mysqli->query($sql);
 		$parent = [[], [], []];
 		while ($core = $sql->fetch_assoc()) {
@@ -547,7 +547,7 @@ class Employee_data extends Db
 	private function q($i)
 	{
 
-		$sql = "SELECT * from spms_corefunctions where parent_id='$i' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+		$sql = "SELECT * from spms_pcr_mfos where parent_id='$i' ORDER BY spms_pcr_mfos.cf_count ASC";
 		$sql = $this->mysqli->query($sql);
 		if (!$sql) {
 			die($this->error);
@@ -660,7 +660,7 @@ class Employee_data extends Db
 		$emp = $this->fileStatus["employees_id"];
 		$superiors_id = $emp;
 
-		$indicators = $this->mysqli->query("SELECT * FROM `spms_matrixindicators` where cf_ID='$perId'");
+		$indicators = $this->mysqli->query("SELECT * FROM spms_matrixindicators where cf_ID='$perId'");
 		while ($empId = $indicators->fetch_assoc()) {
 			$emp .= "," . $empId['mi_incharge'];
 		}
@@ -670,15 +670,15 @@ class Employee_data extends Db
 		$emp_length = count($emp);
 		$view = "<br>";
 		# filter here only employee_id what with immediate supervisor $emp
-		// SELECT `employees_id` FROM `spms_pcr_status` where period_id = $period_id and ImmediateSup = $ImmediateSup;
+		// SELECT employees_id FROM spms_pcr_status where period_id = $period_id and ImmediateSup = $ImmediateSup;
 
 		if ($this->fileStatus["formType"] != 5) {
 			$subordinates = [];
 
 			if ($this->fileStatus["formType"] == 2 || $this->fileStatus["formType"] == 4) { //if spcr division pcr
-				$res = $this->mysqli->query("SELECT `employees_id` FROM `spms_pcr_status` where `period_id` = '$period_id' and `ImmediateSup` = '$superiors_id'");
+				$res = $this->mysqli->query("SELECT employees_id FROM spms_pcr_status where period_id = '$period_id' and ImmediateSup = '$superiors_id'");
 			} elseif ($this->fileStatus["formType"] == 3) { //else if dpcr
-				$res = $this->mysqli->query("SELECT `employees_id` FROM `spms_pcr_status` where `period_id` = '$period_id' and `DepartmentHead` = '$superiors_id'");
+				$res = $this->mysqli->query("SELECT employees_id FROM spms_pcr_status where period_id = '$period_id' and DepartmentHead = '$superiors_id'");
 			}
 
 			while ($row = $res->fetch_assoc()) {
@@ -911,12 +911,12 @@ class Employee_data extends Db
 
 
 		if ($this->get_status('formType') == '1' || $this->get_status('formType') == '5') {
-			$sql = "SELECT * FROM `spms_supportfunctions` where `type`=1";
+			$sql = "SELECT * FROM spms_supportfunctions where type=1";
 		} elseif ($this->get_status('formType') == '3') {
-			$sql = "SELECT * FROM `spms_supportfunctions` where `type`=3";
+			$sql = "SELECT * FROM spms_supportfunctions where type=3";
 			$isDpcr = true;
 		} else {
-			$sql = "SELECT * FROM `spms_supportfunctions` where `type`=2";
+			$sql = "SELECT * FROM spms_supportfunctions where type=2";
 		}
 		$sql = $this->mysqli->query($sql);
 		$col = "";
@@ -1199,7 +1199,7 @@ class Employee_data extends Db
 		$period_id = $_SESSION['period_pr'];
 		$employee_id = $_SESSION['emp_id'];
 		# get form filetype
-		$sql = "SELECT `formType` FROM `spms_pcr_status` WHERE `period_id` = '$period_id' and `employees_id` = '$employee_id';
+		$sql = "SELECT formType FROM spms_pcr_status WHERE period_id = '$period_id' and employees_id = '$employee_id';
 		";
 		$result = $this->mysqli->query($sql);
 		$row = $result->fetch_assoc();
@@ -1353,7 +1353,7 @@ class Employee_data extends Db
 		if ($id == '') {
 			$id = 0;
 		}
-		$empSql = "SELECT * from `employees`";
+		$empSql = "SELECT * from employees";
 		$empSql = $this->mysqli->query($empSql);
 		while ($getData = $empSql->fetch_assoc()) {
 			$val = $getData["employees_id"];
@@ -2068,7 +2068,7 @@ class Employee_data extends Db
 
 	public function get_department_name($department_id)
 	{
-		$sql  = "SELECT * FROM `department` where `department_id`='$department_id'";
+		$sql  = "SELECT * FROM department where department_id='$department_id'";
 		$res = $this->mysqli->query($sql);
 		$row = $res->fetch_assoc();
 		return isset($row["department"]) ? $row["department"] : "_______________________________";
@@ -2607,7 +2607,7 @@ function Authorization_Error()
 
 function getSupportFunctionActivitiesCount($mysqli, $period_id)
 {
-	$query = "SELECT * FROM `spms_supportfunctions_acts` WHERE `period_id` = ?";
+	$query = "SELECT * FROM spms_supportfunctions_acts WHERE period_id = ?";
 	try {
 		$stmt = $mysqli->prepare($query);
 		if ($stmt === false) {

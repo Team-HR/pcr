@@ -5,7 +5,7 @@ function empData($a)
 {
 	global $mysqli;
 	$emps = "";
-	$empSql = "SELECT * from `employees`";
+	$empSql = "SELECT * from employees";
 	$empSql = $mysqli->query($empSql);
 	while ($getData = $empSql->fetch_assoc()) {
 		$val = $getData['employees_id'];

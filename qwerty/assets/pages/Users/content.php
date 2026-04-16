@@ -1,5 +1,5 @@
 <?php
-$allPmt = "SELECT * from `employees` left join `spms_accounts` on `employees`.`employees_id`=`spms_accounts`.`employees_id` where `spms_accounts`.`type` like '%PMT%'";
+$allPmt = "SELECT * from employees left join spms_accounts on employees.employees_id=spms_accounts.employees_id where spms_accounts.type like '%PMT%'";
 $allPmt = $mysqli->query($allPmt);
 $AllpmtRow = "";
 while ($rowData = $allPmt->fetch_assoc()) {
@@ -47,7 +47,7 @@ while ($rowData = $allPmt->fetch_assoc()) {
           <select class="form-control mr-sm-2" type="search" name='search'>
                 <option value="">PMT</option>
               <?php 
-                $sql = "SELECT * from `department`";
+                $sql = "SELECT * from department";
                 $sql = $mysqli->query($sql);
                 while ($option = $sql->fetch_assoc()) {
                   echo "<option value='$option[department_id]'>$option[department]</option>";                  

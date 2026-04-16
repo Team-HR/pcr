@@ -33,7 +33,7 @@ class PcrForm
     {
         $mysqli = $this->mysqli;
         $file_status = [];
-        $sql = "SELECT * FROM `spms_pcr_status` WHERE `performanceReviewStatus_id` = '$id'";
+        $sql = "SELECT * FROM spms_pcr_status WHERE performanceReviewStatus_id = '$id'";
         $res = $mysqli->query($sql);
         if ($row = $res->fetch_assoc()) {
             $file_status = $row;
@@ -72,7 +72,7 @@ class PcrForm
     {
         $mysqli = $this->mysqli;
         # for more compact and faster query
-        # ... and `dep_id` = '$department_id'
+        # ... and dep_id = '$department_id'
 
         # department_id from spms_pcr_status
         $department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
@@ -81,7 +81,7 @@ class PcrForm
 
         # not recommended department_id from employees table
         $main_Arr = [];
-        $sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$period_id' and `dep_id` = '$department_id' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+        $sql = "SELECT * from spms_pcr_mfos where parent_id='' and mfo_periodId='$period_id' and dep_id = '$department_id' ORDER BY spms_pcr_mfos.cf_count ASC";
         $sql = $mysqli->query($sql);
         $parent = [[], [], []];
         while ($core = $sql->fetch_assoc()) {
@@ -157,7 +157,7 @@ class PcrForm
     private function q($siId)
     {
         $mysqli = $this->mysqli;
-        $sql = "SELECT * from spms_corefunctions where parent_id='$siId' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+        $sql = "SELECT * from spms_pcr_mfos where parent_id='$siId' ORDER BY spms_pcr_mfos.cf_count ASC";
         $sql = $mysqli->query($sql);
         return $sql;
     }
@@ -296,11 +296,11 @@ class PcrForm
         $period_id = $fileStatus['period_id'];
         $totalAv = 0;
         if ($formType == '1' || $formType == '5') {
-            $sql = "SELECT * FROM `spms_supportfunctions` where `type`=1";
+            $sql = "SELECT * FROM spms_supportfunctions where type=1";
         } elseif ($formType == '3') {
-            $sql = "SELECT * FROM `spms_supportfunctions` where `type`=3";
+            $sql = "SELECT * FROM spms_supportfunctions where type=3";
         } elseif ($formType == '2' || $formType == '4') {
-            $sql = "SELECT * FROM `spms_supportfunctions` where `type`=2";
+            $sql = "SELECT * FROM spms_supportfunctions where type=2";
         } else {
             return bcdiv($totalAv, 1, 2);
         }

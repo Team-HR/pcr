@@ -7,15 +7,15 @@ if ($month >= 7) { // the date now is 7-12 means july - december in months
 	$year--;
 	$month = "July - December";
 }
-$period = "SELECT `mfoperiod_id` from `spms_mfo_period` where `month_mfo`='$month' and `year_mfo`='$year'";
+$period = "SELECT mfoperiod_id from spms_mfo_period where month_mfo='$month' and year_mfo='$year'";
 $period = $mysqli->query($period);
 $period = $period->fetch_assoc();
 $period = $period['mfoperiod_id'];
-$sqlSelectDep = "SELECT * from `department`";
+$sqlSelectDep = "SELECT * from department";
 $sqlSelectDep = $mysqli->query($sqlSelectDep);
 $table = "";
 while ($tableAr = $sqlSelectDep->fetch_assoc()) {
-	$EmpInDepartment = "SELECT * from `employees` where `employees`.`department_id`='$tableAr[department_id]'";
+	$EmpInDepartment = "SELECT * from employees where employees.department_id='$tableAr[department_id]'";
 	$EmpInDepartment = $mysqli->query($EmpInDepartment);
 	$count = $EmpInDepartment->num_rows;
 	$submitted = 0;
@@ -24,7 +24,7 @@ while ($tableAr = $sqlSelectDep->fetch_assoc()) {
 	$departmentHead = 0;
 	$pmt = 0;
 	while ($empArr = $EmpInDepartment->fetch_assoc()) {
-		$submittedForms = "SELECT * from `spms_pcr_status` where `period_id`='$period' and `employees_id`='$empArr[employees_id]'";
+		$submittedForms = "SELECT * from spms_pcr_status where period_id='$period' and employees_id='$empArr[employees_id]'";
 		$submittedForms = $mysqli->query($submittedForms);
 		if ($submittedForms->num_rows > 0) {
 			$submittedForms = $submittedForms->fetch_assoc();

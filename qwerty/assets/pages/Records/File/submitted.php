@@ -3,11 +3,11 @@
 	// $utlPeroid and $utlDepartment are variables that can be found on departmentFiles.php
 
 
-	$getDepName = "SELECT * FROM `department` where `department_id`='$utlDepartment'";
+	$getDepName = "SELECT * FROM department where department_id='$utlDepartment'";
 	$getDepName = $mysqli->query($getDepName);
 	$getDepName = $getDepName->fetch_assoc();
 	$depName = $getDepName['department'];
-	$sql = "SELECT * from `spms_pcr_status` left join `employees` on `spms_pcr_status`.`employees_id`=`employees`.`employees_id` where `spms_pcr_status`.`period_id`='$utlPeriod' and `spms_pcr_status`.`department_id`='$utlDepartment'";
+	$sql = "SELECT * from spms_pcr_status left join employees on spms_pcr_status.employees_id=employees.employees_id where spms_pcr_status.period_id='$utlPeriod' and spms_pcr_status.department_id='$utlDepartment'";
 	$sql = $mysqli->query($sql);
 	$tableRow = "";
 	$dataId = [];

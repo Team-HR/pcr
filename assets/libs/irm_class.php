@@ -27,7 +27,7 @@ class IRM extends Db
     {
         $department = $this->department;
         $period  = $this->period;
-        $query = "SELECT * from `spms_corefunctions` where `parent_id`='' and `dep_id`='$department' and `mfo_periodId`='$period' order by `cf_count` ASC";
+        $query = "SELECT * from spms_pcr_mfos where parent_id='' and dep_id='$department' and mfo_periodId='$period' order by cf_count ASC";
         $query = $this->mysqli->query($query);
         $view = "";
         while ($row = $query->fetch_assoc()) {
@@ -44,7 +44,7 @@ class IRM extends Db
     private function mfochild($id, $padding)
     {
         $padding += 20;
-        $query = "SELECT * from `spms_corefunctions` where `parent_id`='$id' order by `cf_count` ASC";
+        $query = "SELECT * from spms_pcr_mfos where parent_id='$id' order by cf_count ASC";
         $query = $this->mysqli->query($query);
         $a = [];
         $a[1] = 0;
@@ -64,7 +64,7 @@ class IRM extends Db
 
     private function indicators($dat, $padding)
     {
-        $query  = "SELECT * from `spms_matrixindicators` where `cf_ID`='$dat[cf_ID]'";
+        $query  = "SELECT * from spms_matrixindicators where cf_ID='$dat[cf_ID]'";
         $query = $this->mysqli->query($query);
         $a = [];
         $IndiCount = 0;

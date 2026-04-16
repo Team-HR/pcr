@@ -15,7 +15,7 @@ function signatories($mysqli){
 		if($id==''){
 			$id = 0;
 		}
-		$empSql = "SELECT * from `employees`";
+		$empSql = "SELECT * from employees";
 		$empSql = $mysqli->query($empSql);
 		while($getData = $empSql->fetch_assoc()){
 			if($getData['employees_id']==$id){

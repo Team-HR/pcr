@@ -11,11 +11,11 @@ class FinalNumericalRating
         if ($department_id == "all") {
             $department_filter = ";";
         } else {
-            $department_filter = " AND `department_id` = '$department_id';";
+            $department_filter = " AND department_id = '$department_id';";
         }
-        $sql = "SELECT * FROM `spms_pcr_status` where `period_id` = '$period_id'" . $department_filter; // AND `department_id` = 32 limit 2
-        //--`performanceReviewStatus_id` = '2909'
-        //--`period_id` = '$period_id' AND `final_numerical_rating` IS NULL LIMIT 1
+        $sql = "SELECT * FROM spms_pcr_status where period_id = '$period_id'" . $department_filter; // AND department_id = 32 limit 2
+        //--performanceReviewStatus_id = '2909'
+        //--period_id = '$period_id' AND final_numerical_rating IS NULL LIMIT 1
         $res = $mysqli->query($sql);
         $data = [];
         while ($row = $res->fetch_assoc()) {
@@ -35,7 +35,7 @@ class FinalNumericalRating
         if (!$final_numerical_rating) {
             $final_numerical_rating = NULL;
         }
-        $sql = "UPDATE `spms_pcr_status` SET `final_numerical_rating` = '$final_numerical_rating' WHERE `spms_pcr_status`.`performanceReviewStatus_id` = '$fileStatusId';";
+        $sql = "UPDATE spms_pcr_status SET final_numerical_rating = '$final_numerical_rating' WHERE spms_pcr_status.performanceReviewStatus_id = '$fileStatusId';";
         $mysqli->query($sql);
     }
     public function getFinalNumericalRating($mysqli, $fileStatus)
@@ -104,7 +104,7 @@ class FinalNumericalRating
     private function coreAr($mysqli, $fileStatus = [])
     {
         # for more compact and faster query
-        # ... and `dep_id` = '$department_id'
+        # ... and dep_id = '$department_id'
 
         # department_id from spms_pcr_status
         $department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
@@ -113,7 +113,7 @@ class FinalNumericalRating
 
         # not recommended department_id from employees table
         $main_Arr = [];
-        $sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$period_id' and `dep_id` = '$department_id' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+        $sql = "SELECT * from spms_pcr_mfos where parent_id='' and mfo_periodId='$period_id' and dep_id = '$department_id' ORDER BY spms_pcr_mfos.cf_count ASC";
         $sql = $mysqli->query($sql);
         $parent = [[], [], []];
         while ($core = $sql->fetch_assoc()) {
@@ -186,7 +186,7 @@ class FinalNumericalRating
 
     private function q($mysqli, $siId)
     {
-        $sql = "SELECT * from spms_corefunctions where parent_id='$siId' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+        $sql = "SELECT * from spms_pcr_mfos where parent_id='$siId' ORDER BY spms_pcr_mfos.cf_count ASC";
         $sql = $mysqli->query($sql);
         return $sql;
     }
@@ -320,11 +320,11 @@ class FinalNumericalRating
         $period_id = $fileStatus['period_id'];
         $totalAv = 0;
         if ($formType == '1' || $formType == '5') {
-            $sql = "SELECT * FROM `spms_supportfunctions` where `type`=1";
+            $sql = "SELECT * FROM spms_supportfunctions where type=1";
         } elseif ($formType == '3') {
-            $sql = "SELECT * FROM `spms_supportfunctions` where `type`=3";
+            $sql = "SELECT * FROM spms_supportfunctions where type=3";
         } elseif ($formType == '2' || $formType == '4') {
-            $sql = "SELECT * FROM `spms_supportfunctions` where `type`=2";
+            $sql = "SELECT * FROM spms_supportfunctions where type=2";
         } else {
             return bcdiv($totalAv, 1, 2);
         }

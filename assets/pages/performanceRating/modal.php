@@ -157,7 +157,7 @@ if (isset($_POST['coreFucntionInput'])) {
   $dataId = $_POST['EditCoreFuncDataPost'];
   function s($mysqli, $type, $ind, $pmtCheck)
   {
-    $sqlChild = "SELECT * FROM `spms_corefucndata` where cfd_id='$_POST[EditCoreFuncDataPost]'";
+    $sqlChild = "SELECT * FROM spms_corefucndata where cfd_id='$_POST[EditCoreFuncDataPost]'";
     $sqlChild = $mysqli->query($sqlChild);
     $sqlChild = $sqlChild->fetch_assoc();
     $sql = "SELECT * from spms_matrixindicators where mi_id='$sqlChild[p_id]'";
@@ -208,7 +208,7 @@ if (isset($_POST['coreFucntionInput'])) {
   }
 
 
-  $sql = "SELECT * FROM `spms_corefucndata` where cfd_id='$dataId'";
+  $sql = "SELECT * FROM spms_corefucndata where cfd_id='$dataId'";
   $sql = $mysqli->query($sql);
   $sql = $sql->fetch_assoc();
   $IS  = "";
@@ -245,10 +245,10 @@ if (isset($_POST['coreFucntionInput'])) {
   </div>";
 
   // dont look its just to dump
-  $getPeriodId = "SELECT 	* from `spms_matrixindicators` where `mi_id`='$sql[p_id]'";
+  $getPeriodId = "SELECT 	* from spms_matrixindicators where mi_id='$sql[p_id]'";
   $getPeriodId = $mysqli->query($getPeriodId);
   $getPeriodId = $getPeriodId->fetch_assoc();
-  $getPeriodId = "SELECT * from `spms_corefunctions` where `cf_ID`='$getPeriodId[cf_ID]'";
+  $getPeriodId = "SELECT * from spms_pcr_mfos where cf_ID='$getPeriodId[cf_ID]'";
   $getPeriodId = $mysqli->query($getPeriodId);
   $getPeriodId = $getPeriodId->fetch_assoc();
   $coreFunctionData = new Employee_data();
@@ -267,7 +267,7 @@ if (isset($_POST['coreFucntionInput'])) {
     $criticInput = $immediateSuppCriticInput;
   }
 
-  $sqlChildSucIn = "SELECT * FROM `spms_corefucndata` where cfd_id='$_POST[EditCoreFuncDataPost]'";
+  $sqlChildSucIn = "SELECT * FROM spms_corefucndata where cfd_id='$_POST[EditCoreFuncDataPost]'";
   $sqlChildSucIn = $mysqli->query($sqlChildSucIn);
   $sqlChildSucIn = $sqlChildSucIn->fetch_assoc();
   $sqlSucIn = "SELECT * from spms_matrixindicators where mi_id='$sqlChildSucIn[p_id]'";
@@ -310,7 +310,7 @@ if (isset($_POST['coreFucntionInput'])) {
   function cb($mysqli, $type, $col)
   {
     $dataId = $_POST['addSuppAccomplishementModalContent'];
-    $sql = "SELECT * FROM `spms_supportfunctions` where id_suppFunc='$dataId'";
+    $sql = "SELECT * FROM spms_supportfunctions where id_suppFunc='$dataId'";
     $sql = $mysqli->query($sql);
     $sql = $sql->fetch_assoc();
     $a = unserialize($sql[$col]);
@@ -339,7 +339,7 @@ if (isset($_POST['coreFucntionInput'])) {
   }
 
 
-  $sqlSuc = "SELECT * FROM `spms_supportfunctions` where id_suppFunc='$dataId'";
+  $sqlSuc = "SELECT * FROM spms_supportfunctions where id_suppFunc='$dataId'";
   $sqlSuc = $mysqli->query($sqlSuc);
   $sqlSuc = $sqlSuc->fetch_assoc();
 
@@ -432,7 +432,7 @@ if (isset($_POST['coreFucntionInput'])) {
     $sqldata = "SELECT * from spms_supportfunctiondata where sfd_id='$empdataId'";
     $sqldata = $mysqli->query($sqldata);
     $sqldata = $sqldata->fetch_assoc();
-    $sql = "SELECT * FROM `spms_supportfunctions` where id_suppFunc='$sqldata[parent_id]'";
+    $sql = "SELECT * FROM spms_supportfunctions where id_suppFunc='$sqldata[parent_id]'";
     $sql = $mysqli->query($sql);
     $sql = $sql->fetch_assoc();
     $a = unserialize($sql[$col]);
@@ -477,7 +477,7 @@ if (isset($_POST['coreFucntionInput'])) {
   $sqldataSuccIn = "SELECT * from spms_supportfunctiondata where sfd_id='$_POST[suppFuncEditEmpDataPost]'";
   $sqldataSuccIn = $mysqli->query($sqldataSuccIn);
   $sqldataSuccIn = $sqldataSuccIn->fetch_assoc();
-  $sqlSuccIn = "SELECT * FROM `spms_supportfunctions` where id_suppFunc='$sqldataSuccIn[parent_id]'";
+  $sqlSuccIn = "SELECT * FROM spms_supportfunctions where id_suppFunc='$sqldataSuccIn[parent_id]'";
   $sqlSuccIn = $mysqli->query($sqlSuccIn);
   $sqlSuccIn = $sqlSuccIn->fetch_assoc();
 
@@ -590,7 +590,7 @@ if (isset($_POST['coreFucntionInput'])) {
   ";
 } elseif (isset($_POST['showcommentOfSignatoriesPost'])) {
   $dataId = $_POST['showcommentOfSignatoriesPost'];
-  $sql = "SELECT * from `spms_corefucndata` where `cfd_id` = '$dataId' ";
+  $sql = "SELECT * from spms_corefucndata where cfd_id = '$dataId' ";
   $sql = $mysqli->query($sql);
   $sqlData = $sql->fetch_assoc();
   if ($sqlData['critics']) {
@@ -641,7 +641,7 @@ if (isset($_POST['coreFucntionInput'])) {
     ";
   }
 } elseif (isset($_POST['changePercent'])) {
-  $sql = "SELECT * from spms_corefucndata where `cfd_id`='$_POST[dataId]'";
+  $sql = "SELECT * from spms_corefucndata where cfd_id='$_POST[dataId]'";
   $sql = $mysqli->query($sql);
   $dat = $sql->fetch_assoc();
   $view = "

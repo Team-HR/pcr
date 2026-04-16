@@ -109,7 +109,7 @@ if (isset($_POST['page'])) {
 } elseif (isset($_POST['saveSiData'])) {
 	$acc = addslashes($_POST['acc']);
 	if ($acc != "") {
-		$sql = "INSERT INTO `spms_corefucndata` (`cfd_id`, `type`, `p_id`, `empId`, `actualAcc`, `Q`, `E`, `T`, `remarks`,`percent`)
+		$sql = "INSERT INTO spms_corefucndata (cfd_id, type, p_id, empId, actualAcc, Q, E, T, remarks,percent)
 		VALUES (NULL, '', '$_POST[saveSiData]', '$_SESSION[emp_id]', '$acc', '$_POST[qual]', '$_POST[eff]', '$_POST[time]', '$_POST[remark]','$_POST[perc]')";
 		$sql = $mysqli->query($sql);
 		if (!$sql) {
@@ -121,7 +121,7 @@ if (isset($_POST['page'])) {
 		echo "Please Add Your Actual Accomplishments";
 	}
 } elseif (isset($_POST['RemoveCoreFuncDataPost'])) {
-	$sql = "DELETE FROM `spms_corefucndata` WHERE `spms_corefucndata`.`cfd_id` = '$_POST[RemoveCoreFuncDataPost]'";
+	$sql = "DELETE FROM spms_corefucndata WHERE spms_corefucndata.cfd_id = '$_POST[RemoveCoreFuncDataPost]'";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
 		die($mysqli->error);
@@ -180,11 +180,11 @@ if (isset($_POST['page'])) {
 				$storeArr = serialize($storeArr);
 				$storeArr = $mysqli->real_escape_string($storeArr);
 			}
-			$sql = "UPDATE `spms_corefucndata`
-							SET `actualAcc` = '$accCore', `Q` = '$_POST[qual]',
-							`E` = '$effCore', `T` = '$_POST[time]',
-							`remarks` = '$remarkCore', `supEdit` = '$storeArr',
-							`critics`='$critics',`percent`='$_POST[percEdit]' WHERE `spms_corefucndata`.`cfd_id` ='$dataId'";
+			$sql = "UPDATE spms_corefucndata
+							SET actualAcc = '$accCore', Q = '$_POST[qual]',
+							E = '$effCore', T = '$_POST[time]',
+							remarks = '$remarkCore', supEdit = '$storeArr',
+							critics='$critics',percent='$_POST[percEdit]' WHERE spms_corefucndata.cfd_id ='$dataId'";
 			$sql = $mysqli->query($sql);
 			if (!$sql) {
 				die($mysqli->error);
@@ -195,8 +195,8 @@ if (isset($_POST['page'])) {
 			print(1);
 		}
 	} else {
-		$sql = "UPDATE `spms_corefucndata` SET `actualAcc` = '$accCore', `Q` = '$_POST[qual]', `E` = '$effCore',
-		`T` = '$_POST[time]', `remarks` = '$remarkCore',`percent`='$_POST[percEdit]' WHERE `spms_corefucndata`.`cfd_id` ='$dataId'";
+		$sql = "UPDATE spms_corefucndata SET actualAcc = '$accCore', Q = '$_POST[qual]', E = '$effCore',
+		T = '$_POST[time]', remarks = '$remarkCore',percent='$_POST[percEdit]' WHERE spms_corefucndata.cfd_id ='$dataId'";
 		$sql = $mysqli->query($sql);
 		if (!$sql) {
 			die($mysqli->error);
@@ -208,7 +208,7 @@ if (isset($_POST['page'])) {
 	$empId = $_SESSION['emp_id'];
 	$period = $_POST['period_id'];
 	$parentId = $_POST['addSuppAccomplishementSave'];
-	$parent = "SELECT * from `spms_supportfunctions` where `id_suppFunc`='$parentId'";
+	$parent = "SELECT * from spms_supportfunctions where id_suppFunc='$parentId'";
 	$parent = $mysqli->query($parent);
 	$parent = $parent->fetch_assoc();
 	$qual = $_POST['qual'];
@@ -218,11 +218,11 @@ if (isset($_POST['page'])) {
 	$remark = addslashes($_POST['remark']);
 	$not_applicable = $_POST['not_applicable'] ?? 0;
 
-	$sql = "INSERT INTO `spms_supportfunctiondata` (`sfd_id`,`parent_id`,`emp_id`,`period_id`,`accomplishment`, `Q`, `E`, `T`, `remark`,`percent`)
+	$sql = "INSERT INTO spms_supportfunctiondata (sfd_id,parent_id,emp_id,period_id,accomplishment, Q, E, T, remark,percent)
 	VALUES (NULL, '$parentId','$empId', '$period', '$acc', '$qual', '$eff', '$time', '$remark','$parent[percent]')";
 
 	if ($not_applicable) {
-		$sql = "INSERT INTO `spms_supportfunctiondata` (`sfd_id`,`parent_id`,`emp_id`,`period_id`,`accomplishment`, `Q`, `E`, `T`, `not_applicable`, `remark`,`percent`)
+		$sql = "INSERT INTO spms_supportfunctiondata (sfd_id,parent_id,emp_id,period_id,accomplishment, Q, E, T, not_applicable, remark,percent)
 	VALUES (NULL, '$parentId','$empId', '$period', '', NULL, NULL, NULL, 1,'No PIGs this period. (Weight has been redistributed)','$parent[percent]')";
 	}
 
@@ -235,7 +235,7 @@ if (isset($_POST['page'])) {
 	}
 } elseif (isset($_POST['suppFuncRemoveEmpDataPost'])) {
 	$empdataId = $_POST['suppFuncRemoveEmpDataPost'];
-	$sql = "DELETE FROM `spms_supportfunctiondata` WHERE `sfd_id` = '$empdataId'";
+	$sql = "DELETE FROM spms_supportfunctiondata WHERE sfd_id = '$empdataId'";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
 		echo "<h1>Error Message</h1>";
@@ -283,13 +283,13 @@ if (isset($_POST['page'])) {
 			array_push($supAr, $a);
 			$supAr = serialize($supAr);
 		}
-		$sql = "UPDATE `spms_supportfunctiondata`
-		SET `accomplishment` = '$acc', `Q` = '$quality', `E` = '$efficiency', `T` = '$timeliness', `remark` = '$remarks', `supEdit` = '$supAr'
-		WHERE `spms_supportfunctiondata`.`sfd_id` ='$dataId'";
+		$sql = "UPDATE spms_supportfunctiondata
+		SET accomplishment = '$acc', Q = '$quality', E = '$efficiency', T = '$timeliness', remark = '$remarks', supEdit = '$supAr'
+		WHERE spms_supportfunctiondata.sfd_id ='$dataId'";
 	} else {
-		$sql = "UPDATE `spms_supportfunctiondata`
-		SET `accomplishment` = '$acc', `Q` = '$quality', `E` = '$efficiency', `T` = '$timeliness', `remark` = '$remarks'
-		WHERE `spms_supportfunctiondata`.`sfd_id` ='$dataId'";
+		$sql = "UPDATE spms_supportfunctiondata
+		SET accomplishment = '$acc', Q = '$quality', E = '$efficiency', T = '$timeliness', remark = '$remarks'
+		WHERE spms_supportfunctiondata.sfd_id ='$dataId'";
 	}
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
@@ -311,11 +311,11 @@ if (isset($_POST['page'])) {
 	}
 	// $quality = $_POST['quality'];
 	// $time = $_POST['time'];
-	// $sql = "INSERT INTO `spms_strategicfuncdata`
-	// (`strategicFunc_id`, `period_id`, `emp_id`, `mfo`, `succ_in`, `acc`, `Q`, `T`, `remark`)
+	// $sql = "INSERT INTO spms_strategicfuncdata
+	// (strategicFunc_id, period_id, emp_id, mfo, succ_in, acc, Q, T, remark)
 	// VALUES (NULL, '$period', '$emp', '$mfo', '$suc_in', '$acc', '$quality', '$time', '$remark')";
-	$sql = "INSERT INTO `spms_strategicfuncdata`
-	(`strategicFunc_id`, `period_id`, `emp_id`, `mfo`, `succ_in`, `acc`, `average` , `remark`, `noStrat`)
+	$sql = "INSERT INTO spms_strategicfuncdata
+	(strategicFunc_id, period_id, emp_id, mfo, succ_in, acc, average , remark, noStrat)
 	VALUES (NULL, '$period', '$emp', '$mfo', '$suc_in', '$acc', '$stratAverage' ,'$remark','$noStrat')";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
@@ -325,7 +325,7 @@ if (isset($_POST['page'])) {
 	}
 } elseif (isset($_POST['strategicDeletePost'])) {
 	$dataId = $_POST['strategicDeletePost'];
-	$sql = "DELETE FROM `spms_strategicfuncdata` WHERE `strategicFunc_id` ='$dataId'";
+	$sql = "DELETE FROM spms_strategicfuncdata WHERE strategicFunc_id ='$dataId'";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
 		die($mysqli->error);
@@ -337,7 +337,7 @@ if (isset($_POST['page'])) {
 	$period = $_POST['period_id'];
 	$assembleAll = $_POST['assembleAll'];
 	$approved = $_POST['approved'];
-	$sql = "UPDATE `spms_pcr_status` SET `assembleAll` = '1', `approved` = '$approved'  WHERE `period_id` = '$period' and `employees_id`='$empId'";
+	$sql = "UPDATE spms_pcr_status SET assembleAll = '1', approved = '$approved'  WHERE period_id = '$period' and employees_id='$empId'";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
 		die($mysqli->error);
@@ -384,7 +384,7 @@ elseif (isset($_POST['submitPerformance'])) {
 	$empId = $_SESSION['emp_id'];
 	$period = $_POST['period_id'];
 	$date = date("m/d/y");
-	$sql = "UPDATE `spms_pcr_status` SET `submitted` = 'Done', `dateAccomplished`='$date'  WHERE `period_id` = '$period' and `employees_id`='$empId'";
+	$sql = "UPDATE spms_pcr_status SET submitted = 'Done', dateAccomplished='$date'  WHERE period_id = '$period' and employees_id='$empId'";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
 		die($mysqli->error);
@@ -405,14 +405,14 @@ elseif (isset($_POST['submitPerformance'])) {
 	$countCheck = $check->num_rows;
 	if ($countCheck > 0) {
 		$check = $check->fetch_assoc();
-		// , `department_id` = '$department'
-		$sql = "UPDATE `spms_pcr_status`
-		SET `ImmediateSup` = '$immediateSup', `DepartmentHead` = '$departmentHead', `HeadAgency` = '$headAgency',`formType`='$formType'
-		WHERE `spms_pcr_status`.`performanceReviewStatus_id` = '$check[performanceReviewStatus_id]'";
+		// , department_id = '$department'
+		$sql = "UPDATE spms_pcr_status
+		SET ImmediateSup = '$immediateSup', DepartmentHead = '$departmentHead', HeadAgency = '$headAgency',formType='$formType'
+		WHERE spms_pcr_status.performanceReviewStatus_id = '$check[performanceReviewStatus_id]'";
 	} else {
 		#
-		$sql = "INSERT INTO `spms_pcr_status`
-	(`performanceReviewStatus_id`, `period_id`, `employees_id`, `ImmediateSup`, `DepartmentHead`, `HeadAgency`, `PMT`, `submitted`,`panelApproved`, `approved`, `dateAccomplished`,`formType`,`department_id`,`assembleAll`)
+		$sql = "INSERT INTO spms_pcr_status
+	(performanceReviewStatus_id, period_id, employees_id, ImmediateSup, DepartmentHead, HeadAgency, PMT, submitted,panelApproved, approved, dateAccomplished,formType,department_id,assembleAll)
 	VALUES (NULL, '$period', '$empId', '$immediateSup', '$departmentHead', '$headAgency', '0','','', '', '','$formType','$department','0')";
 		#
 	}
@@ -432,9 +432,9 @@ elseif (isset($_POST['submitPerformance'])) {
 	$count = $sql->num_rows;
 	if ($count > 0) {
 		$sql = $sql->fetch_assoc();
-		$q = "UPDATE `spms_commentrec` SET `comment` = '$com' WHERE `spms_commentrec`.`comRec_id` ='$sql[comRec_id]' ";
+		$q = "UPDATE spms_commentrec SET comment = '$com' WHERE spms_commentrec.comRec_id ='$sql[comRec_id]' ";
 	} else {
-		$q = "INSERT INTO `spms_commentrec` (`comRec_id`, `period_id`, `emp_id`, `comment`)
+		$q = "INSERT INTO spms_commentrec (comRec_id, period_id, emp_id, comment)
 		VALUES ('', '$period', '$empId', '$com')";
 	}
 	$q = $mysqli->query($q);
@@ -452,13 +452,13 @@ elseif (isset($_POST['submitPerformance'])) {
 	// $time = $_POST['time'];
 	$remark = addslashes($_POST['remark']);
 	$stratAverage = $_POST['stratAverage'];
-	// $sql = "UPDATE `spms_strategicfuncdata`
-	// SET `mfo` = '$mfo', `succ_in` = '$suc_in', `acc` = '$acc', `Q` = '$quality', `T` = '$time', `remark` = '$remark'
-	// WHERE `spms_strategicfuncdata`.`strategicFunc_id` = '$dataId'
+	// $sql = "UPDATE spms_strategicfuncdata
+	// SET mfo = '$mfo', succ_in = '$suc_in', acc = '$acc', Q = '$quality', T = '$time', remark = '$remark'
+	// WHERE spms_strategicfuncdata.strategicFunc_id = '$dataId'
 	// ";
-	$sql = "UPDATE `spms_strategicfuncdata`
-	SET `mfo` = '$mfo', `succ_in` = '$suc_in', `acc` = '$acc',`average` = '$stratAverage', `remark` = '$remark'
-	WHERE `spms_strategicfuncdata`.`strategicFunc_id` = '$dataId'
+	$sql = "UPDATE spms_strategicfuncdata
+	SET mfo = '$mfo', succ_in = '$suc_in', acc = '$acc',average = '$stratAverage', remark = '$remark'
+	WHERE spms_strategicfuncdata.strategicFunc_id = '$dataId'
 	";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
@@ -502,9 +502,9 @@ elseif (isset($_POST['submitPerformance'])) {
 	$com = $mysqli->real_escape_string($_POST['commentReccomendationOfSuppSave']);
 	if ($sql->num_rows) {
 		$sql = $sql->fetch_assoc();
-		$query = "UPDATE `spms_commentrec` SET `comment`='$com' WHERE `spms_commentrec`.`comRec_id` = '$sql[comRec_id]'";
+		$query = "UPDATE spms_commentrec SET comment='$com' WHERE spms_commentrec.comRec_id = '$sql[comRec_id]'";
 	} else {
-		$query = "INSERT INTO `spms_commentrec` (`comRec_id`, `period_id`, `emp_id`, `comment`)
+		$query = "INSERT INTO spms_commentrec (comRec_id, period_id, emp_id, comment)
 		VALUES (NULL, '$_POST[commentReccomendationOfSuppPeriod]', '$_POST[commentReccomendationOfSuppEmpId]', '$com')";
 	}
 
@@ -518,7 +518,7 @@ elseif (isset($_POST['submitPerformance'])) {
 } elseif (isset($_POST['editPercent'])) {
 	$percent = $_POST['percent'];
 	$dataId = $_POST['dataId'];
-	$sql = "UPDATE `spms_corefucndata` SET `percent` = '$percent' WHERE `spms_corefucndata`.`cfd_id` = $dataId";
+	$sql = "UPDATE spms_corefucndata SET percent = '$percent' WHERE spms_corefucndata.cfd_id = $dataId";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
 		echo $mysqli->error;

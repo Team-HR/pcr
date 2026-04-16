@@ -9,9 +9,9 @@
     $timeliness = serialize($_POST['timeliness']);
     $supEdit = $_POST['supEdit'];
   if($supEdit){
-    $sql = "UPDATE `spms_supportfunctions` SET `mfo` = '$mfo', `suc_in` = '$successIndicator', `Q` = '$quality', `E` = '$efficiency', `T` = '$timeliness', `percent` = '$percent', `type` = '$pcrType' WHERE `spms_supportfunctions`.`id_suppFunc` = '$supEdit'";
+    $sql = "UPDATE spms_supportfunctions SET mfo = '$mfo', suc_in = '$successIndicator', Q = '$quality', E = '$efficiency', T = '$timeliness', percent = '$percent', type = '$pcrType' WHERE spms_supportfunctions.id_suppFunc = '$supEdit'";
   }else{
-    $sql = "INSERT INTO `spms_supportfunctions` (`id_suppFunc`, `mfo`, `suc_in`, `Q`, `E`, `T`, `percent`,`type`)
+    $sql = "INSERT INTO spms_supportfunctions (id_suppFunc, mfo, suc_in, Q, E, T, percent,type)
     VALUES (NULL, '$mfo', '$successIndicator', '$quality', '$efficiency', '$timeliness', '$percent', '$pcrType')";
   }
     $sql = $mysqli->query($sql);
@@ -22,7 +22,7 @@
     }
   }elseif (isset($_POST['deleteData'])) {
     if($_POST['deleteData']){
-      $sql = "DELETE FROM `spms_supportfunctions` WHERE `spms_supportfunctions`.`id_suppFunc`='$_POST[deleteData]'";
+      $sql = "DELETE FROM spms_supportfunctions WHERE spms_supportfunctions.id_suppFunc='$_POST[deleteData]'";
       $sql = $mysqli->query($sql);
       if($sql){
         echo 1;
@@ -33,7 +33,7 @@
       echo "Null";
     }
   }elseif(isset($_POST['getSupportFunction'])){
-    $sql = "SELECT * from `spms_supportfunctions`";
+    $sql = "SELECT * from spms_supportfunctions";
     $tableRow = "";
     $tableRowIndi = "";
     $tableRowSupervisor = "";

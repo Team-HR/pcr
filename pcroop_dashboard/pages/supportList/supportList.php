@@ -179,7 +179,7 @@
 <?php
 function getSupportFunctions(){
   Global $mysqli;
-  $sql = "SELECT * FROM `supportfunctions`";
+  $sql = "SELECT * FROM supportfunctions";
   $sql = $mysqli->query($sql);
   if(!$sql){
     die($mysqli->error);

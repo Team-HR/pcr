@@ -11,7 +11,7 @@ $mysqli->set_charset("utf8");
 
 
 if (isset($_POST['test'])) {
-    $sql = "SELECT * FROM `spms_pcr_status` where `period_id` = '10' and `department_id` = '32'";
+    $sql = "SELECT * FROM spms_pcr_status where period_id = '10' and department_id = '32'";
     $res = $mysqli->query($sql);
     print($res->num_rows);
 }
@@ -23,7 +23,7 @@ $period_id = 10; //10 - July to Dec 2022
 
 
 # performanceReviewStatus_id = 2434 test fomtype 3 strategic function shoul be excluded from computing final numerical rating
-$sql = "SELECT * FROM `spms_pcr_status` where period_id = '$period_id' LIMIT 1 -- and performanceReviewStatus_id = '2434';";
+$sql = "SELECT * FROM spms_pcr_status where period_id = '$period_id' LIMIT 1 -- and performanceReviewStatus_id = '2434';";
 $res = $mysqli->query($sql);
 $data = [];
 while ($row = $res->fetch_assoc()) {
@@ -140,7 +140,7 @@ function coreRow($mysqli, $fileStatus)
 function coreAr($mysqli, $fileStatus = [])
 {
     # for more compact and faster query
-    # ... and `dep_id` = '$department_id'
+    # ... and dep_id = '$department_id'
 
     # department_id from spms_pcr_status
     $department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
@@ -149,7 +149,7 @@ function coreAr($mysqli, $fileStatus = [])
 
     # not recommended department_id from employees table
     $main_Arr = [];
-    $sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$period_id' and `dep_id` = '$department_id' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+    $sql = "SELECT * from spms_pcr_mfos where parent_id='' and mfo_periodId='$period_id' and dep_id = '$department_id' ORDER BY spms_pcr_mfos.cf_count ASC";
     $sql = $mysqli->query($sql);
     $parent = [[], [], []];
     while ($core = $sql->fetch_assoc()) {
@@ -222,7 +222,7 @@ function si($mysqli, $employee_id, $siId)
 
 function q($mysqli, $siId)
 {
-    $sql = "SELECT * from spms_corefunctions where parent_id='$siId' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+    $sql = "SELECT * from spms_pcr_mfos where parent_id='$siId' ORDER BY spms_pcr_mfos.cf_count ASC";
     $sql = $mysqli->query($sql);
     return $sql;
 }
@@ -356,11 +356,11 @@ function supportFunctionTr($mysqli, $fileStatus)
     $period_id = $fileStatus['period_id'];
     $totalAv = 0;
     if ($formType == '1' || $formType == '5') {
-        $sql = "SELECT * FROM `spms_supportfunctions` where `type`=1";
+        $sql = "SELECT * FROM spms_supportfunctions where type=1";
     } elseif ($formType == '3') {
-        $sql = "SELECT * FROM `spms_supportfunctions` where `type`=3";
+        $sql = "SELECT * FROM spms_supportfunctions where type=3";
     } elseif ($formType == '2' || $formType == '4') {
-        $sql = "SELECT * FROM `spms_supportfunctions` where `type`=2";
+        $sql = "SELECT * FROM spms_supportfunctions where type=2";
     } else {
         return bcdiv($totalAv, 1, 2);
     }

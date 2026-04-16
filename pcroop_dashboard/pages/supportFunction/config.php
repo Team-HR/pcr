@@ -13,7 +13,7 @@
     $arrQuality = ser($_POST['arrQuality']);
     $arrEfficiency = ser($_POST['arrEfficiency']);
     $arrTimeliness = ser($_POST['arrTimeliness']);
-    $sql = "INSERT INTO `supportfunctions` (`id_suppFunc`, `mfo`, `suc_in`, `Q`, `E`, `T`, `percent`, `owner`)
+    $sql = "INSERT INTO supportfunctions (id_suppFunc, mfo, suc_in, Q, E, T, percent, owner)
             VALUES ('', '$mfo', '$successIndicator', '$arrQuality', '$arrEfficiency', '$arrTimeliness', '$percent', '$paraKay');";
     $sql = $mysqli->query($sql);
     if (!$sql) {

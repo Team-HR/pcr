@@ -14,7 +14,7 @@ class PmsAppMigrator
 
 	private function get_top_parent_of_rsm_success_indicator(&$parents, $cf_ID)
 	{
-		$sql = "SELECT * FROM `spms_corefunctions` WHERE `cf_ID` = '$cf_ID'";
+		$sql = "SELECT * FROM spms_pcr_mfos WHERE cf_ID = '$cf_ID'";
 		$res = $this->mysqli->query($sql);
 		if ($row = $res->fetch_assoc()) {
 			$parents[] = $row;
@@ -28,40 +28,40 @@ class PmsAppMigrator
 	public function prepare_sys_positions()
 	{
 		$sql = "
-        	DROP TABLE IF EXISTS `sys_positions`;
+        	DROP TABLE IF EXISTS sys_positions;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        CREATE TABLE `sys_positions` (
-			`id` bigint(20) UNSIGNED NOT NULL,
-			`position` varchar(255) NOT NULL,
-			`functional` varchar(255) DEFAULT NULL,
-			`level` int(11) DEFAULT NULL,
-			`category` varchar(255) DEFAULT NULL,
-			`sg` int(11) DEFAULT NULL,
-			`created_at` timestamp NULL DEFAULT NULL,
-			`updated_at` timestamp NULL DEFAULT NULL
+        CREATE TABLE sys_positions (
+			id bigint(20) UNSIGNED NOT NULL,
+			position varchar(255) NOT NULL,
+			functional varchar(255) DEFAULT NULL,
+			level int(11) DEFAULT NULL,
+			category varchar(255) DEFAULT NULL,
+			sg int(11) DEFAULT NULL,
+			created_at timestamp NULL DEFAULT NULL,
+			updated_at timestamp NULL DEFAULT NULL
 		  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-		ALTER TABLE `sys_positions`
-			ADD PRIMARY KEY (`id`);
+		ALTER TABLE sys_positions
+			ADD PRIMARY KEY (id);
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        ALTER TABLE `sys_positions`
-  			MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+        ALTER TABLE sys_positions
+  			MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
         ";
 		$this->mysqli_new->query($sql);
 	}
 
 	public function migrate_sys_positions_table()
 	{
-		$sql = "SELECT * FROM `positiontitles`";
+		$sql = "SELECT * FROM positiontitles";
 		$res = $this->mysqli->query($sql);
 		$data = [];
 
@@ -87,7 +87,7 @@ class PmsAppMigrator
 
 
 		foreach ($data as $position) {
-			$sql = "INSERT INTO `sys_positions` (`id`, `position`, `functional`, `level`, `category`, `sg`, `created_at`, `updated_at`) VALUES ('$position[id]', '$position[position]', '$position[functional]', '$position[level]', '$position[category]', '$position[sg]', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+			$sql = "INSERT INTO sys_positions (id, position, functional, level, category, sg, created_at, updated_at) VALUES ('$position[id]', '$position[position]', '$position[functional]', '$position[level]', '$position[category]', '$position[sg]', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
 			$this->mysqli_new->query($sql);
 		}
 
@@ -98,44 +98,44 @@ class PmsAppMigrator
 	public function prepare_pms_pcr_support_functions_table()
 	{
 		$sql = "
-        	DROP TABLE IF EXISTS `pms_pcr_support_functions`;
+        	DROP TABLE IF EXISTS pms_pcr_support_functions;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        CREATE TABLE `pms_pcr_support_functions` (
-			`id` bigint(20) UNSIGNED NOT NULL,
-			`order_num` smallint(6) NOT NULL DEFAULT 0,
-			`pms_period_id` bigint(20) UNSIGNED NOT NULL,
-			`support_function` varchar(255) NOT NULL,
-			`success_indicator` varchar(255) NOT NULL,
-			`quality` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`quality`)),
-			`efficiency` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`efficiency`)),
-			`timeliness` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`timeliness`)),
-			`percent` int(11) NOT NULL,
-			`form_type` varchar(255) NOT NULL,
-			`created_at` timestamp NULL DEFAULT NULL,
-			`updated_at` timestamp NULL DEFAULT NULL
+        CREATE TABLE pms_pcr_support_functions (
+			id bigint(20) UNSIGNED NOT NULL,
+			order_num smallint(6) NOT NULL DEFAULT 0,
+			pms_period_id bigint(20) UNSIGNED NOT NULL,
+			support_function varchar(255) NOT NULL,
+			success_indicator varchar(255) NOT NULL,
+			quality longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(quality)),
+			efficiency longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(efficiency)),
+			timeliness longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(timeliness)),
+			percent int(11) NOT NULL,
+			form_type varchar(255) NOT NULL,
+			created_at timestamp NULL DEFAULT NULL,
+			updated_at timestamp NULL DEFAULT NULL
 		  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-		ALTER TABLE `pms_pcr_support_functions`
-			ADD PRIMARY KEY (`id`);
+		ALTER TABLE pms_pcr_support_functions
+			ADD PRIMARY KEY (id);
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        ALTER TABLE `pms_pcr_support_functions`
-  			MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+        ALTER TABLE pms_pcr_support_functions
+  			MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
         ";
 		$this->mysqli_new->query($sql);
 	}
 
 	public function migrate_pms_pcr_support_functions_table()
 	{
-		$sql = "SELECT * FROM `spms_supportfunctions`";
+		$sql = "SELECT * FROM spms_supportfunctions";
 		$res = $this->mysqli->query($sql);
 		$data = [];
 		$form_typ_cmp_for_order = "";
@@ -194,11 +194,11 @@ class PmsAppMigrator
 		}
 
 
-		// INSERT INTO `pms_pcr_support_functions` (`id`, `order_num`, `pms_period_id`, `support_function`, `success_indicator`, `quality`, `efficiency`, `timeliness`, `percent`, `form_type`, `created_at`, `updated_at`) VALUES (NULL, '0', '', '', '', '[]', '[]', '[]', '', '', NULL, NULL)
+		// INSERT INTO pms_pcr_support_functions (id, order_num, pms_period_id, support_function, success_indicator, quality, efficiency, timeliness, percent, form_type, created_at, updated_at) VALUES (NULL, '0', '', '', '', '[]', '[]', '[]', '', '', NULL, NULL)
 
 
 		foreach ($data as $support_function) {
-			$sql = "INSERT INTO `pms_pcr_support_functions` (`id`, `order_num`, `pms_period_id`, `support_function`, `success_indicator`, `quality`, `efficiency`, `timeliness`, `percent`, `form_type`, `created_at`, `updated_at`) VALUES ('$support_function[id]', '$support_function[order_num]', '$support_function[pms_period_id]', '$support_function[support_function]', '$support_function[success_indicator]', '$support_function[quality]', '$support_function[efficiency]', '$support_function[timeliness]', '$support_function[percent]', '$support_function[form_type]', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+			$sql = "INSERT INTO pms_pcr_support_functions (id, order_num, pms_period_id, support_function, success_indicator, quality, efficiency, timeliness, percent, form_type, created_at, updated_at) VALUES ('$support_function[id]', '$support_function[order_num]', '$support_function[pms_period_id]', '$support_function[support_function]', '$support_function[success_indicator]', '$support_function[quality]', '$support_function[efficiency]', '$support_function[timeliness]', '$support_function[percent]', '$support_function[form_type]', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
 			$this->mysqli_new->query($sql);
 		}
 		// $json = json_encode($data, JSON_PRETTY_PRINT);
@@ -208,7 +208,7 @@ class PmsAppMigrator
 
 	public function migrate_pms_rsm_assignments_table_and_pms_rsm_success_indicators_table()
 	{
-		$sql = "SELECT * FROM `spms_matrixindicators`";
+		$sql = "SELECT * FROM spms_matrixindicators";
 		// ; --Where mi_id = 10755
 		$res = $this->mysqli->query($sql);
 		$data = [];
@@ -232,7 +232,7 @@ class PmsAppMigrator
 			if (count($parents) > 0) {
 				if (is_array($in_charges)) {
 					foreach ($in_charges as $employee_id) {
-						$sql = "INSERT INTO `pms_rsm_assignments`(`id`, `period_id`, `pms_rsm_success_indicator_id`, `sys_employee_id`,`created_at`, `updated_at`) VALUES (NULL,'$period_id','$id','$employee_id', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());";
+						$sql = "INSERT INTO pms_rsm_assignments(id, period_id, pms_rsm_success_indicator_id, sys_employee_id,created_at, updated_at) VALUES (NULL,'$period_id','$id','$employee_id', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());";
 						$this->mysqli_new->query($sql);
 					}
 				}
@@ -240,7 +240,7 @@ class PmsAppMigrator
 				$quality = $this->mysqli->real_escape_string($mi_quality);
 				$efficiency = $this->mysqli->real_escape_string($mi_eff);
 				$timeliness = $this->mysqli->real_escape_string($mi_time);
-				$sql = "INSERT INTO `pms_rsm_success_indicators`(`id`, `pms_rsm_id`, `index`, `success_indicator`, `quality`, `efficiency`, `timeliness`, `in_charges`, `corrections`, `created_at`, `updated_at`) VALUES ('$id','$pms_rsm_id','0','$success_indicator','$quality','$efficiency','$timeliness','[]','[]', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+				$sql = "INSERT INTO pms_rsm_success_indicators(id, pms_rsm_id, index, success_indicator, quality, efficiency, timeliness, in_charges, corrections, created_at, updated_at) VALUES ('$id','$pms_rsm_id','0','$success_indicator','$quality','$efficiency','$timeliness','[]','[]', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
 				$this->mysqli_new->query($sql);
 
 				$data[] = [
@@ -266,44 +266,44 @@ class PmsAppMigrator
 	public function prepare_sys_employee_assigned_departments()
 	{
 		$sql = "
-        DROP TABLE IF EXISTS `sys_employee_assigned_departments`;
+        DROP TABLE IF EXISTS sys_employee_assigned_departments;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        CREATE TABLE `sys_employee_assigned_departments` (
-            `id` bigint(20) UNSIGNED NOT NULL,
-            `sys_department_id` bigint(20) UNSIGNED NOT NULL,
-            `sys_employee_id` bigint(20) UNSIGNED NOT NULL,
-            `is_current` tinyint(1) NOT NULL DEFAULT 1,
-            `created_at` timestamp NULL DEFAULT NULL,
-            `updated_at` timestamp NULL DEFAULT NULL
+        CREATE TABLE sys_employee_assigned_departments (
+            id bigint(20) UNSIGNED NOT NULL,
+            sys_department_id bigint(20) UNSIGNED NOT NULL,
+            sys_employee_id bigint(20) UNSIGNED NOT NULL,
+            is_current tinyint(1) NOT NULL DEFAULT 1,
+            created_at timestamp NULL DEFAULT NULL,
+            updated_at timestamp NULL DEFAULT NULL
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        ALTER TABLE `sys_employee_assigned_departments`
-            ADD PRIMARY KEY (`id`);
+        ALTER TABLE sys_employee_assigned_departments
+            ADD PRIMARY KEY (id);
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        ALTER TABLE `sys_employee_assigned_departments`
-            MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+        ALTER TABLE sys_employee_assigned_departments
+            MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
         ";
 		$this->mysqli_new->query($sql);
 	}
 
 	public function migrate_to_prepare_sys_employee_assigned_departments_table()
 	{
-		$sql = "SELECT * FROM `employees`";
+		$sql = "SELECT * FROM employees";
 		$res = $this->mysqli->query($sql);
 		// $debug = "";
 		while ($row = $res->fetch_assoc()) {
 			$sys_employee_id = $row['employees_id'];
 			$sys_department_id = $this->mysqli->real_escape_string($row['department_id']);
-			$sql = "INSERT INTO `sys_employee_assigned_departments`(`id`, `sys_department_id`, `sys_employee_id`, `is_current`, `created_at`, `updated_at`) VALUES (NULL,'$sys_department_id','$sys_employee_id','1', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+			$sql = "INSERT INTO sys_employee_assigned_departments(id, sys_department_id, sys_employee_id, is_current, created_at, updated_at) VALUES (NULL,'$sys_department_id','$sys_employee_id','1', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
 			$this->mysqli_new->query($sql);
 			// $debug .= json_encode($this->mysqli->error) . "<br/>";
 		}
@@ -313,43 +313,43 @@ class PmsAppMigrator
 	public function prepare_sys_employees_table()
 	{
 		$sql = "
-        DROP TABLE IF EXISTS `sys_employees`;
+        DROP TABLE IF EXISTS sys_employees;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        CREATE TABLE `sys_employees` (
-            `id` bigint(20) UNSIGNED NOT NULL,
-            `last_name` varchar(255) NOT NULL,
-            `first_name` varchar(255) NOT NULL,
-            `middle_name` varchar(255) DEFAULT NULL,
-            `ext` varchar(255) DEFAULT NULL,
-            `gender` varchar(255) DEFAULT NULL,
-            `is_employee` tinyint(1) NOT NULL DEFAULT 1,
-            `is_active` tinyint(1) NOT NULL DEFAULT 1,
-            `remarks` varchar(255) DEFAULT NULL,
-            `created_at` timestamp NULL DEFAULT NULL,
-            `updated_at` timestamp NULL DEFAULT NULL
+        CREATE TABLE sys_employees (
+            id bigint(20) UNSIGNED NOT NULL,
+            last_name varchar(255) NOT NULL,
+            first_name varchar(255) NOT NULL,
+            middle_name varchar(255) DEFAULT NULL,
+            ext varchar(255) DEFAULT NULL,
+            gender varchar(255) DEFAULT NULL,
+            is_employee tinyint(1) NOT NULL DEFAULT 1,
+            is_active tinyint(1) NOT NULL DEFAULT 1,
+            remarks varchar(255) DEFAULT NULL,
+            created_at timestamp NULL DEFAULT NULL,
+            updated_at timestamp NULL DEFAULT NULL
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        ALTER TABLE `sys_employees`
-            ADD PRIMARY KEY (`id`);
+        ALTER TABLE sys_employees
+            ADD PRIMARY KEY (id);
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        ALTER TABLE `sys_employees`
-            MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+        ALTER TABLE sys_employees
+            MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
         ";
 		$this->mysqli_new->query($sql);
 	}
 
 	public function migrate_to_sys_employees_table()
 	{
-		$sql = "SELECT * FROM `employees`";
+		$sql = "SELECT * FROM employees";
 		$res = $this->mysqli->query($sql);
 		// $debug = "";
 		while ($row = $res->fetch_assoc()) {
@@ -362,7 +362,7 @@ class PmsAppMigrator
 			$is_employee = 1;
 			$is_active = $row['status'] == 'ACTIVE' ? 1 : 0;
 
-			$sql = "INSERT INTO `sys_employees`(`id`, `last_name`, `first_name`, `middle_name`, `ext`, `gender`, `is_employee`, `is_active`, `remarks`, `created_at`, `updated_at`) VALUES ('$id','$last_name','$first_name','$middle_name','$ext','$gender','$is_employee','$is_active', NULL , CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+			$sql = "INSERT INTO sys_employees(id, last_name, first_name, middle_name, ext, gender, is_employee, is_active, remarks, created_at, updated_at) VALUES ('$id','$last_name','$first_name','$middle_name','$ext','$gender','$is_employee','$is_active', NULL , CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
 			$this->mysqli_new->query($sql);
 			// $debug .= json_encode($this->mysqli->error) . "<br/>";
 		}
@@ -372,45 +372,45 @@ class PmsAppMigrator
 	public function prepare_sys_departments_table()
 	{
 		$sql = "
-        DROP TABLE IF EXISTS `sys_departments`;
+        DROP TABLE IF EXISTS sys_departments;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        CREATE TABLE `sys_departments` (
-            `id` bigint(20) UNSIGNED NOT NULL,
-            `name` varchar(255) NOT NULL,
-            `full_name` varchar(255) DEFAULT NULL,
-            `is_section` tinyint(1) NOT NULL DEFAULT 0,
-            `parent_id` bigint(20) UNSIGNED DEFAULT NULL,
-            `created_at` timestamp NULL DEFAULT NULL,
-            `updated_at` timestamp NULL DEFAULT NULL
+        CREATE TABLE sys_departments (
+            id bigint(20) UNSIGNED NOT NULL,
+            name varchar(255) NOT NULL,
+            full_name varchar(255) DEFAULT NULL,
+            is_section tinyint(1) NOT NULL DEFAULT 0,
+            parent_id bigint(20) UNSIGNED DEFAULT NULL,
+            created_at timestamp NULL DEFAULT NULL,
+            updated_at timestamp NULL DEFAULT NULL
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        ALTER TABLE `sys_departments`
-            ADD PRIMARY KEY (`id`);
+        ALTER TABLE sys_departments
+            ADD PRIMARY KEY (id);
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        ALTER TABLE `sys_departments`
-            MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+        ALTER TABLE sys_departments
+            MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
         ";
 		$this->mysqli_new->query($sql);
 	}
 
 	public function migrate_to_sys_departments_table()
 	{
-		$sql = "SELECT * FROM `department`";
+		$sql = "SELECT * FROM department";
 		$res = $this->mysqli->query($sql);
 		while ($row = $res->fetch_assoc()) {
 			$id = $row['department_id'];
 			$name = $row['alias'];
 			$full_name = $row['department'];
-			$sql = "INSERT INTO `sys_departments` (`id`, `name`, `full_name`, `is_section`, `parent_id`, `created_at`, `updated_at`) VALUES ('$id', '$name', '$full_name', '0', NULL, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+			$sql = "INSERT INTO sys_departments (id, name, full_name, is_section, parent_id, created_at, updated_at) VALUES ('$id', '$name', '$full_name', '0', NULL, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
 			$this->mysqli_new->query($sql);
 		}
 	}
@@ -418,41 +418,41 @@ class PmsAppMigrator
 	public function prepare_pms_rsms_table()
 	{
 		$sql = "
-        DROP TABLE IF EXISTS `pms_rsms`;
+        DROP TABLE IF EXISTS pms_rsms;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-		CREATE TABLE `pms_rsms` (
-			`id` bigint(20) UNSIGNED NOT NULL,
-			`period_id` bigint(20) UNSIGNED NOT NULL,
-			`parent_id` bigint(20) UNSIGNED DEFAULT NULL,
-			`sys_department_id` bigint(20) UNSIGNED NOT NULL,
-			`code` varchar(255) DEFAULT NULL,
-			`title` varchar(255) DEFAULT NULL,
-			`created_at` timestamp NULL DEFAULT NULL,
-			`updated_at` timestamp NULL DEFAULT NULL
+		CREATE TABLE pms_rsms (
+			id bigint(20) UNSIGNED NOT NULL,
+			period_id bigint(20) UNSIGNED NOT NULL,
+			parent_id bigint(20) UNSIGNED DEFAULT NULL,
+			sys_department_id bigint(20) UNSIGNED NOT NULL,
+			code varchar(255) DEFAULT NULL,
+			title varchar(255) DEFAULT NULL,
+			created_at timestamp NULL DEFAULT NULL,
+			updated_at timestamp NULL DEFAULT NULL
 		  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ";
 
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-		ALTER TABLE `pms_rsms`
-			ADD PRIMARY KEY (`id`);
+		ALTER TABLE pms_rsms
+			ADD PRIMARY KEY (id);
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-		ALTER TABLE `pms_rsms`
-				MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+		ALTER TABLE pms_rsms
+				MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
         ";
 		$this->mysqli_new->query($sql);
 	}
 
 	public function migrate_pms_rsms_table()
 	{
-		$sql = "SELECT * FROM `spms_corefunctions`";
+		$sql = "SELECT * FROM spms_pcr_mfos";
 		$res = $this->mysqli->query($sql);
 		$data = [];
 		while ($row = $res->fetch_assoc()) {
@@ -479,7 +479,7 @@ class PmsAppMigrator
 			$code = $this->mysqli_new->real_escape_string($mfo["code"]);
 			$title = $this->mysqli_new->real_escape_string($mfo["title"]);
 
-			$sql = "INSERT INTO `pms_rsms` (`id`, `period_id`, `parent_id`, `sys_department_id`, `code`, `title`, `created_at`, `updated_at`) VALUES ('$mfo[id]', '$mfo[period_id]', $parent_id, '$mfo[sys_department_id]', '$code', '$title', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+			$sql = "INSERT INTO pms_rsms (id, period_id, parent_id, sys_department_id, code, title, created_at, updated_at) VALUES ('$mfo[id]', '$mfo[period_id]', $parent_id, '$mfo[sys_department_id]', '$code', '$title', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
 
 			// if (!$parent_id_) {
 			$sqls[] = $sql;
@@ -494,31 +494,31 @@ class PmsAppMigrator
 	public function prepare_pms_rsm_assignments_table()
 	{
 		$sql = "
-        DROP TABLE IF EXISTS `pms_rsm_assignments`;
+        DROP TABLE IF EXISTS pms_rsm_assignments;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        CREATE TABLE IF NOT EXISTS `pms_rsm_assignments` (
-          `id` bigint(20) UNSIGNED NOT NULL,
-          `period_id` bigint(20) UNSIGNED NOT NULL,
-          `pms_rsm_success_indicator_id` bigint(20) UNSIGNED NOT NULL,
-          `sys_employee_id` bigint(20) UNSIGNED NOT NULL,
-          `created_at` timestamp NULL DEFAULT NULL,
-          `updated_at` timestamp NULL DEFAULT NULL
+        CREATE TABLE IF NOT EXISTS pms_rsm_assignments (
+          id bigint(20) UNSIGNED NOT NULL,
+          period_id bigint(20) UNSIGNED NOT NULL,
+          pms_rsm_success_indicator_id bigint(20) UNSIGNED NOT NULL,
+          sys_employee_id bigint(20) UNSIGNED NOT NULL,
+          created_at timestamp NULL DEFAULT NULL,
+          updated_at timestamp NULL DEFAULT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        ALTER TABLE `pms_rsm_assignments`
-          ADD PRIMARY KEY (`id`);
+        ALTER TABLE pms_rsm_assignments
+          ADD PRIMARY KEY (id);
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-          ALTER TABLE `pms_rsm_assignments`
-          MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+          ALTER TABLE pms_rsm_assignments
+          MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
         ";
 		$this->mysqli_new->query($sql);
 	}
@@ -527,36 +527,36 @@ class PmsAppMigrator
 	public function prepare_pms_rsm_success_indicators_table()
 	{
 		$sql = "
-        DROP TABLE IF EXISTS `pms_rsm_success_indicators`;
+        DROP TABLE IF EXISTS pms_rsm_success_indicators;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        CREATE TABLE `pms_rsm_success_indicators` (
-            `id` bigint(20) UNSIGNED NOT NULL,
-            `pms_rsm_id` bigint(20) UNSIGNED NOT NULL,
-            `index` int(11) NOT NULL DEFAULT 0,
-            `success_indicator` varchar(255) NOT NULL,
-            `quality` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`quality`)),
-            `efficiency` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`efficiency`)),
-            `timeliness` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`timeliness`)),
-            `in_charges` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`in_charges`)),
-            `corrections` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`corrections`)),
-            `created_at` timestamp NULL DEFAULT NULL,
-            `updated_at` timestamp NULL DEFAULT NULL
+        CREATE TABLE pms_rsm_success_indicators (
+            id bigint(20) UNSIGNED NOT NULL,
+            pms_rsm_id bigint(20) UNSIGNED NOT NULL,
+            index int(11) NOT NULL DEFAULT 0,
+            success_indicator varchar(255) NOT NULL,
+            quality longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(quality)),
+            efficiency longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(efficiency)),
+            timeliness longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(timeliness)),
+            in_charges longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(in_charges)),
+            corrections longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(corrections)),
+            created_at timestamp NULL DEFAULT NULL,
+            updated_at timestamp NULL DEFAULT NULL
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        ALTER TABLE `pms_rsm_success_indicators`
-            ADD PRIMARY KEY (`id`);
+        ALTER TABLE pms_rsm_success_indicators
+            ADD PRIMARY KEY (id);
         ";
 		$this->mysqli_new->query($sql);
 
 		$sql = "
-        ALTER TABLE `pms_rsm_success_indicators`
-        MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+        ALTER TABLE pms_rsm_success_indicators
+        MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
         ";
 		$this->mysqli_new->query($sql);
 	}

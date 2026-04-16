@@ -20,13 +20,13 @@
 if (!function_exists('ensureSpmsSystemLogsTable')) {
 	function ensureSpmsSystemLogsTable($mysqli)
 	{
-		$createLogTableSql = "CREATE TABLE IF NOT EXISTS `spms_system_logs` (
-		  `id` int(11) NOT NULL AUTO_INCREMENT,
-		  `guest` text DEFAULT NULL,
-		  `employee_id` int(11) NOT NULL,
-		  `query` longtext NOT NULL,
-		  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-		  PRIMARY KEY (`id`)
+		$createLogTableSql = "CREATE TABLE IF NOT EXISTS spms_system_logs (
+		  id int(11) NOT NULL AUTO_INCREMENT,
+		  guest text DEFAULT NULL,
+		  employee_id int(11) NOT NULL,
+		  query longtext NOT NULL,
+		  updated_at timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+		  PRIMARY KEY (id)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
 
 		$createLogTable = $mysqli->query($createLogTableSql);
@@ -129,7 +129,7 @@ if (!function_exists('logSpmsSystemQuery')) {
 
 		$guestMetaEscaped = $mysqli->real_escape_string($guestMetaJson);
 
-		$insertLogSql = "INSERT INTO `spms_system_logs` (`guest`, `employee_id`, `query`) VALUES ('$guestMetaEscaped', '$employeeId', '$escapedSql')";
+		$insertLogSql = "INSERT INTO spms_system_logs (guest, employee_id, query) VALUES ('$guestMetaEscaped', '$employeeId', '$escapedSql')";
 		$insertLog = $mysqli->query($insertLogSql);
 		if (!$insertLog) {
 			return false;

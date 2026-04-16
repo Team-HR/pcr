@@ -25,7 +25,7 @@ function duplicateSpmsData(
         $pdo->beginTransaction();
 
         // 1. Fetch Core Functions filtering by BOTH Period AND Source Department
-        $sql = "SELECT * FROM spms_corefunctions 
+        $sql = "SELECT * FROM spms_pcr_mfos 
                 WHERE mfo_periodId = :pid 
                 AND dep_id = :sdep"; // Filter by Source Dep
         
@@ -97,7 +97,7 @@ function duplicateSpmsData(
             $finalDepId = $targetDepId ?? $sourceDepId;
 
             // A. Insert Core Function
-            $insertCfSql = "INSERT INTO spms_corefunctions 
+            $insertCfSql = "INSERT INTO spms_pcr_mfos 
                 (mfo_periodId, parent_id, dep_id, cf_count, cf_title, corrections) 
                 VALUES (:mfo, :pid, :dep, :cnt, :title, :cor)";
             

@@ -44,7 +44,7 @@ print "final => " . $final_numerical_rating;
 
 if (isset($_POST['getDepartmentItems'])) {
 	$data = [];
-	$sql = "SELECT * FROM `department` WHERE department_id != 28 ORDER BY department ASC;";
+	$sql = "SELECT * FROM department WHERE department_id != 28 ORDER BY department ASC;";
 	$res = $mysqli->query($sql);
 	while ($row = $res->fetch_assoc()) {
 		$data[] = $row;
@@ -55,7 +55,7 @@ if (isset($_POST['getDepartmentItems'])) {
 
 else if (isset($_POST['getDepartmentHeadItems'])) {
 	$data = [];
-	$sql = "SELECT * FROM `employees` ORDER BY `lastName` ASC;";
+	$sql = "SELECT * FROM employees ORDER BY lastName ASC;";
 	$res = $mysqli->query($sql);
 	while ($row = $res->fetch_assoc()) {
 		$data[] = [
@@ -66,11 +66,11 @@ else if (isset($_POST['getDepartmentHeadItems'])) {
 	print json_encode($data);
 }
 
-// SELECT * FROM `spms_mfo_period` WHERE `year_mfo` > 2018 ORDER BY `spms_mfo_period`.`year_mfo` DESC;
+// SELECT * FROM spms_mfo_period WHERE year_mfo > 2018 ORDER BY spms_mfo_period.year_mfo DESC;
 
 else if (isset($_POST['getPeriodItems'])) {
 	$data = [];
-	$sql = "SELECT * FROM `spms_mfo_period` WHERE `year_mfo` > 2018 ORDER BY `spms_mfo_period`.`year_mfo` DESC;";
+	$sql = "SELECT * FROM spms_mfo_period WHERE year_mfo > 2018 ORDER BY spms_mfo_period.year_mfo DESC;";
 	$res = $mysqli->query($sql);
 	while ($row = $res->fetch_assoc()) {
 		$data[] = [
@@ -90,7 +90,7 @@ else if (isset($_POST['getPeriodItems'])) {
 
 	$department_id = $_POST["department_id"];
 
-	$department_filter = "AND `department_id` = '$department_id'";
+	$department_filter = "AND department_id = '$department_id'";
 	if ($department_id == 'all') {
 		$department_filter = "";
 	}
@@ -98,9 +98,9 @@ else if (isset($_POST['getPeriodItems'])) {
 
 	// $period_id = 10; //10 - July to Dec 2022
 	# performanceReviewStatus_id = 2434 test fomtype 3 strategic function shoul be excluded from computing final numerical rating
-	$sql = "SELECT * FROM `employees` WHERE `employmentStatus` != 'ELECTIVE' AND `status` = 'ACTIVE' AND `employees_id` NOT IN (432350) $department_filter";
-	//--`performanceReviewStatus_id` = '2909'
-	//--`period_id` = '$period_id' AND `final_numerical_rating` IS NULL LIMIT 1
+	$sql = "SELECT * FROM employees WHERE employmentStatus != 'ELECTIVE' AND status = 'ACTIVE' AND employees_id NOT IN (432350) $department_filter";
+	//--performanceReviewStatus_id = '2909'
+	//--period_id = '$period_id' AND final_numerical_rating IS NULL LIMIT 1
 	$res = $mysqli->query($sql);
 	$data = [];
 	while ($row = $res->fetch_assoc()) {
@@ -147,7 +147,7 @@ else if (isset($_POST['getPeriodItems'])) {
 	print table($mysqli, $period_id, $department_id);
 } elseif (isset($_POST["getPeriodYears"])) {
 	$years = [];
-	$sql = "SELECT DISTINCT `year_mfo` FROM `spms_mfo_period` ORDER BY `spms_mfo_period`.`year_mfo` DESC";
+	$sql = "SELECT DISTINCT year_mfo FROM spms_mfo_period ORDER BY spms_mfo_period.year_mfo DESC";
 	$res = $mysqli->query($sql);
 	while ($row = $res->fetch_assoc()) {
 		$year = $row['year_mfo'];
@@ -169,14 +169,14 @@ else if (isset($_POST['getPeriodItems'])) {
 function get_distinct_departments($mysqli, $period_id, $department_id, $data)
 {
 
-	$department_filter = "WHERE `department_id` = '$department_id'";
+	$department_filter = "WHERE department_id = '$department_id'";
 	if ($department_id == "all") {
 		$department_filter = "";
 	}
 
-	// $sql = "SELECT * FROM department WHERE department_id IN (SELECT DISTINCT department_id FROM `spms_pcr_status` WHERE period_id = '$period_id' $department_filter) ORDER BY department;";
+	// $sql = "SELECT * FROM department WHERE department_id IN (SELECT DISTINCT department_id FROM spms_pcr_status WHERE period_id = '$period_id' $department_filter) ORDER BY department;";
 
-	$sql = "SELECT * FROM `department` $department_filter ORDER BY `department`;";
+	$sql = "SELECT * FROM department $department_filter ORDER BY department;";
 	$res = $mysqli->query($sql);
 
 	$departments = [];
@@ -286,13 +286,13 @@ function table($mysqli, $period_id, $department_id)
 	$department_id  = $department_id;
 
 
-	$dep = "SELECT * from `department` where department_id='$department_id'";
+	$dep = "SELECT * from department where department_id='$department_id'";
 	$dep = $mysqli->query($dep);
 	$dep = $dep->fetch_assoc();
 	$dep = $dep['department'];
 
 
-	$period = "SELECT * from `spms_mfo_period` where `mfoperiod_id`='$period_id'";
+	$period = "SELECT * from spms_mfo_period where mfoperiod_id='$period_id'";
 	$period = $mysqli->query($period);
 	$period = $period->fetch_assoc();
 	// $period_id = $period['mfoperiod_id'];
@@ -333,7 +333,7 @@ function tbody($mysqli, $period_id, $dep_id)
 	$view = "";
 
 
-	$sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$period_id' and dep_id='$dep_id' ORDER BY `spms_corefunctions`.`cf_count` ASC ";
+	$sql = "SELECT * from spms_pcr_mfos where parent_id='' and mfo_periodId='$period_id' and dep_id='$dep_id' ORDER BY spms_pcr_mfos.cf_count ASC ";
 	$sql = $mysqli->query($sql);
 	$tr = "";
 	while ($row1 = $sql->fetch_assoc()) {
@@ -352,11 +352,11 @@ function tbodyChild($dataId, $padding)
 {
 	$view = "";
 	$mysqli = $GLOBALS['mysqli'];
-	$sql2 = "SELECT * from spms_corefunctions where parent_id='$dataId' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+	$sql2 = "SELECT * from spms_pcr_mfos where parent_id='$dataId' ORDER BY spms_pcr_mfos.cf_count ASC";
 	$sql2 = $mysqli->query($sql2);
 	$padding += 15;
 	while ($row2 = $sql2->fetch_assoc()) {
-		$sql3 = "SELECT * from spms_corefunctions where parent_id='$row2[cf_ID]' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+		$sql3 = "SELECT * from spms_pcr_mfos where parent_id='$row2[cf_ID]' ORDER BY spms_pcr_mfos.cf_count ASC";
 		$sql3 = $mysqli->query($sql3);
 		$pad = $padding . "px";
 		$view .= trows($mysqli, $row2, $pad, '');
@@ -419,7 +419,7 @@ function validaateCorrection($dat)
 
 function trows($mysqli, $row, $padding, $addDisplay)
 {
-	$sql2 = "SELECT * from spms_corefunctions where parent_id='$row[cf_ID]'";
+	$sql2 = "SELECT * from spms_pcr_mfos where parent_id='$row[cf_ID]'";
 	$sql2 = $mysqli->query($sql2);
 	$sql2count = $sql2->num_rows;
 	if ($sql2count > 0) {
@@ -462,7 +462,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
 				$empincharge = "";
 				if (isset($siDataRow1['mi_id'])) {
 					$mi_id = $siDataRow1['mi_id'];
-					$sql = "SELECT * FROM `spms_corefucndata`where `p_id` = '$mi_id' AND `empId` = '$empDataId';";
+					$sql = "SELECT * FROM spms_corefucndatawhere p_id = '$mi_id' AND empId = '$empDataId';";
 					$res = $mysqli->query($sql);
 					if ($rowdata = $res->fetch_assoc()) {
 						// $empincharge .= " -- " . json_encode($rowdata);
@@ -678,7 +678,7 @@ function changeCount($dat)
 function get_children($mysqli, $cf_ID)
 {
 	$data = [];
-	$sql = "SELECT * FROM `spms_corefunctions` WHERE `parent_id` ='$cf_ID'";
+	$sql = "SELECT * FROM spms_pcr_mfos WHERE parent_id ='$cf_ID'";
 	$result = $mysqli->query($sql);
 	while ($row = $result->fetch_assoc()) {
 		$row["children"] = get_children($mysqli, $row["cf_ID"]);
@@ -698,7 +698,7 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
 		$parent_id = $parent_id ? $parent_id : NULL;
 		$cf_title = $mysqli->real_escape_string($core_function['cf_title']);
 		$cf_count = $mysqli->real_escape_string($core_function['cf_count']);
-		$sql = "INSERT INTO `spms_corefunctions`(`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`, `corrections`) VALUES ('$selected_period_id','$parent_id','$department_id','$cf_count','$cf_title','')";
+		$sql = "INSERT INTO spms_pcr_mfos(mfo_periodId, parent_id, dep_id, cf_count, cf_title, corrections) VALUES ('$selected_period_id','$parent_id','$department_id','$cf_count','$cf_title','')";
 		$mysqli->query($sql);
 		$insert_id = $mysqli->insert_id;
 
@@ -712,7 +712,7 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
 			$mi_eff = $mysqli->real_escape_string($success_idicator['mi_eff']);
 			$mi_time = $mysqli->real_escape_string($success_idicator['mi_time']);
 
-			$sql = "INSERT INTO `spms_matrixindicators`(`cf_ID`, `mi_succIn`, `mi_quality`, `mi_eff`, `mi_time`, `mi_incharge`, `corrections`) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
+			$sql = "INSERT INTO spms_matrixindicators(cf_ID, mi_succIn, mi_quality, mi_eff, mi_time, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
 			$mysqli->query($sql);
 		}
 
@@ -725,7 +725,7 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
 function get_success_indicators($mysqli, $cf_ID)
 {
 	$data = [];
-	$sql = "SELECT * FROM `spms_matrixindicators` WHERE `cf_ID` = '$cf_ID'";
+	$sql = "SELECT * FROM spms_matrixindicators WHERE cf_ID = '$cf_ID'";
 	$result = $mysqli->query($sql);
 	while ($row = $result->fetch_assoc()) {
 		$data[] = $row;
@@ -736,7 +736,7 @@ function get_success_indicators($mysqli, $cf_ID)
 function get_period_id($mysqli, $selected_period_month, $selected_period_year)
 {
 	$period_id = null;
-	$sql = "SELECT `mfoperiod_id` AS `period_id` FROM `spms_mfo_period` WHERE `month_mfo` = '$selected_period_month' AND `year_mfo` = '$selected_period_year'";
+	$sql = "SELECT mfoperiod_id AS period_id FROM spms_mfo_period WHERE month_mfo = '$selected_period_month' AND year_mfo = '$selected_period_year'";
 	$res = $mysqli->query($sql);
 	if ($row = $res->fetch_assoc()) {
 		$period_id = $row["period_id"];
@@ -746,7 +746,7 @@ function get_period_id($mysqli, $selected_period_month, $selected_period_year)
 function get_department($mysqli, $department_id)
 {
 	$department = "";
-	$sql = "SELECT * FROM `department` WHERE `department_id` = '$department_id'";
+	$sql = "SELECT * FROM department WHERE department_id = '$department_id'";
 	$res = $mysqli->query($sql);
 	if ($row = $res->fetch_assoc()) {
 		$department = $row["alias"];
@@ -760,7 +760,7 @@ function get_file_status($mysqli, $period_id, $employees_id)
 {
 	$fileStatus = null;
 
-	$sql = "SELECT * FROM `spms_pcr_status` WHERE `employees_id` = '$employees_id' AND `period_id` = '$period_id'";
+	$sql = "SELECT * FROM spms_pcr_status WHERE employees_id = '$employees_id' AND period_id = '$period_id'";
 	$res = $mysqli->query($sql);
 	if ($row = $res->fetch_assoc()) {
 		$fileStatus = $row;

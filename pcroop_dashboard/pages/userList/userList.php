@@ -90,7 +90,7 @@
 // php function ni siya
 function listOfUser(){
   global $mysqli;
-  $sql = "SELECT * FROM `accounts` left join employees on accounts.employees_id = employees.employees_id left join department on employees.department_id = department.department_id";
+  $sql = "SELECT * FROM accounts left join employees on accounts.employees_id = employees.employees_id left join department on employees.department_id = department.department_id";
   $sql = $mysqli->query($sql);
   $row = "";
   while ($data = $sql->fetch_assoc()) {

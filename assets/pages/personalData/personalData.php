@@ -54,7 +54,7 @@ $fullname = $empData->get_emp('firstName')." ".$empData->get_emp('middleName')."
   </div>
 </div>
 <?php
-  $sql = "SELECT * FROM `spms_accounts` where employees_id='$_POST[personalData]'";
+  $sql = "SELECT * FROM spms_accounts where employees_id='$_POST[personalData]'";
   $sql = $mysqli->query($sql);
   $sql = $sql->fetch_assoc();
 ?>

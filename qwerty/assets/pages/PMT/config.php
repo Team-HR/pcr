@@ -1,12 +1,12 @@
 <?php
 if (isset($_POST['searchDep'])) {
   $search = addslashes($_POST['searchDep']);
-  $sql = "SELECT * from `department` where `department`.`department` like '%$search%' limit 10";
+  $sql = "SELECT * from department where department.department like '%$search%' limit 10";
   $sql = $mysqli->query($sql);
   $listItem = "";
   if ($sql->num_rows) {
     while ($arr = $sql->fetch_assoc()) {
-      // $checkIfAssigned = "SELECT * from `spms_departmentassignedtopmt` where `department_id`='$arr[department_id]'";
+      // $checkIfAssigned = "SELECT * from spms_departmentassignedtopmt where department_id='$arr[department_id]'";
       // $checkIfAssigned = $mysqli->query($checkIfAssigned);
       // if(!$checkIfAssigned->num_rows){
       $listItem .= "<a class='list-group-item list-group-item-action searchResult' style='cursor:pointer;' data-id='$arr[department_id]'>$arr[department]</a>";
@@ -21,8 +21,8 @@ if (isset($_POST['searchDep'])) {
   </ul>
   <?php
 } elseif (isset($_POST['assignDepartmentToPMT'])) {
-  $sql = "INSERT INTO `spms_departmentassignedtopmt` 
-          (`departmentAssignedToPMT_id`, `employees_id`, `department_id`) 
+  $sql = "INSERT INTO spms_departmentassignedtopmt 
+          (departmentAssignedToPMT_id, employees_id, department_id) 
           VALUES (NULL, '$_POST[assignDepartmentToPMT]', '$_POST[depToAssign]')";
   $sql = $mysqli->query($sql);
   if ($sql) {
@@ -32,7 +32,7 @@ if (isset($_POST['searchDep'])) {
   }
 } elseif (isset($_POST['refreshCard'])) {
   $empId = $_POST['refreshCard'];
-  $sql = "SELECT  * from `spms_departmentassignedtopmt` left join `department` on `spms_departmentassignedtopmt`.`department_id`=`department`.`department_id` where `employees_id`='$empId'";
+  $sql = "SELECT  * from spms_departmentassignedtopmt left join department on spms_departmentassignedtopmt.department_id=department.department_id where employees_id='$empId'";
   $sql = $mysqli->query($sql);
   // die($mysqli->error);
   while ($a = $sql->fetch_assoc()) {
@@ -45,16 +45,16 @@ if (isset($_POST['searchDep'])) {
   }
 } elseif (isset($_POST['deleteAssignDep'])) {
   $dataId = $_POST['deleteAssignDep'];
-  $sql = "DELETE FROM `spms_departmentassignedtopmt` WHERE `spms_departmentassignedtopmt`.`departmentAssignedToPMT_id` = '$dataId'";
+  $sql = "DELETE FROM spms_departmentassignedtopmt WHERE spms_departmentassignedtopmt.departmentAssignedToPMT_id = '$dataId'";
   $sql = $mysqli->query($sql);
   echo $mysqli->error;
 } elseif (isset($_POST['unassignDep'])) {
-  $sql = "SELECT * from `department`";
+  $sql = "SELECT * from department";
   $sql = $mysqli->query($sql);
   echo $mysqli->error;
   $tr = "";
   while ($a = $sql->fetch_assoc()) {
-    $check = "SELECT * from `spms_departmentassignedtopmt` where `department_id`='$a[department_id]'";
+    $check = "SELECT * from spms_departmentassignedtopmt where department_id='$a[department_id]'";
     $check = $mysqli->query($check);
     if (!$check->num_rows) {
       $tr .= "

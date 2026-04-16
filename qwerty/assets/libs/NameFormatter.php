@@ -22,7 +22,7 @@ class NameFormatter
 
 	public function set_employee_id($employee_id)
 	{
-		$sql = "SELECT * FROM `employees` WHERE `employees_id` = '$employee_id'";
+		$sql = "SELECT * FROM employees WHERE employees_id = '$employee_id'";
 		$res = $this->mysqli->query($sql);
 
 		if ($row = $res->fetch_assoc()) {
