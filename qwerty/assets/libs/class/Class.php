@@ -271,7 +271,7 @@ class IPCR extends Db
     if ($this->fileStatus['formType'] == 3 || $this->fileStatus['formType'] == 2) {
       $added .= "<td></td>";
     }
-    $sql = "SELECT spms_supportfunctions.mfo,spms_supportfunctions.percent,spms_supportfunctions.suc_in,spms_supportfunctiondata.accomplishment,spms_supportfunctiondata.Q,spms_supportfunctiondata.E,spms_supportfunctiondata.T FROM spms_supportfunctiondata left join spms_supportfunctions on spms_supportfunctiondata.parent_id=spms_supportfunctions.id_suppFunc where spms_supportfunctiondata.emp_id='$this->EmpId' and spms_supportfunctiondata.period_id='$this->period'";
+    $sql = "SELECT spms_pcr_support_functions.mfo,spms_pcr_support_functions.percent,spms_pcr_support_functions.suc_in,spms_supportfunctiondata.accomplishment,spms_supportfunctiondata.Q,spms_supportfunctiondata.E,spms_supportfunctiondata.T FROM spms_supportfunctiondata left join spms_pcr_support_functions on spms_supportfunctiondata.parent_id=spms_pcr_support_functions.id_suppFunc where spms_supportfunctiondata.emp_id='$this->EmpId' and spms_supportfunctiondata.period_id='$this->period'";
     $sql = $this->mysqli->query($sql);
     $view = "";
     while ($support = $sql->fetch_assoc()) {

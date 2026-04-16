@@ -619,11 +619,11 @@ class PcrForm
 		$totalAv = 0;
 
 		if ($formType == '1' || $formType == '5') {
-			$sql = "SELECT * FROM spms_supportfunctions where type=1";
+			$sql = "SELECT * FROM spms_pcr_support_functions where type=1";
 		} elseif ($formType == '3') {
-			$sql = "SELECT * FROM spms_supportfunctions where type=3";
+			$sql = "SELECT * FROM spms_pcr_support_functions where type=3";
 		} elseif ($formType == '2' || $formType == '4') {
-			$sql = "SELECT * FROM spms_supportfunctions where type=2";
+			$sql = "SELECT * FROM spms_pcr_support_functions where type=2";
 		} else {
 			// return bcdiv($totalAv, 1, 2);
 		}

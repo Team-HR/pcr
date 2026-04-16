@@ -208,7 +208,7 @@ if (isset($_POST['page'])) {
 	$empId = $_SESSION['emp_id'];
 	$period = $_POST['period_id'];
 	$parentId = $_POST['addSuppAccomplishementSave'];
-	$parent = "SELECT * from spms_supportfunctions where id_suppFunc='$parentId'";
+	$parent = "SELECT * from spms_pcr_support_functions where id_suppFunc='$parentId'";
 	$parent = $mysqli->query($parent);
 	$parent = $parent->fetch_assoc();
 	$qual = $_POST['qual'];

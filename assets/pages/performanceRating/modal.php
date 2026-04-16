@@ -310,7 +310,7 @@ if (isset($_POST['coreFucntionInput'])) {
   function cb($mysqli, $type, $col)
   {
     $dataId = $_POST['addSuppAccomplishementModalContent'];
-    $sql = "SELECT * FROM spms_supportfunctions where id_suppFunc='$dataId'";
+    $sql = "SELECT * FROM spms_pcr_support_functions where id_suppFunc='$dataId'";
     $sql = $mysqli->query($sql);
     $sql = $sql->fetch_assoc();
     $a = unserialize($sql[$col]);
@@ -339,7 +339,7 @@ if (isset($_POST['coreFucntionInput'])) {
   }
 
 
-  $sqlSuc = "SELECT * FROM spms_supportfunctions where id_suppFunc='$dataId'";
+  $sqlSuc = "SELECT * FROM spms_pcr_support_functions where id_suppFunc='$dataId'";
   $sqlSuc = $mysqli->query($sqlSuc);
   $sqlSuc = $sqlSuc->fetch_assoc();
 
@@ -432,7 +432,7 @@ if (isset($_POST['coreFucntionInput'])) {
     $sqldata = "SELECT * from spms_supportfunctiondata where sfd_id='$empdataId'";
     $sqldata = $mysqli->query($sqldata);
     $sqldata = $sqldata->fetch_assoc();
-    $sql = "SELECT * FROM spms_supportfunctions where id_suppFunc='$sqldata[parent_id]'";
+    $sql = "SELECT * FROM spms_pcr_support_functions where id_suppFunc='$sqldata[parent_id]'";
     $sql = $mysqli->query($sql);
     $sql = $sql->fetch_assoc();
     $a = unserialize($sql[$col]);
@@ -477,7 +477,7 @@ if (isset($_POST['coreFucntionInput'])) {
   $sqldataSuccIn = "SELECT * from spms_supportfunctiondata where sfd_id='$_POST[suppFuncEditEmpDataPost]'";
   $sqldataSuccIn = $mysqli->query($sqldataSuccIn);
   $sqldataSuccIn = $sqldataSuccIn->fetch_assoc();
-  $sqlSuccIn = "SELECT * FROM spms_supportfunctions where id_suppFunc='$sqldataSuccIn[parent_id]'";
+  $sqlSuccIn = "SELECT * FROM spms_pcr_support_functions where id_suppFunc='$sqldataSuccIn[parent_id]'";
   $sqlSuccIn = $mysqli->query($sqlSuccIn);
   $sqlSuccIn = $sqlSuccIn->fetch_assoc();
 

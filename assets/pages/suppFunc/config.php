@@ -9,7 +9,7 @@ if(isset($_POST['StoreSF'])){
   $e = addslashes(serialize($_POST['e']));
   $t = addslashes(serialize($_POST['t']));
   $sql = "INSERT INTO
-            spms_supportfunctions (id_suppFunc, mfo, suc_in, Q, E, T, percent,owner)
+            spms_pcr_support_functions (id_suppFunc, mfo, suc_in, Q, E, T, percent,owner)
             VALUES (NULL, '$suppMfo', '$succIndi', '$q', '$e', '$t', '$percent','$owner')";
   $sql = $mysqli->query($sql);
   if(!$sql){
@@ -18,7 +18,7 @@ if(isset($_POST['StoreSF'])){
     print(1);
   }
 }else if(isset($_POST['removeSupport'])){
-  $sql = "DELETE FROM spms_supportfunctions WHERE spms_supportfunctions.id_suppFunc = '$_POST[removeSupport]'";
+  $sql = "DELETE FROM spms_pcr_support_functions WHERE spms_pcr_support_functions.id_suppFunc = '$_POST[removeSupport]'";
   $sql = $mysqli->query($sql);
   if(!$sql){
     die($mysqli->error);

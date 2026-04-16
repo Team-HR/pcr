@@ -1,7 +1,7 @@
 <?php
 if (isset($_POST['updateData'])) {
   $dataId = $_POST['updateData'];
-  $data = "SELECT * FROM spms_supportfunctions where id_suppFunc='$dataId'";
+  $data = "SELECT * FROM spms_pcr_support_functions where id_suppFunc='$dataId'";
   $data = $_ipcr->get_data($data);
 
   function indicationInputs($type,$data){

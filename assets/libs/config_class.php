@@ -911,12 +911,12 @@ class Employee_data extends Db
 
 
 		if ($this->get_status('formType') == '1' || $this->get_status('formType') == '5') {
-			$sql = "SELECT * FROM spms_supportfunctions where type=1";
+			$sql = "SELECT * FROM spms_pcr_support_functions where type=1";
 		} elseif ($this->get_status('formType') == '3') {
-			$sql = "SELECT * FROM spms_supportfunctions where type=3";
+			$sql = "SELECT * FROM spms_pcr_support_functions where type=3";
 			$isDpcr = true;
 		} else {
-			$sql = "SELECT * FROM spms_supportfunctions where type=2";
+			$sql = "SELECT * FROM spms_pcr_support_functions where type=2";
 		}
 		$sql = $this->mysqli->query($sql);
 		$col = "";
@@ -2607,7 +2607,7 @@ function Authorization_Error()
 
 function getSupportFunctionActivitiesCount($mysqli, $period_id)
 {
-	$query = "SELECT * FROM spms_supportfunctions_acts WHERE period_id = ?";
+	$query = "SELECT * FROM spms_pcr_support_function_activities WHERE period_id = ?";
 	try {
 		$stmt = $mysqli->prepare($query);
 		if ($stmt === false) {

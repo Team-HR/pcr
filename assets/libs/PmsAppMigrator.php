@@ -135,7 +135,7 @@ class PmsAppMigrator
 
 	public function migrate_pms_pcr_support_functions_table()
 	{
-		$sql = "SELECT * FROM spms_supportfunctions";
+		$sql = "SELECT * FROM spms_pcr_support_functions";
 		$res = $this->mysqli->query($sql);
 		$data = [];
 		$form_typ_cmp_for_order = "";
