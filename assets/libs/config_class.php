@@ -1106,7 +1106,7 @@ class Employee_data extends Db
 	private function strategicTr()
 	{
 		$this->strtPercent = "N/A"; //previously N/A
-		$sql = "SELECT * from spms_strategicfuncdata where period_id = '$this->per_ID' and emp_id = '$this->emp_ID'";
+		$sql = "SELECT * from spms_pcr_strategic_accomplishments where period_id = '$this->per_ID' and emp_id = '$this->emp_ID'";
 		$sql = $this->mysqli->query($sql);
 		$countStrat = $sql->num_rows;
 		if (!$sql) {

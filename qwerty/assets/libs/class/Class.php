@@ -316,7 +316,7 @@ class IPCR extends Db
     if ($this->fileStatus['formType'] == 3 || $this->fileStatus['formType'] == 2) {
       $added .= "<td></td>";
     }
-    $sql = "SELECT * from spms_strategicfuncdata where period_id='$this->period' and emp_id='$this->EmpId'";
+    $sql = "SELECT * from spms_pcr_strategic_accomplishments where period_id='$this->period' and emp_id='$this->EmpId'";
     $sql = $this->mysqli->query($sql);
     $view = "";
     $total = 0;

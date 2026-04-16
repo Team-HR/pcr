@@ -311,10 +311,10 @@ if (isset($_POST['page'])) {
 	}
 	// $quality = $_POST['quality'];
 	// $time = $_POST['time'];
-	// $sql = "INSERT INTO spms_strategicfuncdata
+	// $sql = "INSERT INTO spms_pcr_strategic_accomplishments
 	// (strategicFunc_id, period_id, emp_id, mfo, succ_in, acc, Q, T, remark)
 	// VALUES (NULL, '$period', '$emp', '$mfo', '$suc_in', '$acc', '$quality', '$time', '$remark')";
-	$sql = "INSERT INTO spms_strategicfuncdata
+	$sql = "INSERT INTO spms_pcr_strategic_accomplishments
 	(strategicFunc_id, period_id, emp_id, mfo, succ_in, acc, average , remark, noStrat)
 	VALUES (NULL, '$period', '$emp', '$mfo', '$suc_in', '$acc', '$stratAverage' ,'$remark','$noStrat')";
 	$sql = $mysqli->query($sql);
@@ -325,7 +325,7 @@ if (isset($_POST['page'])) {
 	}
 } elseif (isset($_POST['strategicDeletePost'])) {
 	$dataId = $_POST['strategicDeletePost'];
-	$sql = "DELETE FROM spms_strategicfuncdata WHERE strategicFunc_id ='$dataId'";
+	$sql = "DELETE FROM spms_pcr_strategic_accomplishments WHERE strategicFunc_id ='$dataId'";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
 		die($mysqli->error);
@@ -452,13 +452,13 @@ elseif (isset($_POST['submitPerformance'])) {
 	// $time = $_POST['time'];
 	$remark = addslashes($_POST['remark']);
 	$stratAverage = $_POST['stratAverage'];
-	// $sql = "UPDATE spms_strategicfuncdata
+	// $sql = "UPDATE spms_pcr_strategic_accomplishments
 	// SET mfo = '$mfo', succ_in = '$suc_in', acc = '$acc', Q = '$quality', T = '$time', remark = '$remark'
-	// WHERE spms_strategicfuncdata.strategicFunc_id = '$dataId'
+	// WHERE spms_pcr_strategic_accomplishments.strategicFunc_id = '$dataId'
 	// ";
-	$sql = "UPDATE spms_strategicfuncdata
+	$sql = "UPDATE spms_pcr_strategic_accomplishments
 	SET mfo = '$mfo', succ_in = '$suc_in', acc = '$acc',average = '$stratAverage', remark = '$remark'
-	WHERE spms_strategicfuncdata.strategicFunc_id = '$dataId'
+	WHERE spms_pcr_strategic_accomplishments.strategicFunc_id = '$dataId'
 	";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {

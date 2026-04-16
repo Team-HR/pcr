@@ -316,7 +316,7 @@ function strategicTr($mysqli, $fileStatus)
     $period_id = $fileStatus['period_id'];
     $employee_id = $fileStatus['employees_id'];
 
-    $sql = "SELECT * from spms_strategicfuncdata where period_id = '$period_id' and emp_id = '$employee_id'";
+    $sql = "SELECT * from spms_pcr_strategic_accomplishments where period_id = '$period_id' and emp_id = '$employee_id'";
     $sql = $mysqli->query($sql);
     $totalCount = 0;
     $totalAv = 0;
