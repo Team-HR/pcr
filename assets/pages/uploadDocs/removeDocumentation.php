@@ -1,7 +1,7 @@
 <?php
 require_once "../../libs/config_class.php";
 $removeId = $_POST['removeId'];
-$sql = "DELETE FROM spms_workdocumentation WHERE spms_workdocumentation.workDocumentationID = '$removeId'";
+$sql = "DELETE FROM spms_pcr_work_documentations WHERE spms_pcr_work_documentations.workDocumentationID = '$removeId'";
 $sql = $mysqli->query($sql);
 if(!$sql){
   echo "Something went wrong";
