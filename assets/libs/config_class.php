@@ -484,7 +484,7 @@ class Employee_data extends Db
 	{
 		$period = $this->period;
 		$department = $this->get_emp('department_id');
-		$sql = "SELECT * spms_rsmstatus where period_id='$period[mfoperiod_id]' and department_id='$department'";
+		$sql = "SELECT * spms_rsm_status where period_id='$period[mfoperiod_id]' and department_id='$department'";
 		$sql = mysql::query($sql);
 		$this->rsmStatus = $sql->fetch_assoc();
 	}

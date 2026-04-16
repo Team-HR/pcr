@@ -224,11 +224,11 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   }
   if ($statusOK) {
     $department = $user->get_emp('department_id');
-    $rsmStatus = "SELECT * from spms_rsmstatus where period_id='$period' and department_id='$department'";
+    $rsmStatus = "SELECT * from spms_rsm_status where period_id='$period' and department_id='$department'";
     $rsmStatus = $mysqli->query($rsmStatus);
     if ($rsmStatus->num_rows < 1) {
       // if this period will end edit will change to zero;
-      $rsm = "INSERT INTO spms_rsmstatus (rsmStatus_id, period_id, department_id, done, edit, alter_logs) VALUES (NULL, '$period', '$department', '0', '1', '')";
+      $rsm = "INSERT INTO spms_rsm_status (rsmStatus_id, period_id, department_id, done, edit, alter_logs) VALUES (NULL, '$period', '$department', '0', '1', '')";
       $rsm = $mysqli->query($rsm);
       if (!$rsm) {
         die($mysqli->error);
@@ -397,7 +397,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
 } elseif (isset($_POST['closeRsm'])) {
   $rsmStatusId = (int)$_POST['closeRsm'];
 
-  $sqlQuery = "UPDATE spms_rsmstatus SET edit = '0' , done='1' WHERE spms_rsmstatus.rsmStatus_id = '$rsmStatusId'";
+  $sqlQuery = "UPDATE spms_rsm_status SET edit = '0' , done='1' WHERE spms_rsm_status.rsmStatus_id = '$rsmStatusId'";
   $sql = $mysqli->query($sqlQuery);
 
   if (!$sql) {
@@ -867,7 +867,7 @@ function rsmEditStatus($dat)
   $period = $_SESSION['period'];
   $enable = false;
 
-  $sql = "SELECT * from spms_rsmstatus where period_id='$period' and department_id='$department_id'";
+  $sql = "SELECT * from spms_rsm_status where period_id='$period' and department_id='$department_id'";
   $sql = $mysqli->query($sql);
   $sql = $sql->fetch_assoc();
   if ($sql['edit']) {
