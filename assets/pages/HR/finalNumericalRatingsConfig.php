@@ -66,11 +66,11 @@ else if (isset($_POST['getDepartmentHeadItems'])) {
 	print json_encode($data);
 }
 
-// SELECT * FROM spms_mfo_period WHERE year_mfo > 2018 ORDER BY spms_mfo_period.year_mfo DESC;
+// SELECT * FROM spms_periods WHERE year_mfo > 2018 ORDER BY spms_periods.year_mfo DESC;
 
 else if (isset($_POST['getPeriodItems'])) {
 	$data = [];
-	$sql = "SELECT * FROM spms_mfo_period WHERE year_mfo > 2018 ORDER BY spms_mfo_period.year_mfo DESC;";
+	$sql = "SELECT * FROM spms_periods WHERE year_mfo > 2018 ORDER BY spms_periods.year_mfo DESC;";
 	$res = $mysqli->query($sql);
 	while ($row = $res->fetch_assoc()) {
 		$data[] = [
@@ -147,7 +147,7 @@ else if (isset($_POST['getPeriodItems'])) {
 	print table($mysqli, $period_id, $department_id);
 } elseif (isset($_POST["getPeriodYears"])) {
 	$years = [];
-	$sql = "SELECT DISTINCT year_mfo FROM spms_mfo_period ORDER BY spms_mfo_period.year_mfo DESC";
+	$sql = "SELECT DISTINCT year_mfo FROM spms_periods ORDER BY spms_periods.year_mfo DESC";
 	$res = $mysqli->query($sql);
 	while ($row = $res->fetch_assoc()) {
 		$year = $row['year_mfo'];
@@ -292,7 +292,7 @@ function table($mysqli, $period_id, $department_id)
 	$dep = $dep['department'];
 
 
-	$period = "SELECT * from spms_mfo_period where mfoperiod_id='$period_id'";
+	$period = "SELECT * from spms_periods where mfoperiod_id='$period_id'";
 	$period = $mysqli->query($period);
 	$period = $period->fetch_assoc();
 	// $period_id = $period['mfoperiod_id'];
@@ -736,7 +736,7 @@ function get_success_indicators($mysqli, $cf_ID)
 function get_period_id($mysqli, $selected_period_month, $selected_period_year)
 {
 	$period_id = null;
-	$sql = "SELECT mfoperiod_id AS period_id FROM spms_mfo_period WHERE month_mfo = '$selected_period_month' AND year_mfo = '$selected_period_year'";
+	$sql = "SELECT mfoperiod_id AS period_id FROM spms_periods WHERE month_mfo = '$selected_period_month' AND year_mfo = '$selected_period_year'";
 	$res = $mysqli->query($sql);
 	if ($row = $res->fetch_assoc()) {
 		$period_id = $row["period_id"];

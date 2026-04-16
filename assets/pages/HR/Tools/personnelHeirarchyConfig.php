@@ -9,7 +9,7 @@ if (isset($_POST["getPersonnelHeirarchy"])) {
 
     $period_id = 0;
 
-    $sql = "SELECT * FROM spms_mfo_period where month_mfo = '$selected_period_month' AND year_mfo = '$selected_period_year'";
+    $sql = "SELECT * FROM spms_periods where month_mfo = '$selected_period_month' AND year_mfo = '$selected_period_year'";
 
     $res = $mysqli->query($sql);
     if ($row = $res->fetch_assoc()) {

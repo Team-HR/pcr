@@ -3,7 +3,7 @@
 $nameFormatter = new NameFormatter($mysqli);
 
 if (isset($_POST["getPeriods"])) {
-    $sql = "SELECT * FROM spms_mfo_period";
+    $sql = "SELECT * FROM spms_periods";
     $res = $mysqli->query($sql);
     $data = [];
     while ($row = $res->fetch_assoc()) {
@@ -26,7 +26,7 @@ if (isset($_POST["getPeriods"])) {
 
     $data = [];
     // get period id first
-    $sql = "SELECT * FROM spms_mfo_period WHERE month_mfo = '$selPeriod' AND year_mfo = '$selYear'";
+    $sql = "SELECT * FROM spms_periods WHERE month_mfo = '$selPeriod' AND year_mfo = '$selYear'";
 
     $res = $mysqli->query($sql);
     $row = $res->fetch_assoc();

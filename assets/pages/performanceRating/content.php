@@ -94,7 +94,7 @@ if (isset($_POST['page'])) {
 } elseif (isset($_POST['findP'])) {
 	$period = $_POST['period'];
 	$year = $_POST['year'];
-	$sql = "SELECT * from spms_mfo_period where month_mfo='$period' and year_mfo='$year'";
+	$sql = "SELECT * from spms_periods where month_mfo='$period' and year_mfo='$year'";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
 		echo $mysqli->error;

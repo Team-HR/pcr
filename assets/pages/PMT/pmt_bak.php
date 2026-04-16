@@ -14,7 +14,7 @@ if (isset($_GET['year']) && isset($_GET['period']) && $_GET['year'] != "" && $_G
 	}
 }
 // $period = "July - December";
-$periodSql = "SELECT * from spms_mfo_period where month_mfo='$period' and year_mfo='$year'";
+$periodSql = "SELECT * from spms_periods where month_mfo='$period' and year_mfo='$year'";
 $periodSql = $mysqli->query($periodSql);
 $periodSql = $periodSql->fetch_assoc();
 $userId = $user->get_emp('employees_id');

@@ -168,7 +168,7 @@ elseif (isset($_GET["get_rating_scale_matrix"])) {
         $department = $row["department"];
     }
 
-    $sql = "SELECT * FROM spms_mfo_period WHERE mfoperiod_id = '$period_id'";
+    $sql = "SELECT * FROM spms_periods WHERE mfoperiod_id = '$period_id'";
     $res = $mysqli->query($sql);
     if ($row = $res->fetch_assoc()) {
         $period = $row["month_mfo"] . " " . $row["year_mfo"];

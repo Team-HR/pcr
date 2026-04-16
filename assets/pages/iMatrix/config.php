@@ -14,7 +14,7 @@ if (isset($_POST['page'])) {
 } elseif (isset($_POST['period_check'])) {
   $month = $_POST['period_check'];
   $year = $_POST['year'];
-  $sql = "SELECT * from spms_mfo_period where month_mfo='$month' and year_mfo='$year'";
+  $sql = "SELECT * from spms_periods where month_mfo='$month' and year_mfo='$year'";
   $sql = $mysqli->query($sql);
   if (!$sql) {
     die($mysqli->error);
@@ -29,7 +29,7 @@ if (isset($_POST['page'])) {
   $data["period"] = "";
   $data["departments"] = [];
   $mfoperiod_id = $_SESSION["iMatrix_period"];
-  $sql = "SELECT * FROM spms_mfo_period WHERE mfoperiod_id = '$mfoperiod_id'";
+  $sql = "SELECT * FROM spms_periods WHERE mfoperiod_id = '$mfoperiod_id'";
   $res = $mysqli->query($sql);
 
   if ($row = $res->fetch_assoc()) {

@@ -7,7 +7,7 @@ if (isset($_POST['get_prev_rsm'])) {
   $selected_period_id = $_SESSION["period"];
 
   // get selected period data
-  $sql = "SELECT * FROM spms_mfo_period WHERE mfoperiod_id = '$selected_period_id';";
+  $sql = "SELECT * FROM spms_periods WHERE mfoperiod_id = '$selected_period_id';";
   $result = $mysqli->query($sql);
   $row = $result->fetch_assoc();
   //  {"mfoperiod_id":"10","month_mfo":"July - December","year_mfo":"2022"}
@@ -35,7 +35,7 @@ if (isset($_POST['get_prev_rsm'])) {
   $selected_period_id = $_SESSION["period"];
 
   // get selected period data
-  $sql = "SELECT * FROM spms_mfo_period WHERE mfoperiod_id = '$selected_period_id';";
+  $sql = "SELECT * FROM spms_periods WHERE mfoperiod_id = '$selected_period_id';";
   $result = $mysqli->query($sql);
   $row = $result->fetch_assoc();
   //  {"mfoperiod_id":"10","month_mfo":"July - December","year_mfo":"2022"}
@@ -54,7 +54,7 @@ if (isset($_POST['get_prev_rsm'])) {
     $months = "July - December";
     $year = $selected_year - 1;
   }
-  $sql = "SELECT mfoperiod_id FROM spms_mfo_period WHERE month_mfo = '$months' AND year_mfo = '$year'";
+  $sql = "SELECT mfoperiod_id FROM spms_periods WHERE month_mfo = '$months' AND year_mfo = '$year'";
   $result = $mysqli->query($sql);
   $row = $result->fetch_assoc();
   $period_id = $row["mfoperiod_id"];
@@ -157,7 +157,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   $selected_period_id = 12;
 
   // get selected period data
-  $sql = "SELECT * FROM spms_mfo_period WHERE mfoperiod_id = '$selected_period_id';";
+  $sql = "SELECT * FROM spms_periods WHERE mfoperiod_id = '$selected_period_id';";
   $result = $mysqli->query($sql);
   $row = $result->fetch_assoc();
   //  {"mfoperiod_id":"10","month_mfo":"July - December","year_mfo":"2022"}
@@ -177,7 +177,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
     $year = $selected_year - 1;
   }
 
-  $sql = "SELECT mfoperiod_id FROM spms_mfo_period WHERE month_mfo = '$months' AND year_mfo = '$year'";
+  $sql = "SELECT mfoperiod_id FROM spms_periods WHERE month_mfo = '$months' AND year_mfo = '$year'";
   $result = $mysqli->query($sql);
   $row = $result->fetch_assoc();
   $period_id = $row["mfoperiod_id"];
@@ -203,7 +203,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   $period = "";
   $statusOK = 0;
 
-  $sql = "SELECT * from spms_mfo_period where month_mfo='$_POST[period_check]' and year_mfo='$_POST[year]'";
+  $sql = "SELECT * from spms_periods where month_mfo='$_POST[period_check]' and year_mfo='$_POST[year]'";
   $sql = $mysqli->query($sql);
 
   if (!$sql) {
@@ -216,7 +216,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
     $_SESSION['period'] = $sqlFetch['mfoperiod_id'];
     $statusOK = 1;
   } else {
-    $sql = "INSERT INTO spms_mfo_period (mfoperiod_id, month_mfo, year_mfo) VALUES (NULL,'$_POST[period_check]','$_POST[year]')";
+    $sql = "INSERT INTO spms_periods (mfoperiod_id, month_mfo, year_mfo) VALUES (NULL,'$_POST[period_check]','$_POST[year]')";
     $sql = $mysqli->query($sql);
     $statusOK = 1;
     $period = $mysqli->insert_id;
@@ -460,7 +460,7 @@ function getPreviousPeriodId($mysqli)
   $selected_months = '';
   $selected_year = '';
 
-  $sql = "SELECT * FROM spms_mfo_period WHERE mfoperiod_id = '$period_id';";
+  $sql = "SELECT * FROM spms_periods WHERE mfoperiod_id = '$period_id';";
   $result = $mysqli->query($sql);
   if ($row = $result->fetch_assoc()) {
     $selected_months = $row["month_mfo"];
@@ -478,7 +478,7 @@ function getPreviousPeriodId($mysqli)
     $year = $selected_year - 1;
   }
 
-  $sql = "SELECT * FROM spms_mfo_period WHERE month_mfo = '$months' AND year_mfo = '$year';";
+  $sql = "SELECT * FROM spms_periods WHERE month_mfo = '$months' AND year_mfo = '$year';";
   $result = $mysqli->query($sql);
   if ($row = $result->fetch_assoc()) {
     $previous_period_id = $row['mfoperiod_id'];
@@ -513,7 +513,7 @@ function table($mysqli)
   $dep = $dep['department'];
 
 
-  $period = "SELECT * from spms_mfo_period where mfoperiod_id='$period_id'";
+  $period = "SELECT * from spms_periods where mfoperiod_id='$period_id'";
   $period = $mysqli->query($period);
   $period = $period->fetch_assoc();
   // $period_id = $period['mfoperiod_id'];

@@ -34,7 +34,7 @@ function gridNotifView()
 {
   global $mysqli;
   $empId = $_SESSION['emp_id'];
-  $getAllPeriod = "SELECT * from spms_mfo_period";
+  $getAllPeriod = "SELECT * from spms_periods";
   $getAllPeriod = $mysqli->query($getAllPeriod);
   $department_id = $_SESSION['emp_info']['department_id'];
 

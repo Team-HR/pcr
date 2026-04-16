@@ -5,7 +5,7 @@ if (isset($_POST['rsmGetTableData'])) {
     $period = $_POST['period'];
     $year = $_POST['year'];
 
-    $sql = "SELECT * from spms_mfo_period where month_mfo='$period' and year_mfo='$year'";
+    $sql = "SELECT * from spms_periods where month_mfo='$period' and year_mfo='$year'";
     $sql = $mysqli->query($sql);
     // 
     $mfoperiod = $sql->fetch_assoc();
@@ -106,7 +106,7 @@ if (isset($_POST['rsmGetTableData'])) {
 } elseif (isset($_POST['enableAllRsm'])) {
     $year = $_POST['year'];
     $period = $_POST['period'];
-    $periodId = "SELECT * from spms_mfo_period where month_mfo='$period' and year_mfo='$year'";
+    $periodId = "SELECT * from spms_periods where month_mfo='$period' and year_mfo='$year'";
     $periodId = $mysqli->query($periodId);
     $periodId = $periodId->fetch_assoc();
     $allDepartment  = "SELECT * from department";

@@ -4,7 +4,7 @@ function pendingTable($mysqli)
 {
   $table = "";
   $period = $_SESSION['periodPending'];
-  $gperiod = "SELECT * from spms_mfo_period where mfoperiod_id='$period'";
+  $gperiod = "SELECT * from spms_periods where mfoperiod_id='$period'";
   $gperiod = $mysqli->query($gperiod);
   $gperiod = $gperiod->fetch_assoc();
   $empId = $_SESSION['emp_id'];

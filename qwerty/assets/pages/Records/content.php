@@ -7,7 +7,7 @@ if ($month >= 7) { // the date now is 7-12 means july - december in months
 	$year--;
 	$month = "July - December";
 }
-$period = "SELECT mfoperiod_id from spms_mfo_period where month_mfo='$month' and year_mfo='$year'";
+$period = "SELECT mfoperiod_id from spms_periods where month_mfo='$month' and year_mfo='$year'";
 $period = $mysqli->query($period);
 $period = $period->fetch_assoc();
 $period = $period['mfoperiod_id'];

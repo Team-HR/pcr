@@ -95,7 +95,7 @@ class Employee_data extends Db
 
 	public function get_period_and_year($period_id)
 	{
-		$sql = "SELECT * FROM spms_mfo_period WHERE mfoperiod_id = '$period_id'";
+		$sql = "SELECT * FROM spms_periods WHERE mfoperiod_id = '$period_id'";
 		$res = $this->mysqli->query($sql);
 		if ($row = $res->fetch_assoc()) {
 			return [
@@ -213,7 +213,7 @@ class Employee_data extends Db
 	{
 		$this->per_ID = $per;
 		//retriving all the data of period
-		$sql = "SELECT  * from spms_mfo_period where mfoperiod_id='$this->per_ID'";
+		$sql = "SELECT  * from spms_periods where mfoperiod_id='$this->per_ID'";
 		$sql = $this->mysqli->query($sql);
 		if (!$sql) {
 			die($this->error);
@@ -225,7 +225,7 @@ class Employee_data extends Db
 	public function set_periodMY($m, $y)
 	{
 		//retriving all the data of period
-		$sql = "SELECT  * from spms_mfo_period where month_mfo='$m' and year_mfo='$y'";
+		$sql = "SELECT  * from spms_periods where month_mfo='$m' and year_mfo='$y'";
 		$sql = $this->mysqli->query($sql);
 		if (!$sql) {
 			die($this->error);

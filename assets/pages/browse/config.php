@@ -7,7 +7,7 @@ if (isset($_POST['showList'])) {
   $year = $_POST['year'];
 
 
-  $sql = "SELECT * FROM spms_mfo_period WHERE month_mfo = '$period' AND year_mfo = '$year'";
+  $sql = "SELECT * FROM spms_periods WHERE month_mfo = '$period' AND year_mfo = '$year'";
   $res = $mysqli->query($sql);
 
   if ($row = $res->fetch_assoc()) {

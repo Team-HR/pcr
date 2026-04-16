@@ -194,7 +194,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 	// $period = $_POST["period"];
 	// $year = $_POST["year"];
 	$data = [];
-	// $sql = "SELECT * from spms_mfo_period where month_mfo='$period' and year_mfo='$year'";
+	// $sql = "SELECT * from spms_periods where month_mfo='$period' and year_mfo='$year'";
 	// $res = $mysqli->query($sql);
 	// $periodSql = $res->fetch_assoc();
 	$employee_id_auth = $user->get_emp('employees_id');
@@ -210,7 +210,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 } elseif (isset($_POST['getPeriodId'])) {
 	$period = $_POST["period"];
 	$year = $_POST["year"];
-	$sql = "SELECT * from spms_mfo_period where month_mfo='$period' and year_mfo='$year'";
+	$sql = "SELECT * from spms_periods where month_mfo='$period' and year_mfo='$year'";
 	$res = $mysqli->query($sql);
 	$row = $res->fetch_assoc();
 	$period_id = $row['mfoperiod_id'];
@@ -617,7 +617,7 @@ elseif (isset($_POST["initLoadForm"])) {
 
 function getPeriodInformation($mysqli, $period_id)
 {
-	$sql = "SELECT * FROM spms_mfo_period WHERE mfoperiod_id = '$period_id'";
+	$sql = "SELECT * FROM spms_periods WHERE mfoperiod_id = '$period_id'";
 	$res = $mysqli->query($sql);
 	$row = $res->fetch_assoc();
 	$period = $row["month_mfo"];
