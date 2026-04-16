@@ -398,7 +398,7 @@ if (isset($_POST['coreFucntionInput'])) {
 } elseif (isset($_POST['suppFuncEditEmpDataPost'])) {
 
   $empdataId = $_POST['suppFuncEditEmpDataPost'];
-  $sqldata = "SELECT * from spms_supportfunctiondata where sfd_id='$empdataId'";
+  $sqldata = "SELECT * from spms_pcr_support_function_accomplishments where sfd_id='$empdataId'";
   $sqldata = $mysqli->query($sqldata);
   $sqldata = $sqldata->fetch_assoc();
   $pmtCheck = false;
@@ -429,7 +429,7 @@ if (isset($_POST['coreFucntionInput'])) {
   {
 
     $empdataId = $_POST['suppFuncEditEmpDataPost'];
-    $sqldata = "SELECT * from spms_supportfunctiondata where sfd_id='$empdataId'";
+    $sqldata = "SELECT * from spms_pcr_support_function_accomplishments where sfd_id='$empdataId'";
     $sqldata = $mysqli->query($sqldata);
     $sqldata = $sqldata->fetch_assoc();
     $sql = "SELECT * FROM spms_pcr_support_functions where id_suppFunc='$sqldata[parent_id]'";
@@ -474,7 +474,7 @@ if (isset($_POST['coreFucntionInput'])) {
     return $view;
   }
 
-  $sqldataSuccIn = "SELECT * from spms_supportfunctiondata where sfd_id='$_POST[suppFuncEditEmpDataPost]'";
+  $sqldataSuccIn = "SELECT * from spms_pcr_support_function_accomplishments where sfd_id='$_POST[suppFuncEditEmpDataPost]'";
   $sqldataSuccIn = $mysqli->query($sqldataSuccIn);
   $sqldataSuccIn = $sqldataSuccIn->fetch_assoc();
   $sqlSuccIn = "SELECT * FROM spms_pcr_support_functions where id_suppFunc='$sqldataSuccIn[parent_id]'";

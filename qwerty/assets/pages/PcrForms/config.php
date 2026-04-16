@@ -81,7 +81,7 @@ if (isset($_POST["getPeriods"])) {
 
     # check if file has support function data existing
 
-    // $sql = "SELECT * FROM spms_supportfunctiondata WHERE emp_id = '$employees_id' AND period_id = '$period_id';";
+    // $sql = "SELECT * FROM spms_pcr_support_function_accomplishments WHERE emp_id = '$employees_id' AND period_id = '$period_id';";
     // $res = $mysqli->query($sql);
     // $support_function_data = [];
     // while ($row = $res->fetch_assoc()) {
@@ -125,7 +125,7 @@ if (isset($_POST["getPeriods"])) {
 
             ];
             foreach ($conversion as $key => $func) {
-                $sql = "UPDATE spms_supportfunctiondata SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
+                $sql = "UPDATE spms_pcr_support_function_accomplishments SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
                 $mysqli->query($sql);
             }
         } elseif ($currFormType == '3') {
@@ -152,7 +152,7 @@ if (isset($_POST["getPeriods"])) {
                 ],
             ];
             foreach ($conversion as $key => $func) {
-                $sql = "UPDATE spms_supportfunctiondata SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
+                $sql = "UPDATE spms_pcr_support_function_accomplishments SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
                 $mysqli->query($sql);
             }
         }
@@ -194,7 +194,7 @@ if (isset($_POST["getPeriods"])) {
 
             ];
             foreach ($conversion as $key => $func) {
-                $sql = "UPDATE spms_supportfunctiondata SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
+                $sql = "UPDATE spms_pcr_support_function_accomplishments SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
                 $mysqli->query($sql);
             }
         } elseif ($currFormType == '3') {
@@ -221,7 +221,7 @@ if (isset($_POST["getPeriods"])) {
                 ],
             ];
             foreach ($conversion as $key => $func) {
-                $sql = "UPDATE spms_supportfunctiondata SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
+                $sql = "UPDATE spms_pcr_support_function_accomplishments SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
                 $mysqli->query($sql);
             }
         }
@@ -250,7 +250,7 @@ if (isset($_POST["getPeriods"])) {
                 ],
             ];
             foreach ($conversion as $key => $func) {
-                $sql = "UPDATE spms_supportfunctiondata SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
+                $sql = "UPDATE spms_pcr_support_function_accomplishments SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
                 $mysqli->query($sql);
             }
         } elseif ($currFormType == '2') {
@@ -277,7 +277,7 @@ if (isset($_POST["getPeriods"])) {
                 ],
             ];
             foreach ($conversion as $key => $func) {
-                $sql = "UPDATE spms_supportfunctiondata SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
+                $sql = "UPDATE spms_pcr_support_function_accomplishments SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
                 $mysqli->query($sql);
             }
         }

@@ -310,7 +310,7 @@ class PcrForm
         $emp_count = 0;
 
         while ($tr = $sql->fetch_assoc()) {
-            $sqlSelect = "SELECT * from spms_supportfunctiondata where parent_id='$tr[id_suppFunc]' and emp_id='$employee_id' and period_id='$period_id'";
+            $sqlSelect = "SELECT * from spms_pcr_support_function_accomplishments where parent_id='$tr[id_suppFunc]' and emp_id='$employee_id' and period_id='$period_id'";
             $sqlSelect = $mysqli->query($sqlSelect);
             $sqlSelectCount = $sqlSelect->num_rows;
             if ($sqlSelectCount > 0) {

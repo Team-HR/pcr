@@ -266,7 +266,7 @@ elseif (isset($_POST["initLoadForm"])) {
 	$sfd_id = $payload["sfd_id"];
 
 	// get exisiting cfdata first and compare to check if changes were made
-	$sql = "SELECT * FROM spms_supportfunctiondata WHERE sfd_id = '$sfd_id'";
+	$sql = "SELECT * FROM spms_pcr_support_function_accomplishments WHERE sfd_id = '$sfd_id'";
 	$res = $mysqli->query($sql);
 
 	$row = $res->fetch_assoc();
@@ -383,7 +383,7 @@ elseif (isset($_POST["initLoadForm"])) {
 	//   )
 
 	// check first if sfd_id exists 
-	$sql = "SELECT * FROM spms_supportfunctiondata WHERE sfd_id = '$sfd_id'";
+	$sql = "SELECT * FROM spms_pcr_support_function_accomplishments WHERE sfd_id = '$sfd_id'";
 	$res = $mysqli->query($sql);
 
 	// if none return null
@@ -396,7 +396,7 @@ elseif (isset($_POST["initLoadForm"])) {
 	$critics = $payload["critics"];
 	$critics = serialize($critics);
 	$critics = $mysqli->real_escape_string($critics);
-	// $sql = "UPDATE spms_supportfunctiondata SET critics = '$critics' WHERE spms_supportfunctiondata.sfd_id = '$sfd_id';";
+	// $sql = "UPDATE spms_pcr_support_function_accomplishments SET critics = '$critics' WHERE spms_pcr_support_function_accomplishments.sfd_id = '$sfd_id';";
 	// $res = $mysqli->query($sql);
 	// echo  json_encode($res);
 	// return null;
@@ -421,8 +421,8 @@ elseif (isset($_POST["initLoadForm"])) {
 	// payload_q
 	// payload_e
 	// payload_t
-	// spms_supportfunctiondata
-	$sql = "UPDATE spms_supportfunctiondata SET accomplishment = '$payload_actualAcc', Q = '$payload_q', E = '$payload_e', T = '$payload_t', supEdit = '$supEdit' ,critics = '$critics' WHERE spms_supportfunctiondata.sfd_id = '$sfd_id';";
+	// spms_pcr_support_function_accomplishments
+	$sql = "UPDATE spms_pcr_support_function_accomplishments SET accomplishment = '$payload_actualAcc', Q = '$payload_q', E = '$payload_e', T = '$payload_t', supEdit = '$supEdit' ,critics = '$critics' WHERE spms_pcr_support_function_accomplishments.sfd_id = '$sfd_id';";
 
 	$res = $mysqli->query($sql);
 

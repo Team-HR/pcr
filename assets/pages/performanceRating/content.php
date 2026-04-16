@@ -218,11 +218,11 @@ if (isset($_POST['page'])) {
 	$remark = addslashes($_POST['remark']);
 	$not_applicable = $_POST['not_applicable'] ?? 0;
 
-	$sql = "INSERT INTO spms_supportfunctiondata (sfd_id,parent_id,emp_id,period_id,accomplishment, Q, E, T, remark,percent)
+	$sql = "INSERT INTO spms_pcr_support_function_accomplishments (sfd_id,parent_id,emp_id,period_id,accomplishment, Q, E, T, remark,percent)
 	VALUES (NULL, '$parentId','$empId', '$period', '$acc', '$qual', '$eff', '$time', '$remark','$parent[percent]')";
 
 	if ($not_applicable) {
-		$sql = "INSERT INTO spms_supportfunctiondata (sfd_id,parent_id,emp_id,period_id,accomplishment, Q, E, T, not_applicable, remark,percent)
+		$sql = "INSERT INTO spms_pcr_support_function_accomplishments (sfd_id,parent_id,emp_id,period_id,accomplishment, Q, E, T, not_applicable, remark,percent)
 	VALUES (NULL, '$parentId','$empId', '$period', '', NULL, NULL, NULL, 1,'No PIGs this period. (Weight has been redistributed)','$parent[percent]')";
 	}
 
@@ -235,7 +235,7 @@ if (isset($_POST['page'])) {
 	}
 } elseif (isset($_POST['suppFuncRemoveEmpDataPost'])) {
 	$empdataId = $_POST['suppFuncRemoveEmpDataPost'];
-	$sql = "DELETE FROM spms_supportfunctiondata WHERE sfd_id = '$empdataId'";
+	$sql = "DELETE FROM spms_pcr_support_function_accomplishments WHERE sfd_id = '$empdataId'";
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
 		echo "<h1>Error Message</h1>";
@@ -250,7 +250,7 @@ if (isset($_POST['page'])) {
 	$quality = $_POST['quality'];
 	$timeliness = $_POST['timeliness'];
 	$remarks = addslashes($_POST['remarks']);
-	$sqlCheck = "SELECT * from spms_supportfunctiondata where sfd_id='$dataId'";
+	$sqlCheck = "SELECT * from spms_pcr_support_function_accomplishments where sfd_id='$dataId'";
 	$sqlCheck = $mysqli->query($sqlCheck);
 	$sqlCheck = $sqlCheck->fetch_assoc();
 	if ($sqlCheck['emp_id'] != $_SESSION['emp_id']) {
@@ -283,13 +283,13 @@ if (isset($_POST['page'])) {
 			array_push($supAr, $a);
 			$supAr = serialize($supAr);
 		}
-		$sql = "UPDATE spms_supportfunctiondata
+		$sql = "UPDATE spms_pcr_support_function_accomplishments
 		SET accomplishment = '$acc', Q = '$quality', E = '$efficiency', T = '$timeliness', remark = '$remarks', supEdit = '$supAr'
-		WHERE spms_supportfunctiondata.sfd_id ='$dataId'";
+		WHERE spms_pcr_support_function_accomplishments.sfd_id ='$dataId'";
 	} else {
-		$sql = "UPDATE spms_supportfunctiondata
+		$sql = "UPDATE spms_pcr_support_function_accomplishments
 		SET accomplishment = '$acc', Q = '$quality', E = '$efficiency', T = '$timeliness', remark = '$remarks'
-		WHERE spms_supportfunctiondata.sfd_id ='$dataId'";
+		WHERE spms_pcr_support_function_accomplishments.sfd_id ='$dataId'";
 	}
 	$sql = $mysqli->query($sql);
 	if (!$sql) {
