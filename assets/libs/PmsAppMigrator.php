@@ -218,12 +218,19 @@ class PmsAppMigrator
 			$mi_time = unserialize($row['mi_time']);
 			$mi_quality = $this->convertSerial($mi_quality);
 			$mi_quality = json_encode($mi_quality);
+			$row["Q"] = $mi_quality;
+
 			$mi_eff = $this->convertSerial($mi_eff);
 			$mi_eff = json_encode($mi_eff);
+			$row["E"] = $mi_eff;
+
 			$mi_time = $this->convertSerial($mi_time);
 			$mi_time = json_encode($mi_time);
+			$row["T"] = $mi_time;
+
 			$id = $row['mi_id'];
-			$pms_rsm_id = $row['cf_ID'];
+			$pms_rsm_id = $row['cf_ID']; 
+			// NOTE: mi_incharge column will be dropped — this migration script reads it for historical data only
 			$in_charges = explode(",", $row['mi_incharge']);
 			$parents = [];
 			$this->get_top_parent_of_rsm_success_indicator($parents, $pms_rsm_id);

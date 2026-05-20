@@ -124,25 +124,32 @@ function duplicateSpmsData(
             foreach ($indicators as $mi) {
                 // Filter In-Charge
                 if ($filterInCharge !== null) {
-                    $inChargeArr = explode(',', $mi['mi_incharge']);
-                    if (!in_array($filterInCharge, $inChargeArr)) {
+                    $stmtFilter = $pdo->prepare(
+                        "SELECT id FROM pms_ipcr_si_assignments
+                         WHERE success_indicator_id = :si_id AND user_id = :uid LIMIT 1"
+                    );
+                    $stmtFilter->execute([':si_id' => $mi['mi_id'], ':uid' => $filterInCharge]);
+                    if (!$stmtFilter->fetch()) {
                         continue;
                     }
                 }
 
                 $insertMiSql = "INSERT INTO spms_pcr_indicators 
-                    (cf_ID, mi_succIn, mi_incharge, corrections) 
-                    VALUES (:new_cf, :succ, :inc, :cor)";
+                    (cf_ID, mi_succIn, corrections) 
+                    VALUES (:new_cf, :succ, :cor)";
                 
                 $stmtMiIns = $pdo->prepare($insertMiSql);
                 $stmtMiIns->execute([
                     ':new_cf' => $newCfId,
                     ':succ'   => $mi['mi_succIn'],
-                    ':inc'    => $mi['mi_incharge'],
                     ':cor'    => $mi['corrections']
                 ]);
                 $newMiId = $pdo->lastInsertId();
-                $inChargeArr = array_filter(array_map('trim', explode(',', $mi['mi_incharge'])));
+                $stmtIncharge = $pdo->prepare(
+                    "SELECT user_id FROM pms_ipcr_si_assignments WHERE success_indicator_id = :src"
+                );
+                $stmtIncharge->execute([':src' => $mi['mi_id']]);
+                $inChargeArr = array_column($stmtIncharge->fetchAll(PDO::FETCH_ASSOC), 'user_id');
                 foreach ($inChargeArr as $empId) {
                     if (!is_numeric($empId)) continue;
                     $stmtAssign = $pdo->prepare(
