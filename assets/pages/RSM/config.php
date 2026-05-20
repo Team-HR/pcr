@@ -1,6 +1,9 @@
 <?php
 // copy previous rsm start
 require_once __DIR__ . '/../../libs/SystemLogger.php';
+require_once __DIR__ . '/../../libs/Db.php';
+$db = new Db();
+$mysqli = $db->getMysqli();
 
 if (isset($_POST['get_prev_rsm'])) {
   $data = [];
@@ -223,7 +226,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
     $_SESSION['period'] = $mysqli->insert_id;
   }
   if ($statusOK) {
-    $department = $user->get_emp('department_id');
+    $department = $_SESSION['emp_info']['department_id'];
     $rsmStatus = "SELECT * from spms_rsm_status where period_id='$period' and department_id='$department'";
     $rsmStatus = $mysqli->query($rsmStatus);
     if ($rsmStatus->num_rows < 1) {
@@ -239,7 +242,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
 } elseif (isset($_POST['page'])) {
   $page = $_POST['page'];
   if ($page == 'table') {
-    echo table($mysqli);
+    table($mysqli);
     if (rsmEditStatus("")) {
       echo "<button class='ui primary button fluid' onclick='closeRsm(" . rsmEditStatus("id") . ")'>Submit Rating Scale Matrix</button>";
     }
