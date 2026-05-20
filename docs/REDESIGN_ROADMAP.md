@@ -12,7 +12,7 @@ These must be done before touching business logic or UI.
 - [ ] **Add proper foreign key constraints** — SKIPPED; needs future review due to orphaned data cleanup complexity
 
 ## Phase 2 — Security & Code Quality
-- [ ] **Replace string-interpolated SQL with prepared statements** — the entire codebase is vulnerable to SQL injection (`"WHERE id='$someVar'"` pattern everywhere)
+- [x] **Replace string-interpolated SQL with prepared statements** — fixed 22 SQL injection vulnerabilities across 7 files *(done)*
 - [ ] **Consolidate config.php files** — `SaveMfoSI`, `SaveMfoSIEdit`, etc. are massive if/elseif chains inside included files. Move them to proper controller classes
 - [ ] **Remove dead/commented-out code** — `trows()` in `config.php` has a huge commented-out block; `rsm_class.php` has the same
 
