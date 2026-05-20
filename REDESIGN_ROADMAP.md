@@ -1,10 +1,11 @@
 # PCR System Redesign Roadmap
 
-## Phase 1 — Data Layer (You Are Here ✅)
+## Phase 1 — Data Layer
 These must be done before touching business logic or UI.
 
 - [x] **Normalize `mi_incharge`** → `pms_ipcr_si_assignments` *(done)*
-- [ ] **Normalize `mi_quality`, `mi_eff`, `mi_time`** — these use PHP `serialize()` stored as a string in the DB. That's fragile and hard to query. Move them to a proper ratings table (e.g., `pms_ipcr_si_ratings`)
+- [x] **Normalize `mi_quality`, `mi_eff`, `mi_time`** → `pms_si_qet_descriptors` *(done — branch `feature/normalize-si-qet-descriptors`)*
+- [ ] **Drop old columns** — `ALTER TABLE spms_pcr_indicators DROP COLUMN mi_quality, mi_eff, mi_time` + remove dual-write in `config.php` *(pending migration run & verification)*
 - [ ] **Normalize `corrections`** — also uses `serialize()`, same problem
 - [ ] **Standardize table naming** — the codebase mixes `spms_pcr_*`, `pms_rsm_*`, `pms_ipcr_*`. Settle on one convention
 - [ ] **Add proper foreign key constraints** — the skipped rows during migration revealed orphaned data with no enforcement
@@ -25,5 +26,5 @@ These must be done before touching business logic or UI.
 
 ## Notes
 - Started: 2026-05-20
-- First completed item: `mi_incharge` normalization into `pms_ipcr_si_assignments`
-- Migration script: `tools/migrate_si_assignments.php`
+- `mi_incharge` → `pms_ipcr_si_assignments`: `tools/migrate_si_assignments.php`
+- `mi_quality/eff/time` → `pms_si_qet_descriptors`: `tools/migrate_si_qet_descriptors.php` (dual-write active; old columns not yet dropped)
