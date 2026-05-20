@@ -118,9 +118,9 @@ if (isset($_POST['ModalSiAddCont'])) {
         Rating Matrix
         <i class='blue chart bar icon'></i>
         </h2>
-        " . ratingInputs('Quality', $dataId, $mrq[1], $mrq[2], $mrq[3], $mrq[4], $mrq[5])
-    . ratingInputs('Efficiency', $dataId, $mre[1], $mre[2], $mre[3], $mre[4], $mre[5])
-    . ratingInputs('Timeliness', $dataId, $mrt[1], $mrt[2], $mrt[3], $mrt[4], $mrt[5]) . "
+        " . ratingInputs('Quality', $dataId, $mrq[1] ?? '', $mrq[2] ?? '', $mrq[3] ?? '', $mrq[4] ?? '', $mrq[5] ?? '')
+    . ratingInputs('Efficiency', $dataId, $mre[1] ?? '', $mre[2] ?? '', $mre[3] ?? '', $mre[4] ?? '', $mre[5] ?? '')
+    . ratingInputs('Timeliness', $dataId, $mrt[1] ?? '', $mrt[2] ?? '', $mrt[3] ?? '', $mrt[4] ?? '', $mrt[5] ?? '') . "
         <label><b>Incharge</b></label>
         <div class='ui fluid multiple search selection dropdown'>
           <input type='hidden' name='emp' id='incharge$dataId' value='" . get_si_incharge_value($mysqli, $dataId) . "'>
