@@ -387,7 +387,10 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   } else {
     $period_id   = $_SESSION['period'];
     $assigned_by = $_SESSION['emp_info']['employees_id'];
-    $mysqli->query("DELETE FROM spms_pcr_si_assignments WHERE success_indicator_id = '$dataId'");
+    $stmt = $mysqli->prepare("DELETE FROM spms_pcr_si_assignments WHERE success_indicator_id = ?");
+    $stmt->bind_param("i", $dataId);
+    $stmt->execute();
+    $stmt->close();
     $emp_arr = array_filter(array_map('trim', explode(',', $incharge)));
     foreach ($emp_arr as $emp_id) {
       if (!is_numeric($emp_id)) continue;
@@ -395,7 +398,10 @@ elseif (isset($_POST['copy_to_other_dept'])) {
                      VALUES ('$dataId', '$emp_id', '$period_id', '$assigned_by', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
       $mysqli->query($assign_sql);
     }
-    $mysqli->query("DELETE FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = '$dataId'");
+    $stmt = $mysqli->prepare("DELETE FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = ?");
+    $stmt->bind_param("i", $dataId);
+    $stmt->execute();
+    $stmt->close();
     $qet_map = ['quality' => $_POST['quality'], 'efficiency' => $_POST['efficiency'], 'timeliness' => $_POST['timeliness']];
     foreach ($qet_map as $measure_type => $scores) {
       if (!is_array($scores)) continue;
@@ -422,8 +428,14 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   if (!$sql) {
     die($mysqli->error);
   } else {
-    $mysqli->query("DELETE FROM spms_pcr_si_assignments WHERE success_indicator_id = '$removeSiId'");
-    $mysqli->query("DELETE FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = '$removeSiId'");
+    $stmt = $mysqli->prepare("DELETE FROM spms_pcr_si_assignments WHERE success_indicator_id = ?");
+    $stmt->bind_param("i", $removeSiId);
+    $stmt->execute();
+    $stmt->close();
+    $stmt = $mysqli->prepare("DELETE FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = ?");
+    $stmt->bind_param("i", $removeSiId);
+    $stmt->execute();
+    $stmt->close();
     $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
     if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
       die($mysqli->error);
@@ -819,11 +831,15 @@ function trows($mysqli, $row, $padding, $addDisplay)
       $performanceMeasure = "";
       $qetDisplay = [];
       foreach (['quality' => 'Quality', 'efficiency' => 'Efficiency', 'timeliness' => 'Timeliness'] as $mtype => $mlabel) {
-        $qetRes = $mysqli->query("SELECT score, descriptor FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = '$siMiId' AND measure_type = '$mtype' ORDER BY score DESC");
+        $stmt = $mysqli->prepare("SELECT score, descriptor FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = ? AND measure_type = ? ORDER BY score DESC");
+        $stmt->bind_param("is", $siMiId, $mtype);
+        $stmt->execute();
+        $qetRes = $stmt->get_result();
         $qetHtml = "";
         while ($qetRow = $qetRes->fetch_assoc()) {
           $qetHtml .= "<b>" . $qetRow['score'] . "</b> - " . htmlspecialchars($qetRow['descriptor']) . "<br>";
         }
+        $stmt->close();
         $qetDisplay[$mtype] = $qetHtml;
         if ($qetHtml !== "") {
           $performanceMeasure .= "$mlabel<br>";
@@ -1108,12 +1124,16 @@ function get_children($mysqli, $cf_ID)
 
 function copy_qet_descriptors($mysqli, $source_mi_id, $new_mi_id)
 {
-  $res = $mysqli->query("SELECT measure_type, score, descriptor FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = '$source_mi_id'");
+  $stmt = $mysqli->prepare("SELECT measure_type, score, descriptor FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = ?");
+  $stmt->bind_param("i", $source_mi_id);
+  $stmt->execute();
+  $res = $stmt->get_result();
   while ($row = $res->fetch_assoc()) {
     $esc = $mysqli->real_escape_string($row['descriptor']);
     $mysqli->query("INSERT IGNORE INTO spms_pcr_si_qet_descriptors (success_indicator_id, measure_type, score, descriptor, created_at, updated_at)
                     VALUES ('$new_mi_id', '$row[measure_type]', '$row[score]', '$esc', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
   }
+  $stmt->close();
 }
 
 function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $department_id = null)
@@ -1141,12 +1161,16 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
       $mysqli->query($sql);
       $new_mi_id = $mysqli->insert_id;
       $src_mi_id = $success_idicator['mi_id'];
-      $inRes = $mysqli->query("SELECT user_id FROM spms_pcr_si_assignments WHERE success_indicator_id = '$src_mi_id'");
+      $stmt = $mysqli->prepare("SELECT user_id FROM spms_pcr_si_assignments WHERE success_indicator_id = ?");
+      $stmt->bind_param("i", $src_mi_id);
+      $stmt->execute();
+      $inRes = $stmt->get_result();
       while ($inRow = $inRes->fetch_assoc()) {
         $emp_id = $inRow['user_id'];
         $mysqli->query("INSERT INTO spms_pcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
                         VALUES ('$new_mi_id', '$emp_id', '$selected_period_id', 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
       }
+      $stmt->close();
       copy_qet_descriptors($mysqli, $src_mi_id, $new_mi_id);
     }
 
@@ -1181,12 +1205,16 @@ function start_duplicating_copy_to($mysqli, $data, $selected_period_id, $parent_
       $mysqli->query($sql);
       $new_mi_id = $mysqli->insert_id;
       $src_mi_id = $success_idicator['mi_id'];
-      $inRes = $mysqli->query("SELECT user_id FROM spms_pcr_si_assignments WHERE success_indicator_id = '$src_mi_id'");
+      $stmt = $mysqli->prepare("SELECT user_id FROM spms_pcr_si_assignments WHERE success_indicator_id = ?");
+      $stmt->bind_param("i", $src_mi_id);
+      $stmt->execute();
+      $inRes = $stmt->get_result();
       while ($inRow = $inRes->fetch_assoc()) {
         $emp_id = $inRow['user_id'];
         $mysqli->query("INSERT INTO spms_pcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
                         VALUES ('$new_mi_id', '$emp_id', '$selected_period_id', 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
       }
+      $stmt->close();
       copy_qet_descriptors($mysqli, $src_mi_id, $new_mi_id);
     }
 
@@ -1221,12 +1249,16 @@ function start_duplicating_to_diff_dept($mysqli, $data, $selected_period_id, $pa
       $mysqli->query($sql);
       $new_mi_id = $mysqli->insert_id;
       $src_mi_id = $success_idicator['mi_id'];
-      $inRes = $mysqli->query("SELECT user_id FROM spms_pcr_si_assignments WHERE success_indicator_id = '$src_mi_id'");
+      $stmt = $mysqli->prepare("SELECT user_id FROM spms_pcr_si_assignments WHERE success_indicator_id = ?");
+      $stmt->bind_param("i", $src_mi_id);
+      $stmt->execute();
+      $inRes = $stmt->get_result();
       while ($inRow = $inRes->fetch_assoc()) {
         $emp_id = $inRow['user_id'];
         $mysqli->query("INSERT INTO spms_pcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
                         VALUES ('$new_mi_id', '$emp_id', '$selected_period_id', 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
       }
+      $stmt->close();
       copy_qet_descriptors($mysqli, $src_mi_id, $new_mi_id);
     }
 
