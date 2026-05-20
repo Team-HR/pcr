@@ -723,12 +723,18 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
 
 			$mi_succIn = $mysqli->real_escape_string($success_idicator['mi_succIn']);
 
-			$mi_quality = $mysqli->real_escape_string($success_idicator['mi_quality']);
-			$mi_eff = $mysqli->real_escape_string($success_idicator['mi_eff']);
-			$mi_time = $mysqli->real_escape_string($success_idicator['mi_time']);
-
-			$sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_quality, mi_eff, mi_time, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
+			$sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$success_idicator[mi_incharge]','')";
 			$mysqli->query($sql);
+			$new_mi_id = $mysqli->insert_id;
+			$src_mi_id = $success_idicator['mi_id'];
+			$qetRes = $mysqli->query("SELECT measure_type, score, descriptor FROM pms_si_qet_descriptors
+			                          WHERE success_indicator_id = '$src_mi_id'");
+			while ($qetRow = $qetRes->fetch_assoc()) {
+				$esc = $mysqli->real_escape_string($qetRow['descriptor']);
+				$mysqli->query("INSERT IGNORE INTO pms_si_qet_descriptors
+				                (success_indicator_id, measure_type, score, descriptor, created_at, updated_at)
+				                VALUES ('$new_mi_id', '$qetRow[measure_type]', '$qetRow[score]', '$esc', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
+			}
 		}
 
 		$data[$key]["children"] = start_duplicating($mysqli, $core_function["children"], $selected_period_id, $insert_id);

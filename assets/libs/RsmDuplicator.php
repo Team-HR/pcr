@@ -131,16 +131,13 @@ function duplicateSpmsData(
                 }
 
                 $insertMiSql = "INSERT INTO spms_pcr_indicators 
-                    (cf_ID, mi_succIn, mi_quality, mi_eff, mi_time, mi_incharge, corrections) 
-                    VALUES (:new_cf, :succ, :qual, :eff, :time, :inc, :cor)";
+                    (cf_ID, mi_succIn, mi_incharge, corrections) 
+                    VALUES (:new_cf, :succ, :inc, :cor)";
                 
                 $stmtMiIns = $pdo->prepare($insertMiSql);
                 $stmtMiIns->execute([
                     ':new_cf' => $newCfId,
                     ':succ'   => $mi['mi_succIn'],
-                    ':qual'   => $mi['mi_quality'],
-                    ':eff'    => $mi['mi_eff'],
-                    ':time'   => $mi['mi_time'],
                     ':inc'    => $mi['mi_incharge'],
                     ':cor'    => $mi['corrections']
                 ]);
