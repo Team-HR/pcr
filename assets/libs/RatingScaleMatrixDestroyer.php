@@ -32,21 +32,33 @@ class RatingScaleMatrixDestroyer
 			# delete mfo
 			$cf_ID = $mfo['cf_ID'];
 			// call function destroy_mfo($cf_ID)
-			$sql = "DELETE FROM spms_pcr_mfos WHERE cf_ID = '$cf_ID'";
-			$this->mysqli->query($sql);
+			$stmt = $this->mysqli->prepare("DELETE FROM spms_pcr_mfos WHERE cf_ID = ?");
+			$stmt->bind_param("i", $cf_ID);
+			$stmt->execute();
+			$stmt->close();
 			# delete success indicators
 			// call function destroy_si($mi_id)
 			foreach ($mfo['success_indicators'] as $success_indicator) {
 				$mi_id = $success_indicator['mi_id'];
-				$sql = "DELETE FROM spms_pcr_indicators WHERE mi_id = '$mi_id'";
-				$this->mysqli->query($sql);
-				$this->mysqli->query("DELETE FROM spms_pcr_si_assignments WHERE success_indicator_id = '$mi_id'");
-				$this->mysqli->query("DELETE FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = '$mi_id'");
+				$stmt = $this->mysqli->prepare("DELETE FROM spms_pcr_indicators WHERE mi_id = ?");
+				$stmt->bind_param("i", $mi_id);
+				$stmt->execute();
+				$stmt->close();
+				$stmt = $this->mysqli->prepare("DELETE FROM spms_pcr_si_assignments WHERE success_indicator_id = ?");
+				$stmt->bind_param("i", $mi_id);
+				$stmt->execute();
+				$stmt->close();
+				$stmt = $this->mysqli->prepare("DELETE FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = ?");
+				$stmt->bind_param("i", $mi_id);
+				$stmt->execute();
+				$stmt->close();
 				# delete mfo data
 				// call function destroy_cfd($cfd_id)
 				foreach ($success_indicator['cfd_ids'] as $cfd_id) {
-					$sql = "DELETE FROM spms_pcr_indicator_accomplishments WHERE cfd_id = '$cfd_id'";
-					$this->mysqli->query($sql);
+					$stmt = $this->mysqli->prepare("DELETE FROM spms_pcr_indicator_accomplishments WHERE cfd_id = ?");
+					$stmt->bind_param("i", $cfd_id);
+					$stmt->execute();
+					$stmt->close();
 				}
 			}
 		}

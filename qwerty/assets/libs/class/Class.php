@@ -666,13 +666,21 @@ class IPCR extends Db
   private function accountblePersons($perId)
   {
     $emp = $this->EmpId;
-    $core = $this->mysqli->query("SELECT * FROM spms_pcr_mfos where parent_id='$perId'");
+    $stmt = $this->mysqli->prepare("SELECT * FROM spms_pcr_mfos where parent_id=?");
+    $stmt->bind_param("i", $perId);
+    $stmt->execute();
+    $core = $stmt->get_result();
     while ($coreId = $core->fetch_assoc()) {
-      $indicators = $this->mysqli->query("SELECT * FROM spms_pcr_indicators where cf_ID='$coreId[cf_ID]'");
+      $stmt2 = $this->mysqli->prepare("SELECT * FROM spms_pcr_indicators where cf_ID=?");
+      $stmt2->bind_param("i", $coreId['cf_ID']);
+      $stmt2->execute();
+      $indicators = $stmt2->get_result();
       while ($empId = $indicators->fetch_assoc()) {
         $emp .= "," . $empId['mi_incharge'];
       }
+      $stmt2->close();
     }
+    $stmt->close();
     $emp  = explode(",", $emp);
     $emp = array_unique($emp);
     $view = "<br>";

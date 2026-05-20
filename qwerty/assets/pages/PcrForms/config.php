@@ -289,11 +289,15 @@ if (isset($_POST["getPeriods"])) {
 function getUsername($mysqli, $employees_id)
 {
     $username = "N/A";
-    $res = $mysqli->query("SELECT * FROM spms_accounts WHERE employees_id = '$employees_id'");
+    $stmt = $mysqli->prepare("SELECT * FROM spms_accounts WHERE employees_id = ?");
+    $stmt->bind_param("i", $employees_id);
+    $stmt->execute();
+    $res = $stmt->get_result();
     if ($row = $res->fetch_assoc()) {
         $username = $row["username"];
     } else {
         $username = '';
     };
+    $stmt->close();
     return $username;
 }

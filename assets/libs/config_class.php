@@ -677,13 +677,22 @@ class Employee_data extends Db
 			$subordinates = [];
 
 			if ($this->fileStatus["formType"] == 2 || $this->fileStatus["formType"] == 4) { //if spcr division pcr
-				$res = $this->mysqli->query("SELECT employees_id FROM spms_pcr_status where period_id = '$period_id' and ImmediateSup = '$superiors_id'");
+				$stmt = $this->mysqli->prepare("SELECT employees_id FROM spms_pcr_status where period_id = ? and ImmediateSup = ?");
+				$stmt->bind_param("ii", $period_id, $superiors_id);
+				$stmt->execute();
+				$res = $stmt->get_result();
 			} elseif ($this->fileStatus["formType"] == 3) { //else if dpcr
-				$res = $this->mysqli->query("SELECT employees_id FROM spms_pcr_status where period_id = '$period_id' and DepartmentHead = '$superiors_id'");
+				$stmt = $this->mysqli->prepare("SELECT employees_id FROM spms_pcr_status where period_id = ? and DepartmentHead = ?");
+				$stmt->bind_param("ii", $period_id, $superiors_id);
+				$stmt->execute();
+				$res = $stmt->get_result();
 			}
 
 			while ($row = $res->fetch_assoc()) {
 				$subordinates[] = $row['employees_id'];
+			}
+			if (isset($stmt)) {
+				$stmt->close();
 			}
 
 
