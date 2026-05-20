@@ -2169,9 +2169,9 @@ class Employee_data extends Db
 			$view = "<tr>
 			<td style='padding-left:$padding;width:25%'>" . $ar['cf_count'] . " " . $ar['cf_title'] . "</td>
 			<td style='width:25%'>" . nl2br($si['mi_succIn']) . "</td>
-			<td style='width:15%'>" . $this->RatingMat($si['mi_quality']) . "</td>
-			<td style='width:15%'>" . $this->RatingMat($si['mi_eff']) . "</td>
-			<td style='width:15%'>" . $this->RatingMat($si['mi_time']) . "</td>
+			<td style='width:15%'>" . $this->RatingMat($si['mi_id'], 'quality') . "</td>
+			<td style='width:15%'>" . $this->RatingMat($si['mi_id'], 'efficiency') . "</td>
+			<td style='width:15%'>" . $this->RatingMat($si['mi_id'], 'timeliness') . "</td>
 			</tr>";
 		} else {
 			// $view = "
@@ -2191,16 +2191,14 @@ class Employee_data extends Db
 		return $view;
 	}
 
-	function RatingMat($a)
+	function RatingMat($mi_id, $measure_type)
 	{
 		$view = '';
-		$a = unserialize($a);
-		$count = 5;
-		while ($count >= 1) {
-			if ($a[$count] != "") {
-				$view .= $count . " - " . $a[$count] . "<br>";
-			}
-			$count--;
+		$res = $this->mysqli->query("SELECT score, descriptor FROM pms_si_qet_descriptors
+		                             WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
+		                             ORDER BY score DESC");
+		while ($row = $res->fetch_assoc()) {
+			$view .= $row['score'] . " - " . $row['descriptor'] . "<br>";
 		}
 		return $view;
 	}

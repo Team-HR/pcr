@@ -87,20 +87,20 @@ if (isset($_POST['coreFucntionInput'])) {
 } elseif (isset($_POST['accOpenAdd'])) {
   function s($mysqli, $type)
   {
-    $sql = "SELECT * from spms_pcr_indicators where mi_id='$_POST[accOpenAdd]'";
-    $sql = $mysqli->query($sql);
-    $sql = $sql->fetch_assoc();
-    if ($type == 'Quality') {
-      $q = unserialize($sql['mi_quality']);
-    } elseif ($type == 'Efficiency') {
-      $q = unserialize($sql['mi_eff']);
-    } elseif ($type == 'Timeliness') {
-      $q = unserialize($sql['mi_time']);
+    $mi_id = (int)$_POST['accOpenAdd'];
+    $type_map = ['Quality' => 'quality', 'Efficiency' => 'efficiency', 'Timeliness' => 'timeliness'];
+    $measure_type = $type_map[$type] ?? 'quality';
+    $q = [];
+    $res = $mysqli->query("SELECT score, descriptor FROM pms_si_qet_descriptors
+                           WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
+                           ORDER BY score ASC");
+    while ($row = $res->fetch_assoc()) {
+      $q[(int)$row['score']] = $row['descriptor'];
     }
     $qnum = 1;
     $optQ = "";
-    while ($qnum <= count($q) - 1) {
-      if ($q[$qnum] != "") {
+    while ($qnum <= 5) {
+      if (isset($q[$qnum]) && $q[$qnum] != "") {
         $optQ .= "<option value='$qnum'>" . $q[$qnum] . "</option>";
       }
       $qnum++;
@@ -160,20 +160,20 @@ if (isset($_POST['coreFucntionInput'])) {
     $sqlChild = "SELECT * FROM spms_pcr_indicator_accomplishments where cfd_id='$_POST[EditCoreFuncDataPost]'";
     $sqlChild = $mysqli->query($sqlChild);
     $sqlChild = $sqlChild->fetch_assoc();
-    $sql = "SELECT * from spms_pcr_indicators where mi_id='$sqlChild[p_id]'";
-    $sql = $mysqli->query($sql);
-    $sql = $sql->fetch_assoc();
-    if ($type == 'Quality') {
-      $q = unserialize($sql['mi_quality']);
-    } elseif ($type == 'Efficiency') {
-      $q = unserialize($sql['mi_eff']);
-    } elseif ($type == 'Timeliness') {
-      $q = unserialize($sql['mi_time']);
+    $mi_id = (int)$sqlChild['p_id'];
+    $type_map = ['Quality' => 'quality', 'Efficiency' => 'efficiency', 'Timeliness' => 'timeliness'];
+    $measure_type = $type_map[$type] ?? 'quality';
+    $q = [];
+    $res = $mysqli->query("SELECT score, descriptor FROM pms_si_qet_descriptors
+                           WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
+                           ORDER BY score ASC");
+    while ($row = $res->fetch_assoc()) {
+      $q[(int)$row['score']] = $row['descriptor'];
     }
     $qnum = 1;
     $optQ = "";
-    while ($qnum <= count($q) - 1) {
-      if ($q[$qnum] != "") {
+    while ($qnum <= 5) {
+      if (isset($q[$qnum]) && $q[$qnum] != "") {
         if ($qnum == $ind) {
           $optQ .= "<option value='$qnum' selected>" . $q[$qnum] . "</option>";
         } else {

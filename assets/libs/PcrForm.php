@@ -175,9 +175,9 @@ class PcrForm
 				"mi_id" => $si["mi_id"],
 				"mi_succIn" => $si["mi_succIn"],
 				"si_corrections" => $si["corrections"],
-				"mi_quality" => unserialize($si["mi_quality"]),
-				"mi_eff" => unserialize($si["mi_eff"]),
-				"mi_time" => unserialize($si["mi_time"])
+				"mi_quality" => $this->get_qet_arr($si["mi_id"], "quality"),
+				"mi_eff" => $this->get_qet_arr($si["mi_id"], "efficiency"),
+				"mi_time" => $this->get_qet_arr($si["mi_id"], "timeliness")
 			];
 			$tr = $tr + $si;
 		}
@@ -203,9 +203,9 @@ class PcrForm
 						"mi_id" => $si["mi_id"],
 						"mi_succIn" => $si["mi_succIn"],
 						"si_corrections" => $si["corrections"],
-						"mi_quality" => unserialize($si["mi_quality"]),
-						"mi_eff" => unserialize($si["mi_eff"]),
-						"mi_time" => unserialize($si["mi_time"]),
+						"mi_quality" => $this->get_qet_arr($si["mi_id"], "quality"),
+						"mi_eff" => $this->get_qet_arr($si["mi_id"], "efficiency"),
+						"mi_time" => $this->get_qet_arr($si["mi_id"], "timeliness"),
 					];
 					$data[] = /* $_tr + */ $si;
 				}
@@ -425,6 +425,19 @@ class PcrForm
 		return $main_Arr;
 	}
 
+	private function get_qet_arr($mi_id, $measure_type)
+	{
+		$arr = [];
+		$mysqli = $this->mysqli;
+		$result = $mysqli->query("SELECT score, descriptor FROM pms_si_qet_descriptors
+		                          WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
+		                          ORDER BY score ASC");
+		while ($row = $result->fetch_assoc()) {
+			$arr[(int)$row['score']] = $row['descriptor'];
+		}
+		return $arr;
+	}
+
 	private function si($employee_id, $siId)
 	{
 		$mysqli = $this->mysqli;
@@ -436,13 +449,13 @@ class PcrForm
 		$sqlSi1 = $mysqli->query($sqlSi1);
 		if ($sqlSi1->num_rows > 0) {
 			while ($a = $sqlSi1->fetch_assoc()) {
-				$incharge = explode(',', $a['mi_incharge']);
-				$cIn = 0;
-				while ($cIn < count($incharge)) {
-					if ($incharge[$cIn] == $employee_id) {
-						array_push($i, $a);
-					}
-					$cIn++;
+				$mi_id = $a['mi_id'];
+				$check = "SELECT id FROM pms_ipcr_si_assignments
+				          WHERE success_indicator_id = '$mi_id' AND user_id = '$employee_id'
+				          LIMIT 1";
+				$check_res = $mysqli->query($check);
+				if ($check_res && $check_res->num_rows > 0) {
+					array_push($i, $a);
 				}
 			}
 		} else {
