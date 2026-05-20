@@ -402,7 +402,7 @@ function unserData($ser_arr)
 function qetDisplay($mysqli, $mi_id, $measure_type)
 {
 	$data = "";
-	$res = $mysqli->query("SELECT score, descriptor FROM pms_si_qet_descriptors
+	$res = $mysqli->query("SELECT score, descriptor FROM spms_pcr_si_qet_descriptors
 	                       WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
 	                       ORDER BY score DESC");
 	while ($row = $res->fetch_assoc()) {
@@ -458,7 +458,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
 				$correctionColor = "color:red;";
 			}
 			$empincharge = "";
-			$inchargeRes = $mysqli->query("SELECT user_id FROM pms_ipcr_si_assignments WHERE success_indicator_id = '$siDataRow1[mi_id]'");
+			$inchargeRes = $mysqli->query("SELECT user_id FROM spms_pcr_si_assignments WHERE success_indicator_id = '$siDataRow1[mi_id]'");
 			while ($inchargeRow = $inchargeRes->fetch_assoc()) {
 				$empDataId = $inchargeRow['user_id'];
 				if (!$empDataId || $empDataId == null) {
@@ -727,17 +727,17 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
 			$mysqli->query($sql);
 			$new_mi_id = $mysqli->insert_id;
 			$src_mi_id = $success_idicator['mi_id'];
-			$inRes = $mysqli->query("SELECT user_id FROM pms_ipcr_si_assignments WHERE success_indicator_id = '$src_mi_id'");
+			$inRes = $mysqli->query("SELECT user_id FROM spms_pcr_si_assignments WHERE success_indicator_id = '$src_mi_id'");
 			while ($inRow = $inRes->fetch_assoc()) {
 				$emp_id = $inRow['user_id'];
-				$mysqli->query("INSERT INTO pms_ipcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
+				$mysqli->query("INSERT INTO spms_pcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
 			                VALUES ('$new_mi_id', '$emp_id', '$selected_period_id', 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
 			}
-			$qetRes = $mysqli->query("SELECT measure_type, score, descriptor FROM pms_si_qet_descriptors
+			$qetRes = $mysqli->query("SELECT measure_type, score, descriptor FROM spms_pcr_si_qet_descriptors
 			                          WHERE success_indicator_id = '$src_mi_id'");
 			while ($qetRow = $qetRes->fetch_assoc()) {
 				$esc = $mysqli->real_escape_string($qetRow['descriptor']);
-				$mysqli->query("INSERT IGNORE INTO pms_si_qet_descriptors
+				$mysqli->query("INSERT IGNORE INTO spms_pcr_si_qet_descriptors
 			                (success_indicator_id, measure_type, score, descriptor, created_at, updated_at)
 			                VALUES ('$new_mi_id', '$qetRow[measure_type]', '$qetRow[score]', '$esc', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
 			}

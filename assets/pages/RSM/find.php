@@ -7,7 +7,7 @@
 
     // Find distinct success_indicator_ids whose descriptors match the search term
     $sql = "SELECT DISTINCT success_indicator_id
-            FROM pms_si_qet_descriptors
+            FROM spms_pcr_si_qet_descriptors
             WHERE measure_type = '$measure_type' AND descriptor LIKE '%$search%'
             ORDER BY success_indicator_id DESC
             LIMIT 100";
@@ -21,7 +21,7 @@
         if (in_array($si_id, $seen)) continue;
         $seen[] = $si_id;
 
-        $dres = $mysqli->query("SELECT score, descriptor FROM pms_si_qet_descriptors
+        $dres = $mysqli->query("SELECT score, descriptor FROM spms_pcr_si_qet_descriptors
                                 WHERE success_indicator_id = '$si_id' AND measure_type = '$measure_type'
                                 ORDER BY score ASC");
         $scores = [];

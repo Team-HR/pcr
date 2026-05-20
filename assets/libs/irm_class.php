@@ -116,7 +116,7 @@ class IRM extends Db
     private function get_si($mi_id, $measure_type)
     {
         $view = "";
-        $query = "SELECT score, descriptor FROM pms_si_qet_descriptors
+        $query = "SELECT score, descriptor FROM spms_pcr_si_qet_descriptors
                   WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
                   ORDER BY score DESC";
         $result = $this->mysqli->query($query);
@@ -128,7 +128,7 @@ class IRM extends Db
     private function get_employee_by_si($mi_id)
     {
         $emp   = $this->emp;
-        $query = "SELECT id FROM pms_ipcr_si_assignments
+        $query = "SELECT id FROM spms_pcr_si_assignments
                   WHERE success_indicator_id = '$mi_id' AND user_id = '$emp'
                   LIMIT 1";
         $result = $this->mysqli->query($query);

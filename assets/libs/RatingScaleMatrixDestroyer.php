@@ -40,8 +40,8 @@ class RatingScaleMatrixDestroyer
 				$mi_id = $success_indicator['mi_id'];
 				$sql = "DELETE FROM spms_pcr_indicators WHERE mi_id = '$mi_id'";
 				$this->mysqli->query($sql);
-				$this->mysqli->query("DELETE FROM pms_ipcr_si_assignments WHERE success_indicator_id = '$mi_id'");
-				$this->mysqli->query("DELETE FROM pms_si_qet_descriptors WHERE success_indicator_id = '$mi_id'");
+				$this->mysqli->query("DELETE FROM spms_pcr_si_assignments WHERE success_indicator_id = '$mi_id'");
+				$this->mysqli->query("DELETE FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = '$mi_id'");
 				# delete mfo data
 				// call function destroy_cfd($cfd_id)
 				foreach ($success_indicator['cfd_ids'] as $cfd_id) {

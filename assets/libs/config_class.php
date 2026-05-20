@@ -577,7 +577,7 @@ class Employee_data extends Db
 			$emp_id = $this->emp_ID;
 			foreach ($cachedResults as $a) {
 				$mi_id = $a['mi_id'];
-				$check = $this->mysqli->query("SELECT id FROM pms_ipcr_si_assignments
+				$check = $this->mysqli->query("SELECT id FROM spms_pcr_si_assignments
 				                               WHERE success_indicator_id = '$mi_id' AND user_id = '$emp_id' LIMIT 1");
 				if ($check && $check->num_rows > 0) {
 					array_push($i, $a);
@@ -659,7 +659,7 @@ class Employee_data extends Db
 		$emp = $this->fileStatus["employees_id"];
 		$superiors_id = $emp;
 
-		$indicators = $this->mysqli->query("SELECT DISTINCT pisa.user_id FROM pms_ipcr_si_assignments pisa
+		$indicators = $this->mysqli->query("SELECT DISTINCT pisa.user_id FROM spms_pcr_si_assignments pisa
 		                                    INNER JOIN spms_pcr_indicators spi ON spi.mi_id = pisa.success_indicator_id
 		                                    WHERE spi.cf_ID = '$perId'");
 		while ($empId = $indicators->fetch_assoc()) {
@@ -2195,7 +2195,7 @@ class Employee_data extends Db
 	function RatingMat($mi_id, $measure_type)
 	{
 		$view = '';
-		$res = $this->mysqli->query("SELECT score, descriptor FROM pms_si_qet_descriptors
+		$res = $this->mysqli->query("SELECT score, descriptor FROM spms_pcr_si_qet_descriptors
 		                             WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
 		                             ORDER BY score DESC");
 		while ($row = $res->fetch_assoc()) {

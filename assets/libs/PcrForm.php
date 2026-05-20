@@ -429,7 +429,7 @@ class PcrForm
 	{
 		$arr = [];
 		$mysqli = $this->mysqli;
-		$result = $mysqli->query("SELECT score, descriptor FROM pms_si_qet_descriptors
+		$result = $mysqli->query("SELECT score, descriptor FROM spms_pcr_si_qet_descriptors
 		                          WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
 		                          ORDER BY score ASC");
 		while ($row = $result->fetch_assoc()) {
@@ -450,7 +450,7 @@ class PcrForm
 		if ($sqlSi1->num_rows > 0) {
 			while ($a = $sqlSi1->fetch_assoc()) {
 				$mi_id = $a['mi_id'];
-				$check = "SELECT id FROM pms_ipcr_si_assignments
+				$check = "SELECT id FROM spms_pcr_si_assignments
 				          WHERE success_indicator_id = '$mi_id' AND user_id = '$employee_id'
 				          LIMIT 1";
 				$check_res = $mysqli->query($check);

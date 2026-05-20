@@ -125,7 +125,7 @@ function duplicateSpmsData(
                 // Filter In-Charge
                 if ($filterInCharge !== null) {
                     $stmtFilter = $pdo->prepare(
-                        "SELECT id FROM pms_ipcr_si_assignments
+                        "SELECT id FROM spms_pcr_si_assignments
                          WHERE success_indicator_id = :si_id AND user_id = :uid LIMIT 1"
                     );
                     $stmtFilter->execute([':si_id' => $mi['mi_id'], ':uid' => $filterInCharge]);
@@ -146,14 +146,14 @@ function duplicateSpmsData(
                 ]);
                 $newMiId = $pdo->lastInsertId();
                 $stmtIncharge = $pdo->prepare(
-                    "SELECT user_id FROM pms_ipcr_si_assignments WHERE success_indicator_id = :src"
+                    "SELECT user_id FROM spms_pcr_si_assignments WHERE success_indicator_id = :src"
                 );
                 $stmtIncharge->execute([':src' => $mi['mi_id']]);
                 $inChargeArr = array_column($stmtIncharge->fetchAll(PDO::FETCH_ASSOC), 'user_id');
                 foreach ($inChargeArr as $empId) {
                     if (!is_numeric($empId)) continue;
                     $stmtAssign = $pdo->prepare(
-                        "INSERT INTO pms_ipcr_si_assignments
+                        "INSERT INTO spms_pcr_si_assignments
                          (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
                          VALUES (:si_id, :uid, :pid, 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())"
                     );
@@ -164,12 +164,12 @@ function duplicateSpmsData(
                     ]);
                 }
                 $stmtQet = $pdo->prepare(
-                    "SELECT measure_type, score, descriptor FROM pms_si_qet_descriptors
+                    "SELECT measure_type, score, descriptor FROM spms_pcr_si_qet_descriptors
                      WHERE success_indicator_id = :src"
                 );
                 $stmtQet->execute([':src' => $mi['mi_id']]);
                 $stmtQetIns = $pdo->prepare(
-                    "INSERT IGNORE INTO pms_si_qet_descriptors
+                    "INSERT IGNORE INTO spms_pcr_si_qet_descriptors
                      (success_indicator_id, measure_type, score, descriptor, created_at, updated_at)
                      VALUES (:si_id, :mtype, :score, :desc, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())"
                 );
