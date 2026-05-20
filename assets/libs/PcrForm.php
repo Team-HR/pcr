@@ -174,7 +174,7 @@ class PcrForm
 			$si = [
 				"mi_id" => $si["mi_id"],
 				"mi_succIn" => $si["mi_succIn"],
-				"si_corrections" => $si["corrections"],
+				"si_corrections" => json_decode($si["corrections"], true) ?? [],
 				"mi_quality" => $this->get_qet_arr($si["mi_id"], "quality"),
 				"mi_eff" => $this->get_qet_arr($si["mi_id"], "efficiency"),
 				"mi_time" => $this->get_qet_arr($si["mi_id"], "timeliness")
@@ -202,7 +202,7 @@ class PcrForm
 					$si = [
 						"mi_id" => $si["mi_id"],
 						"mi_succIn" => $si["mi_succIn"],
-						"si_corrections" => $si["corrections"],
+						"si_corrections" => json_decode($si["corrections"], true) ?? [],
 						"mi_quality" => $this->get_qet_arr($si["mi_id"], "quality"),
 						"mi_eff" => $this->get_qet_arr($si["mi_id"], "efficiency"),
 						"mi_time" => $this->get_qet_arr($si["mi_id"], "timeliness"),

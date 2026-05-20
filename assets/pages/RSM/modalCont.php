@@ -53,7 +53,7 @@ if (isset($_POST['ModalSiAddCont'])) {
   $mrt = get_si_rating_arr($mysqli, $dataId, 'timeliness');
   $correction = "";
   if ($sql['corrections']) {
-    $c = unserialize($sql['corrections']);
+    $c = json_decode($sql['corrections'], true) ?? [];
     $count = 0;
     $view = "";
     while ($count < count($c)) {

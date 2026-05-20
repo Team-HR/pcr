@@ -40,10 +40,10 @@ if (isset($_POST['getIRM'])) {
     $getMFO = $getMFO->fetch_assoc();
     $c = [];
     if ($getMFO['corrections']) {
-        $c = unserialize($getMFO['corrections']);
+        $c = json_decode($getMFO['corrections'], true) ?? [];
     }
     $c[] = $a;
-    $c = $mysqli->real_escape_string(serialize($c));
+    $c = $mysqli->real_escape_string(json_encode($c));
     $sql = "UPDATE spms_pcr_indicators SET corrections = '$c' WHERE spms_pcr_indicators.mi_id = $datID";
     if (isset($_POST['mfoCorrection'])) {
         $sql = "UPDATE spms_pcr_mfos SET corrections = '$c' WHERE spms_pcr_mfos.cf_ID = $datID";
@@ -67,7 +67,7 @@ if (isset($_POST['getIRM'])) {
     $sql = $mysqli->query($sql);
     $view = "";
     $c = $sql->fetch_assoc();
-    $c = unserialize($c['corrections']);
+    $c = json_decode($c['corrections'], true) ?? [];
     $count = 0;
     while ($count < count($c)) {
         $state = "<b style='color:red'>Unaccomplished</b>";
@@ -112,13 +112,13 @@ if (isset($_POST['getIRM'])) {
     $sql = $mysqli->query($sql);
     $sql = $sql->fetch_assoc();
     if ($sql['corrections'] != "") {
-        $c = unserialize($sql['corrections']);
+        $c = json_decode($sql['corrections'], true) ?? [];
 
         array_splice($c, $arIndex[1], 1);
         if (!$c) {
             $c = "";
         } elseif (count($c) >= 1) {
-            $c = $mysqli->real_escape_string(serialize($c));
+            $c = $mysqli->real_escape_string(json_encode($c));
         } else {
             $c = "";
         }
@@ -196,7 +196,7 @@ elseif (isset($_GET["get_rating_scale_matrix"])) {
     $sql = "SELECT * FROM spms_pcr_mfos WHERE spms_pcr_mfos.cf_ID = '$cf_ID';";
     $result = $mysqli->query($sql);
     $row = $result->fetch_assoc();
-    $corrections = $row["corrections"] ? unserialize($row["corrections"]) : [];
+    $corrections = $row["corrections"] ? json_decode($row["corrections"], true) : [];
 
     foreach ($corrections as $corr) {
         if ($corr[1] == 0) {
@@ -206,7 +206,7 @@ elseif (isset($_GET["get_rating_scale_matrix"])) {
     }
 
     array_unshift($corrections, [$correction, 0]);
-    $corrections = serialize($corrections);
+    $corrections = json_encode($corrections);
     $corrections = $mysqli->real_escape_string($corrections);
 
 
@@ -222,11 +222,11 @@ elseif (isset($_GET["get_rating_scale_matrix"])) {
     $sql = "SELECT * FROM spms_pcr_mfos WHERE cf_ID = '$cf_ID'";
     $result = $mysqli->query($sql);
     $row = $result->fetch_assoc();
-    $corrections = unserialize($row["corrections"]);
+    $corrections = json_decode($row["corrections"], true) ?? [];
     array_splice($corrections, $index, 1);
 
     # save new corrections to db
-    $corrections = $mysqli->real_escape_string(serialize($corrections));
+    $corrections = $mysqli->real_escape_string(json_encode($corrections));
 
     $sql = "UPDATE spms_pcr_mfos SET corrections = '$corrections' WHERE cf_ID = '$cf_ID'";
     $mysqli->query($sql);
@@ -256,7 +256,7 @@ elseif (isset($_POST["add_si_correction"])) {
     $sql = "SELECT * FROM spms_pcr_indicators WHERE spms_pcr_indicators.mi_id = '$mi_id';";
     $result = $mysqli->query($sql);
     $row = $result->fetch_assoc();
-    $corrections = $row["corrections"] ? unserialize($row["corrections"]) : [];
+    $corrections = $row["corrections"] ? json_decode($row["corrections"], true) : [];
 
     foreach ($corrections as $corr) {
         if ($corr[1] == 0) {
@@ -266,7 +266,7 @@ elseif (isset($_POST["add_si_correction"])) {
     }
 
     array_unshift($corrections, [$correction, 0]);
-    $corrections = serialize($corrections);
+    $corrections = json_encode($corrections);
     $corrections = $mysqli->real_escape_string($corrections);
 
 
@@ -282,11 +282,11 @@ elseif (isset($_POST["add_si_correction"])) {
     $sql = "SELECT * FROM spms_pcr_indicators WHERE mi_id = '$mi_id'";
     $result = $mysqli->query($sql);
     $row = $result->fetch_assoc();
-    $corrections = unserialize($row["corrections"]);
+    $corrections = json_decode($row["corrections"], true) ?? [];
     array_splice($corrections, $index, 1);
 
     # save new corrections to db
-    $corrections = $mysqli->real_escape_string(serialize($corrections));
+    $corrections = $mysqli->real_escape_string(json_encode($corrections));
 
     $sql = "UPDATE spms_pcr_indicators SET corrections = '$corrections' WHERE mi_id = '$mi_id'";
     $mysqli->query($sql);

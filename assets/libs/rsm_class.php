@@ -105,8 +105,8 @@ class RsmClass extends Db
                 "level" => 0,
                 "code" => $row["cf_count"],
                 "title" => $row["cf_title"],
-                "mfo_corrections" => unserialize($row["corrections"]),
-                "correction_status" => $this->get_correction_status(unserialize($row["corrections"]))
+                "mfo_corrections" => json_decode($row["corrections"], true) ?? [],
+                "correction_status" => $this->get_correction_status(json_decode($row["corrections"], true) ?? [])
             ];
 
             # get success indicators
@@ -176,8 +176,8 @@ class RsmClass extends Db
                 "level" => $level,
                 "code" => $row["cf_count"],
                 "title" => $row["cf_title"],
-                "mfo_corrections" => unserialize($row["corrections"]),
-                "correction_status" => $this->get_correction_status(unserialize($row["corrections"]))
+                "mfo_corrections" => json_decode($row["corrections"], true) ?? [],
+                "correction_status" => $this->get_correction_status(json_decode($row["corrections"], true) ?? [])
             ];
 
             # get success indicators
@@ -235,8 +235,8 @@ class RsmClass extends Db
                 "efficiencies" => $this->parse_ratings_by_si($row["mi_id"], "efficiency"),
                 "timelinesses" => $this->parse_ratings_by_si($row["mi_id"], "timeliness"),
                 "incharges" => $this->get_incharges_by_si($row["mi_id"]),
-                "si_corrections" => unserialize($row["corrections"]),
-                "si_correction_status" => $this->get_correction_status(unserialize($row["corrections"]))
+                "si_corrections" => json_decode($row["corrections"], true) ?? [],
+                "si_correction_status" => $this->get_correction_status(json_decode($row["corrections"], true) ?? [])
             ];
             $data[] = $item;
         }
@@ -412,7 +412,7 @@ class RsmClass extends Db
         if ($dat) {
             $color = "color:blue";
             $count = 0;
-            $dat = unserialize($dat);
+            $dat = json_decode($dat, true) ?? [];
             while ($count < count($dat)) {
                 if ($dat[$count][1] == 0) {
                     $color = "color:red";

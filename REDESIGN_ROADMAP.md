@@ -7,7 +7,7 @@ These must be done before touching business logic or UI.
 - [x] **Normalize `mi_quality`, `mi_eff`, `mi_time`** → `pms_si_qet_descriptors` *(done — branch `feature/normalize-si-qet-descriptors`)*
 - [x] **Drop old columns** — `mi_quality`, `mi_eff`, `mi_time` dropped from `spms_pcr_indicators` *(done)*
 - [x] **Drop `mi_incharge` column** — dropped from `spms_pcr_indicators` *(done)*
-- [ ] **Normalize `corrections`** — also uses `serialize()`, same problem
+- [x] **Normalize `corrections`** — swapped serialize/unserialize → json_encode/json_decode; run `tools/migrate_corrections_to_json.php` *(pending execution)*
 - [ ] **Standardize table naming** — the codebase mixes `spms_pcr_*`, `pms_rsm_*`, `pms_ipcr_*`. Settle on one convention
 - [ ] **Add proper foreign key constraints** — the skipped rows during migration revealed orphaned data with no enforcement
 
