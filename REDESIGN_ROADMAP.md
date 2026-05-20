@@ -9,7 +9,7 @@ These must be done before touching business logic or UI.
 - [x] **Drop `mi_incharge` column** — dropped from `spms_pcr_indicators` *(done)*
 - [x] **Normalize `corrections`** — swapped serialize/unserialize → json_encode/json_decode; migration executed: 2368 rows migrated *(done)*
 - [x] **Standardize table naming** — renamed pms_ipcr_si_assignments → spms_pcr_si_assignments and pms_si_qet_descriptors → spms_pcr_si_qet_descriptors; migration executed *(done)*
-- [ ] **Add proper foreign key constraints** — the skipped rows during migration revealed orphaned data with no enforcement
+- [x] **Add proper foreign key constraints** — added 7 FK constraints to PCR tables; cleaned up 40,756 orphaned records; fixed 5 column type mismatches *(done)*
 
 ## Phase 2 — Security & Code Quality
 - [ ] **Replace string-interpolated SQL with prepared statements** — the entire codebase is vulnerable to SQL injection (`"WHERE id='$someVar'"` pattern everywhere)
