@@ -1,5 +1,9 @@
 <?php
 require_once "../assets/libs/RatingScaleMatrixDestroyer.php";
+require_once "../../assets/libs/class/Class.php";
+
+$_ipcr = new IPCR();
+$mysqli = $_ipcr->getMysqli();
 
 if (isset($_POST['rsmGetTableData'])) {
     $period = $_POST['period'];
