@@ -317,15 +317,12 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   }
 } elseif (isset($_POST['SaveMfoSI'])) {
   $dataId = $_POST['SaveMfoSI'];
-  $quality = $mysqli->real_escape_string(serialize($_POST['quality']));
-  $efficiency = $mysqli->real_escape_string(serialize($_POST['efficiency']));
-  $timeliness = $mysqli->real_escape_string(serialize($_POST['timeliness']));
   $successIn = $mysqli->real_escape_string($_POST['successIn']);
   $incharge = $mysqli->real_escape_string($_POST['incharge']);
   $sqlQuery = "INSERT INTO spms_pcr_indicators
-  (mi_id, cf_ID, mi_succIn, mi_quality, mi_eff, mi_time, mi_incharge)
+  (mi_id, cf_ID, mi_succIn, mi_incharge)
   VALUES
-  (NULL, '$dataId', '$successIn', '$quality', '$efficiency', '$timeliness', '$incharge')";
+  (NULL, '$dataId', '$successIn', '$incharge')";
   $sql = $mysqli->query($sqlQuery);
   if (!$sql) {
     die($mysqli->error);
@@ -359,9 +356,6 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   }
 } elseif (isset($_POST['SaveMfoSIEdit'])) {
   $dataId = $_POST['SaveMfoSIEdit'];
-  $quality = $mysqli->real_escape_string(serialize($_POST['quality']));
-  $efficiency = $mysqli->real_escape_string(serialize($_POST['efficiency']));
-  $timeliness = $mysqli->real_escape_string(serialize($_POST['timeliness']));
   $successIn = $mysqli->real_escape_string($_POST['successIn']);
   $incharge = $mysqli->real_escape_string($_POST['incharge']);
   $getC = "SELECT * from spms_pcr_indicators where mi_id=$dataId";
@@ -381,9 +375,6 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   $update_correction = $mysqli->real_escape_string($update_correction);
   $sqlQuery = "UPDATE spms_pcr_indicators SET
   mi_succIn = '$successIn',
-  mi_quality = '$quality',
-  mi_eff = '$efficiency',
-  mi_time = '$timeliness',
   mi_incharge = '$incharge',
   corrections = '$update_correction'
   WHERE spms_pcr_indicators.mi_id = $dataId;
@@ -1144,11 +1135,7 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
 
       $mi_succIn = $mysqli->real_escape_string($success_idicator['mi_succIn']);
 
-      $mi_quality = $mysqli->real_escape_string($success_idicator['mi_quality']);
-      $mi_eff = $mysqli->real_escape_string($success_idicator['mi_eff']);
-      $mi_time = $mysqli->real_escape_string($success_idicator['mi_time']);
-
-      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_quality, mi_eff, mi_time, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
+      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$success_idicator[mi_incharge]','')";
       $mysqli->query($sql);
       $new_mi_id = $mysqli->insert_id;
       $in_charges = array_filter(array_map('trim', explode(',', $success_idicator['mi_incharge'])));
@@ -1187,11 +1174,7 @@ function start_duplicating_copy_to($mysqli, $data, $selected_period_id, $parent_
 
       $mi_succIn = $mysqli->real_escape_string($success_idicator['mi_succIn']);
 
-      $mi_quality = $mysqli->real_escape_string($success_idicator['mi_quality']);
-      $mi_eff = $mysqli->real_escape_string($success_idicator['mi_eff']);
-      $mi_time = $mysqli->real_escape_string($success_idicator['mi_time']);
-
-      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_quality, mi_eff, mi_time, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
+      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$success_idicator[mi_incharge]','')";
       $mysqli->query($sql);
       $new_mi_id = $mysqli->insert_id;
       $in_charges = array_filter(array_map('trim', explode(',', $success_idicator['mi_incharge'])));
@@ -1230,11 +1213,7 @@ function start_duplicating_to_diff_dept($mysqli, $data, $selected_period_id, $pa
 
       $mi_succIn = $mysqli->real_escape_string($success_idicator['mi_succIn']);
 
-      $mi_quality = $mysqli->real_escape_string($success_idicator['mi_quality']);
-      $mi_eff = $mysqli->real_escape_string($success_idicator['mi_eff']);
-      $mi_time = $mysqli->real_escape_string($success_idicator['mi_time']);
-
-      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_quality, mi_eff, mi_time, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
+      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$success_idicator[mi_incharge]','')";
       $mysqli->query($sql);
       $new_mi_id = $mysqli->insert_id;
       $in_charges = array_filter(array_map('trim', explode(',', $success_idicator['mi_incharge'])));
