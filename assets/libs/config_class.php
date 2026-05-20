@@ -574,14 +574,13 @@ class Employee_data extends Db
 		$cachedResults = getCachedQueryResultRedis($this->mysqli, $this->redis, $cacheKey, $sqlSi1);
 
 		if (count($cachedResults) > 0) {
+			$emp_id = $this->emp_ID;
 			foreach ($cachedResults as $a) {
-				$incharge = explode(',', $a['mi_incharge']);
-				$cIn = 0;
-				while ($cIn < count($incharge)) {
-					if ($incharge[$cIn] == $this->emp_ID) {
-						array_push($i, $a);
-					}
-					$cIn++;
+				$mi_id = $a['mi_id'];
+				$check = $this->mysqli->query("SELECT id FROM pms_ipcr_si_assignments
+				                               WHERE success_indicator_id = '$mi_id' AND user_id = '$emp_id' LIMIT 1");
+				if ($check && $check->num_rows > 0) {
+					array_push($i, $a);
 				}
 			}
 		} else {
@@ -660,9 +659,11 @@ class Employee_data extends Db
 		$emp = $this->fileStatus["employees_id"];
 		$superiors_id = $emp;
 
-		$indicators = $this->mysqli->query("SELECT * FROM spms_pcr_indicators where cf_ID='$perId'");
+		$indicators = $this->mysqli->query("SELECT DISTINCT pisa.user_id FROM pms_ipcr_si_assignments pisa
+		                                    INNER JOIN spms_pcr_indicators spi ON spi.mi_id = pisa.success_indicator_id
+		                                    WHERE spi.cf_ID = '$perId'");
 		while ($empId = $indicators->fetch_assoc()) {
-			$emp .= "," . $empId['mi_incharge'];
+			$emp .= "," . $empId['user_id'];
 		}
 
 		$emp  = explode(",", $emp);

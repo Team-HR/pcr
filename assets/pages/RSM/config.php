@@ -320,9 +320,9 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   $successIn = $mysqli->real_escape_string($_POST['successIn']);
   $incharge = $mysqli->real_escape_string($_POST['incharge']);
   $sqlQuery = "INSERT INTO spms_pcr_indicators
-  (mi_id, cf_ID, mi_succIn, mi_incharge)
+  (mi_id, cf_ID, mi_succIn)
   VALUES
-  (NULL, '$dataId', '$successIn', '$incharge')";
+  (NULL, '$dataId', '$successIn')";
   $sql = $mysqli->query($sqlQuery);
   if (!$sql) {
     die($mysqli->error);
@@ -375,7 +375,6 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   $update_correction = $mysqli->real_escape_string($update_correction);
   $sqlQuery = "UPDATE spms_pcr_indicators SET
   mi_succIn = '$successIn',
-  mi_incharge = '$incharge',
   corrections = '$update_correction'
   WHERE spms_pcr_indicators.mi_id = $dataId;
   ";
@@ -1135,16 +1134,17 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
 
       $mi_succIn = $mysqli->real_escape_string($success_idicator['mi_succIn']);
 
-      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$success_idicator[mi_incharge]','')";
+      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, corrections) VALUES ('$insert_id','$mi_succIn','')";
       $mysqli->query($sql);
       $new_mi_id = $mysqli->insert_id;
-      $in_charges = array_filter(array_map('trim', explode(',', $success_idicator['mi_incharge'])));
-      foreach ($in_charges as $emp_id) {
-        if (!is_numeric($emp_id)) continue;
+      $src_mi_id = $success_idicator['mi_id'];
+      $inRes = $mysqli->query("SELECT user_id FROM pms_ipcr_si_assignments WHERE success_indicator_id = '$src_mi_id'");
+      while ($inRow = $inRes->fetch_assoc()) {
+        $emp_id = $inRow['user_id'];
         $mysqli->query("INSERT INTO pms_ipcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
                         VALUES ('$new_mi_id', '$emp_id', '$selected_period_id', 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
       }
-      copy_qet_descriptors($mysqli, $success_idicator['mi_id'], $new_mi_id);
+      copy_qet_descriptors($mysqli, $src_mi_id, $new_mi_id);
     }
 
     $data[$key]["children"] = start_duplicating($mysqli, $core_function["children"], $selected_period_id, $insert_id);
@@ -1174,16 +1174,17 @@ function start_duplicating_copy_to($mysqli, $data, $selected_period_id, $parent_
 
       $mi_succIn = $mysqli->real_escape_string($success_idicator['mi_succIn']);
 
-      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$success_idicator[mi_incharge]','')";
+      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, corrections) VALUES ('$insert_id','$mi_succIn','')";
       $mysqli->query($sql);
       $new_mi_id = $mysqli->insert_id;
-      $in_charges = array_filter(array_map('trim', explode(',', $success_idicator['mi_incharge'])));
-      foreach ($in_charges as $emp_id) {
-        if (!is_numeric($emp_id)) continue;
+      $src_mi_id = $success_idicator['mi_id'];
+      $inRes = $mysqli->query("SELECT user_id FROM pms_ipcr_si_assignments WHERE success_indicator_id = '$src_mi_id'");
+      while ($inRow = $inRes->fetch_assoc()) {
+        $emp_id = $inRow['user_id'];
         $mysqli->query("INSERT INTO pms_ipcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
                         VALUES ('$new_mi_id', '$emp_id', '$selected_period_id', 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
       }
-      copy_qet_descriptors($mysqli, $success_idicator['mi_id'], $new_mi_id);
+      copy_qet_descriptors($mysqli, $src_mi_id, $new_mi_id);
     }
 
     $data[$key]["children"] = start_duplicating_copy_to($mysqli, $core_function["children"], $selected_period_id, $insert_id);
@@ -1213,16 +1214,17 @@ function start_duplicating_to_diff_dept($mysqli, $data, $selected_period_id, $pa
 
       $mi_succIn = $mysqli->real_escape_string($success_idicator['mi_succIn']);
 
-      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$success_idicator[mi_incharge]','')";
+      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, corrections) VALUES ('$insert_id','$mi_succIn','')";
       $mysqli->query($sql);
       $new_mi_id = $mysqli->insert_id;
-      $in_charges = array_filter(array_map('trim', explode(',', $success_idicator['mi_incharge'])));
-      foreach ($in_charges as $emp_id) {
-        if (!is_numeric($emp_id)) continue;
+      $src_mi_id = $success_idicator['mi_id'];
+      $inRes = $mysqli->query("SELECT user_id FROM pms_ipcr_si_assignments WHERE success_indicator_id = '$src_mi_id'");
+      while ($inRow = $inRes->fetch_assoc()) {
+        $emp_id = $inRow['user_id'];
         $mysqli->query("INSERT INTO pms_ipcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
                         VALUES ('$new_mi_id', '$emp_id', '$selected_period_id', 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
       }
-      copy_qet_descriptors($mysqli, $success_idicator['mi_id'], $new_mi_id);
+      copy_qet_descriptors($mysqli, $src_mi_id, $new_mi_id);
     }
 
     $data[$key]["children"] = start_duplicating_to_diff_dept($mysqli, $core_function["children"], $selected_period_id, $insert_id, $department_id);

@@ -168,13 +168,11 @@ class FinalNumericalRating
         $sqlSi1 = $mysqli->query($sqlSi1);
         if ($sqlSi1->num_rows > 0) {
             while ($a = $sqlSi1->fetch_assoc()) {
-                $incharge = explode(',', $a['mi_incharge']);
-                $cIn = 0;
-                while ($cIn < count($incharge)) {
-                    if ($incharge[$cIn] == $employee_id) {
-                        array_push($i, $a);
-                    }
-                    $cIn++;
+                $mi_id = $a['mi_id'];
+                $check = $mysqli->query("SELECT id FROM pms_ipcr_si_assignments
+                                         WHERE success_indicator_id = '$mi_id' AND user_id = '$employee_id' LIMIT 1");
+                if ($check && $check->num_rows > 0) {
+                    array_push($i, $a);
                 }
             }
         } else {
