@@ -83,21 +83,25 @@
   - Renames both tables to `spms_pcr_*` prefix
 
 #### Step 7: Initial orphan cleanup
-- [ ] Run `tools/cleanup_orphaned_data.php`
+- [ ] **SKIPPED** — Run `tools/cleanup_orphaned_data.php`
   - Deletes initial orphaned records (~5,517)
+  - **Needs future review before deployment**
 
 #### Step 8: Fix schema and cleanup
-- [ ] Run `tools/fix_schema_and_cleanup.php`
+- [ ] **SKIPPED** — Run `tools/fix_schema_and_cleanup.php`
   - Fixes column type mismatches (5 columns)
   - Deletes additional orphaned records (~35,226)
+  - **Needs future review before deployment**
 
 #### Step 9: Final cleanup
-- [ ] Run `tools/cleanup_remaining_orphans.php`
+- [ ] **SKIPPED** — Run `tools/cleanup_remaining_orphans.php`
   - Deletes final orphaned records (run until 0 deleted)
+  - **Needs future review before deployment**
 
 #### Step 10: Add FK constraints
-- [ ] Run `tools/add_foreign_key_constraints.php`
+- [ ] **SKIPPED** — Run `tools/add_foreign_key_constraints.php`
   - Adds 7 foreign key constraints
+  - **Needs future review before deployment**
 
 ### Verification
 - [ ] **Run diagnostics** — `tools/analyze_orphaned_data.php`
