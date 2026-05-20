@@ -1,5 +1,13 @@
 <?php
 require_once "assets/pages/performanceRating/config.php";
+require_once "assets/libs/config_class.php";
+if (!isset($user)) {
+	$user = new Employee_data();
+	$user->set_emp($_SESSION['emp_id']);
+}
+if (!isset($step)) {
+	$step = new step();
+}
 if (isset($_POST['page'])) {
 	$page = $_POST['page'];
 	$period_id = $_POST['period_id'];
