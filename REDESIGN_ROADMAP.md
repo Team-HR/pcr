@@ -6,6 +6,7 @@ These must be done before touching business logic or UI.
 - [x] **Normalize `mi_incharge`** → `pms_ipcr_si_assignments` *(done)*
 - [x] **Normalize `mi_quality`, `mi_eff`, `mi_time`** → `pms_si_qet_descriptors` *(done — branch `feature/normalize-si-qet-descriptors`)*
 - [x] **Drop old columns** — dual-write removed from `config.php`; run `tools/drop_si_qet_columns.php` to execute the `ALTER TABLE` *(pending execution)*
+- [ ] **Drop `mi_incharge` column** — normalize reads in `FinalNumericalRatings.php`, `config_class.php`, `finalNumericalRatingsConfig.php`, `RsmDuplicator.php` to join `pms_ipcr_si_assignments`; remove dual-write; then drop column
 - [ ] **Normalize `corrections`** — also uses `serialize()`, same problem
 - [ ] **Standardize table naming** — the codebase mixes `spms_pcr_*`, `pms_rsm_*`, `pms_ipcr_*`. Settle on one convention
 - [ ] **Add proper foreign key constraints** — the skipped rows during migration revealed orphaned data with no enforcement
