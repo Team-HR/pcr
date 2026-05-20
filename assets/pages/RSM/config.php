@@ -276,13 +276,13 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   $update_correction = "";
   if ($getC['corrections']) {
     $update_correction = [];
-    $getC = unserialize($getC['corrections']);
+    $getC = json_decode($getC['corrections'], true) ?? [];
     $count = 0;
     while ($count < count($getC)) {
       $update_correction[] = [$getC[$count][0], 1];
       $count++;
     }
-    $update_correction = serialize($update_correction);
+    $update_correction = json_encode($update_correction);
   }
 
   $editRsmTitle = $mysqli->real_escape_string($editRsmTitle);
@@ -364,13 +364,13 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   $update_correction = "";
   if ($getC['corrections']) {
     $update_correction = [];
-    $getC = unserialize($getC['corrections']);
+    $getC = json_decode($getC['corrections'], true) ?? [];
     $count = 0;
     while ($count < count($getC)) {
       $update_correction[] = [$getC[$count][0], 1];
       $count++;
     }
-    $update_correction = serialize($update_correction);
+    $update_correction = json_encode($update_correction);
   }
   $update_correction = $mysqli->real_escape_string($update_correction);
   $sqlQuery = "UPDATE spms_pcr_indicators SET
@@ -979,7 +979,7 @@ function settingDrop($mysqli, $row, $edit, $add, $delete)
 {
   $correction = "";
   if ($row['corrections']) {
-    $c = unserialize($row['corrections']);
+    $c = json_decode($row['corrections'], true) ?? [];
     $count = 0;
     $crt = "";
     while ($count < count($c)) {

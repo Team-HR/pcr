@@ -635,7 +635,7 @@ function settingDrop($mysqli, $row, $edit, $add, $delete)
 {
 	$correction = "";
 	if ($row['corrections']) {
-		$c = unserialize($row['corrections']);
+		$c = json_decode($row['corrections'], true) ?? [];
 		$count = 0;
 		$crt = "";
 		while ($count < count($c)) {
