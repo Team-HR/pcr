@@ -144,6 +144,39 @@ function duplicateSpmsData(
                     ':inc'    => $mi['mi_incharge'],
                     ':cor'    => $mi['corrections']
                 ]);
+                $newMiId = $pdo->lastInsertId();
+                $inChargeArr = array_filter(array_map('trim', explode(',', $mi['mi_incharge'])));
+                foreach ($inChargeArr as $empId) {
+                    if (!is_numeric($empId)) continue;
+                    $stmtAssign = $pdo->prepare(
+                        "INSERT INTO pms_ipcr_si_assignments
+                         (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
+                         VALUES (:si_id, :uid, :pid, 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())"
+                    );
+                    $stmtAssign->execute([
+                        ':si_id' => $newMiId,
+                        ':uid'   => $empId,
+                        ':pid'   => $targetPeriodId,
+                    ]);
+                }
+                $stmtQet = $pdo->prepare(
+                    "SELECT measure_type, score, descriptor FROM pms_si_qet_descriptors
+                     WHERE success_indicator_id = :src"
+                );
+                $stmtQet->execute([':src' => $mi['mi_id']]);
+                $stmtQetIns = $pdo->prepare(
+                    "INSERT IGNORE INTO pms_si_qet_descriptors
+                     (success_indicator_id, measure_type, score, descriptor, created_at, updated_at)
+                     VALUES (:si_id, :mtype, :score, :desc, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())"
+                );
+                foreach ($stmtQet->fetchAll(PDO::FETCH_ASSOC) as $qrow) {
+                    $stmtQetIns->execute([
+                        ':si_id' => $newMiId,
+                        ':mtype' => $qrow['measure_type'],
+                        ':score' => $qrow['score'],
+                        ':desc'  => $qrow['descriptor'],
+                    ]);
+                }
                 $insertedMiCount++;
             }
 

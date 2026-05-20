@@ -48,9 +48,9 @@ if (isset($_POST['ModalSiAddCont'])) {
   $sql = $mysqli->query($sql);
   $sql = $sql->fetch_assoc();
   $dataId = $sql['mi_id'];
-  $mrq = mr($sql, 'mi_quality');
-  $mre = mr($sql, 'mi_eff');
-  $mrt = mr($sql, 'mi_time');
+  $mrq = get_si_rating_arr($mysqli, $dataId, 'quality');
+  $mre = get_si_rating_arr($mysqli, $dataId, 'efficiency');
+  $mrt = get_si_rating_arr($mysqli, $dataId, 'timeliness');
   $correction = "";
   if ($sql['corrections']) {
     $c = unserialize($sql['corrections']);
@@ -123,7 +123,7 @@ if (isset($_POST['ModalSiAddCont'])) {
     . ratingInputs('Timeliness', $dataId, $mrt[1], $mrt[2], $mrt[3], $mrt[4], $mrt[5]) . "
         <label><b>Incharge</b></label>
         <div class='ui fluid multiple search selection dropdown'>
-          <input type='hidden' name='emp' id='incharge$dataId' value='$sql[mi_incharge]'>
+          <input type='hidden' name='emp' id='incharge$dataId' value='" . get_si_incharge_value($mysqli, $dataId) . "'>
           <i class='dropdown icon'></i>
           <div class='default text'>Select Employees</div>
           <div class='menu'>
@@ -214,6 +214,18 @@ function mr($sql, $a)
   $arr = unserialize($sql[$a]);
   return $arr;
 }
+function get_si_rating_arr($mysqli, $mi_id, $measure_type)
+{
+  $arr = [];
+  $sql = "SELECT score, descriptor FROM pms_si_qet_descriptors
+          WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
+          ORDER BY score ASC";
+  $res = $mysqli->query($sql);
+  while ($row = $res->fetch_assoc()) {
+    $arr[(int)$row['score']] = $row['descriptor'];
+  }
+  return $arr;
+}
 function inputs($count, $type, $dataId, $inputVal)
 {
   $inputVal = htmlentities($inputVal);
@@ -249,4 +261,18 @@ function employFunc($mysqli)
     $view .= "<div class='item' data-value='$row[employees_id]'>$row[firstName] $row[lastName] $row[middleName] $row[extName]</div>";
   }
   return $view;
+}
+function get_si_descriptors($mysqli, $mi_id, $measure_type)
+{
+  return get_si_rating_arr($mysqli, $mi_id, $measure_type);
+}
+function get_si_incharge_value($mysqli, $mi_id)
+{
+  $ids = [];
+  $sql = "SELECT user_id FROM pms_ipcr_si_assignments WHERE success_indicator_id = '$mi_id'";
+  $res = $mysqli->query($sql);
+  while ($row = $res->fetch_assoc()) {
+    $ids[] = $row['user_id'];
+  }
+  return implode(',', $ids);
 }

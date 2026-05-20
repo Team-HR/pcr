@@ -82,16 +82,16 @@ class IRM extends Db
         } else {
             $count = 1;
             while ($row = $query->fetch_assoc()) {
-                if ($this->get_employee($row['mi_incharge'])) {
+                if ($this->get_employee_by_si($row['mi_id'])) {
                     $IndiCount = 1;
                     if ($count == 1) {
                         $view .= "
                         <tr>
                         <td style='padding-left:" . $padding . "px;'>$dat[cf_count] $dat[cf_title]</td>
                         <td>$row[mi_succIn]</td>   
-                        <td>" . $this->get_si($row['mi_quality']) . "</td>   
-                        <td>" . $this->get_si($row['mi_eff']) . "</td>   
-                        <td>" . $this->get_si($row['mi_time']) . "</td>   
+                        <td>" . $this->get_si($row['mi_id'], 'quality') . "</td>   
+                        <td>" . $this->get_si($row['mi_id'], 'efficiency') . "</td>   
+                        <td>" . $this->get_si($row['mi_id'], 'timeliness') . "</td>   
                         <tr>
                         ";
                     } else {
@@ -99,9 +99,9 @@ class IRM extends Db
                         <tr>
                         <td></td>   
                         <td>$row[mi_succIn]</td>   
-                        <td>" . $this->get_si($row['mi_quality']) . "</td>   
-                        <td>" . $this->get_si($row['mi_eff']) . "</td>   
-                        <td>" . $this->get_si($row['mi_time']) . "</td>   
+                        <td>" . $this->get_si($row['mi_id'], 'quality') . "</td>   
+                        <td>" . $this->get_si($row['mi_id'], 'efficiency') . "</td>   
+                        <td>" . $this->get_si($row['mi_id'], 'timeliness') . "</td>   
                         <tr>
                         ";
                     }
@@ -113,29 +113,25 @@ class IRM extends Db
         $a[1] = $IndiCount;
         return $a;
     }
-    private function get_si($dat)
+    private function get_si($mi_id, $measure_type)
     {
-        $ar = unserialize($dat);
-        $count = 5;
         $view = "";
-        while ($count >= 1) {
-            if ($ar[$count]) {
-                $view .= $count . " - " . $ar[$count] . "<br>";
-            }
-            $count--;
+        $query = "SELECT score, descriptor FROM pms_si_qet_descriptors
+                  WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
+                  ORDER BY score DESC";
+        $result = $this->mysqli->query($query);
+        while ($row = $result->fetch_assoc()) {
+            $view .= $row['score'] . " - " . htmlspecialchars($row['descriptor']) . "<br>";
         }
         return $view;
     }
-    private function get_employee($dat)
+    private function get_employee_by_si($mi_id)
     {
-        $dat = explode(",", $dat);
-        $show = false;
-        foreach ($dat as $empDataId) {
-            if ($empDataId == $this->emp) {
-                $show =  true;
-                break;
-            }
-        }
-        return $show;
+        $emp   = $this->emp;
+        $query = "SELECT id FROM pms_ipcr_si_assignments
+                  WHERE success_indicator_id = '$mi_id' AND user_id = '$emp'
+                  LIMIT 1";
+        $result = $this->mysqli->query($query);
+        return $result && $result->num_rows > 0;
     }
 }

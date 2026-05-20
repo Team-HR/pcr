@@ -399,6 +399,17 @@ function unserData($ser_arr)
 	// }
 	return $data;
 }
+function qetDisplay($mysqli, $mi_id, $measure_type)
+{
+	$data = "";
+	$res = $mysqli->query("SELECT score, descriptor FROM pms_si_qet_descriptors
+	                       WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
+	                       ORDER BY score DESC");
+	while ($row = $res->fetch_assoc()) {
+		$data .= "<b>" . $row['score'] . "</b> - " . htmlspecialchars($row['descriptor']) . "<br>";
+	}
+	return $data;
+}
 
 function validaateCorrection($dat)
 {
@@ -556,14 +567,18 @@ function trows($mysqli, $row, $padding, $addDisplay)
 			$Qdata = "";
 			$Edata = "";
 			$Tdata = "";
+			$siMiId = $siDataRow1['mi_id'];
 			$performanceMeasure = "";
-			if (unserData($siDataRow1['mi_quality']) != "") {
+			$qHtml = qetDisplay($mysqli, $siMiId, 'quality');
+			$eHtml = qetDisplay($mysqli, $siMiId, 'efficiency');
+			$tHtml = qetDisplay($mysqli, $siMiId, 'timeliness');
+			if ($qHtml != "") {
 				$performanceMeasure .= "Quality<br>";
 			}
-			if (unserData($siDataRow1['mi_eff']) != "") {
+			if ($eHtml != "") {
 				$performanceMeasure .= "Efficiency<br>";
 			}
-			if (unserData($siDataRow1['mi_time']) != "") {
+			if ($tHtml != "") {
 				$performanceMeasure .= "Timeliness<br>";
 			}
 			if ($count == 1) {
@@ -575,9 +590,9 @@ function trows($mysqli, $row, $padding, $addDisplay)
         </td>
         <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . ""/*json_encode($siDataRow1)*/ . "</td>
         <td>$performanceMeasure</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_quality']) . "</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_eff']) . "</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_time']) . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>$qHtml</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>$eHtml</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>$tHtml</td>
         <td>$empincharge</td>
         </tr>
         ";
@@ -587,9 +602,9 @@ function trows($mysqli, $row, $padding, $addDisplay)
         <td></td>
         <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . "</td>
         <td>$performanceMeasure</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_quality']) . "</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_eff']) . "</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_time']) . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>$qHtml</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>$eHtml</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>$tHtml</td>
         <td>$empincharge</td>
         </tr>
         ";

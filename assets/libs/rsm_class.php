@@ -231,10 +231,10 @@ class RsmClass extends Db
                 "mi_id" => $row["mi_id"],
                 "cf_id" => $row["cf_ID"],
                 "success_indicator" => $row["mi_succIn"],
-                "qualities" => $this->parse_ratings($row["mi_quality"]),
-                "efficiencies" => $this->parse_ratings($row["mi_eff"]),
-                "timelinesses" => $this->parse_ratings($row["mi_time"]),
-                "incharges" => $this->get_incharges($row["mi_incharge"]),
+                "qualities" => $this->parse_ratings_by_si($row["mi_id"], "quality"),
+                "efficiencies" => $this->parse_ratings_by_si($row["mi_id"], "efficiency"),
+                "timelinesses" => $this->parse_ratings_by_si($row["mi_id"], "timeliness"),
+                "incharges" => $this->get_incharges_by_si($row["mi_id"]),
                 "si_corrections" => unserialize($row["corrections"]),
                 "si_correction_status" => $this->get_correction_status(unserialize($row["corrections"]))
             ];
@@ -243,56 +243,38 @@ class RsmClass extends Db
         return $data;
     }
 
-    private function get_incharges($mi_incharge)
+    private function get_incharges_by_si($mi_id)
     {
-        if (!$mi_incharge) return [];
-        $incharges = explode(",", $mi_incharge);
         $data = [];
-        foreach ($incharges as $employee_id) {
-            $query = "SELECT employees_id, lastName, firstName, middleName, extName FROM employees WHERE employees_id = '$employee_id';";
-            $result = $this->mysqli->query($query);
-            $row = $result->fetch_assoc();
-            if ($row) {
-                # code...
+        $query = "SELECT a.user_id, e.employees_id, e.lastName, e.firstName
+                  FROM pms_ipcr_si_assignments a
+                  LEFT JOIN employees e ON a.user_id = e.employees_id
+                  WHERE a.success_indicator_id = '$mi_id'";
+        $result = $this->mysqli->query($query);
+        while ($row = $result->fetch_assoc()) {
+            if ($row['employees_id']) {
                 $data[] = [
-                    "id" => $row["employees_id"],
-                    "name" => $row["lastName"] . ", " . $row["firstName"] //. $row["middleName"] ? " " . $row["middleName"][0] : "" . $row["extName"] ? " " . $row["extName"] : ""
+                    "id"   => $row["employees_id"],
+                    "name" => $row["lastName"] . ", " . $row["firstName"]
                 ];
             }
         }
         return $data;
     }
 
-    private function parse_ratings($rating)
+    private function parse_ratings_by_si($mi_id, $measure_type)
     {
-
-        $empty = true;
-        $scales = unserialize($rating);
-        if (!is_array($scales)) {
-            return [];
-        }
-        foreach ($scales as $scale) {
-            if ($scale) {
-                $empty = false;
-            }
-        }
-        if ($empty) {
-            return  [];
-        }
-
         $data = [];
-        foreach ($scales as $score => $description) {
-            if ($description) {
-                $data[] = [
-                    "score" => $score,
-                    "description" => $description
-                ];
-            }
+        $query = "SELECT score, descriptor FROM pms_si_qet_descriptors
+                  WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
+                  ORDER BY score DESC";
+        $result = $this->mysqli->query($query);
+        while ($row = $result->fetch_assoc()) {
+            $data[] = [
+                "score"       => (int) $row['score'],
+                "description" => $row['descriptor']
+            ];
         }
-
-        usort($data, fn($a, $b) => strcmp($b["score"], $a["score"]));
-
-
         return $data;
     }
 
@@ -377,10 +359,10 @@ class RsmClass extends Db
                                 </button>$dat[cf_count] $dat[cf_title]
                             </td> 
                             <td style='$colors' $dataEl>$row[mi_succIn]</td>   
-                            <td style='$colors' $dataEl>" . $this->get_si($row['mi_quality']) . "</td>   
-                            <td style='$colors' $dataEl>" . $this->get_si($row['mi_eff']) . "</td>   
-                            <td style='$colors' $dataEl>" . $this->get_si($row['mi_time']) . "</td>   
-                            <td >" . $this->get_employee($row['mi_incharge']) . "</td>
+                            <td style='$colors' $dataEl>" . $this->get_si($row['mi_id'], 'quality') . "</td>   
+                            <td style='$colors' $dataEl>" . $this->get_si($row['mi_id'], 'efficiency') . "</td>   
+                            <td style='$colors' $dataEl>" . $this->get_si($row['mi_id'], 'timeliness') . "</td>   
+                            <td >" . $this->get_employee_by_si($row['mi_id']) . "</td>
                             <td $comStyle>
                                 <button class='ui primary button' data-target='correction' data-id='$row[mi_id]'>
                                     Add Correction
@@ -393,10 +375,10 @@ class RsmClass extends Db
                             <tr style='$colors' class='correctionTr'>
                             <td></td>   
                             <td $dataEl>$row[mi_succIn]</td>   
-                            <td $dataEl>" . $this->get_si($row['mi_quality']) . "</td>   
-                            <td $dataEl>" . $this->get_si($row['mi_eff']) . "</td>   
-                            <td $dataEl>" . $this->get_si($row['mi_time']) . "</td>   
-                            <td >" . $this->get_employee($row['mi_incharge']) . "</td>
+                            <td $dataEl>" . $this->get_si($row['mi_id'], 'quality') . "</td>   
+                            <td $dataEl>" . $this->get_si($row['mi_id'], 'efficiency') . "</td>   
+                            <td $dataEl>" . $this->get_si($row['mi_id'], 'timeliness') . "</td>   
+                            <td >" . $this->get_employee_by_si($row['mi_id']) . "</td>
                             <td $comStyle>
                                 <button class='ui primary button' data-target='correction' data-id='$row[mi_id]'>
                                     Add Correction
@@ -411,16 +393,15 @@ class RsmClass extends Db
         }
         return $view;
     }
-    private function get_si($dat)
+    private function get_si($mi_id, $measure_type)
     {
-        $ar = unserialize($dat);
-        $count = 5;
         $view = "";
-        while ($count >= 1) {
-            if ($ar[$count]) {
-                $view .= $count . " - " . $ar[$count] . "<br>";
-            }
-            $count--;
+        $query = "SELECT score, descriptor FROM pms_si_qet_descriptors
+                  WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
+                  ORDER BY score DESC";
+        $result = $this->mysqli->query($query);
+        while ($row = $result->fetch_assoc()) {
+            $view .= $row['score'] . " - " . htmlspecialchars($row['descriptor']) . "<br>";
         }
         return $view;
     }
@@ -444,18 +425,19 @@ class RsmClass extends Db
     }
 
 
-    private function get_employee($dat)
+    private function get_employee_by_si($mi_id)
     {
-        $dat = explode(",", $dat);
-        $view = "";
-        foreach ($dat as $empDataId) {
-            if (!$empDataId || $empDataId == null) {
-                continue;
-            }
-            $sql = "SELECT * from employees where employees_id ='$empDataId'";
-            $res = $this->mysqli->query($sql);
-            $sqlIncharge = $res->fetch_assoc();
-            $view .= "<a class='btn btn-primary button' style='cursor:pointer' data-target='showIRM' data-id='$sqlIncharge[employees_id]||" . $this->period . "||" . $this->department . "'>" . $sqlIncharge['lastName'] . " " . $sqlIncharge['firstName'] . " " . $sqlIncharge['middleName'] . "</a><br>";
+        $period     = $this->period;
+        $department = $this->department;
+        $view   = "";
+        $query  = "SELECT a.user_id, e.employees_id, e.lastName, e.firstName, e.middleName
+                   FROM pms_ipcr_si_assignments a
+                   LEFT JOIN employees e ON a.user_id = e.employees_id
+                   WHERE a.success_indicator_id = '$mi_id'";
+        $result = $this->mysqli->query($query);
+        while ($row = $result->fetch_assoc()) {
+            if (!$row['employees_id']) continue;
+            $view .= "<a class='btn btn-primary button' style='cursor:pointer' data-target='showIRM' data-id='$row[employees_id]||$period||$department'>" . $row['lastName'] . " " . $row['firstName'] . " " . $row['middleName'] . "</a><br>";
         }
         return $view;
     }

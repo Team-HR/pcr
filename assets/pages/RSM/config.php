@@ -330,6 +330,27 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   if (!$sql) {
     die($mysqli->error);
   } else {
+    $new_mi_id   = $mysqli->insert_id;
+    $period_id   = $_SESSION['period'];
+    $assigned_by = $_SESSION['emp_info']['employees_id'];
+    $emp_arr = array_filter(array_map('trim', explode(',', $incharge)));
+    foreach ($emp_arr as $emp_id) {
+      if (!is_numeric($emp_id)) continue;
+      $assign_sql = "INSERT INTO pms_ipcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
+                     VALUES ('$new_mi_id', '$emp_id', '$period_id', '$assigned_by', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+      $mysqli->query($assign_sql);
+    }
+    $qet_map = ['quality' => $_POST['quality'], 'efficiency' => $_POST['efficiency'], 'timeliness' => $_POST['timeliness']];
+    foreach ($qet_map as $measure_type => $scores) {
+      if (!is_array($scores)) continue;
+      foreach ($scores as $score => $descriptor) {
+        $descriptor = trim($descriptor);
+        if ($descriptor === '' || !is_numeric($score)) continue;
+        $esc = $mysqli->real_escape_string($descriptor);
+        $mysqli->query("INSERT IGNORE INTO pms_si_qet_descriptors (success_indicator_id, measure_type, score, descriptor, created_at, updated_at)
+                        VALUES ('$new_mi_id', '$measure_type', '$score', '$esc', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
+      }
+    }
     $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
     if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
       die($mysqli->error);
@@ -371,7 +392,28 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   if (!$sql) {
     die($mysqli->error);
   } else {
-
+    $period_id   = $_SESSION['period'];
+    $assigned_by = $_SESSION['emp_info']['employees_id'];
+    $mysqli->query("DELETE FROM pms_ipcr_si_assignments WHERE success_indicator_id = '$dataId'");
+    $emp_arr = array_filter(array_map('trim', explode(',', $incharge)));
+    foreach ($emp_arr as $emp_id) {
+      if (!is_numeric($emp_id)) continue;
+      $assign_sql = "INSERT INTO pms_ipcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
+                     VALUES ('$dataId', '$emp_id', '$period_id', '$assigned_by', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+      $mysqli->query($assign_sql);
+    }
+    $mysqli->query("DELETE FROM pms_si_qet_descriptors WHERE success_indicator_id = '$dataId'");
+    $qet_map = ['quality' => $_POST['quality'], 'efficiency' => $_POST['efficiency'], 'timeliness' => $_POST['timeliness']];
+    foreach ($qet_map as $measure_type => $scores) {
+      if (!is_array($scores)) continue;
+      foreach ($scores as $score => $descriptor) {
+        $descriptor = trim($descriptor);
+        if ($descriptor === '' || !is_numeric($score)) continue;
+        $esc = $mysqli->real_escape_string($descriptor);
+        $mysqli->query("INSERT INTO pms_si_qet_descriptors (success_indicator_id, measure_type, score, descriptor, created_at, updated_at)
+                        VALUES ('$dataId', '$measure_type', '$score', '$esc', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
+      }
+    }
     $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
     if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
       die($mysqli->error);
@@ -380,13 +422,15 @@ elseif (isset($_POST['copy_to_other_dept'])) {
     print(1);
   }
 } elseif (isset($_POST['removeSi'])) {
-  $sqlQuery = "DELETE FROM spms_pcr_indicators WHERE spms_pcr_indicators.mi_id = '$_POST[removeSi]'";
+  $removeSiId = (int) $_POST['removeSi'];
+  $sqlQuery = "DELETE FROM spms_pcr_indicators WHERE spms_pcr_indicators.mi_id = '$removeSiId'";
 
   $sql = $mysqli->query($sqlQuery);
   if (!$sql) {
     die($mysqli->error);
   } else {
-
+    $mysqli->query("DELETE FROM pms_ipcr_si_assignments WHERE success_indicator_id = '$removeSiId'");
+    $mysqli->query("DELETE FROM pms_si_qet_descriptors WHERE success_indicator_id = '$removeSiId'");
     $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
     if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
       die($mysqli->error);
@@ -682,31 +726,29 @@ function trows($mysqli, $row, $padding, $addDisplay)
         $correctionColor = "color:red;";
       }
       $empincharge = "";
-      $incharge = explode(',', $siDataRow1['mi_incharge']);
-      #iterate employees
-      foreach ($incharge as $empDataId) {
-        if (!$empDataId || $empDataId == null) {
-          continue;
-        }
-        $sqlIncharge = "SELECT * from employees where employees_id='$empDataId'";
-        $sqlIncharge = $mysqli->query($sqlIncharge);
+      $siMiId = $siDataRow1['mi_id'];
+      $assignSql = "SELECT a.user_id, e.employees_id, e.firstName, e.lastName, e.middleName, e.extName
+                    FROM pms_ipcr_si_assignments a
+                    LEFT JOIN employees e ON a.user_id = e.employees_id
+                    WHERE a.success_indicator_id = '$siMiId'";
+      $assignRes = $mysqli->query($assignSql);
+      while ($sqlIncharge = $assignRes->fetch_assoc()) {
+        if (!$sqlIncharge['employees_id']) continue;
+        $firstName  = $sqlIncharge['firstName']  ?? '';
+        $lastName   = $sqlIncharge['lastName']   ?? '';
+        $middleName = $sqlIncharge['middleName'] ?? '';
+        $extName    = $sqlIncharge['extName']    ?? '';
 
-        if ($sqlIncharge = $sqlIncharge->fetch_assoc()) {
-          $firstName  = $sqlIncharge['firstName']  ?? '';
-          $lastName   = $sqlIncharge['lastName']   ?? '';
-          $middleName = $sqlIncharge['middleName'] ?? '';
-          $extName    = $sqlIncharge['extName']    ?? '';
+        $middleInitial = $middleName !== '' ? $middleName[0] . '.' : '';
+        $extFormatted  = $extName !== '' ? ", $extName" : '';
 
-          $middleInitial = $middleName !== '' ? $middleName[0] . '.' : '';
-          $extFormatted  = $extName !== '' ? ", $extName" : '';
+        $parts = array_filter([$lastName, $firstName, $middleInitial]);
+        $fullName = implode(' ', $parts) . $extFormatted;
 
-          $parts = array_filter([$lastName, $firstName, $middleInitial]);
-          $fullName = implode(' ', $parts) . $extFormatted;
+        $empincharge .= "<br><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$fullName</a><br>";
+      }
 
-          $empincharge .= "<br><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$fullName</a><br>";
-        }
-
-        // if (isset($siDataRow1['mi_id'])) {
+      // if (isset($siDataRow1['mi_id'])) {
         //   $mi_id = $siDataRow1['mi_id'];
         //   $sql = "SELECT * FROM spms_pcr_indicator_accomplishments where p_id = '$mi_id' AND empId = '$empDataId';";
         //   $res = $mysqli->query($sql);
@@ -778,19 +820,21 @@ function trows($mysqli, $row, $padding, $addDisplay)
         //     $empincharge .= "NOT ACCOMPLISHED";
         //   }
         // }
-      }
       $Qdata = "";
       $Edata = "";
       $Tdata = "";
       $performanceMeasure = "";
-      if (unserData($siDataRow1['mi_quality']) != "") {
-        $performanceMeasure .= "Quality<br>";
-      }
-      if (unserData($siDataRow1['mi_eff']) != "") {
-        $performanceMeasure .= "Efficiency<br>";
-      }
-      if (unserData($siDataRow1['mi_time']) != "") {
-        $performanceMeasure .= "Timeliness<br>";
+      $qetDisplay = [];
+      foreach (['quality' => 'Quality', 'efficiency' => 'Efficiency', 'timeliness' => 'Timeliness'] as $mtype => $mlabel) {
+        $qetRes = $mysqli->query("SELECT score, descriptor FROM pms_si_qet_descriptors WHERE success_indicator_id = '$siMiId' AND measure_type = '$mtype' ORDER BY score DESC");
+        $qetHtml = "";
+        while ($qetRow = $qetRes->fetch_assoc()) {
+          $qetHtml .= "<b>" . $qetRow['score'] . "</b> - " . htmlspecialchars($qetRow['descriptor']) . "<br>";
+        }
+        $qetDisplay[$mtype] = $qetHtml;
+        if ($qetHtml !== "") {
+          $performanceMeasure .= "$mlabel<br>";
+        }
       }
       if ($count == 1) {
         $view .= "
@@ -801,9 +845,9 @@ function trows($mysqli, $row, $padding, $addDisplay)
         </td>
         <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . ""/*json_encode($siDataRow1)*/ . "</td>
         <td>$performanceMeasure</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_quality']) . "</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_eff']) . "</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_time']) . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . $qetDisplay['quality'] . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . $qetDisplay['efficiency'] . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . $qetDisplay['timeliness'] . "</td>
         <td>$empincharge</td>
         <td class='noprint' style='width:100px;padding:5px'>
         ";
@@ -823,9 +867,9 @@ function trows($mysqli, $row, $padding, $addDisplay)
         <td></td>
         <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . "</td>
         <td>$performanceMeasure</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_quality']) . "</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_eff']) . "</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_time']) . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . $qetDisplay['quality'] . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . $qetDisplay['efficiency'] . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . $qetDisplay['timeliness'] . "</td>
         <td>$empincharge</td>
         <td class='noprint' style='width:100px;padding:5px'>
         ";
@@ -1069,6 +1113,16 @@ function get_children($mysqli, $cf_ID)
   return $data;
 }
 
+function copy_qet_descriptors($mysqli, $source_mi_id, $new_mi_id)
+{
+  $res = $mysqli->query("SELECT measure_type, score, descriptor FROM pms_si_qet_descriptors WHERE success_indicator_id = '$source_mi_id'");
+  while ($row = $res->fetch_assoc()) {
+    $esc = $mysqli->real_escape_string($row['descriptor']);
+    $mysqli->query("INSERT IGNORE INTO pms_si_qet_descriptors (success_indicator_id, measure_type, score, descriptor, created_at, updated_at)
+                    VALUES ('$new_mi_id', '$row[measure_type]', '$row[score]', '$esc', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
+  }
+}
+
 function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $department_id = null)
 {
   // $department_id = 3;
@@ -1096,6 +1150,14 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
 
       $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_quality, mi_eff, mi_time, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
       $mysqli->query($sql);
+      $new_mi_id = $mysqli->insert_id;
+      $in_charges = array_filter(array_map('trim', explode(',', $success_idicator['mi_incharge'])));
+      foreach ($in_charges as $emp_id) {
+        if (!is_numeric($emp_id)) continue;
+        $mysqli->query("INSERT INTO pms_ipcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
+                        VALUES ('$new_mi_id', '$emp_id', '$selected_period_id', 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
+      }
+      copy_qet_descriptors($mysqli, $success_idicator['mi_id'], $new_mi_id);
     }
 
     $data[$key]["children"] = start_duplicating($mysqli, $core_function["children"], $selected_period_id, $insert_id);
@@ -1131,6 +1193,14 @@ function start_duplicating_copy_to($mysqli, $data, $selected_period_id, $parent_
 
       $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_quality, mi_eff, mi_time, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
       $mysqli->query($sql);
+      $new_mi_id = $mysqli->insert_id;
+      $in_charges = array_filter(array_map('trim', explode(',', $success_idicator['mi_incharge'])));
+      foreach ($in_charges as $emp_id) {
+        if (!is_numeric($emp_id)) continue;
+        $mysqli->query("INSERT INTO pms_ipcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
+                        VALUES ('$new_mi_id', '$emp_id', '$selected_period_id', 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
+      }
+      copy_qet_descriptors($mysqli, $success_idicator['mi_id'], $new_mi_id);
     }
 
     $data[$key]["children"] = start_duplicating_copy_to($mysqli, $core_function["children"], $selected_period_id, $insert_id);
@@ -1166,6 +1236,14 @@ function start_duplicating_to_diff_dept($mysqli, $data, $selected_period_id, $pa
 
       $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, mi_quality, mi_eff, mi_time, mi_incharge, corrections) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
       $mysqli->query($sql);
+      $new_mi_id = $mysqli->insert_id;
+      $in_charges = array_filter(array_map('trim', explode(',', $success_idicator['mi_incharge'])));
+      foreach ($in_charges as $emp_id) {
+        if (!is_numeric($emp_id)) continue;
+        $mysqli->query("INSERT INTO pms_ipcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
+                        VALUES ('$new_mi_id', '$emp_id', '$selected_period_id', 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
+      }
+      copy_qet_descriptors($mysqli, $success_idicator['mi_id'], $new_mi_id);
     }
 
     $data[$key]["children"] = start_duplicating_to_diff_dept($mysqli, $core_function["children"], $selected_period_id, $insert_id, $department_id);
