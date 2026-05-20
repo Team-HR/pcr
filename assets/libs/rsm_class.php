@@ -247,7 +247,7 @@ class RsmClass extends Db
     {
         $data = [];
         $query = "SELECT a.user_id, e.employees_id, e.lastName, e.firstName
-                  FROM pms_ipcr_si_assignments a
+                  FROM spms_pcr_si_assignments a
                   LEFT JOIN employees e ON a.user_id = e.employees_id
                   WHERE a.success_indicator_id = '$mi_id'";
         $result = $this->mysqli->query($query);
@@ -265,7 +265,7 @@ class RsmClass extends Db
     private function parse_ratings_by_si($mi_id, $measure_type)
     {
         $data = [];
-        $query = "SELECT score, descriptor FROM pms_si_qet_descriptors
+        $query = "SELECT score, descriptor FROM spms_pcr_si_qet_descriptors
                   WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
                   ORDER BY score DESC";
         $result = $this->mysqli->query($query);
@@ -396,7 +396,7 @@ class RsmClass extends Db
     private function get_si($mi_id, $measure_type)
     {
         $view = "";
-        $query = "SELECT score, descriptor FROM pms_si_qet_descriptors
+        $query = "SELECT score, descriptor FROM spms_pcr_si_qet_descriptors
                   WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
                   ORDER BY score DESC";
         $result = $this->mysqli->query($query);
@@ -431,7 +431,7 @@ class RsmClass extends Db
         $department = $this->department;
         $view   = "";
         $query  = "SELECT a.user_id, e.employees_id, e.lastName, e.firstName, e.middleName
-                   FROM pms_ipcr_si_assignments a
+                   FROM spms_pcr_si_assignments a
                    LEFT JOIN employees e ON a.user_id = e.employees_id
                    WHERE a.success_indicator_id = '$mi_id'";
         $result = $this->mysqli->query($query);

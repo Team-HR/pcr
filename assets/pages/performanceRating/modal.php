@@ -91,7 +91,7 @@ if (isset($_POST['coreFucntionInput'])) {
     $type_map = ['Quality' => 'quality', 'Efficiency' => 'efficiency', 'Timeliness' => 'timeliness'];
     $measure_type = $type_map[$type] ?? 'quality';
     $q = [];
-    $res = $mysqli->query("SELECT score, descriptor FROM pms_si_qet_descriptors
+    $res = $mysqli->query("SELECT score, descriptor FROM spms_pcr_si_qet_descriptors
                            WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
                            ORDER BY score ASC");
     while ($row = $res->fetch_assoc()) {
@@ -164,7 +164,7 @@ if (isset($_POST['coreFucntionInput'])) {
     $type_map = ['Quality' => 'quality', 'Efficiency' => 'efficiency', 'Timeliness' => 'timeliness'];
     $measure_type = $type_map[$type] ?? 'quality';
     $q = [];
-    $res = $mysqli->query("SELECT score, descriptor FROM pms_si_qet_descriptors
+    $res = $mysqli->query("SELECT score, descriptor FROM spms_pcr_si_qet_descriptors
                            WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
                            ORDER BY score ASC");
     while ($row = $res->fetch_assoc()) {

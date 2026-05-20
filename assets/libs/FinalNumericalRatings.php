@@ -169,7 +169,7 @@ class FinalNumericalRating
         if ($sqlSi1->num_rows > 0) {
             while ($a = $sqlSi1->fetch_assoc()) {
                 $mi_id = $a['mi_id'];
-                $check = $mysqli->query("SELECT id FROM pms_ipcr_si_assignments
+                $check = $mysqli->query("SELECT id FROM spms_pcr_si_assignments
                                          WHERE success_indicator_id = '$mi_id' AND user_id = '$employee_id' LIMIT 1");
                 if ($check && $check->num_rows > 0) {
                     array_push($i, $a);

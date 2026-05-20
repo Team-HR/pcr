@@ -217,7 +217,7 @@ function mr($sql, $a)
 function get_si_rating_arr($mysqli, $mi_id, $measure_type)
 {
   $arr = [];
-  $sql = "SELECT score, descriptor FROM pms_si_qet_descriptors
+  $sql = "SELECT score, descriptor FROM spms_pcr_si_qet_descriptors
           WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
           ORDER BY score ASC";
   $res = $mysqli->query($sql);
@@ -269,7 +269,7 @@ function get_si_descriptors($mysqli, $mi_id, $measure_type)
 function get_si_incharge_value($mysqli, $mi_id)
 {
   $ids = [];
-  $sql = "SELECT user_id FROM pms_ipcr_si_assignments WHERE success_indicator_id = '$mi_id'";
+  $sql = "SELECT user_id FROM spms_pcr_si_assignments WHERE success_indicator_id = '$mi_id'";
   $res = $mysqli->query($sql);
   while ($row = $res->fetch_assoc()) {
     $ids[] = $row['user_id'];

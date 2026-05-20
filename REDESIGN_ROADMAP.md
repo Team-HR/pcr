@@ -8,7 +8,7 @@ These must be done before touching business logic or UI.
 - [x] **Drop old columns** — `mi_quality`, `mi_eff`, `mi_time` dropped from `spms_pcr_indicators` *(done)*
 - [x] **Drop `mi_incharge` column** — dropped from `spms_pcr_indicators` *(done)*
 - [x] **Normalize `corrections`** — swapped serialize/unserialize → json_encode/json_decode; migration executed: 2368 rows migrated *(done)*
-- [ ] **Standardize table naming** — the codebase mixes `spms_pcr_*`, `pms_rsm_*`, `pms_ipcr_*`. Settle on one convention
+- [x] **Standardize table naming** — renamed pms_ipcr_si_assignments → spms_pcr_si_assignments and pms_si_qet_descriptors → spms_pcr_si_qet_descriptors; run migration script *(done — pending migration execution)*
 - [ ] **Add proper foreign key constraints** — the skipped rows during migration revealed orphaned data with no enforcement
 
 ## Phase 2 — Security & Code Quality
