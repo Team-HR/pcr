@@ -5,7 +5,40 @@ require_once __DIR__ . '/../../libs/Db.php';
 $db = new Db();
 $mysqli = $db->getMysqli();
 
-if (isset($_POST['get_prev_rsm'])) {
+if (isset($_POST['get_mfo_tree'])) {
+  if (!isset($_SESSION["emp_info"]["department_id"]) || !isset($_SESSION["period"])) {
+    echo json_encode(["error" => "Session data not available"]);
+    exit;
+  }
+  
+  $department_id = $_SESSION["emp_info"]["department_id"];
+  $period_id = $_SESSION["period"];
+  
+  // Get top-level MFOs (parent_id='')
+  $tree_data = [];
+  $sql = "SELECT cf_ID, cf_count, cf_title FROM spms_pcr_mfos 
+          WHERE parent_id='' AND dep_id='$department_id' AND mfo_periodId='$period_id' 
+          ORDER BY cf_count ASC";
+  $result = $mysqli->query($sql);
+  
+  if (!$result) {
+    echo json_encode(["error" => $mysqli->error]);
+    exit;
+  }
+  
+  while ($row = $result->fetch_assoc()) {
+    $node = [
+      "id" => $row["cf_ID"],
+      "code" => $row["cf_count"],
+      "title" => $row["cf_title"],
+      "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id)
+    ];
+    $tree_data[] = $node;
+  }
+  
+  echo json_encode($tree_data);
+  exit;
+} elseif (isset($_POST['get_prev_rsm'])) {
   $data = [];
   $selected_period_id = $_SESSION["period"];
 
@@ -1278,4 +1311,25 @@ function get_success_indicators($mysqli, $cf_ID)
     $data[] = $row;
   }
   return $data;
+}
+
+// Recursive function to get MFO children
+function get_mfo_tree_children($mysqli, $parent_id, $department_id) {
+  $children = [];
+  $sql = "SELECT cf_ID, cf_count, cf_title FROM spms_pcr_mfos 
+          WHERE parent_id='$parent_id' AND dep_id='$department_id' 
+          ORDER BY cf_count ASC";
+  $result = $mysqli->query($sql);
+  
+  while ($row = $result->fetch_assoc()) {
+    $node = [
+      "id" => $row["cf_ID"],
+      "code" => $row["cf_count"],
+      "title" => $row["cf_title"],
+      "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id)
+    ];
+    $children[] = $node;
+  }
+  
+  return $children;
 }
