@@ -32,12 +32,11 @@
 								</select>
 							</div>
 							<div class="ui four wide field">
-								<div class="ui submit button" onclick="rsm_load_tree()">Go</div>
+								<div class="ui button" onclick="window.location.href='?MotherRatingScale&Tree&period=' + encodeURIComponent(document.getElementById('period').value) + '&year=' + encodeURIComponent(document.getElementById('year').value)">Go</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div class="ui segment" id="mfoTreeContainer" style="padding: 20px; margin-left: 5%; margin-right: 5%;"></div>
 	<?php
 				break;
 			}

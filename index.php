@@ -46,9 +46,15 @@ if (isset($_SESSION['emp_id'])) {
 				// the rating scale matrix editing page
 				require_once "assets/pages/RSM/rsm_editor.php";
 			} else if (isset($_GET['Tree'])) {
-				// the rating scale matrix tree view
-				require_once "assets/pages/RSM/rsm_tree.php";
+				if (isset($_GET['period']) && isset($_GET['year'])) {
+					// the rating scale matrix tree view
+					require_once "assets/pages/RSM/rsm_tree_view.php";
+				} else {
+					// the rating scale matrix tree view
+					require_once "assets/pages/RSM/rsm_tree.php";
+				}
 			}
+
 		} else if (isset($_GET['test'])) {
 			// period and year selector
 			require_once "assets/pages/test.php";
