@@ -10,32 +10,53 @@ if (isset($_POST['get_mfo_tree'])) {
     echo json_encode(["error" => "Session data not available"]);
     exit;
   }
-  
+
   $department_id = $_SESSION["emp_info"]["department_id"];
   $period_id = $_SESSION["period"];
-  
+
+  // Get department name
+  $dept_name = "";
+  $dept_alias = "";
+  $dept_sql = "SELECT department,alias FROM department WHERE department_id='$department_id'";
+  $dept_result = $mysqli->query($dept_sql);
+  if ($dept_result && $dept_row = $dept_result->fetch_assoc()) {
+    $dept_name = $dept_row["department"];
+    $dept_alias = $dept_row["alias"];
+  } else {
+    $dept_name = "Department";
+  }
+
   // Get top-level MFOs (parent_id='')
-  $tree_data = [];
+  $mfo_children = [];
   $sql = "SELECT cf_ID, cf_count, cf_title FROM spms_pcr_mfos 
           WHERE parent_id='' AND dep_id='$department_id' AND mfo_periodId='$period_id' 
           ORDER BY cf_count ASC";
   $result = $mysqli->query($sql);
-  
+
   if (!$result) {
     echo json_encode(["error" => $mysqli->error]);
     exit;
   }
-  
+
   while ($row = $result->fetch_assoc()) {
     $node = [
       "id" => $row["cf_ID"],
-      "code" => $row["cf_count"],
-      "title" => $row["cf_title"],
+      "code" => "",
+      "title" => $row["cf_count"] . ". " . $row["cf_title"],
+      "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"]),
       "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id)
     ];
-    $tree_data[] = $node;
+    $mfo_children[] = $node;
   }
-  
+
+  // Create root node with department name
+  $tree_data = [[
+    "id" => "dept_root",
+    "code" => $dept_alias ? $dept_alias : $dept_name,
+    "title" => $dept_name,
+    "children" => $mfo_children
+  ]];
+
   echo json_encode($tree_data);
   exit;
 } elseif (isset($_POST['get_prev_rsm'])) {
@@ -787,77 +808,77 @@ function trows($mysqli, $row, $padding, $addDisplay)
       }
 
       // if (isset($siDataRow1['mi_id'])) {
-        //   $mi_id = $siDataRow1['mi_id'];
-        //   $sql = "SELECT * FROM spms_pcr_indicator_accomplishments where p_id = '$mi_id' AND empId = '$empDataId';";
-        //   $res = $mysqli->query($sql);
-        //   if ($rowdata = $res->fetch_assoc()) {
-        //     // $empincharge .= " -- " . json_encode($rowdata);
-        //     # Rehabilitation Leave Benefits
-        //     if ($rowdata['disable'] != 1) {
-        //       # code...
-        //       $score = 0;
-        //       $q = "";
-        //       $e = "";
-        //       $t = "";
-        //       $count_scales = 0;
-        //       if ($rowdata['Q']) {
-        //         $score += $rowdata['Q'];
-        //         $q = $rowdata['Q'];
-        //         $count_scales++;
-        //       }
-        //       if ($rowdata['E']) {
-        //         $score += $rowdata['E'];
-        //         $e = $rowdata['E'];
-        //         $count_scales++;
-        //       }
-        //       if ($rowdata['T']) {
-        //         $score += $rowdata['T'];
-        //         $t = $rowdata['T'];
-        //         $count_scales++;
-        //       }
+      //   $mi_id = $siDataRow1['mi_id'];
+      //   $sql = "SELECT * FROM spms_pcr_indicator_accomplishments where p_id = '$mi_id' AND empId = '$empDataId';";
+      //   $res = $mysqli->query($sql);
+      //   if ($rowdata = $res->fetch_assoc()) {
+      //     // $empincharge .= " -- " . json_encode($rowdata);
+      //     # Rehabilitation Leave Benefits
+      //     if ($rowdata['disable'] != 1) {
+      //       # code...
+      //       $score = 0;
+      //       $q = "";
+      //       $e = "";
+      //       $t = "";
+      //       $count_scales = 0;
+      //       if ($rowdata['Q']) {
+      //         $score += $rowdata['Q'];
+      //         $q = $rowdata['Q'];
+      //         $count_scales++;
+      //       }
+      //       if ($rowdata['E']) {
+      //         $score += $rowdata['E'];
+      //         $e = $rowdata['E'];
+      //         $count_scales++;
+      //       }
+      //       if ($rowdata['T']) {
+      //         $score += $rowdata['T'];
+      //         $t = $rowdata['T'];
+      //         $count_scales++;
+      //       }
 
-        //       // $empincharge .= "<br/>";
-        //       $score = bcdiv($score, $count_scales, 1);
-        //       $score = explode(".", $score);
-        //       if ($score[1] == 0) {
-        //         $score = $score[0];
-        //       } else {
-        //         $score = implode(".", $score);
-        //       }
-        //       $final_mfo_rating = $score . "/5";
+      //       // $empincharge .= "<br/>";
+      //       $score = bcdiv($score, $count_scales, 1);
+      //       $score = explode(".", $score);
+      //       if ($score[1] == 0) {
+      //         $score = $score[0];
+      //       } else {
+      //         $score = implode(".", $score);
+      //       }
+      //       $final_mfo_rating = $score . "/5";
 
-        //       $empincharge .= "<table class='ui mini compact structured celled table'>
-        //         <thead>
-        //             <tr style='text-align: left;'>
-        //               <th colspan='4'><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a></th>
-        //             </tr>
-        //             <tr style='text-align: center;'>
-        //               <th>Q</th>
-        //               <th>E</th>
-        //               <th>T</th>
-        //               <th>FINAL</th>
-        //             </tr>
-        //         </thead>
-        //         <tbody>
-        //             <tr style='text-align: center;'>
-        //               <td>$q</td>
-        //               <td>$e</td>
-        //               <td>$t</td>
-        //               <td>$final_mfo_rating</td>
-        //             </tr>
-        //         </tbody>
-        //       </table>";
-        //       // $empincharge .= $final_mfo_rating;
-        //     } #else not applicable
-        //     else {
-        //       $empincharge .= "<a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br/>";
-        //       $empincharge .= "N/A (" . $rowdata['remarks'] . ")";
-        //     }
-        //   } else {
-        //     $empincharge .= "<a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br/>";
-        //     $empincharge .= "NOT ACCOMPLISHED";
-        //   }
-        // }
+      //       $empincharge .= "<table class='ui mini compact structured celled table'>
+      //         <thead>
+      //             <tr style='text-align: left;'>
+      //               <th colspan='4'><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a></th>
+      //             </tr>
+      //             <tr style='text-align: center;'>
+      //               <th>Q</th>
+      //               <th>E</th>
+      //               <th>T</th>
+      //               <th>FINAL</th>
+      //             </tr>
+      //         </thead>
+      //         <tbody>
+      //             <tr style='text-align: center;'>
+      //               <td>$q</td>
+      //               <td>$e</td>
+      //               <td>$t</td>
+      //               <td>$final_mfo_rating</td>
+      //             </tr>
+      //         </tbody>
+      //       </table>";
+      //       // $empincharge .= $final_mfo_rating;
+      //     } #else not applicable
+      //     else {
+      //       $empincharge .= "<a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br/>";
+      //       $empincharge .= "N/A (" . $rowdata['remarks'] . ")";
+      //     }
+      //   } else {
+      //     $empincharge .= "<a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br/>";
+      //     $empincharge .= "NOT ACCOMPLISHED";
+      //   }
+      // }
       $Qdata = "";
       $Edata = "";
       $Tdata = "";
@@ -1313,23 +1334,73 @@ function get_success_indicators($mysqli, $cf_ID)
   return $data;
 }
 
+// Helper function to get personnel in-charge for an MFO
+function get_mfo_personnel_incharge($mysqli, $cf_id)
+{
+  $personnel = [];
+  $seen_ids = [];
+
+  // Get all success indicators for this MFO
+  $si_sql = "SELECT mi_id FROM spms_pcr_indicators WHERE cf_ID = '$cf_id'";
+  $si_result = $mysqli->query($si_sql);
+
+  while ($si_row = $si_result->fetch_assoc()) {
+    $mi_id = $si_row['mi_id'];
+
+    // Get personnel assignments for this success indicator
+    $assign_sql = "SELECT a.user_id, e.employees_id, e.firstName, e.lastName, e.middleName, e.extName
+                    FROM spms_pcr_si_assignments a
+                    LEFT JOIN employees e ON a.user_id = e.employees_id
+                    WHERE a.success_indicator_id = '$mi_id'";
+    $assign_result = $mysqli->query($assign_sql);
+
+    while ($emp_row = $assign_result->fetch_assoc()) {
+      if (!$emp_row['employees_id']) continue;
+
+      // Skip duplicates
+      if (in_array($emp_row['employees_id'], $seen_ids)) continue;
+      $seen_ids[] = $emp_row['employees_id'];
+
+      $firstName  = $emp_row['firstName']  ?? '';
+      $lastName   = $emp_row['lastName']   ?? '';
+      $middleName = $emp_row['middleName'] ?? '';
+      $extName    = $emp_row['extName']    ?? '';
+
+      $middleInitial = $middleName !== '' ? $middleName[0] . '.' : '';
+      $extFormatted  = $extName !== '' ? ", $extName" : '';
+
+      $parts = array_filter([$lastName, $firstName, $middleInitial]);
+      $fullName = implode(' ', $parts) . $extFormatted;
+
+      $personnel[] = [
+        "employee_id" => $emp_row['employees_id'],
+        "full_name" => $fullName
+      ];
+    }
+  }
+
+  return $personnel;
+}
+
 // Recursive function to get MFO children
-function get_mfo_tree_children($mysqli, $parent_id, $department_id) {
+function get_mfo_tree_children($mysqli, $parent_id, $department_id)
+{
   $children = [];
   $sql = "SELECT cf_ID, cf_count, cf_title FROM spms_pcr_mfos 
           WHERE parent_id='$parent_id' AND dep_id='$department_id' 
           ORDER BY cf_count ASC";
   $result = $mysqli->query($sql);
-  
+
   while ($row = $result->fetch_assoc()) {
     $node = [
       "id" => $row["cf_ID"],
-      "code" => $row["cf_count"],
-      "title" => $row["cf_title"],
+      "code" => "",
+      "title" => $row["cf_count"] . ". " . $row["cf_title"],
+      "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"]),
       "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id)
     ];
     $children[] = $node;
   }
-  
+
   return $children;
 }
