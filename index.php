@@ -39,7 +39,7 @@ if (isset($_SESSION['emp_id'])) {
 				require_once "assets/pages/iMatrix/iMatrixError.php";
 			}
 		} else if (isset($_GET['MotherRatingScale'])) {
-			if (!isset($_GET['Edit']) && !isset($_GET['Tree'])) {
+			if (!isset($_GET['Edit']) && !isset($_GET['Tree']) && !isset($_GET['OrgTree'])) {
 				// period and year selector
 				require_once "assets/pages/RSM/rsm.php";
 			} else if (isset($_GET['Edit'])) {
@@ -52,6 +52,14 @@ if (isset($_SESSION['emp_id'])) {
 				} else {
 					// the rating scale matrix tree view
 					require_once "assets/pages/RSM/rsm_tree.php";
+				}
+			} else if (isset($_GET['OrgTree'])) {
+				if (isset($_GET['period']) && isset($_GET['year'])) {
+					// the rating scale matrix org tree view
+					require_once "assets/pages/RSM/rsm_orgtree_view.php";
+				} else {
+					// the rating scale matrix org tree view
+					require_once "assets/pages/RSM/rsm_orgtree.php";
 				}
 			}
 

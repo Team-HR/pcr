@@ -59,6 +59,19 @@ if (isset($_POST['get_mfo_tree'])) {
 
   echo json_encode($tree_data);
   exit;
+} elseif (isset($_POST['get_org_tree'])) {
+  if (!isset($_SESSION["emp_info"]["department_id"]) || !isset($_SESSION["period"])) {
+    echo json_encode(["error" => "Session data not available"]);
+    exit;
+  }
+
+  $department_id = $_SESSION["emp_info"]["department_id"];
+  $period_id = $_SESSION["period"];
+
+  $tree_data = get_department_personnel_hierarchy($mysqli, $department_id, $period_id);
+
+  echo json_encode($tree_data);
+  exit;
 } elseif (isset($_POST['get_prev_rsm'])) {
   $data = [];
   $selected_period_id = $_SESSION["period"];
@@ -1403,4 +1416,102 @@ function get_mfo_tree_children($mysqli, $parent_id, $department_id)
   }
 
   return $children;
+}
+
+// Helper function to get employee name
+function get_employee_name($mysqli, $employee_id)
+{
+  $sql = "SELECT * from employees where employees_id='$employee_id'";
+  $res = $mysqli->query($sql);
+
+  $name = "";
+
+  if ($row = $res->fetch_assoc()) {
+    $name = "$row[lastName], $row[firstName]";
+    if ($row['extName']) {
+      $name .= " " . $row['extName'];
+    }
+    $name = mb_strtoupper($name);
+  }
+
+  return $name;
+}
+
+// Helper function to sort personnel alphabetically
+function order_personnel($personnel)
+{
+  usort($personnel, fn($a, $b) => strcmp($a['name'], $b['name']));
+  return $personnel;
+}
+
+// Helper function to build hierarchical tree
+function buildTree(array $elements, $parentId)
+{
+  $branch = array();
+
+  foreach ($elements as $element) {
+    if ($element['parent_id'] == $parentId) {
+      $children = buildTree($elements, $element['id']);
+      if ($children) {
+        $element['children'] = $children;
+      }
+      $branch[] = $element;
+    }
+  }
+
+  return $branch;
+}
+
+// Main function to get department personnel hierarchy
+function get_department_personnel_hierarchy($mysqli, $department_id, $period_id)
+{
+  // Get all personnel in the department for the period
+  $sql = "SELECT * FROM spms_pcr_status WHERE department_id = '$department_id' AND period_id = '$period_id'";
+  $res = $mysqli->query($sql);
+
+  $personnel = [];
+  $department_head_id = null;
+
+  while ($row = $res->fetch_assoc()) {
+    // Store department head ID for reference
+    if ($row['DepartmentHead'] && !$department_head_id) {
+      $department_head_id = $row['DepartmentHead'];
+    }
+
+    $employee_id = $row['employees_id'];
+    $parent_id = $row['ImmediateSup'];
+
+    // If ImmediateSup is null, use DepartmentHead as parent
+    if (!$parent_id) {
+      $parent_id = $row['DepartmentHead'];
+    }
+
+    $datum = [
+      "id" => $employee_id,
+      "parent_id" => $parent_id,
+      "name" => get_employee_name($mysqli, $employee_id)
+    ];
+
+    $personnel[] = $datum;
+  }
+
+  // Sort personnel by name
+  $personnel = order_personnel($personnel);
+
+  // Build hierarchical tree starting from department head
+  if ($department_head_id) {
+    $tree = buildTree($personnel, $department_head_id);
+
+    // Create root node with department head
+    $root_node = [
+      "id" => $department_head_id,
+      "name" => get_employee_name($mysqli, $department_head_id),
+      "children" => $tree
+    ];
+
+    return $root_node;
+  } else {
+    // If no department head found, return flat list
+    return $personnel;
+  }
 }
