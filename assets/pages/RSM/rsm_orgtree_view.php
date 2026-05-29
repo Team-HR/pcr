@@ -3,10 +3,10 @@
 <script src="/assets/pages/RSM/orgchart.js?v=<?php echo filemtime(__DIR__ . '/orgchart.js'); ?>"></script>
 
 <style>
-	#chart-container {
+	#orgchart-container {
 		position: relative;
 		font-family: Arial;
-		height: 1560px;
+		height: 560px;
 		border: 1px solid #aaa;
 		overflow: auto;
 		text-align: center;
@@ -22,11 +22,26 @@
 		white-space: normal !important;
 		/* Overrides 'nowrap' to allow actual text wrapping */
 		overflow: visible !important;
-		/* Ensures long text strings aren't clipped */
-		text-overflow: clip !important;
-		/* Removes the trailing ellipsis (...) */
-		padding: 8px 4px;
-		/* Adds padding around wrapped sentences */
+	}
+
+	/* Custom scrollbar styling */
+	#orgchart-container::-webkit-scrollbar {
+		height: 20px;
+		width: 12px;
+	}
+
+	#orgchart-container::-webkit-scrollbar-track {
+		background: #f1f1f1;
+		border-radius: 6px;
+	}
+
+	#orgchart-container::-webkit-scrollbar-thumb {
+		background: grey;
+		border-radius: 6px;
+	}
+
+	#orgchart-container::-webkit-scrollbar-thumb:hover {
+		background: teal;
 	}
 
 	/* Optional: Set a fixed or minimum width for your MFO nodes */
@@ -34,9 +49,42 @@
 		min-width: 80px !important;
 		/* Adjust this value based on your UI needs */
 	}
+
+	/* Highlighted node styling */
+	.orgchart .node.highlighted {
+		background-color: #ffeb3b !important;
+		border: 2px solid #fbc02d !important;
+		box-shadow: 0 0 10px rgba(251, 192, 45, 0.5) !important;
+	}
+
+	/* Search input styling */
+	#search-container {
+		margin-bottom: 15px;
+		padding: 10px;
+		background-color: #f5f5f5;
+		border-radius: 4px;
+	}
+
+	#search-input {
+		width: 100%;
+		padding: 8px 12px;
+		font-size: 14px;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		box-sizing: border-box;
+	}
+
+	#search-input:focus {
+		outline: none;
+		border-color: #007bff;
+	}
 </style>
 
-<div id="chart-container"></div>
+<div id="search-container">
+	<input type="text" id="search-input" placeholder="Search by name...">
+</div>
+
+<div id="orgchart-container"></div>
 
 <script>
 	$(document).ready(function() {
@@ -45,7 +93,7 @@
 		const period = urlParams.get('period');
 		const year = urlParams.get('year');
 		if (period && year) {
-			rsm_load_tree(period, year)
+			org_load_tree(period, year)
 		}
 	});
 </script>
