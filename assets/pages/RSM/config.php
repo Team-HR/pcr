@@ -756,7 +756,7 @@ function validaateCorrection($dat)
   $color = false;
   if ($dat) {
     $count = 0;
-    $dat = unserialize($dat);
+    $dat = json_decode($dat);
     while ($count < count($dat)) {
       if ($dat[$count][1] == 0) {
         $color = true;
