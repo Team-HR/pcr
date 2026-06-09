@@ -1059,8 +1059,37 @@ class Employee_data extends Db
 					<td>" . nl2br($fdata['remark']) . "</td>
 					<td class='noprint'></td>
 					$col
+
+				$percent = $fdata['percent'];
+				$this->supportPercent += $percent;
+
+				if (in_array($period_id, $exemptedPeriods) && $tr['id_suppFunc'] == '15') {
+					$viewTr .= "
+								<tr>
+									<td style='width:25%'>$tr[mfo] = N/A</td>
+									<td style='text-align: center;' colspan='10'>No PIGs this period. (Weight has been redistributed)</td>
+									<td class='noprint'></td>
+								</tr>
+							";
+				} else {
+					$viewTr .= "
+				<tr>
+					<td style='width:25%'>$tr[mfo] = $percent%</td>
+					<td style='width:25%'>$supportSi</td>
+					<td style='$this->budgetView'></td>
+					<td style='$this->accountableView'></td>
+					<td style='$acc_row'>" . nl2br($fdata['accomplishment']) . "</td>
+					<td style='$q_row'>$fdata[Q]</td>
+					<td style='$e_row'>$fdata[E]</td>
+					<td style='$t_row'>$fdata[T]</td>
+					<td>$av</td>
+					<td>" . nl2br($fdata['remark']) . "</td>
+					<td class='noprint'></td>
+					$col
 				</tr>
 				";
+					$totalAv += $av;
+				}
 					$totalAv += $av;
 				}
 			} else {
@@ -1083,10 +1112,47 @@ class Employee_data extends Db
 							<td style='width:25%;padding:10px' colspan='10'><button class='ui basic primary fluid button' onclick='addSuppAccomplishement($tr[id_suppFunc])'> Add Accomplishments for your Support Function</button></td>
 						</tr>";
 				}
+
+				if (in_array($period_id, $exemptedPeriods) && $tr['id_suppFunc'] == '15') {
+					$viewTr .= "
+						<tr>
+							<td style='width:25%'>$tr[mfo] = N/A</td>
+							<td style='width:25%;text-align:center'>
+								(No Strategic Function during this period.)
+							</td>
+							<td style='width:25%;padding:10px' colspan='10'><button class='ui red fluid button' onclick='addSuppAccomplishementNotApplicable($tr[id_suppFunc])'>Not Applicable</button></td>
+						</tr>";
+				} else {
+					$viewTr .= "
+						<tr>
+							<td style='width:25%'>$tr[mfo] = $tr[percent]%</td>
+							<td style='width:25%'>$supportSi</td>
+							<td style='width:25%;padding:10px' colspan='10'><button class='ui basic primary fluid button' onclick='addSuppAccomplishement($tr[id_suppFunc])'> Add Accomplishments for your Support Function</button></td>
+						</tr>";
+				}
 			}
 		}
 		$this->supportView = $viewTr;
 		$this->support_countEmpty = $emp_count;
+
+
+		/**
+		 * When Strategic Function is not available in the period
+		 * then Oversight monitoring of PIGS (5%) whill excluded from the calculation
+		 * The Proportional Redistribution Method
+		 * Total Av = (Total Ratings / Total Weights) * Original Total Weight (Support Func: 20%)
+		 * 
+		 * */
+
+		if (in_array($period_id, $exemptedPeriods) && $isDpcr) {
+			if ($period_id > 22) {
+				$totalAv = ($totalAv / 0.15) * 0.2; // Original calculation (proportional redistribution for new period from 23 onwards)
+			} else {
+				$totalAv += 0.25; // Adding the excluded 5% to the total (perfect 0.25 ave, for old period from 22, since hard copies already submitted to HR)
+			}
+			$totalAv = bcdiv($totalAv, 1, 2);
+		}
+
 
 
 		/**
