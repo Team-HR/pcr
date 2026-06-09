@@ -1,67 +1,64 @@
 <?php
     $type = $_POST['type'];
-    $dataId = $_POST['dataId'];
+    $dataId = $mysqli->real_escape_string($_POST['dataId']);
     $search = $mysqli->real_escape_string($_POST['search']);
-    if($type=="Quality"){
-        $dbcolname = "mi_quality";
-    }elseif ($type=="Efficiency") {
-        $dbcolname = "mi_eff";
-    }elseif ($type=="Timeliness") {
-        $dbcolname = "mi_time";
-    }
-    $a = [];
-    $sql = "SELECT $dbcolname as result from spms_matrixindicators  where $dbcolname like '%$search%' ORDER BY mi_id DESC limit 100";
-    $sql = $mysqli->query($sql);
-    if($sql->num_rows){
-        while($ftch = $sql->fetch_assoc()){
-            $c = count($a);
-            if($c>=3){
-                break;
-            }elseif(!$c){
-                $a[] = $ftch;
-            }elseif($c<3){
-                $i = 0;
-                $c = count($a);
-                while($i<=$c){
-                    if($i==$c){
-                         break;  
-                    }elseif($a[$i]==$ftch){
-                        break;
-                    }elseif($c<3){
-                        $a[] = $ftch;
-                        $i++;
-                    }
-                }
-            }
+    $type_map = ['Quality' => 'quality', 'Efficiency' => 'efficiency', 'Timeliness' => 'timeliness'];
+    $measure_type = $type_map[$type] ?? 'quality';
+
+    // Find distinct success_indicator_ids whose descriptors match the search term
+    $sql = "SELECT DISTINCT success_indicator_id
+            FROM spms_pcr_si_qet_descriptors
+            WHERE measure_type = '$measure_type' AND descriptor LIKE '%$search%'
+            ORDER BY success_indicator_id DESC
+            LIMIT 100";
+    $res = $mysqli->query($sql);
+
+    $seen = [];
+    $groups = [];
+    while ($row = $res->fetch_assoc()) {
+        if (count($groups) >= 3) break;
+        $si_id = $row['success_indicator_id'];
+        if (in_array($si_id, $seen)) continue;
+        $seen[] = $si_id;
+
+        $dres = $mysqli->query("SELECT score, descriptor FROM spms_pcr_si_qet_descriptors
+                                WHERE success_indicator_id = '$si_id' AND measure_type = '$measure_type'
+                                ORDER BY score ASC");
+        $scores = [];
+        while ($drow = $dres->fetch_assoc()) {
+            $scores[(int)$drow['score']] = $drow['descriptor'];
         }
-        $x = count($a);
-        $y = 0;
-        $rslt ="";
-        while ($y<$x){
-            $dat = unserialize($a[$y]['result']);
+        $groups[] = $scores;
+    }
+
+    if (count($groups) > 0) {
+        $rslt = "";
+        foreach ($groups as $dat) {
             $dats = "";
-            $countDats = 5;
-            while($countDats>=1){
-                if($dat[$countDats]){
-                    $dats.= "<b>".$countDats."</b> - ".$dat[$countDats]."<br>";
+            for ($s = 5; $s >= 1; $s--) {
+                if (isset($dat[$s]) && $dat[$s] != "") {
+                    $dats .= "<b>$s</b> - " . htmlspecialchars($dat[$s]) . "<br>";
                 }
-                $countDats--;
             }
-            $rslt.=  "
+            $v1 = htmlspecialchars($dat[1] ?? '');
+            $v2 = htmlspecialchars($dat[2] ?? '');
+            $v3 = htmlspecialchars($dat[3] ?? '');
+            $v4 = htmlspecialchars($dat[4] ?? '');
+            $v5 = htmlspecialchars($dat[5] ?? '');
+            $rslt .= "
                 <div class='card'>
                     <div class='content'>
                         <div class='description'>
-                            $dats                
+                            $dats
                         </div>
                     </div>
                     <div class='extra content'>
                     <div class='ui two buttons'>
-                        <div class='ui basic green button' onclick='storeToISIinputs(\"||$dat[1]||$dat[2]||$dat[3]||$dat[4]||$dat[5]\",\"".$type.$_POST['dataId']."\")'>Use</div>
+                        <div class='ui basic green button' onclick='storeToISIinputs(\"||$v1||$v2||$v3||$v4||$v5\",\"{$type}{$_POST['dataId']}\")'>Use</div>
                     </div>
                     </div>
-                </div>     
+                </div>
             ";
-            $y++;
         }
         echo "
             <div class='ui cards'>
@@ -69,7 +66,7 @@
             </div>
             <br>
         ";
-    }else{
+    } else {
         echo "<h3 style='text-align:center;color:#22242675;border:1px solid #22242626;padding:10px;border-radius:10px 10px 10px 10px'>No suggestions Found</h3>";
     }
 ?>

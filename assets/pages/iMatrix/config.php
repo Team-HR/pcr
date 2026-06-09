@@ -14,7 +14,7 @@ if (isset($_POST['page'])) {
 } elseif (isset($_POST['period_check'])) {
   $month = $_POST['period_check'];
   $year = $_POST['year'];
-  $sql = "SELECT * from spms_mfo_period where month_mfo='$month' and year_mfo='$year'";
+  $sql = "SELECT * from spms_periods where month_mfo='$month' and year_mfo='$year'";
   $sql = $mysqli->query($sql);
   if (!$sql) {
     die($mysqli->error);
@@ -29,7 +29,7 @@ if (isset($_POST['page'])) {
   $data["period"] = "";
   $data["departments"] = [];
   $mfoperiod_id = $_SESSION["iMatrix_period"];
-  $sql = "SELECT * FROM spms_mfo_period WHERE mfoperiod_id = '$mfoperiod_id'";
+  $sql = "SELECT * FROM spms_periods WHERE mfoperiod_id = '$mfoperiod_id'";
   $res = $mysqli->query($sql);
 
   if ($row = $res->fetch_assoc()) {
@@ -53,18 +53,18 @@ if (isset($_POST['page'])) {
   $employee_id = $_SESSION["emp_id"];
 
 
-  $sql = "SELECT * FROM spms_performancereviewstatus WHERE period_id = '$period_id' AND employees_id = '$employee_id'";
+  $sql = "SELECT * FROM spms_pcr_status WHERE period_id = '$period_id' AND employees_id = '$employee_id'";
   $res = $mysqli->query($sql);
   
 #
   if ($res->num_rows < 1) {
-    $sql = "INSERT INTO `spms_performancereviewstatus` (`performanceReviewStatus_id`, `period_id`, `employees_id`, `ImmediateSup`, `DepartmentHead`, `HeadAgency`, `PMT`, `submitted`, `certify`, `approved`, `panelApproved`, `dateAccomplished`, `formType`, `department_id`, `assembleAll`) VALUES (NULL, $period_id, $employee_id, '', '', '', '', '', '', '', '', '', '', '$department_id', '1')";
+    $sql = "INSERT INTO spms_pcr_status (performanceReviewStatus_id, period_id, employees_id, ImmediateSup, DepartmentHead, HeadAgency, PMT, submitted, certify, approved, panelApproved, dateAccomplished, formType, department_id, assembleAll) VALUES (NULL, $period_id, $employee_id, '', '', '', '', '', '', '', '', '', '', '$department_id', '1')";
 #
     $res = $mysqli->query($sql);
   } elseif ($res->num_rows > 0) {
     $row = $res->fetch_assoc();
     $id = $row["performanceReviewStatus_id"];
-    $sql = "UPDATE spms_performancereviewstatus SET department_id = '$department_id' WHERE performanceReviewStatus_id = '$id'";
+    $sql = "UPDATE spms_pcr_status SET department_id = '$department_id' WHERE performanceReviewStatus_id = '$id'";
     $mysqli->query($sql);
   }
 

@@ -73,7 +73,7 @@ class IPCR extends Db
   {
     $this->EmpId = $EmpId;
     if ($this->period && $this->department && $this->EmpId) {
-      $sql = "SELECT * from `spms_performancereviewstatus` left join `spms_mfo_period` on `spms_performancereviewstatus`.`period_id`=`spms_mfo_period`.`mfoperiod_id` left join `department` on `spms_performancereviewstatus`.`department_id`=`department`.`department_id` where `spms_performancereviewstatus`.`employees_id`='$this->EmpId' and `spms_performancereviewstatus`.`department_id`='$this->department' and `spms_performancereviewstatus`.`period_id`='$this->period'";
+      $sql = "SELECT * from spms_pcr_status left join spms_periods on spms_pcr_status.period_id=spms_periods.mfoperiod_id left join department on spms_pcr_status.department_id=department.department_id where spms_pcr_status.employees_id='$this->EmpId' and spms_pcr_status.department_id='$this->department' and spms_pcr_status.period_id='$this->period'";
       $sql = $this->mysqli->query($sql);
       $this->fileStatus = $sql->fetch_assoc();
     }
@@ -100,7 +100,7 @@ class IPCR extends Db
   {
     $view = "";
     if (strtoupper($this->fileType) == "PERFORMANCE") {
-      $sql = "SELECT * from `spms_corefucndata` where `p_id`='$indicators[mi_id]' and `empId`='$this->EmpId'";
+      $sql = "SELECT * from spms_pcr_indicator_accomplishments where p_id='$indicators[mi_id]' and empId='$this->EmpId'";
       $sql = $this->mysqli->query($sql);
       $dev = 0;
       $av = 0;
@@ -155,10 +155,10 @@ class IPCR extends Db
       $added .= "<td></td>";
     }
 
-    $sql = "SELECT * FROM `spms_corefunctions` where mfo_periodId='$this->period' and dep_id='$this->department' and parent_id=''";
+    $sql = "SELECT * FROM spms_pcr_mfos where mfo_periodId='$this->period' and dep_id='$this->department' and parent_id=''";
     $sql = $this->mysqli->query($sql);
     while ($arr = $sql->fetch_assoc()) {
-      $matrixindicators = "SELECT * from spms_matrixindicators where cf_ID='$arr[cf_ID]'";
+      $matrixindicators = "SELECT * from spms_pcr_indicators where cf_ID='$arr[cf_ID]'";
       $matrixindicators = $this->mysqli->query($matrixindicators);
       $view = "";
       $child = $this->child($arr['cf_ID'], 20);
@@ -209,14 +209,14 @@ class IPCR extends Db
     if ($this->fileStatus['formType'] == 3 || $this->fileStatus['formType'] == 2) {
       $added .= "<td></td>";
     }
-    $sql1 = "SELECT * FROM `spms_corefunctions` where parent_id='$p'";
+    $sql1 = "SELECT * FROM spms_pcr_mfos where parent_id='$p'";
     $sql1 = $this->mysqli->query($sql1);
     $padding = $s . "px";
     $view = "";
     while ($child_arr = $sql1->fetch_assoc()) {
-      $matrixindicators = "SELECT * from spms_matrixindicators where cf_ID='$child_arr[cf_ID]'";
+      $matrixindicators = "SELECT * from spms_pcr_indicators where cf_ID='$child_arr[cf_ID]'";
       $matrixindicators = $this->mysqli->query($matrixindicators);
-      $sql2 = "SELECT * FROM `spms_corefunctions` where parent_id='$child_arr[cf_ID]'";
+      $sql2 = "SELECT * FROM spms_pcr_mfos where parent_id='$child_arr[cf_ID]'";
       $sql2 = $this->mysqli->query($sql2);
       $child = "";
       if ($sql2->num_rows) {
@@ -271,7 +271,7 @@ class IPCR extends Db
     if ($this->fileStatus['formType'] == 3 || $this->fileStatus['formType'] == 2) {
       $added .= "<td></td>";
     }
-    $sql = "SELECT `spms_supportfunctions`.`mfo`,`spms_supportfunctions`.`percent`,`spms_supportfunctions`.`suc_in`,`spms_supportfunctiondata`.`accomplishment`,`spms_supportfunctiondata`.`Q`,`spms_supportfunctiondata`.`E`,`spms_supportfunctiondata`.`T` FROM `spms_supportfunctiondata` left join `spms_supportfunctions` on `spms_supportfunctiondata`.`parent_id`=`spms_supportfunctions`.`id_suppFunc` where `spms_supportfunctiondata`.`emp_id`='$this->EmpId' and `spms_supportfunctiondata`.`period_id`='$this->period'";
+    $sql = "SELECT spms_pcr_support_functions.mfo,spms_pcr_support_functions.percent,spms_pcr_support_functions.suc_in,spms_pcr_support_function_accomplishments.accomplishment,spms_pcr_support_function_accomplishments.Q,spms_pcr_support_function_accomplishments.E,spms_pcr_support_function_accomplishments.T FROM spms_pcr_support_function_accomplishments left join spms_pcr_support_functions on spms_pcr_support_function_accomplishments.parent_id=spms_pcr_support_functions.id_suppFunc where spms_pcr_support_function_accomplishments.emp_id='$this->EmpId' and spms_pcr_support_function_accomplishments.period_id='$this->period'";
     $sql = $this->mysqli->query($sql);
     $view = "";
     while ($support = $sql->fetch_assoc()) {
@@ -316,7 +316,7 @@ class IPCR extends Db
     if ($this->fileStatus['formType'] == 3 || $this->fileStatus['formType'] == 2) {
       $added .= "<td></td>";
     }
-    $sql = "SELECT * from `spms_strategicfuncdata` where `period_id`='$this->period' and `emp_id`='$this->EmpId'";
+    $sql = "SELECT * from spms_pcr_strategic_accomplishments where period_id='$this->period' and emp_id='$this->EmpId'";
     $sql = $this->mysqli->query($sql);
     $view = "";
     $total = 0;
@@ -372,7 +372,7 @@ class IPCR extends Db
     $count = 0;
     $view = '';
     while ($count < count($EmpId)) {
-      $sql = "SELECT * FROM `employees` where employees_id='$EmpId[$count]'";
+      $sql = "SELECT * FROM employees where employees_id='$EmpId[$count]'";
       $sql = $this->mysqli->query($sql);
       $sql = $sql->fetch_assoc();
       $view .= $sql['firstName'] . " " . $sql['middleName'] . " " . $sql['lastName'] . "<br><br>";
@@ -654,7 +654,7 @@ class IPCR extends Db
   private function empDetails($DataId)
   {
 
-    $sql = "SELECT * from `employees` left join `positiontitles` on `employees`.`position_id`=`positiontitles`.`position_id` where `employees_id`='$DataId'";
+    $sql = "SELECT * from employees left join positiontitles on employees.position_id=positiontitles.position_id where employees_id='$DataId'";
     $sql = $this->mysqli->query($sql);
     $employee = $sql->fetch_assoc();
     return $employee;
@@ -666,13 +666,21 @@ class IPCR extends Db
   private function accountblePersons($perId)
   {
     $emp = $this->EmpId;
-    $core = $this->mysqli->query("SELECT * FROM `spms_corefunctions` where parent_id='$perId'");
+    $stmt = $this->mysqli->prepare("SELECT * FROM spms_pcr_mfos where parent_id=?");
+    $stmt->bind_param("i", $perId);
+    $stmt->execute();
+    $core = $stmt->get_result();
     while ($coreId = $core->fetch_assoc()) {
-      $indicators = $this->mysqli->query("SELECT * FROM `spms_matrixindicators` where cf_ID='$coreId[cf_ID]'");
+      $stmt2 = $this->mysqli->prepare("SELECT * FROM spms_pcr_indicators where cf_ID=?");
+      $stmt2->bind_param("i", $coreId['cf_ID']);
+      $stmt2->execute();
+      $indicators = $stmt2->get_result();
       while ($empId = $indicators->fetch_assoc()) {
         $emp .= "," . $empId['mi_incharge'];
       }
+      $stmt2->close();
     }
+    $stmt->close();
     $emp  = explode(",", $emp);
     $emp = array_unique($emp);
     $view = "<br>";
@@ -685,7 +693,7 @@ class IPCR extends Db
 
   private function comments()
   {
-    $sql = "SELECT * from `spms_commentrec` where `emp_id`='$this->EmpId' and `period_id`='$this->period'";
+    $sql = "SELECT * from spms_pcr_recommendations where emp_id='$this->EmpId' and period_id='$this->period'";
     $sql = $this->mysqli->query($sql);
     $sql = $sql->fetch_assoc();
     return $sql['comment'];

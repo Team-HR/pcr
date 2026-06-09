@@ -17,8 +17,8 @@ $date = Date('Y-m-d');
 $mover = move_uploaded_file($from, $to);
 if ($mover) {
   echo "asdasd";
-  $sql = "INSERT INTO `spms_workdocumentation`
-  (`workDocumentationID`, `employee_id`, `mfoDataId`, `workDocumentationTitle`, `workDocumentationFile`, `workDocumentationDescription`, `workDocumentationDateInputed`)
+  $sql = "INSERT INTO spms_pcr_work_documentations
+  (workDocumentationID, employee_id, mfoDataId, workDocumentationTitle, workDocumentationFile, workDocumentationDescription, workDocumentationDateInputed)
   VALUES (NULL, '$employees_id', '$parentId[0]', '$fileTitle', '$fileName', '$fileDescription', '$date')";
   $query = $mysqli->query($sql);
 } else {

@@ -95,7 +95,7 @@ class RsmClass extends Db
         $department = $this->department;
         $period  = $this->period;
         $data = [];
-        $query = "SELECT * from `spms_corefunctions` where `parent_id`='' and `dep_id`='$department' and `mfo_periodId`='$period' order by `cf_count` ASC";
+        $query = "SELECT * from spms_pcr_mfos where parent_id='' and dep_id='$department' and mfo_periodId='$period' order by cf_count ASC";
         $result = $this->mysqli->query($query);
 
         while ($row = $result->fetch_assoc()) {
@@ -105,8 +105,8 @@ class RsmClass extends Db
                 "level" => 0,
                 "code" => $row["cf_count"],
                 "title" => $row["cf_title"],
-                "mfo_corrections" => unserialize($row["corrections"]),
-                "correction_status" => $this->get_correction_status(unserialize($row["corrections"]))
+                "mfo_corrections" => json_decode($row["corrections"], true) ?? [],
+                "correction_status" => $this->get_correction_status(json_decode($row["corrections"], true) ?? [])
             ];
 
             # get success indicators
@@ -142,7 +142,7 @@ class RsmClass extends Db
     {
         $department = $this->department;
         $period  = $this->period;
-        $query = "SELECT * from `spms_corefunctions` where `parent_id`='' and `dep_id`='$department' and `mfo_periodId`='$period' order by `cf_count` ASC";
+        $query = "SELECT * from spms_pcr_mfos where parent_id='' and dep_id='$department' and mfo_periodId='$period' order by cf_count ASC";
         $query = $this->mysqli->query($query);
         $view = "";
         while ($row = $query->fetch_assoc()) {
@@ -165,9 +165,9 @@ class RsmClass extends Db
         # 
         # Better check on children with wrong mfo_periodId OR
         # disregard since child depends on parent_id with proper mfo_periodId?
-        # and `mfo_periodId`='$period'
+        # and mfo_periodId='$period'
         #
-        $sql = "SELECT * from `spms_corefunctions` where `parent_id`='$parent_id' and `dep_id`='$department' order by `cf_count` ASC";
+        $sql = "SELECT * from spms_pcr_mfos where parent_id='$parent_id' and dep_id='$department' order by cf_count ASC";
         $result = $this->mysqli->query($sql);
         while ($row = $result->fetch_assoc()) {
             $item = [
@@ -176,8 +176,8 @@ class RsmClass extends Db
                 "level" => $level,
                 "code" => $row["cf_count"],
                 "title" => $row["cf_title"],
-                "mfo_corrections" => unserialize($row["corrections"]),
-                "correction_status" => $this->get_correction_status(unserialize($row["corrections"]))
+                "mfo_corrections" => json_decode($row["corrections"], true) ?? [],
+                "correction_status" => $this->get_correction_status(json_decode($row["corrections"], true) ?? [])
             ];
 
             # get success indicators
@@ -223,7 +223,7 @@ class RsmClass extends Db
     # get_success_indicators
     private function get_success_indicators($cf_ID)
     {
-        $query = "SELECT * FROM `spms_matrixindicators` WHERE `cf_ID` = '$cf_ID' ORDER BY `mi_id` ASC";
+        $query = "SELECT * FROM spms_pcr_indicators WHERE cf_ID = '$cf_ID' ORDER BY mi_id ASC";
         $result = $this->mysqli->query($query);
         $data = [];
         while ($row = $result->fetch_assoc()) {
@@ -231,75 +231,57 @@ class RsmClass extends Db
                 "mi_id" => $row["mi_id"],
                 "cf_id" => $row["cf_ID"],
                 "success_indicator" => $row["mi_succIn"],
-                "qualities" => $this->parse_ratings($row["mi_quality"]),
-                "efficiencies" => $this->parse_ratings($row["mi_eff"]),
-                "timelinesses" => $this->parse_ratings($row["mi_time"]),
-                "incharges" => $this->get_incharges($row["mi_incharge"]),
-                "si_corrections" => unserialize($row["corrections"]),
-                "si_correction_status" => $this->get_correction_status(unserialize($row["corrections"]))
+                "qualities" => $this->parse_ratings_by_si($row["mi_id"], "quality"),
+                "efficiencies" => $this->parse_ratings_by_si($row["mi_id"], "efficiency"),
+                "timelinesses" => $this->parse_ratings_by_si($row["mi_id"], "timeliness"),
+                "incharges" => $this->get_incharges_by_si($row["mi_id"]),
+                "si_corrections" => json_decode($row["corrections"], true) ?? [],
+                "si_correction_status" => $this->get_correction_status(json_decode($row["corrections"], true) ?? [])
             ];
             $data[] = $item;
         }
         return $data;
     }
 
-    private function get_incharges($mi_incharge)
+    private function get_incharges_by_si($mi_id)
     {
-        if (!$mi_incharge) return [];
-        $incharges = explode(",", $mi_incharge);
         $data = [];
-        foreach ($incharges as $employee_id) {
-            $query = "SELECT `employees_id`, `lastName`, `firstName`, `middleName`, `extName` FROM `employees` WHERE `employees_id` = '$employee_id';";
-            $result = $this->mysqli->query($query);
-            $row = $result->fetch_assoc();
-            if ($row) {
-                # code...
+        $query = "SELECT a.user_id, e.employees_id, e.lastName, e.firstName
+                  FROM spms_pcr_si_assignments a
+                  LEFT JOIN employees e ON a.user_id = e.employees_id
+                  WHERE a.success_indicator_id = '$mi_id'";
+        $result = $this->mysqli->query($query);
+        while ($row = $result->fetch_assoc()) {
+            if ($row['employees_id']) {
                 $data[] = [
-                    "id" => $row["employees_id"],
-                    "name" => $row["lastName"] . ", " . $row["firstName"] //. $row["middleName"] ? " " . $row["middleName"][0] : "" . $row["extName"] ? " " . $row["extName"] : ""
+                    "id"   => $row["employees_id"],
+                    "name" => $row["lastName"] . ", " . $row["firstName"]
                 ];
             }
         }
         return $data;
     }
 
-    private function parse_ratings($rating)
+    private function parse_ratings_by_si($mi_id, $measure_type)
     {
-
-        $empty = true;
-        $scales = unserialize($rating);
-        if (!is_array($scales)) {
-            return [];
-        }
-        foreach ($scales as $scale) {
-            if ($scale) {
-                $empty = false;
-            }
-        }
-        if ($empty) {
-            return  [];
-        }
-
         $data = [];
-        foreach ($scales as $score => $description) {
-            if ($description) {
-                $data[] = [
-                    "score" => $score,
-                    "description" => $description
-                ];
-            }
+        $query = "SELECT score, descriptor FROM spms_pcr_si_qet_descriptors
+                  WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
+                  ORDER BY score DESC";
+        $result = $this->mysqli->query($query);
+        while ($row = $result->fetch_assoc()) {
+            $data[] = [
+                "score"       => (int) $row['score'],
+                "description" => $row['descriptor']
+            ];
         }
-
-        usort($data, fn($a, $b) => strcmp($b["score"], $a["score"]));
-
-
         return $data;
     }
 
     private function mfochild($id, $padding, $btnDis)
     {
         $padding += 20;
-        $query = "SELECT * from `spms_corefunctions` where `parent_id`='$id' order by `cf_count` ASC";
+        $query = "SELECT * from spms_pcr_mfos where parent_id='$id' order by cf_count ASC";
         $query = $this->mysqli->query($query);
         $view = "";
         while ($row = $query->fetch_assoc()) {
@@ -313,7 +295,7 @@ class RsmClass extends Db
     }
     private function indicators($dat, $padding, $btnDis)
     {
-        $query  = "SELECT * from `spms_matrixindicators` where `cf_ID`='$dat[cf_ID]'";
+        $query  = "SELECT * from spms_pcr_indicators where cf_ID='$dat[cf_ID]'";
         $query = $this->mysqli->query($query);
         $view = "";
         $comStyle = "";
@@ -377,10 +359,10 @@ class RsmClass extends Db
                                 </button>$dat[cf_count] $dat[cf_title]
                             </td> 
                             <td style='$colors' $dataEl>$row[mi_succIn]</td>   
-                            <td style='$colors' $dataEl>" . $this->get_si($row['mi_quality']) . "</td>   
-                            <td style='$colors' $dataEl>" . $this->get_si($row['mi_eff']) . "</td>   
-                            <td style='$colors' $dataEl>" . $this->get_si($row['mi_time']) . "</td>   
-                            <td >" . $this->get_employee($row['mi_incharge']) . "</td>
+                            <td style='$colors' $dataEl>" . $this->get_si($row['mi_id'], 'quality') . "</td>   
+                            <td style='$colors' $dataEl>" . $this->get_si($row['mi_id'], 'efficiency') . "</td>   
+                            <td style='$colors' $dataEl>" . $this->get_si($row['mi_id'], 'timeliness') . "</td>   
+                            <td >" . $this->get_employee_by_si($row['mi_id']) . "</td>
                             <td $comStyle>
                                 <button class='ui primary button' data-target='correction' data-id='$row[mi_id]'>
                                     Add Correction
@@ -393,10 +375,10 @@ class RsmClass extends Db
                             <tr style='$colors' class='correctionTr'>
                             <td></td>   
                             <td $dataEl>$row[mi_succIn]</td>   
-                            <td $dataEl>" . $this->get_si($row['mi_quality']) . "</td>   
-                            <td $dataEl>" . $this->get_si($row['mi_eff']) . "</td>   
-                            <td $dataEl>" . $this->get_si($row['mi_time']) . "</td>   
-                            <td >" . $this->get_employee($row['mi_incharge']) . "</td>
+                            <td $dataEl>" . $this->get_si($row['mi_id'], 'quality') . "</td>   
+                            <td $dataEl>" . $this->get_si($row['mi_id'], 'efficiency') . "</td>   
+                            <td $dataEl>" . $this->get_si($row['mi_id'], 'timeliness') . "</td>   
+                            <td >" . $this->get_employee_by_si($row['mi_id']) . "</td>
                             <td $comStyle>
                                 <button class='ui primary button' data-target='correction' data-id='$row[mi_id]'>
                                     Add Correction
@@ -411,16 +393,15 @@ class RsmClass extends Db
         }
         return $view;
     }
-    private function get_si($dat)
+    private function get_si($mi_id, $measure_type)
     {
-        $ar = unserialize($dat);
-        $count = 5;
         $view = "";
-        while ($count >= 1) {
-            if ($ar[$count]) {
-                $view .= $count . " - " . $ar[$count] . "<br>";
-            }
-            $count--;
+        $query = "SELECT score, descriptor FROM spms_pcr_si_qet_descriptors
+                  WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
+                  ORDER BY score DESC";
+        $result = $this->mysqli->query($query);
+        while ($row = $result->fetch_assoc()) {
+            $view .= $row['score'] . " - " . htmlspecialchars($row['descriptor']) . "<br>";
         }
         return $view;
     }
@@ -431,7 +412,7 @@ class RsmClass extends Db
         if ($dat) {
             $color = "color:blue";
             $count = 0;
-            $dat = unserialize($dat);
+            $dat = json_decode($dat, true) ?? [];
             while ($count < count($dat)) {
                 if ($dat[$count][1] == 0) {
                     $color = "color:red";
@@ -444,18 +425,19 @@ class RsmClass extends Db
     }
 
 
-    private function get_employee($dat)
+    private function get_employee_by_si($mi_id)
     {
-        $dat = explode(",", $dat);
-        $view = "";
-        foreach ($dat as $empDataId) {
-            if (!$empDataId || $empDataId == null) {
-                continue;
-            }
-            $sql = "SELECT * from employees where `employees_id` ='$empDataId'";
-            $res = $this->mysqli->query($sql);
-            $sqlIncharge = $res->fetch_assoc();
-            $view .= "<a class='btn btn-primary button' style='cursor:pointer' data-target='showIRM' data-id='$sqlIncharge[employees_id]||" . $this->period . "||" . $this->department . "'>" . $sqlIncharge['lastName'] . " " . $sqlIncharge['firstName'] . " " . $sqlIncharge['middleName'] . "</a><br>";
+        $period     = $this->period;
+        $department = $this->department;
+        $view   = "";
+        $query  = "SELECT a.user_id, e.employees_id, e.lastName, e.firstName, e.middleName
+                   FROM spms_pcr_si_assignments a
+                   LEFT JOIN employees e ON a.user_id = e.employees_id
+                   WHERE a.success_indicator_id = '$mi_id'";
+        $result = $this->mysqli->query($query);
+        while ($row = $result->fetch_assoc()) {
+            if (!$row['employees_id']) continue;
+            $view .= "<a class='btn btn-primary button' style='cursor:pointer' data-target='showIRM' data-id='$row[employees_id]||$period||$department'>" . $row['lastName'] . " " . $row['firstName'] . " " . $row['middleName'] . "</a><br>";
         }
         return $view;
     }

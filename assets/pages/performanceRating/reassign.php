@@ -45,7 +45,7 @@
     $userId = $user->get_emp('employees_id');
     $period = $_SESSION['period_pr'];
     $comment = addslashes($_POST['comment']);
-    $sql = "INSERT INTO `spms_corefucndata` (`cfd_id`, `type`, `p_id`, `empId`, `actualAcc`, `Q`, `E`, `T`, `remarks`,`disable`)
+    $sql = "INSERT INTO spms_pcr_indicator_accomplishments (cfd_id, type, p_id, empId, actualAcc, Q, E, T, remarks,disable)
 		VALUES (NULL, '', '$dataId', '$userId', '', '0', '0', '0', '$comment','1');";
     $sql = $mysqli->query($sql);
     if(!$sql){

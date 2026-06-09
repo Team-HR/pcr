@@ -18,7 +18,7 @@ if (isset($_POST['auth'])) {
 	}
 
 
-	$sql = "SELECT * from `spms_accounts` WHERE `username` = '$username'";
+	$sql = "SELECT * from spms_accounts WHERE username = '$username'";
 	$res = $mysqli->query($sql);
 
 	if ($user = $res->fetch_assoc()) {

@@ -145,7 +145,7 @@
 						</template>
 						{{item.mi_succIn}}
 					</td>
-					<!-- if has spms_corefucndata -->
+					<!-- if has spms_pcr_indicator_accomplishments -->
 					<template v-if="item.cfd_id && !item.not_applicable">
 						<td :style="item.corrected_actualAcc ? 'color:red':''">{{item.actualAcc}}</td>
 						<td :style="item.corrected_Q ? 'color:red':''">{{item.q}}</td>
@@ -201,7 +201,7 @@
 						</template>
 						{{item.mi_succIn}}
 					</td>
-					<!-- if has spms_corefucndata -->
+					<!-- if has spms_pcr_indicator_accomplishments -->
 					<template v-if="item.cfd_id && !item.not_applicable">
 						<td>{{item.actualAcc}}</td>
 						<td>{{item.q}}</td>

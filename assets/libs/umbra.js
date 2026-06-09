@@ -128,6 +128,49 @@ function rsm_period(i) {
     }
   );
 }
+
+function renderMfoTree(nodes, level = 0) {
+  if (!nodes || nodes.length === 0) return "";
+
+  var html = "<ul style='list-style-type: none; padding-left: " + (level * 20) + "px;'>";
+
+  for (var i = 0; i < nodes.length; i++) {
+    var node = nodes[i];
+    var hasChildren = node.children && node.children.length > 0;
+    var icon = hasChildren ? "chevron right" : "circle";
+    var clickHandler = hasChildren ? "onclick='toggleTreeNode(this)'" : "";
+
+    html += "<li style='margin: 5px 0;'>";
+    html += "<i class='" + icon + " icon' style='cursor: pointer; margin-right: 8px;' " + clickHandler + "></i>";
+    html += "<span style='font-weight: bold;'>" + node.code + "</span> - " + node.title;
+
+    if (hasChildren) {
+      html += "<div class='tree-children' style='display: none;'>";
+      html += renderMfoTree(node.children, level + 1);
+      html += "</div>";
+    }
+
+    html += "</li>";
+  }
+
+  html += "</ul>";
+  return html;
+}
+
+function toggleTreeNode(icon) {
+  var childrenDiv = icon.nextElementSibling.nextElementSibling;
+  if (childrenDiv && childrenDiv.classList.contains('tree-children')) {
+    if (childrenDiv.style.display === 'none') {
+      childrenDiv.style.display = 'block';
+      icon.classList.remove('chevron', 'right');
+      icon.classList.add('chevron', 'down');
+    } else {
+      childrenDiv.style.display = 'none';
+      icon.classList.remove('chevron', 'down');
+      icon.classList.add('chevron', 'right');
+    }
+  }
+}
 function addMFoRsm(i) {
   var rsmCount = $("#rsmcount" + i).val();
   var pid = $("#mfo_pid" + i).val();

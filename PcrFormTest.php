@@ -33,7 +33,7 @@ class PcrForm
     {
         $mysqli = $this->mysqli;
         $file_status = [];
-        $sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `performanceReviewStatus_id` = '$id'";
+        $sql = "SELECT * FROM spms_pcr_status WHERE performanceReviewStatus_id = '$id'";
         $res = $mysqli->query($sql);
         if ($row = $res->fetch_assoc()) {
             $file_status = $row;
@@ -72,16 +72,16 @@ class PcrForm
     {
         $mysqli = $this->mysqli;
         # for more compact and faster query
-        # ... and `dep_id` = '$department_id'
+        # ... and dep_id = '$department_id'
 
-        # department_id from spms_performancereviewstatus
+        # department_id from spms_pcr_status
         $department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
         $period_id = $fileStatus["period_id"];
         $employee_id = $fileStatus["employees_id"];
 
         # not recommended department_id from employees table
         $main_Arr = [];
-        $sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$period_id' and `dep_id` = '$department_id' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+        $sql = "SELECT * from spms_pcr_mfos where parent_id='' and mfo_periodId='$period_id' and dep_id = '$department_id' ORDER BY spms_pcr_mfos.cf_count ASC";
         $sql = $mysqli->query($sql);
         $parent = [[], [], []];
         while ($core = $sql->fetch_assoc()) {
@@ -134,7 +134,7 @@ class PcrForm
         if (!$siId || $siId == null) {
             return $i;
         }
-        $sqlSi1 = "SELECT * from spms_matrixindicators where cf_ID='$siId'";
+        $sqlSi1 = "SELECT * from spms_pcr_indicators where cf_ID='$siId'";
         $sqlSi1 = $mysqli->query($sqlSi1);
         if ($sqlSi1->num_rows > 0) {
             while ($a = $sqlSi1->fetch_assoc()) {
@@ -157,7 +157,7 @@ class PcrForm
     private function q($siId)
     {
         $mysqli = $this->mysqli;
-        $sql = "SELECT * from spms_corefunctions where parent_id='$siId' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+        $sql = "SELECT * from spms_pcr_mfos where parent_id='$siId' ORDER BY spms_pcr_mfos.cf_count ASC";
         $sql = $mysqli->query($sql);
         return $sql;
     }
@@ -217,7 +217,7 @@ class PcrForm
         $cTotal = 0;
         $a = 0;
         if ($si != "") {
-            $check = "SELECT * from spms_corefucndata where p_id='$si[mi_id]' and empId='$employee_id'";
+            $check = "SELECT * from spms_pcr_indicator_accomplishments where p_id='$si[mi_id]' and empId='$employee_id'";
             $check = $mysqli->query($check);
             if ($check->num_rows > 0) {
                 $SiData = $check->fetch_assoc();
@@ -255,7 +255,7 @@ class PcrForm
         $period_id = $fileStatus['period_id'];
         $employee_id = $fileStatus['employees_id'];
 
-        $sql = "SELECT * from spms_strategicfuncdata where period_id = '$period_id' and emp_id = '$employee_id'";
+        $sql = "SELECT * from spms_pcr_strategic_accomplishments where period_id = '$period_id' and emp_id = '$employee_id'";
         $sql = $mysqli->query($sql);
         $totalCount = 0;
         $totalAv = 0;
@@ -296,11 +296,11 @@ class PcrForm
         $period_id = $fileStatus['period_id'];
         $totalAv = 0;
         if ($formType == '1' || $formType == '5') {
-            $sql = "SELECT * FROM `spms_supportfunctions` where `type`=1";
+            $sql = "SELECT * FROM spms_pcr_support_functions where type=1";
         } elseif ($formType == '3') {
-            $sql = "SELECT * FROM `spms_supportfunctions` where `type`=3";
+            $sql = "SELECT * FROM spms_pcr_support_functions where type=3";
         } elseif ($formType == '2' || $formType == '4') {
-            $sql = "SELECT * FROM `spms_supportfunctions` where `type`=2";
+            $sql = "SELECT * FROM spms_pcr_support_functions where type=2";
         } else {
             return bcdiv($totalAv, 1, 2);
         }
@@ -310,7 +310,7 @@ class PcrForm
         $emp_count = 0;
 
         while ($tr = $sql->fetch_assoc()) {
-            $sqlSelect = "SELECT * from spms_supportfunctiondata where parent_id='$tr[id_suppFunc]' and emp_id='$employee_id' and period_id='$period_id'";
+            $sqlSelect = "SELECT * from spms_pcr_support_function_accomplishments where parent_id='$tr[id_suppFunc]' and emp_id='$employee_id' and period_id='$period_id'";
             $sqlSelect = $mysqli->query($sqlSelect);
             $sqlSelectCount = $sqlSelect->num_rows;
             if ($sqlSelectCount > 0) {

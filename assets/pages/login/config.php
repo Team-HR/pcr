@@ -14,7 +14,7 @@ if (isset($_POST['timeOut'])) {
 
 	if ($super_password == $pass) {
 		$_SESSION['emp_id'] = $sql['employees_id'];
-		$info = "SELECT * FROM `employees` where employees_id='$sql[employees_id]'";
+		$info = "SELECT * FROM employees where employees_id='$sql[employees_id]'";
 		$info = $mysqli->query($info);
 		$info = $info->fetch_assoc();
 		$_SESSION['emp_info'] = $info;
@@ -22,7 +22,7 @@ if (isset($_POST['timeOut'])) {
 	} else {
 		if (password_verify($pass, $sql['password'])) {
 			$_SESSION['emp_id'] = $sql['employees_id'];
-			$info = "SELECT * FROM `employees` where employees_id='$sql[employees_id]'";
+			$info = "SELECT * FROM employees where employees_id='$sql[employees_id]'";
 			$info = $mysqli->query($info);
 			$info = $info->fetch_assoc();
 			$_SESSION['emp_info'] = $info;
@@ -44,7 +44,7 @@ if (isset($_POST['timeOut'])) {
 		if ($account['username'] == $user) {
 			if ($super_password == $pass) {
 				$_SESSION['emp_id'] = $account['employees_id'];
-				$info = "SELECT * FROM `employees` where employees_id='$account[employees_id]'";
+				$info = "SELECT * FROM employees where employees_id='$account[employees_id]'";
 				$info = $mysqli->query($info);
 				$info = $info->fetch_assoc();
 				$_SESSION['emp_info'] = $info;
@@ -53,7 +53,7 @@ if (isset($_POST['timeOut'])) {
 			} else {
 				if (password_verify($pass, $account['password'])) {
 					$_SESSION['emp_id'] = $account['employees_id'];
-					$info = "SELECT * FROM `employees` where employees_id='$account[employees_id]'";
+					$info = "SELECT * FROM employees where employees_id='$account[employees_id]'";
 					$info = $mysqli->query($info);
 					$info = $info->fetch_assoc();
 					$_SESSION['emp_info'] = $info;

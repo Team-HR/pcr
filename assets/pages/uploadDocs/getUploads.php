@@ -3,7 +3,7 @@ require_once "../../libs/config_class.php";
 $dataId = explode("|",$_POST['documentationId']);
 // echo $_POST['documentationId'];
   // $documentOnwerId = $_SESSION['emp_id'];
-$sql = "SELECT * from spms_workdocumentation where employee_id='$dataId[1]' and mfoDataId='$dataId[0]'";
+$sql = "SELECT * from spms_pcr_work_documentations where employee_id='$dataId[1]' and mfoDataId='$dataId[0]'";
 $sql = $mysqli->query($sql);
 if($sql->num_rows>0){
   while($dat = $sql->fetch_assoc()){

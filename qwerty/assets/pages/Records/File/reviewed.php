@@ -1,9 +1,9 @@
 <?php 
-	$getDepName = "SELECT * FROM `department` where `department_id`='$utlDepartment'";
+	$getDepName = "SELECT * FROM department where department_id='$utlDepartment'";
 	$getDepName = $mysqli->query($getDepName);
 	$getDepName = $getDepName->fetch_assoc();
 	$depName = $getDepName['department'];
-	$sql = "SELECT * from `spms_performancereviewstatus` left join `employees` on `spms_performancereviewstatus`.`employees_id`=`employees`.`employees_id` where `spms_performancereviewstatus`.`period_id`='$utlPeriod' and `spms_performancereviewstatus`.`department_id`='$utlDepartment'";
+	$sql = "SELECT * from spms_pcr_status left join employees on spms_pcr_status.employees_id=employees.employees_id where spms_pcr_status.period_id='$utlPeriod' and spms_pcr_status.department_id='$utlDepartment'";
 	$sql = $mysqli->query($sql);
 	$tableRow = "";
 	$done = "<img src='assets/image/done.PNG' width='20px'>";

@@ -11,11 +11,11 @@ class FinalNumericalRating
         if ($department_id == "all") {
             $department_filter = ";";
         } else {
-            $department_filter = " AND `department_id` = '$department_id';";
+            $department_filter = " AND department_id = '$department_id';";
         }
-        $sql = "SELECT * FROM `spms_performancereviewstatus` where `period_id` = '$period_id'" . $department_filter; // AND `department_id` = 32 limit 2
-        //--`performanceReviewStatus_id` = '2909'
-        //--`period_id` = '$period_id' AND `final_numerical_rating` IS NULL LIMIT 1
+        $sql = "SELECT * FROM spms_pcr_status where period_id = '$period_id'" . $department_filter; // AND department_id = 32 limit 2
+        //--performanceReviewStatus_id = '2909'
+        //--period_id = '$period_id' AND final_numerical_rating IS NULL LIMIT 1
         $res = $mysqli->query($sql);
         $data = [];
         while ($row = $res->fetch_assoc()) {
@@ -35,7 +35,7 @@ class FinalNumericalRating
         if (!$final_numerical_rating) {
             $final_numerical_rating = NULL;
         }
-        $sql = "UPDATE `spms_performancereviewstatus` SET `final_numerical_rating` = '$final_numerical_rating' WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$fileStatusId';";
+        $sql = "UPDATE spms_pcr_status SET final_numerical_rating = '$final_numerical_rating' WHERE spms_pcr_status.performanceReviewStatus_id = '$fileStatusId';";
         $mysqli->query($sql);
     }
     public function getFinalNumericalRating($mysqli, $fileStatus)
@@ -104,16 +104,16 @@ class FinalNumericalRating
     private function coreAr($mysqli, $fileStatus = [])
     {
         # for more compact and faster query
-        # ... and `dep_id` = '$department_id'
+        # ... and dep_id = '$department_id'
 
-        # department_id from spms_performancereviewstatus
+        # department_id from spms_pcr_status
         $department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
         $period_id = $fileStatus["period_id"];
         $employee_id = $fileStatus["employees_id"];
 
         # not recommended department_id from employees table
         $main_Arr = [];
-        $sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$period_id' and `dep_id` = '$department_id' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+        $sql = "SELECT * from spms_pcr_mfos where parent_id='' and mfo_periodId='$period_id' and dep_id = '$department_id' ORDER BY spms_pcr_mfos.cf_count ASC";
         $sql = $mysqli->query($sql);
         $parent = [[], [], []];
         while ($core = $sql->fetch_assoc()) {
@@ -164,17 +164,15 @@ class FinalNumericalRating
         if (!$siId || $siId == null) {
             return $i;
         }
-        $sqlSi1 = "SELECT * from spms_matrixindicators where cf_ID='$siId'";
+        $sqlSi1 = "SELECT * from spms_pcr_indicators where cf_ID='$siId'";
         $sqlSi1 = $mysqli->query($sqlSi1);
         if ($sqlSi1->num_rows > 0) {
             while ($a = $sqlSi1->fetch_assoc()) {
-                $incharge = explode(',', $a['mi_incharge']);
-                $cIn = 0;
-                while ($cIn < count($incharge)) {
-                    if ($incharge[$cIn] == $employee_id) {
-                        array_push($i, $a);
-                    }
-                    $cIn++;
+                $mi_id = $a['mi_id'];
+                $check = $mysqli->query("SELECT id FROM spms_pcr_si_assignments
+                                         WHERE success_indicator_id = '$mi_id' AND user_id = '$employee_id' LIMIT 1");
+                if ($check && $check->num_rows > 0) {
+                    array_push($i, $a);
                 }
             }
         } else {
@@ -186,7 +184,7 @@ class FinalNumericalRating
 
     private function q($mysqli, $siId)
     {
-        $sql = "SELECT * from spms_corefunctions where parent_id='$siId' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+        $sql = "SELECT * from spms_pcr_mfos where parent_id='$siId' ORDER BY spms_pcr_mfos.cf_count ASC";
         $sql = $mysqli->query($sql);
         return $sql;
     }
@@ -243,7 +241,7 @@ class FinalNumericalRating
         $cTotal = 0;
         $a = 0;
         if ($si != "") {
-            $check = "SELECT * from spms_corefucndata where p_id='$si[mi_id]' and empId='$employee_id'";
+            $check = "SELECT * from spms_pcr_indicator_accomplishments where p_id='$si[mi_id]' and empId='$employee_id'";
             $check = $mysqli->query($check);
             if ($check->num_rows > 0) {
                 $SiData = $check->fetch_assoc();
@@ -280,7 +278,7 @@ class FinalNumericalRating
         $period_id = $fileStatus['period_id'];
         $employee_id = $fileStatus['employees_id'];
 
-        $sql = "SELECT * from spms_strategicfuncdata where period_id = '$period_id' and emp_id = '$employee_id'";
+        $sql = "SELECT * from spms_pcr_strategic_accomplishments where period_id = '$period_id' and emp_id = '$employee_id'";
         $sql = $mysqli->query($sql);
         $totalCount = 0;
         $totalAv = 0;
@@ -320,11 +318,11 @@ class FinalNumericalRating
         $period_id = $fileStatus['period_id'];
         $totalAv = 0;
         if ($formType == '1' || $formType == '5') {
-            $sql = "SELECT * FROM `spms_supportfunctions` where `type`=1";
+            $sql = "SELECT * FROM spms_pcr_support_functions where type=1";
         } elseif ($formType == '3') {
-            $sql = "SELECT * FROM `spms_supportfunctions` where `type`=3";
+            $sql = "SELECT * FROM spms_pcr_support_functions where type=3";
         } elseif ($formType == '2' || $formType == '4') {
-            $sql = "SELECT * FROM `spms_supportfunctions` where `type`=2";
+            $sql = "SELECT * FROM spms_pcr_support_functions where type=2";
         } else {
             return bcdiv($totalAv, 1, 2);
         }
@@ -334,7 +332,7 @@ class FinalNumericalRating
         $emp_count = 0;
 
         while ($tr = $sql->fetch_assoc()) {
-            $sqlSelect = "SELECT * from spms_supportfunctiondata where parent_id='$tr[id_suppFunc]' and emp_id='$employee_id' and period_id='$period_id'";
+            $sqlSelect = "SELECT * from spms_pcr_support_function_accomplishments where parent_id='$tr[id_suppFunc]' and emp_id='$employee_id' and period_id='$period_id'";
             $sqlSelect = $mysqli->query($sqlSelect);
             $sqlSelectCount = $sqlSelect->num_rows;
             if ($sqlSelectCount > 0) {

@@ -1,14 +1,14 @@
 <?php 
-	$getDepName = "SELECT * FROM `department` where `department_id`='$utlDepartment'";
+	$getDepName = "SELECT * FROM department where department_id='$utlDepartment'";
 	$getDepName = $mysqli->query($getDepName);
 	$getDepName = $getDepName->fetch_assoc();
 	$depName = $getDepName['department'];
 
-	$emp = "SELECT * from `employees` where `department_id`='$utlDepartment'";
+	$emp = "SELECT * from employees where department_id='$utlDepartment'";
 	$emp = $mysqli->query($emp);
 	$tableRow ="";
 	while ($empAr = $emp->fetch_assoc()) {
-		$files = "SELECT * from `spms_performancereviewstatus` where `period_id`='$utlPeriod' and `department_id`='$utlDepartment'";
+		$files = "SELECT * from spms_pcr_status where period_id='$utlPeriod' and department_id='$utlDepartment'";
 		$files = $mysqli->query($files);
 		if($files->num_rows){
 			$count = 0;

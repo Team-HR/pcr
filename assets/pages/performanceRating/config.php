@@ -15,7 +15,7 @@ function signatories($mysqli){
 		if($id==''){
 			$id = 0;
 		}
-		$empSql = "SELECT * from `employees`";
+		$empSql = "SELECT * from employees";
 		$empSql = $mysqli->query($empSql);
 		while($getData = $empSql->fetch_assoc()){
 			if($getData['employees_id']==$id){
@@ -26,7 +26,7 @@ function signatories($mysqli){
 		}
 		return $emps;
 	}
-	$sql = "SELECT * from spms_performancereviewstatus where period_id='$_SESSION[period_pr]' and employees_id='$_SESSION[emp_id]'";
+	$sql = "SELECT * from spms_pcr_status where period_id='$_SESSION[period_pr]' and employees_id='$_SESSION[emp_id]'";
 	$sql = $mysqli->query($sql);
 	$sql = $sql->fetch_assoc();
 	$view = "

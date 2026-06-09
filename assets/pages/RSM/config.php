@@ -1,13 +1,83 @@
 <?php
 // copy previous rsm start
 require_once __DIR__ . '/../../libs/SystemLogger.php';
+require_once __DIR__ . '/../../libs/Db.php';
+$db = new Db();
+$mysqli = $db->getMysqli();
 
-if (isset($_POST['get_prev_rsm'])) {
+if (isset($_POST['get_mfo_tree'])) {
+  if (!isset($_SESSION["emp_info"]["department_id"]) || !isset($_SESSION["period"])) {
+    echo json_encode(["error" => "Session data not available"]);
+    exit;
+  }
+
+  $department_id = $_SESSION["emp_info"]["department_id"];
+  $period_id = $_SESSION["period"];
+
+  // Get department name
+  $dept_name = "";
+  $dept_alias = "";
+  $dept_sql = "SELECT department,alias FROM department WHERE department_id='$department_id'";
+  $dept_result = $mysqli->query($dept_sql);
+  if ($dept_result && $dept_row = $dept_result->fetch_assoc()) {
+    $dept_name = $dept_row["department"];
+    $dept_alias = $dept_row["alias"];
+  } else {
+    $dept_name = "Department";
+  }
+
+  // Get top-level MFOs (parent_id='')
+  $mfo_children = [];
+  $sql = "SELECT cf_ID, cf_count, cf_title FROM spms_pcr_mfos 
+          WHERE parent_id='' AND dep_id='$department_id' AND mfo_periodId='$period_id' 
+          ORDER BY cf_count ASC";
+  $result = $mysqli->query($sql);
+
+  if (!$result) {
+    echo json_encode(["error" => $mysqli->error]);
+    exit;
+  }
+
+  while ($row = $result->fetch_assoc()) {
+    $node = [
+      "id" => $row["cf_ID"],
+      "code" => "",
+      "title" => $row["cf_count"] . ". " . $row["cf_title"],
+      "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"]),
+      "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id)
+    ];
+    $mfo_children[] = $node;
+  }
+
+  // Create root node with department name
+  $tree_data = [[
+    "id" => "dept_root",
+    "code" => $dept_alias ? $dept_alias : $dept_name,
+    "title" => $dept_name,
+    "children" => $mfo_children
+  ]];
+
+  echo json_encode($tree_data);
+  exit;
+} elseif (isset($_POST['get_org_tree'])) {
+  if (!isset($_SESSION["emp_info"]["department_id"]) || !isset($_SESSION["period"])) {
+    echo json_encode(["error" => "Session data not available"]);
+    exit;
+  }
+
+  $department_id = $_SESSION["emp_info"]["department_id"];
+  $period_id = $_SESSION["period"];
+
+  $tree_data = get_department_personnel_hierarchy($mysqli, $department_id, $period_id);
+
+  echo json_encode($tree_data);
+  exit;
+} elseif (isset($_POST['get_prev_rsm'])) {
   $data = [];
   $selected_period_id = $_SESSION["period"];
 
   // get selected period data
-  $sql = "SELECT * FROM `spms_mfo_period` WHERE `mfoperiod_id` = '$selected_period_id';";
+  $sql = "SELECT * FROM spms_periods WHERE mfoperiod_id = '$selected_period_id';";
   $result = $mysqli->query($sql);
   $row = $result->fetch_assoc();
   //  {"mfoperiod_id":"10","month_mfo":"July - December","year_mfo":"2022"}
@@ -35,7 +105,7 @@ if (isset($_POST['get_prev_rsm'])) {
   $selected_period_id = $_SESSION["period"];
 
   // get selected period data
-  $sql = "SELECT * FROM `spms_mfo_period` WHERE `mfoperiod_id` = '$selected_period_id';";
+  $sql = "SELECT * FROM spms_periods WHERE mfoperiod_id = '$selected_period_id';";
   $result = $mysqli->query($sql);
   $row = $result->fetch_assoc();
   //  {"mfoperiod_id":"10","month_mfo":"July - December","year_mfo":"2022"}
@@ -54,7 +124,7 @@ if (isset($_POST['get_prev_rsm'])) {
     $months = "July - December";
     $year = $selected_year - 1;
   }
-  $sql = "SELECT `mfoperiod_id` FROM `spms_mfo_period` WHERE `month_mfo` = '$months' AND `year_mfo` = '$year'";
+  $sql = "SELECT mfoperiod_id FROM spms_periods WHERE month_mfo = '$months' AND year_mfo = '$year'";
   $result = $mysqli->query($sql);
   $row = $result->fetch_assoc();
   $period_id = $row["mfoperiod_id"];
@@ -63,7 +133,7 @@ if (isset($_POST['get_prev_rsm'])) {
 
   // get previous period core functions
   $data = [];
-  $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$period_id' AND `dep_id` = '$department_id' AND `parent_id` = '';";
+  $sql = "SELECT * FROM spms_pcr_mfos WHERE mfo_periodId = '$period_id' AND dep_id = '$department_id' AND parent_id = '';";
   $result = $mysqli->query($sql);
   while ($row = $result->fetch_assoc()) {
     // $data[] = [
@@ -77,7 +147,7 @@ if (isset($_POST['get_prev_rsm'])) {
   $data = start_duplicating($mysqli, $data, $selected_period_id, "");
 
   /*
-  spms_corefunctions
+  spms_pcr_mfos
   cf_ID: "9801"
   cf_count: "01."
   cf_title: "Recruitment Services"
@@ -86,7 +156,7 @@ if (isset($_POST['get_prev_rsm'])) {
   mfo_periodId: "2"
   parent_id: "9816"
 
-  spms_matrixindicators
+  spms_pcr_indicators
   cf_ID: "9802"
   corrections: ""
   mi_eff: "a:6:{i:0;s:0:\"\";i:1;s:0:\"\";i:2;s:20:\"No meeting conducted\";i:3;s:0:\"\";i:4;s:0:\"\";i:5;s:22:\"With meeting conducted\";}"
@@ -98,8 +168,8 @@ if (isset($_POST['get_prev_rsm'])) {
 */
 
   // foreach ($data as $i => $datum) {
-  // copy to spms_corefunctions
-  // $sql = "INSERT INTO `spms_corefunctions`(`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`, `corrections`) VALUES ('$selected_period_id','$datum[parent_id]','$datum[dep_id]','$datum[cf_count]','$datum[cf_title]','')";
+  // copy to spms_pcr_mfos
+  // $sql = "INSERT INTO spms_pcr_mfos(mfo_periodId, parent_id, dep_id, cf_count, cf_title, corrections) VALUES ('$selected_period_id','$datum[parent_id]','$datum[dep_id]','$datum[cf_count]','$datum[cf_title]','')";
   // $data[$i]['core_function_data']['insert_id'] = '9';
   // }
 
@@ -125,7 +195,7 @@ set the parameters according to period_id, department_id and mfo parent_id
   $selected_department_id = 26;
 
   $data = [];
-  $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$curr_period_id' AND `dep_id` = '$curr_department_id' AND `parent_id` = '$parent_id';";
+  $sql = "SELECT * FROM spms_pcr_mfos WHERE mfo_periodId = '$curr_period_id' AND dep_id = '$curr_department_id' AND parent_id = '$parent_id';";
 
   $result = $mysqli->query($sql);
   while ($row = $result->fetch_assoc()) {
@@ -137,7 +207,7 @@ set the parameters according to period_id, department_id and mfo parent_id
     $data[] = $row;
   }
 
-  $sql = "SELECT * FROM `spms_corefunctions` WHERE `cf_ID` = '$parent_id';";
+  $sql = "SELECT * FROM spms_pcr_mfos WHERE cf_ID = '$parent_id';";
   $res = $mysqli->query($sql);
   if ($row = $res->fetch_assoc()) {
     $row["children"] = $data;
@@ -157,7 +227,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   $selected_period_id = 12;
 
   // get selected period data
-  $sql = "SELECT * FROM `spms_mfo_period` WHERE `mfoperiod_id` = '$selected_period_id';";
+  $sql = "SELECT * FROM spms_periods WHERE mfoperiod_id = '$selected_period_id';";
   $result = $mysqli->query($sql);
   $row = $result->fetch_assoc();
   //  {"mfoperiod_id":"10","month_mfo":"July - December","year_mfo":"2022"}
@@ -177,7 +247,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
     $year = $selected_year - 1;
   }
 
-  $sql = "SELECT `mfoperiod_id` FROM `spms_mfo_period` WHERE `month_mfo` = '$months' AND `year_mfo` = '$year'";
+  $sql = "SELECT mfoperiod_id FROM spms_periods WHERE month_mfo = '$months' AND year_mfo = '$year'";
   $result = $mysqli->query($sql);
   $row = $result->fetch_assoc();
   $period_id = $row["mfoperiod_id"];
@@ -186,7 +256,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
 
   // get previous period core functions
   $data = [];
-  $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$period_id' AND `dep_id` = '$department_id' AND `parent_id` = '';";
+  $sql = "SELECT * FROM spms_pcr_mfos WHERE mfo_periodId = '$period_id' AND dep_id = '$department_id' AND parent_id = '';";
   $result = $mysqli->query($sql);
   while ($row = $result->fetch_assoc()) {
     $row["children"] = get_children($mysqli, $row['cf_ID']);
@@ -203,7 +273,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   $period = "";
   $statusOK = 0;
 
-  $sql = "SELECT * from spms_mfo_period where month_mfo='$_POST[period_check]' and year_mfo='$_POST[year]'";
+  $sql = "SELECT * from spms_periods where month_mfo='$_POST[period_check]' and year_mfo='$_POST[year]'";
   $sql = $mysqli->query($sql);
 
   if (!$sql) {
@@ -216,19 +286,19 @@ elseif (isset($_POST['copy_to_other_dept'])) {
     $_SESSION['period'] = $sqlFetch['mfoperiod_id'];
     $statusOK = 1;
   } else {
-    $sql = "INSERT INTO `spms_mfo_period` (`mfoperiod_id`, `month_mfo`, `year_mfo`) VALUES (NULL,'$_POST[period_check]','$_POST[year]')";
+    $sql = "INSERT INTO spms_periods (mfoperiod_id, month_mfo, year_mfo) VALUES (NULL,'$_POST[period_check]','$_POST[year]')";
     $sql = $mysqli->query($sql);
     $statusOK = 1;
     $period = $mysqli->insert_id;
     $_SESSION['period'] = $mysqli->insert_id;
   }
   if ($statusOK) {
-    $department = $user->get_emp('department_id');
-    $rsmStatus = "SELECT * from `spms_rsmstatus` where `period_id`='$period' and `department_id`='$department'";
+    $department = $_SESSION['emp_info']['department_id'];
+    $rsmStatus = "SELECT * from spms_rsm_status where period_id='$period' and department_id='$department'";
     $rsmStatus = $mysqli->query($rsmStatus);
     if ($rsmStatus->num_rows < 1) {
       // if this period will end edit will change to zero;
-      $rsm = "INSERT INTO `spms_rsmstatus` (`rsmStatus_id`, `period_id`, `department_id`, `done`, `edit`, `alter_logs`) VALUES (NULL, '$period', '$department', '0', '1', '')";
+      $rsm = "INSERT INTO spms_rsm_status (rsmStatus_id, period_id, department_id, done, edit, alter_logs) VALUES (NULL, '$period', '$department', '0', '1', '')";
       $rsm = $mysqli->query($rsm);
       if (!$rsm) {
         die($mysqli->error);
@@ -239,7 +309,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
 } elseif (isset($_POST['page'])) {
   $page = $_POST['page'];
   if ($page == 'table') {
-    echo table($mysqli);
+    table($mysqli);
     if (rsmEditStatus("")) {
       echo "<button class='ui primary button fluid' onclick='closeRsm(" . rsmEditStatus("id") . ")'>Submit Rating Scale Matrix</button>";
     }
@@ -252,7 +322,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   if ($rsmCount != "" && $addRSMData != "") {
     $dep_id = $_SESSION['emp_info']['department_id'];
     $pid = $_POST['pid'];
-    $sqlQuery = "INSERT INTO `spms_corefunctions` (`cf_ID`,`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`) VALUES ('','$_SESSION[period]', '$pid','$dep_id', '$rsmCount', '$addRSMData')";
+    $sqlQuery = "INSERT INTO spms_pcr_mfos (cf_ID,mfo_periodId, parent_id, dep_id, cf_count, cf_title) VALUES ('','$_SESSION[period]', '$pid','$dep_id', '$rsmCount', '$addRSMData')";
     $sql = $mysqli->query($sqlQuery);
     if (!$sql) {
       die($mysqli->error);
@@ -270,24 +340,24 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   $editRsmTitle = $_POST['editRsmTitle'];
   $editcountRsm = changeCount($_POST['editcountRsm']);
   $dataId = $_POST['dataId'];
-  $getC = "SELECT * from `spms_corefunctions` where `cf_ID`=$dataId";
+  $getC = "SELECT * from spms_pcr_mfos where cf_ID=$dataId";
   $getC = $mysqli->query($getC);
   $getC = $getC->fetch_assoc();
   $update_correction = "";
   if ($getC['corrections']) {
     $update_correction = [];
-    $getC = unserialize($getC['corrections']);
+    $getC = json_decode($getC['corrections'], true) ?? [];
     $count = 0;
     while ($count < count($getC)) {
       $update_correction[] = [$getC[$count][0], 1];
       $count++;
     }
-    $update_correction = serialize($update_correction);
+    $update_correction = json_encode($update_correction);
   }
 
   $editRsmTitle = $mysqli->real_escape_string($editRsmTitle);
   $update_correction = $mysqli->real_escape_string($update_correction);
-  $sqlQuery = "UPDATE `spms_corefunctions` SET `cf_count` = '$editcountRsm', `cf_title` = '$editRsmTitle',`corrections`='$update_correction' WHERE `spms_corefunctions`.`cf_ID` = '$dataId'";
+  $sqlQuery = "UPDATE spms_pcr_mfos SET cf_count = '$editcountRsm', cf_title = '$editRsmTitle',corrections='$update_correction' WHERE spms_pcr_mfos.cf_ID = '$dataId'";
   $sql = $mysqli->query($sqlQuery);
   if (!$sql) {
     die($mysqli->error);
@@ -302,7 +372,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   }
 } elseif (isset($_POST['MfoSiDelete'])) {
   $dataId = $_POST['MfoSiDelete'];
-  $sqlQuery = "DELETE FROM `spms_corefunctions` WHERE `spms_corefunctions`.`cf_ID` ='$dataId'";
+  $sqlQuery = "DELETE FROM spms_pcr_mfos WHERE spms_pcr_mfos.cf_ID ='$dataId'";
   $sql = $mysqli->query($sqlQuery);
   if (!$sql) {
     die($mysqli->error);
@@ -317,19 +387,37 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   }
 } elseif (isset($_POST['SaveMfoSI'])) {
   $dataId = $_POST['SaveMfoSI'];
-  $quality = $mysqli->real_escape_string(serialize($_POST['quality']));
-  $efficiency = $mysqli->real_escape_string(serialize($_POST['efficiency']));
-  $timeliness = $mysqli->real_escape_string(serialize($_POST['timeliness']));
   $successIn = $mysqli->real_escape_string($_POST['successIn']);
   $incharge = $mysqli->real_escape_string($_POST['incharge']);
-  $sqlQuery = "INSERT INTO `spms_matrixindicators`
-  (`mi_id`, `cf_ID`, `mi_succIn`, `mi_quality`, `mi_eff`, `mi_time`, `mi_incharge`)
+  $sqlQuery = "INSERT INTO spms_pcr_indicators
+  (mi_id, cf_ID, mi_succIn)
   VALUES
-  (NULL, '$dataId', '$successIn', '$quality', '$efficiency', '$timeliness', '$incharge')";
+  (NULL, '$dataId', '$successIn')";
   $sql = $mysqli->query($sqlQuery);
   if (!$sql) {
     die($mysqli->error);
   } else {
+    $new_mi_id   = $mysqli->insert_id;
+    $period_id   = $_SESSION['period'];
+    $assigned_by = $_SESSION['emp_info']['employees_id'];
+    $emp_arr = array_filter(array_map('trim', explode(',', $incharge)));
+    foreach ($emp_arr as $emp_id) {
+      if (!is_numeric($emp_id)) continue;
+      $assign_sql = "INSERT INTO spms_pcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
+                     VALUES ('$new_mi_id', '$emp_id', '$period_id', '$assigned_by', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+      $mysqli->query($assign_sql);
+    }
+    $qet_map = ['quality' => $_POST['quality'], 'efficiency' => $_POST['efficiency'], 'timeliness' => $_POST['timeliness']];
+    foreach ($qet_map as $measure_type => $scores) {
+      if (!is_array($scores)) continue;
+      foreach ($scores as $score => $descriptor) {
+        $descriptor = trim($descriptor);
+        if ($descriptor === '' || !is_numeric($score)) continue;
+        $esc = $mysqli->real_escape_string($descriptor);
+        $mysqli->query("INSERT IGNORE INTO spms_pcr_si_qet_descriptors (success_indicator_id, measure_type, score, descriptor, created_at, updated_at)
+                        VALUES ('$new_mi_id', '$measure_type', '$score', '$esc', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
+      }
+    }
     $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
     if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
       die($mysqli->error);
@@ -338,40 +426,60 @@ elseif (isset($_POST['copy_to_other_dept'])) {
   }
 } elseif (isset($_POST['SaveMfoSIEdit'])) {
   $dataId = $_POST['SaveMfoSIEdit'];
-  $quality = $mysqli->real_escape_string(serialize($_POST['quality']));
-  $efficiency = $mysqli->real_escape_string(serialize($_POST['efficiency']));
-  $timeliness = $mysqli->real_escape_string(serialize($_POST['timeliness']));
   $successIn = $mysqli->real_escape_string($_POST['successIn']);
   $incharge = $mysqli->real_escape_string($_POST['incharge']);
-  $getC = "SELECT * from `spms_matrixindicators` where `mi_id`=$dataId";
+  $getC = "SELECT * from spms_pcr_indicators where mi_id=$dataId";
   $getC = $mysqli->query($getC);
   $getC = $getC->fetch_assoc();
   $update_correction = "";
   if ($getC['corrections']) {
     $update_correction = [];
-    $getC = unserialize($getC['corrections']);
+    $getC = json_decode($getC['corrections'], true) ?? [];
     $count = 0;
     while ($count < count($getC)) {
       $update_correction[] = [$getC[$count][0], 1];
       $count++;
     }
-    $update_correction = serialize($update_correction);
+    $update_correction = json_encode($update_correction);
   }
   $update_correction = $mysqli->real_escape_string($update_correction);
-  $sqlQuery = "UPDATE `spms_matrixindicators` SET
-  `mi_succIn` = '$successIn',
-  `mi_quality` = '$quality',
-  `mi_eff` = '$efficiency',
-  `mi_time` = '$timeliness',
-  `mi_incharge` = '$incharge',
-  `corrections` = '$update_correction'
-  WHERE `spms_matrixindicators`.`mi_id` = $dataId;
+  $sqlQuery = "UPDATE spms_pcr_indicators SET
+  mi_succIn = '$successIn',
+  corrections = '$update_correction'
+  WHERE spms_pcr_indicators.mi_id = $dataId;
   ";
   $sql = $mysqli->query($sqlQuery);
   if (!$sql) {
     die($mysqli->error);
   } else {
-
+    $period_id   = $_SESSION['period'];
+    $assigned_by = $_SESSION['emp_info']['employees_id'];
+    $stmt = $mysqli->prepare("DELETE FROM spms_pcr_si_assignments WHERE success_indicator_id = ?");
+    $stmt->bind_param("i", $dataId);
+    $stmt->execute();
+    $stmt->close();
+    $emp_arr = array_filter(array_map('trim', explode(',', $incharge)));
+    foreach ($emp_arr as $emp_id) {
+      if (!is_numeric($emp_id)) continue;
+      $assign_sql = "INSERT INTO spms_pcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
+                     VALUES ('$dataId', '$emp_id', '$period_id', '$assigned_by', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())";
+      $mysqli->query($assign_sql);
+    }
+    $stmt = $mysqli->prepare("DELETE FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = ?");
+    $stmt->bind_param("i", $dataId);
+    $stmt->execute();
+    $stmt->close();
+    $qet_map = ['quality' => $_POST['quality'], 'efficiency' => $_POST['efficiency'], 'timeliness' => $_POST['timeliness']];
+    foreach ($qet_map as $measure_type => $scores) {
+      if (!is_array($scores)) continue;
+      foreach ($scores as $score => $descriptor) {
+        $descriptor = trim($descriptor);
+        if ($descriptor === '' || !is_numeric($score)) continue;
+        $esc = $mysqli->real_escape_string($descriptor);
+        $mysqli->query("INSERT INTO spms_pcr_si_qet_descriptors (success_indicator_id, measure_type, score, descriptor, created_at, updated_at)
+                        VALUES ('$dataId', '$measure_type', '$score', '$esc', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
+      }
+    }
     $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
     if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
       die($mysqli->error);
@@ -380,13 +488,21 @@ elseif (isset($_POST['copy_to_other_dept'])) {
     print(1);
   }
 } elseif (isset($_POST['removeSi'])) {
-  $sqlQuery = "DELETE FROM `spms_matrixindicators` WHERE `spms_matrixindicators`.`mi_id` = '$_POST[removeSi]'";
+  $removeSiId = (int) $_POST['removeSi'];
+  $sqlQuery = "DELETE FROM spms_pcr_indicators WHERE spms_pcr_indicators.mi_id = '$removeSiId'";
 
   $sql = $mysqli->query($sqlQuery);
   if (!$sql) {
     die($mysqli->error);
   } else {
-
+    $stmt = $mysqli->prepare("DELETE FROM spms_pcr_si_assignments WHERE success_indicator_id = ?");
+    $stmt->bind_param("i", $removeSiId);
+    $stmt->execute();
+    $stmt->close();
+    $stmt = $mysqli->prepare("DELETE FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = ?");
+    $stmt->bind_param("i", $removeSiId);
+    $stmt->execute();
+    $stmt->close();
     $escapedLogQuery = $mysqli->real_escape_string($sqlQuery);
     if (!logSpmsSystemQuery($mysqli, $escapedLogQuery)) {
       die($mysqli->error);
@@ -397,7 +513,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
 } elseif (isset($_POST['closeRsm'])) {
   $rsmStatusId = (int)$_POST['closeRsm'];
 
-  $sqlQuery = "UPDATE `spms_rsmstatus` SET `edit` = '0' , `done`='1' WHERE `spms_rsmstatus`.`rsmStatus_id` = '$rsmStatusId'";
+  $sqlQuery = "UPDATE spms_rsm_status SET edit = '0' , done='1' WHERE spms_rsm_status.rsmStatus_id = '$rsmStatusId'";
   $sql = $mysqli->query($sqlQuery);
 
   if (!$sql) {
@@ -441,7 +557,7 @@ elseif (isset($_POST['copy_to_other_dept'])) {
 } elseif (isset($_POST['changeParent'])) {
   $sub = $_POST['sub'];
   $parent = $_POST['parent'];
-  $sql  = "UPDATE `spms_corefunctions` SET `parent_id` = '$parent' WHERE `spms_corefunctions`.`cf_ID` = $sub";
+  $sql  = "UPDATE spms_pcr_mfos SET parent_id = '$parent' WHERE spms_pcr_mfos.cf_ID = $sub";
   $sql = $mysqli->query($sql);
   echo 1;
 } elseif (false) {
@@ -460,7 +576,7 @@ function getPreviousPeriodId($mysqli)
   $selected_months = '';
   $selected_year = '';
 
-  $sql = "SELECT * FROM `spms_mfo_period` WHERE `mfoperiod_id` = '$period_id';";
+  $sql = "SELECT * FROM spms_periods WHERE mfoperiod_id = '$period_id';";
   $result = $mysqli->query($sql);
   if ($row = $result->fetch_assoc()) {
     $selected_months = $row["month_mfo"];
@@ -478,7 +594,7 @@ function getPreviousPeriodId($mysqli)
     $year = $selected_year - 1;
   }
 
-  $sql = "SELECT * FROM `spms_mfo_period` WHERE `month_mfo` = '$months' AND `year_mfo` = '$year';";
+  $sql = "SELECT * FROM spms_periods WHERE month_mfo = '$months' AND year_mfo = '$year';";
   $result = $mysqli->query($sql);
   if ($row = $result->fetch_assoc()) {
     $previous_period_id = $row['mfoperiod_id'];
@@ -499,7 +615,7 @@ function table($mysqli)
   $employee_id = $_SESSION['emp_info']['employees_id'];
   $period_id = $_SESSION['period'];
 
-  $sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `employees_id` = '$employee_id' AND `period_id` = '$period_id'";
+  $sql = "SELECT * FROM spms_pcr_status WHERE employees_id = '$employee_id' AND period_id = '$period_id'";
   $res = $mysqli->query($sql);
   if ($row = $res->fetch_assoc()) {
     $department_id = $row['department_id'];
@@ -507,13 +623,13 @@ function table($mysqli)
     $department_id = $_SESSION['emp_info']['department_id'];
   }
 
-  $dep = "SELECT * from `department` where department_id='$department_id'";
+  $dep = "SELECT * from department where department_id='$department_id'";
   $dep = $mysqli->query($dep);
   $dep = $dep->fetch_assoc();
   $dep = $dep['department'];
 
 
-  $period = "SELECT * from `spms_mfo_period` where `mfoperiod_id`='$period_id'";
+  $period = "SELECT * from spms_periods where mfoperiod_id='$period_id'";
   $period = $mysqli->query($period);
   $period = $period->fetch_assoc();
   // $period_id = $period['mfoperiod_id'];
@@ -561,7 +677,7 @@ function tbody($mysqli)
   $employee_id = $_SESSION['emp_info']['employees_id'];
   $period_id = $_SESSION['period'];
 
-  $sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `employees_id` = '$employee_id' AND `period_id` = '$period_id'";
+  $sql = "SELECT * FROM spms_pcr_status WHERE employees_id = '$employee_id' AND period_id = '$period_id'";
   $res = $mysqli->query($sql);
   if ($row = $res->fetch_assoc()) {
     $dep_id = $row['department_id'];
@@ -569,7 +685,7 @@ function tbody($mysqli)
     $dep_id = $_SESSION['emp_info']['department_id'];
   }
 
-  $sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$period_id' and dep_id='$dep_id' ORDER BY `spms_corefunctions`.`cf_count` ASC ";
+  $sql = "SELECT * from spms_pcr_mfos where parent_id='' and mfo_periodId='$period_id' and dep_id='$dep_id' ORDER BY spms_pcr_mfos.cf_count ASC ";
   $sql = $mysqli->query($sql);
   $tr = "";
   while ($row1 = $sql->fetch_assoc()) {
@@ -588,11 +704,11 @@ function tbodyChild($dataId, $padding)
 {
   $view = "";
   $mysqli = $GLOBALS['mysqli'];
-  $sql2 = "SELECT * from spms_corefunctions where parent_id='$dataId' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+  $sql2 = "SELECT * from spms_pcr_mfos where parent_id='$dataId' ORDER BY spms_pcr_mfos.cf_count ASC";
   $sql2 = $mysqli->query($sql2);
   $padding += 15;
   while ($row2 = $sql2->fetch_assoc()) {
-    $sql3 = "SELECT * from spms_corefunctions where parent_id='$row2[cf_ID]' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+    $sql3 = "SELECT * from spms_pcr_mfos where parent_id='$row2[cf_ID]' ORDER BY spms_pcr_mfos.cf_count ASC";
     $sql3 = $mysqli->query($sql3);
     $pad = $padding . "px";
     $view .= trows($mysqli, $row2, $pad, '');
@@ -640,7 +756,7 @@ function validaateCorrection($dat)
   $color = false;
   if ($dat) {
     $count = 0;
-    $dat = unserialize($dat);
+    $dat = json_decode($dat);
     while ($count < count($dat)) {
       if ($dat[$count][1] == 0) {
         $color = true;
@@ -654,7 +770,7 @@ function validaateCorrection($dat)
 
 function trows($mysqli, $row, $padding, $addDisplay)
 {
-  $sql2 = "SELECT * from spms_corefunctions where parent_id='$row[cf_ID]'";
+  $sql2 = "SELECT * from spms_pcr_mfos where parent_id='$row[cf_ID]'";
   $sql2 = $mysqli->query($sql2);
   $sql2count = $sql2->num_rows;
   if ($sql2count > 0) {
@@ -663,7 +779,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
     $set_drop = settingDrop($mysqli, $row, '', $addDisplay, '');
   }
   $view = "";
-  $siData1 = "SELECT * from spms_matrixindicators where cf_ID='$row[cf_ID]'";
+  $siData1 = "SELECT * from spms_pcr_indicators where cf_ID='$row[cf_ID]'";
   $siData1 = $mysqli->query($siData1);
   $siDatacount1 = $siData1->num_rows;
   $count = 1;
@@ -682,115 +798,119 @@ function trows($mysqli, $row, $padding, $addDisplay)
         $correctionColor = "color:red;";
       }
       $empincharge = "";
-      $incharge = explode(',', $siDataRow1['mi_incharge']);
-      #iterate employees
-      foreach ($incharge as $empDataId) {
-        if (!$empDataId || $empDataId == null) {
-          continue;
-        }
-        $sqlIncharge = "SELECT * from employees where employees_id='$empDataId'";
-        $sqlIncharge = $mysqli->query($sqlIncharge);
+      $siMiId = $siDataRow1['mi_id'];
+      $assignSql = "SELECT a.user_id, e.employees_id, e.firstName, e.lastName, e.middleName, e.extName
+                    FROM spms_pcr_si_assignments a
+                    LEFT JOIN employees e ON a.user_id = e.employees_id
+                    WHERE a.success_indicator_id = '$siMiId'";
+      $assignRes = $mysqli->query($assignSql);
+      while ($sqlIncharge = $assignRes->fetch_assoc()) {
+        if (!$sqlIncharge['employees_id']) continue;
+        $firstName  = $sqlIncharge['firstName']  ?? '';
+        $lastName   = $sqlIncharge['lastName']   ?? '';
+        $middleName = $sqlIncharge['middleName'] ?? '';
+        $extName    = $sqlIncharge['extName']    ?? '';
 
-        if ($sqlIncharge = $sqlIncharge->fetch_assoc()) {
-          $firstName  = $sqlIncharge['firstName']  ?? '';
-          $lastName   = $sqlIncharge['lastName']   ?? '';
-          $middleName = $sqlIncharge['middleName'] ?? '';
-          $extName    = $sqlIncharge['extName']    ?? '';
+        $middleInitial = $middleName !== '' ? $middleName[0] . '.' : '';
+        $extFormatted  = $extName !== '' ? ", $extName" : '';
 
-          $middleInitial = $middleName !== '' ? $middleName[0] . '.' : '';
-          $extFormatted  = $extName !== '' ? ", $extName" : '';
+        $parts = array_filter([$lastName, $firstName, $middleInitial]);
+        $fullName = implode(' ', $parts) . $extFormatted;
 
-          $parts = array_filter([$lastName, $firstName, $middleInitial]);
-          $fullName = implode(' ', $parts) . $extFormatted;
-
-          $empincharge .= "<br><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$fullName</a><br>";
-        }
-
-        // if (isset($siDataRow1['mi_id'])) {
-        //   $mi_id = $siDataRow1['mi_id'];
-        //   $sql = "SELECT * FROM `spms_corefucndata`where `p_id` = '$mi_id' AND `empId` = '$empDataId';";
-        //   $res = $mysqli->query($sql);
-        //   if ($rowdata = $res->fetch_assoc()) {
-        //     // $empincharge .= " -- " . json_encode($rowdata);
-        //     # Rehabilitation Leave Benefits
-        //     if ($rowdata['disable'] != 1) {
-        //       # code...
-        //       $score = 0;
-        //       $q = "";
-        //       $e = "";
-        //       $t = "";
-        //       $count_scales = 0;
-        //       if ($rowdata['Q']) {
-        //         $score += $rowdata['Q'];
-        //         $q = $rowdata['Q'];
-        //         $count_scales++;
-        //       }
-        //       if ($rowdata['E']) {
-        //         $score += $rowdata['E'];
-        //         $e = $rowdata['E'];
-        //         $count_scales++;
-        //       }
-        //       if ($rowdata['T']) {
-        //         $score += $rowdata['T'];
-        //         $t = $rowdata['T'];
-        //         $count_scales++;
-        //       }
-
-        //       // $empincharge .= "<br/>";
-        //       $score = bcdiv($score, $count_scales, 1);
-        //       $score = explode(".", $score);
-        //       if ($score[1] == 0) {
-        //         $score = $score[0];
-        //       } else {
-        //         $score = implode(".", $score);
-        //       }
-        //       $final_mfo_rating = $score . "/5";
-
-        //       $empincharge .= "<table class='ui mini compact structured celled table'>
-        //         <thead>
-        //             <tr style='text-align: left;'>
-        //               <th colspan='4'><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a></th>
-        //             </tr>
-        //             <tr style='text-align: center;'>
-        //               <th>Q</th>
-        //               <th>E</th>
-        //               <th>T</th>
-        //               <th>FINAL</th>
-        //             </tr>
-        //         </thead>
-        //         <tbody>
-        //             <tr style='text-align: center;'>
-        //               <td>$q</td>
-        //               <td>$e</td>
-        //               <td>$t</td>
-        //               <td>$final_mfo_rating</td>
-        //             </tr>
-        //         </tbody>
-        //       </table>";
-        //       // $empincharge .= $final_mfo_rating;
-        //     } #else not applicable
-        //     else {
-        //       $empincharge .= "<a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br/>";
-        //       $empincharge .= "N/A (" . $rowdata['remarks'] . ")";
-        //     }
-        //   } else {
-        //     $empincharge .= "<a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br/>";
-        //     $empincharge .= "NOT ACCOMPLISHED";
-        //   }
-        // }
+        $empincharge .= "<br><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$fullName</a><br>";
       }
+
+      // if (isset($siDataRow1['mi_id'])) {
+      //   $mi_id = $siDataRow1['mi_id'];
+      //   $sql = "SELECT * FROM spms_pcr_indicator_accomplishments where p_id = '$mi_id' AND empId = '$empDataId';";
+      //   $res = $mysqli->query($sql);
+      //   if ($rowdata = $res->fetch_assoc()) {
+      //     // $empincharge .= " -- " . json_encode($rowdata);
+      //     # Rehabilitation Leave Benefits
+      //     if ($rowdata['disable'] != 1) {
+      //       # code...
+      //       $score = 0;
+      //       $q = "";
+      //       $e = "";
+      //       $t = "";
+      //       $count_scales = 0;
+      //       if ($rowdata['Q']) {
+      //         $score += $rowdata['Q'];
+      //         $q = $rowdata['Q'];
+      //         $count_scales++;
+      //       }
+      //       if ($rowdata['E']) {
+      //         $score += $rowdata['E'];
+      //         $e = $rowdata['E'];
+      //         $count_scales++;
+      //       }
+      //       if ($rowdata['T']) {
+      //         $score += $rowdata['T'];
+      //         $t = $rowdata['T'];
+      //         $count_scales++;
+      //       }
+
+      //       // $empincharge .= "<br/>";
+      //       $score = bcdiv($score, $count_scales, 1);
+      //       $score = explode(".", $score);
+      //       if ($score[1] == 0) {
+      //         $score = $score[0];
+      //       } else {
+      //         $score = implode(".", $score);
+      //       }
+      //       $final_mfo_rating = $score . "/5";
+
+      //       $empincharge .= "<table class='ui mini compact structured celled table'>
+      //         <thead>
+      //             <tr style='text-align: left;'>
+      //               <th colspan='4'><a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a></th>
+      //             </tr>
+      //             <tr style='text-align: center;'>
+      //               <th>Q</th>
+      //               <th>E</th>
+      //               <th>T</th>
+      //               <th>FINAL</th>
+      //             </tr>
+      //         </thead>
+      //         <tbody>
+      //             <tr style='text-align: center;'>
+      //               <td>$q</td>
+      //               <td>$e</td>
+      //               <td>$t</td>
+      //               <td>$final_mfo_rating</td>
+      //             </tr>
+      //         </tbody>
+      //       </table>";
+      //       // $empincharge .= $final_mfo_rating;
+      //     } #else not applicable
+      //     else {
+      //       $empincharge .= "<a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br/>";
+      //       $empincharge .= "N/A (" . $rowdata['remarks'] . ")";
+      //     }
+      //   } else {
+      //     $empincharge .= "<a onclick='ShowIPcrModal(\"$sqlIncharge[employees_id]\")' style='cursor:pointer;'>$sqlIncharge[firstName] $sqlIncharge[lastName]</a><br/>";
+      //     $empincharge .= "NOT ACCOMPLISHED";
+      //   }
+      // }
       $Qdata = "";
       $Edata = "";
       $Tdata = "";
       $performanceMeasure = "";
-      if (unserData($siDataRow1['mi_quality']) != "") {
-        $performanceMeasure .= "Quality<br>";
-      }
-      if (unserData($siDataRow1['mi_eff']) != "") {
-        $performanceMeasure .= "Efficiency<br>";
-      }
-      if (unserData($siDataRow1['mi_time']) != "") {
-        $performanceMeasure .= "Timeliness<br>";
+      $qetDisplay = [];
+      foreach (['quality' => 'Quality', 'efficiency' => 'Efficiency', 'timeliness' => 'Timeliness'] as $mtype => $mlabel) {
+        $stmt = $mysqli->prepare("SELECT score, descriptor FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = ? AND measure_type = ? ORDER BY score DESC");
+        $stmt->bind_param("is", $siMiId, $mtype);
+        $stmt->execute();
+        $qetRes = $stmt->get_result();
+        $qetHtml = "";
+        while ($qetRow = $qetRes->fetch_assoc()) {
+          $qetHtml .= "<b>" . $qetRow['score'] . "</b> - " . htmlspecialchars($qetRow['descriptor']) . "<br>";
+        }
+        $stmt->close();
+        $qetDisplay[$mtype] = $qetHtml;
+        if ($qetHtml !== "") {
+          $performanceMeasure .= "$mlabel<br>";
+        }
       }
       if ($count == 1) {
         $view .= "
@@ -801,9 +921,9 @@ function trows($mysqli, $row, $padding, $addDisplay)
         </td>
         <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . ""/*json_encode($siDataRow1)*/ . "</td>
         <td>$performanceMeasure</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_quality']) . "</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_eff']) . "</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_time']) . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . $qetDisplay['quality'] . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . $qetDisplay['efficiency'] . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . $qetDisplay['timeliness'] . "</td>
         <td>$empincharge</td>
         <td class='noprint' style='width:100px;padding:5px'>
         ";
@@ -823,9 +943,9 @@ function trows($mysqli, $row, $padding, $addDisplay)
         <td></td>
         <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . "</td>
         <td>$performanceMeasure</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_quality']) . "</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_eff']) . "</td>
-        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . unserData($siDataRow1['mi_time']) . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . $qetDisplay['quality'] . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . $qetDisplay['efficiency'] . "</td>
+        <td style='width:150px;padding-bottom:10px;$correctionColor'>" . $qetDisplay['timeliness'] . "</td>
         <td>$empincharge</td>
         <td class='noprint' style='width:100px;padding:5px'>
         ";
@@ -867,7 +987,7 @@ function rsmEditStatus($dat)
   $period = $_SESSION['period'];
   $enable = false;
 
-  $sql = "SELECT * from `spms_rsmstatus` where `period_id`='$period' and `department_id`='$department_id'";
+  $sql = "SELECT * from spms_rsm_status where period_id='$period' and department_id='$department_id'";
   $sql = $mysqli->query($sql);
   $sql = $sql->fetch_assoc();
   if ($sql['edit']) {
@@ -891,7 +1011,7 @@ function AddInputs($mysqli, $dataId)
   $period_id = $_SESSION["period"];
   $employee_id = $_SESSION['emp_info']['employees_id'];
 
-  $sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `employees_id` = '$employee_id' AND `period_id` = '$period_id'";
+  $sql = "SELECT * FROM spms_pcr_status WHERE employees_id = '$employee_id' AND period_id = '$period_id'";
   $res = $mysqli->query($sql);
   if ($row = $res->fetch_assoc()) {
     $department_id = $row['department_id'];
@@ -903,13 +1023,13 @@ function AddInputs($mysqli, $dataId)
   $curr_rsm_exists = false;
   $prev_rsm_exists = false;
   $previous_period_id = getPreviousPeriodId($mysqli);
-  $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$period_id' AND `dep_id` = '$department_id' LIMIT 1;";
+  $sql = "SELECT * FROM spms_pcr_mfos WHERE mfo_periodId = '$period_id' AND dep_id = '$department_id' LIMIT 1;";
   $result = $mysqli->query($sql);
   if ($result->num_rows > 0) {
     $curr_rsm_exists = true;
   }
 
-  $sql = "SELECT * FROM `spms_corefunctions` WHERE `mfo_periodId` = '$previous_period_id' AND `dep_id` = '$department_id' LIMIT 1;";
+  $sql = "SELECT * FROM spms_pcr_mfos WHERE mfo_periodId = '$previous_period_id' AND dep_id = '$department_id' LIMIT 1;";
   $result = $mysqli->query($sql);
   if ($result->num_rows > 0) {
     $prev_rsm_exists = true;
@@ -945,7 +1065,7 @@ function settingDrop($mysqli, $row, $edit, $add, $delete)
 {
   $correction = "";
   if ($row['corrections']) {
-    $c = unserialize($row['corrections']);
+    $c = json_decode($row['corrections'], true) ?? [];
     $count = 0;
     $crt = "";
     while ($count < count($c)) {
@@ -1060,13 +1180,27 @@ function changeCount($dat)
 function get_children($mysqli, $cf_ID)
 {
   $data = [];
-  $sql = "SELECT * FROM `spms_corefunctions` WHERE `parent_id` ='$cf_ID'";
+  $sql = "SELECT * FROM spms_pcr_mfos WHERE parent_id ='$cf_ID'";
   $result = $mysqli->query($sql);
   while ($row = $result->fetch_assoc()) {
     $row["children"] = get_children($mysqli, $row["cf_ID"]);
     $data[] = $row;
   }
   return $data;
+}
+
+function copy_qet_descriptors($mysqli, $source_mi_id, $new_mi_id)
+{
+  $stmt = $mysqli->prepare("SELECT measure_type, score, descriptor FROM spms_pcr_si_qet_descriptors WHERE success_indicator_id = ?");
+  $stmt->bind_param("i", $source_mi_id);
+  $stmt->execute();
+  $res = $stmt->get_result();
+  while ($row = $res->fetch_assoc()) {
+    $esc = $mysqli->real_escape_string($row['descriptor']);
+    $mysqli->query("INSERT IGNORE INTO spms_pcr_si_qet_descriptors (success_indicator_id, measure_type, score, descriptor, created_at, updated_at)
+                    VALUES ('$new_mi_id', '$row[measure_type]', '$row[score]', '$esc', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
+  }
+  $stmt->close();
 }
 
 function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $department_id = null)
@@ -1080,7 +1214,7 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
     $parent_id = $parent_id ? $parent_id : NULL;
     $cf_title = $mysqli->real_escape_string($core_function['cf_title']);
     $cf_count = $mysqli->real_escape_string($core_function['cf_count']);
-    $sql = "INSERT INTO `spms_corefunctions`(`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`, `corrections`) VALUES ('$selected_period_id','$parent_id','$department_id','$cf_count','$cf_title','')";
+    $sql = "INSERT INTO spms_pcr_mfos(mfo_periodId, parent_id, dep_id, cf_count, cf_title, corrections) VALUES ('$selected_period_id','$parent_id','$department_id','$cf_count','$cf_title','')";
     $mysqli->query($sql);
     $insert_id = $mysqli->insert_id;
 
@@ -1090,12 +1224,21 @@ function start_duplicating($mysqli, $data, $selected_period_id, $parent_id, $dep
 
       $mi_succIn = $mysqli->real_escape_string($success_idicator['mi_succIn']);
 
-      $mi_quality = $mysqli->real_escape_string($success_idicator['mi_quality']);
-      $mi_eff = $mysqli->real_escape_string($success_idicator['mi_eff']);
-      $mi_time = $mysqli->real_escape_string($success_idicator['mi_time']);
-
-      $sql = "INSERT INTO `spms_matrixindicators`(`cf_ID`, `mi_succIn`, `mi_quality`, `mi_eff`, `mi_time`, `mi_incharge`, `corrections`) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
+      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, corrections) VALUES ('$insert_id','$mi_succIn','')";
       $mysqli->query($sql);
+      $new_mi_id = $mysqli->insert_id;
+      $src_mi_id = $success_idicator['mi_id'];
+      $stmt = $mysqli->prepare("SELECT user_id FROM spms_pcr_si_assignments WHERE success_indicator_id = ?");
+      $stmt->bind_param("i", $src_mi_id);
+      $stmt->execute();
+      $inRes = $stmt->get_result();
+      while ($inRow = $inRes->fetch_assoc()) {
+        $emp_id = $inRow['user_id'];
+        $mysqli->query("INSERT INTO spms_pcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
+                        VALUES ('$new_mi_id', '$emp_id', '$selected_period_id', 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
+      }
+      $stmt->close();
+      copy_qet_descriptors($mysqli, $src_mi_id, $new_mi_id);
     }
 
     $data[$key]["children"] = start_duplicating($mysqli, $core_function["children"], $selected_period_id, $insert_id);
@@ -1115,7 +1258,7 @@ function start_duplicating_copy_to($mysqli, $data, $selected_period_id, $parent_
     $parent_id = $parent_id ? $parent_id : NULL;
     $cf_title = $mysqli->real_escape_string($core_function['cf_title']);
     $cf_count = $mysqli->real_escape_string($core_function['cf_count']);
-    $sql = "INSERT INTO `spms_corefunctions`(`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`, `corrections`) VALUES ('$selected_period_id','$parent_id','$department_id','$cf_count','$cf_title','')";
+    $sql = "INSERT INTO spms_pcr_mfos(mfo_periodId, parent_id, dep_id, cf_count, cf_title, corrections) VALUES ('$selected_period_id','$parent_id','$department_id','$cf_count','$cf_title','')";
     $mysqli->query($sql);
     $insert_id = $mysqli->insert_id;
 
@@ -1125,12 +1268,21 @@ function start_duplicating_copy_to($mysqli, $data, $selected_period_id, $parent_
 
       $mi_succIn = $mysqli->real_escape_string($success_idicator['mi_succIn']);
 
-      $mi_quality = $mysqli->real_escape_string($success_idicator['mi_quality']);
-      $mi_eff = $mysqli->real_escape_string($success_idicator['mi_eff']);
-      $mi_time = $mysqli->real_escape_string($success_idicator['mi_time']);
-
-      $sql = "INSERT INTO `spms_matrixindicators`(`cf_ID`, `mi_succIn`, `mi_quality`, `mi_eff`, `mi_time`, `mi_incharge`, `corrections`) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
+      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, corrections) VALUES ('$insert_id','$mi_succIn','')";
       $mysqli->query($sql);
+      $new_mi_id = $mysqli->insert_id;
+      $src_mi_id = $success_idicator['mi_id'];
+      $stmt = $mysqli->prepare("SELECT user_id FROM spms_pcr_si_assignments WHERE success_indicator_id = ?");
+      $stmt->bind_param("i", $src_mi_id);
+      $stmt->execute();
+      $inRes = $stmt->get_result();
+      while ($inRow = $inRes->fetch_assoc()) {
+        $emp_id = $inRow['user_id'];
+        $mysqli->query("INSERT INTO spms_pcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
+                        VALUES ('$new_mi_id', '$emp_id', '$selected_period_id', 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
+      }
+      $stmt->close();
+      copy_qet_descriptors($mysqli, $src_mi_id, $new_mi_id);
     }
 
     $data[$key]["children"] = start_duplicating_copy_to($mysqli, $core_function["children"], $selected_period_id, $insert_id);
@@ -1150,7 +1302,7 @@ function start_duplicating_to_diff_dept($mysqli, $data, $selected_period_id, $pa
     $parent_id = $parent_id ? $parent_id : NULL;
     $cf_title = $mysqli->real_escape_string($core_function['cf_title']);
     $cf_count = $mysqli->real_escape_string($core_function['cf_count']);
-    $sql = "INSERT INTO `spms_corefunctions`(`mfo_periodId`, `parent_id`, `dep_id`, `cf_count`, `cf_title`, `corrections`) VALUES ('$selected_period_id','$parent_id','$department_id','$cf_count','$cf_title','')";
+    $sql = "INSERT INTO spms_pcr_mfos(mfo_periodId, parent_id, dep_id, cf_count, cf_title, corrections) VALUES ('$selected_period_id','$parent_id','$department_id','$cf_count','$cf_title','')";
     $mysqli->query($sql);
     $insert_id = $mysqli->insert_id;
 
@@ -1160,12 +1312,21 @@ function start_duplicating_to_diff_dept($mysqli, $data, $selected_period_id, $pa
 
       $mi_succIn = $mysqli->real_escape_string($success_idicator['mi_succIn']);
 
-      $mi_quality = $mysqli->real_escape_string($success_idicator['mi_quality']);
-      $mi_eff = $mysqli->real_escape_string($success_idicator['mi_eff']);
-      $mi_time = $mysqli->real_escape_string($success_idicator['mi_time']);
-
-      $sql = "INSERT INTO `spms_matrixindicators`(`cf_ID`, `mi_succIn`, `mi_quality`, `mi_eff`, `mi_time`, `mi_incharge`, `corrections`) VALUES ('$insert_id','$mi_succIn','$mi_quality','$mi_eff','$mi_time','$success_idicator[mi_incharge]','')";
+      $sql = "INSERT INTO spms_pcr_indicators(cf_ID, mi_succIn, corrections) VALUES ('$insert_id','$mi_succIn','')";
       $mysqli->query($sql);
+      $new_mi_id = $mysqli->insert_id;
+      $src_mi_id = $success_idicator['mi_id'];
+      $stmt = $mysqli->prepare("SELECT user_id FROM spms_pcr_si_assignments WHERE success_indicator_id = ?");
+      $stmt->bind_param("i", $src_mi_id);
+      $stmt->execute();
+      $inRes = $stmt->get_result();
+      while ($inRow = $inRes->fetch_assoc()) {
+        $emp_id = $inRow['user_id'];
+        $mysqli->query("INSERT INTO spms_pcr_si_assignments (success_indicator_id, user_id, period_id, assigned_by, created_at, updated_at)
+                        VALUES ('$new_mi_id', '$emp_id', '$selected_period_id', 9, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())");
+      }
+      $stmt->close();
+      copy_qet_descriptors($mysqli, $src_mi_id, $new_mi_id);
     }
 
     $data[$key]["children"] = start_duplicating_to_diff_dept($mysqli, $core_function["children"], $selected_period_id, $insert_id, $department_id);
@@ -1178,10 +1339,179 @@ function start_duplicating_to_diff_dept($mysqli, $data, $selected_period_id, $pa
 function get_success_indicators($mysqli, $cf_ID)
 {
   $data = [];
-  $sql = "SELECT * FROM `spms_matrixindicators` WHERE `cf_ID` = '$cf_ID'";
+  $sql = "SELECT * FROM spms_pcr_indicators WHERE cf_ID = '$cf_ID'";
   $result = $mysqli->query($sql);
   while ($row = $result->fetch_assoc()) {
     $data[] = $row;
   }
   return $data;
+}
+
+// Helper function to get personnel in-charge for an MFO
+function get_mfo_personnel_incharge($mysqli, $cf_id)
+{
+  $personnel = [];
+  $seen_ids = [];
+
+  // Get all success indicators for this MFO
+  $si_sql = "SELECT mi_id FROM spms_pcr_indicators WHERE cf_ID = '$cf_id'";
+  $si_result = $mysqli->query($si_sql);
+
+  while ($si_row = $si_result->fetch_assoc()) {
+    $mi_id = $si_row['mi_id'];
+
+    // Get personnel assignments for this success indicator
+    $assign_sql = "SELECT a.user_id, e.employees_id, e.firstName, e.lastName, e.middleName, e.extName
+                    FROM spms_pcr_si_assignments a
+                    LEFT JOIN employees e ON a.user_id = e.employees_id
+                    WHERE a.success_indicator_id = '$mi_id'";
+    $assign_result = $mysqli->query($assign_sql);
+
+    while ($emp_row = $assign_result->fetch_assoc()) {
+      if (!$emp_row['employees_id']) continue;
+
+      // Skip duplicates
+      if (in_array($emp_row['employees_id'], $seen_ids)) continue;
+      $seen_ids[] = $emp_row['employees_id'];
+
+      $firstName  = $emp_row['firstName']  ?? '';
+      $lastName   = $emp_row['lastName']   ?? '';
+      $middleName = $emp_row['middleName'] ?? '';
+      $extName    = $emp_row['extName']    ?? '';
+
+      $middleInitial = $middleName !== '' ? $middleName[0] . '.' : '';
+      $extFormatted  = $extName !== '' ? ", $extName" : '';
+
+      $parts = array_filter([$lastName, $firstName, $middleInitial]);
+      $fullName = implode(' ', $parts) . $extFormatted;
+
+      $personnel[] = [
+        "employee_id" => $emp_row['employees_id'],
+        "full_name" => $fullName
+      ];
+    }
+  }
+
+  return $personnel;
+}
+
+// Recursive function to get MFO children
+function get_mfo_tree_children($mysqli, $parent_id, $department_id)
+{
+  $children = [];
+  $sql = "SELECT cf_ID, cf_count, cf_title FROM spms_pcr_mfos 
+          WHERE parent_id='$parent_id' AND dep_id='$department_id' 
+          ORDER BY cf_count ASC";
+  $result = $mysqli->query($sql);
+
+  while ($row = $result->fetch_assoc()) {
+    $node = [
+      "id" => $row["cf_ID"],
+      "code" => "",
+      "title" => $row["cf_count"] . ". " . $row["cf_title"],
+      "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"]),
+      "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id)
+    ];
+    $children[] = $node;
+  }
+
+  return $children;
+}
+
+// Helper function to get employee name
+function get_employee_name($mysqli, $employee_id)
+{
+  $sql = "SELECT * from employees where employees_id='$employee_id'";
+  $res = $mysqli->query($sql);
+
+  $name = "";
+
+  if ($row = $res->fetch_assoc()) {
+    $name = "$row[lastName], $row[firstName]";
+    if ($row['extName']) {
+      $name .= " " . $row['extName'];
+    }
+    $name = mb_strtoupper($name);
+  }
+
+  return $name;
+}
+
+// Helper function to sort personnel alphabetically
+function order_personnel($personnel)
+{
+  usort($personnel, fn($a, $b) => strcmp($a['name'], $b['name']));
+  return $personnel;
+}
+
+// Helper function to build hierarchical tree
+function buildTree(array $elements, $parentId)
+{
+  $branch = array();
+
+  foreach ($elements as $element) {
+    if ($element['parent_id'] == $parentId) {
+      $children = buildTree($elements, $element['id']);
+      if ($children) {
+        $element['children'] = $children;
+      }
+      $branch[] = $element;
+    }
+  }
+
+  return $branch;
+}
+
+// Main function to get department personnel hierarchy
+function get_department_personnel_hierarchy($mysqli, $department_id, $period_id)
+{
+  // Get all personnel in the department for the period
+  $sql = "SELECT * FROM spms_pcr_status WHERE department_id = '$department_id' AND period_id = '$period_id'";
+  $res = $mysqli->query($sql);
+
+  $personnel = [];
+  $department_head_id = null;
+
+  while ($row = $res->fetch_assoc()) {
+    // Store department head ID for reference
+    if ($row['DepartmentHead'] && !$department_head_id) {
+      $department_head_id = $row['DepartmentHead'];
+    }
+
+    $employee_id = $row['employees_id'];
+    $parent_id = $row['ImmediateSup'];
+
+    // If ImmediateSup is null, use DepartmentHead as parent
+    if (!$parent_id) {
+      $parent_id = $row['DepartmentHead'];
+    }
+
+    $datum = [
+      "id" => $employee_id,
+      "parent_id" => $parent_id,
+      "name" => get_employee_name($mysqli, $employee_id)
+    ];
+
+    $personnel[] = $datum;
+  }
+
+  // Sort personnel by name
+  $personnel = order_personnel($personnel);
+
+  // Build hierarchical tree starting from department head
+  if ($department_head_id) {
+    $tree = buildTree($personnel, $department_head_id);
+
+    // Create root node with department head
+    $root_node = [
+      "id" => $department_head_id,
+      "name" => get_employee_name($mysqli, $department_head_id),
+      "children" => $tree
+    ];
+
+    return $root_node;
+  } else {
+    // If no department head found, return flat list
+    return $personnel;
+  }
 }

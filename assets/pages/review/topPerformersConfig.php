@@ -6,7 +6,7 @@ if (isset($_POST["getList"])) {
   $period = $_SESSION["periodPending"];
   $empId =  $_SESSION["emp_id"];
 
-  $sql = "SELECT * from spms_performancereviewstatus where period_id='$period' and (`ImmediateSup`='$empId' or `DepartmentHead` = '$empId')  ";
+  $sql = "SELECT * from spms_pcr_status where period_id='$period' and (ImmediateSup='$empId' or DepartmentHead = '$empId')  ";
   $res = $mysqli->query($sql);
 
   $data = [];
@@ -64,7 +64,7 @@ function getScale($final_numerical_rating)
 function getPersonnelName($mysqli, $empid)
 {
   if (!$empid) return "";
-  $sql = "SELECT * FROM `employees` WHERE `employees_id` = '$empid'";
+  $sql = "SELECT * FROM employees WHERE employees_id = '$empid'";
   $res = $mysqli->query($sql);
   $full_name = "";
   if ($row = $res->fetch_assoc()) {

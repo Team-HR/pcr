@@ -9,7 +9,7 @@ if (isset($_POST["getPersonnelHeirarchy"])) {
 
     $period_id = 0;
 
-    $sql = "SELECT * FROM `spms_mfo_period` where `month_mfo` = '$selected_period_month' AND `year_mfo` = '$selected_period_year'";
+    $sql = "SELECT * FROM spms_periods where month_mfo = '$selected_period_month' AND year_mfo = '$selected_period_year'";
 
     $res = $mysqli->query($sql);
     if ($row = $res->fetch_assoc()) {
@@ -19,7 +19,7 @@ if (isset($_POST["getPersonnelHeirarchy"])) {
     // $departmentHeadEmployeeId = 0;
 
     // if ($period_id) {
-    //     $sql = "SELECT DISTINCT `DepartmentHead` FROM `spms_performancereviewstatus` WHERE `department_id` = '$department_id' and `period_id` = '$period_id'";
+    //     $sql = "SELECT DISTINCT DepartmentHead FROM spms_pcr_status WHERE department_id = '$department_id' and period_id = '$period_id'";
 
     //     $res = $mysqli->query($sql);
 

@@ -12,7 +12,7 @@ function bd($ar){
   }
   return $rate;
 }
-$sql = "SELECT * from spms_supportfunctions";
+$sql = "SELECT * from spms_pcr_support_functions";
 $sql = $mysqli->query($sql);
 $InputedSupp = "";
 if($sql->num_rows>0){

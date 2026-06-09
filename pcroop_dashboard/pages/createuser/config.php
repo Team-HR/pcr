@@ -17,8 +17,8 @@ if (isset($_POST['createUser'])) {
       if($check->num_rows){
         echo "Username is already taken";
       }else{
-        $sql = "INSERT INTO `accounts`
-        (`acc_id`, `employees_id`, `username`, `password`, `type`)
+        $sql = "INSERT INTO accounts
+        (acc_id, employees_id, username, password, type)
         VALUES (NULL, '$employee', '$username', '$password', '$userType')";
         $sql = $mysqli->query($sql);
         if(!$sql){

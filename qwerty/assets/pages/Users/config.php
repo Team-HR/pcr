@@ -5,13 +5,13 @@ if (isset($_POST['searchEmp'])) {
   if (count($data) > 1) {
     $first = $data[0];
     $second = $data[1];
-    $query = "where (`firstName` like '$first%' and `lastName` like '$second%') or (`firstName` like '$second%' and `lastName` like '$first%')";
+    $query = "where (firstName like '$first%' and lastName like '$second%') or (firstName like '$second%' and lastName like '$first%')";
   } else {
     $first = $data[0];
-    $query = "where `firstName` like '$first%' or `lastName` like '$first%'";
+    $query = "where firstName like '$first%' or lastName like '$first%'";
   }
 
-  $sql = "SELECT * from `employees` $query limit 10";
+  $sql = "SELECT * from employees $query limit 10";
   $sql = $mysqli->query($sql);
   $row = "";
   if ($sql->num_rows >= 1) {
@@ -27,7 +27,7 @@ if (isset($_POST['searchEmp'])) {
   </table>
 <?php
 } elseif (isset($_POST['showFormDetails'])) {
-  $sql = "SELECT * from `employees` left join `spms_accounts` on `employees`.`employees_id`=`spms_accounts`.`employees_id`  where `employees`.`employees_id`='$_POST[showFormDetails]'";
+  $sql = "SELECT * from employees left join spms_accounts on employees.employees_id=spms_accounts.employees_id  where employees.employees_id='$_POST[showFormDetails]'";
   $info = $_ipcr->get_data($sql);
   $permit = explode(",", $info['type']);
   $pmt = "";
@@ -111,12 +111,12 @@ if (isset($_POST['searchEmp'])) {
   $username = $_POST['username'];
   $password = password_hash("1234", PASSWORD_DEFAULT);
   $type = $_POST['type'];
-  $find = "SELECT * from `spms_accounts` where `employees_id` = '$_POST[updateAccount]'";
+  $find = "SELECT * from spms_accounts where employees_id = '$_POST[updateAccount]'";
   $find = $mysqli->query($find);
   if ($find->num_rows) {
-    $sql = "UPDATE `spms_accounts` SET `username` = '$username', `type` = '$type' WHERE `spms_accounts`.`employees_id` = '$dataId'";
+    $sql = "UPDATE spms_accounts SET username = '$username', type = '$type' WHERE spms_accounts.employees_id = '$dataId'";
   } else {
-    $sql = "INSERT INTO `spms_accounts` (`acc_id`, `employees_id`, `username`, `password`, `type`)
+    $sql = "INSERT INTO spms_accounts (acc_id, employees_id, username, password, type)
             VALUES (NULL, '$dataId', '$username', '$password', '$type')";
   }
   $sql = $mysqli->query($sql);
@@ -128,7 +128,7 @@ if (isset($_POST['searchEmp'])) {
 } elseif (isset($_POST['resetPassword'])) {
   $dataId = $_POST['resetPassword'];
   $password = password_hash("1234", PASSWORD_DEFAULT);
-  $sql = "UPDATE `spms_accounts` set `password`='$password' where `employees_id`='$dataId'";
+  $sql = "UPDATE spms_accounts set password='$password' where employees_id='$dataId'";
   $sql = $mysqli->query($sql);
   if ($sql) {
     echo "Password was reset to Defualt";
@@ -138,9 +138,9 @@ if (isset($_POST['searchEmp'])) {
 } elseif (isset($_POST['searchSelectedDep'])) {
   $data = $_POST['searchSelectedDep'];
   if ($data) {
-    $allPmt = "SELECT `employees`.`employees_id`, `employees`.`lastName`,`employees`.`firstName`,`employees`.`middleName`, `spms_accounts`.`type` from `employees` left join `spms_accounts` on `employees`.`employees_id`=`spms_accounts`.`employees_id` where `employees`.`department_id`='$data'";
+    $allPmt = "SELECT employees.employees_id, employees.lastName,employees.firstName,employees.middleName, spms_accounts.type from employees left join spms_accounts on employees.employees_id=spms_accounts.employees_id where employees.department_id='$data'";
   } else {
-    $allPmt = "SELECT `employees`.`employees_id`, `employees`.`lastName`,`employees`.`firstName`,`employees`.`middleName`, `spms_accounts`.`type` from `employees` left join `spms_accounts` on `employees`.`employees_id`=`spms_accounts`.`employees_id` where `spms_accounts`.`type` like '%PMT%'";
+    $allPmt = "SELECT employees.employees_id, employees.lastName,employees.firstName,employees.middleName, spms_accounts.type from employees left join spms_accounts on employees.employees_id=spms_accounts.employees_id where spms_accounts.type like '%PMT%'";
   }
   $allPmt = $mysqli->query($allPmt);
   $view = "";

@@ -7,8 +7,6 @@
 	<link rel="stylesheet" type="text/css" href="assets/libs/ui/dist/semantic.css">
 	<script src="assets/libs/jquery/jquery-3.3.1.min.js"></script>
 	<script src="assets/libs/ui/dist/semantic.min.js"></script>
-	<script src="assets/libs/node_modules/chart.js/dist/Chart.js"></script>
-	<script src="assets/libs/node_modules/chart.js/dist/Chart.min.js"></script>
 	<script src="assets/libs/umbra.js?v=<?= time() ?>"></script>
 
 	<!-- <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">

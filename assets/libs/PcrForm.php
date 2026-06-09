@@ -18,7 +18,7 @@ class PcrForm
 	{
 		$mysqli = $this->mysqli;
 		$file_status = [];
-		$sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `performanceReviewStatus_id` = '$id'";
+		$sql = "SELECT * FROM spms_pcr_status WHERE performanceReviewStatus_id = '$id'";
 		$res = $mysqli->query($sql);
 		if ($row = $res->fetch_assoc()) {
 			$file_status = $row;
@@ -72,7 +72,7 @@ class PcrForm
 		// get position start
 		$position = "";
 		if ($employees_id) {
-			$sql = "SELECT `employees`.`position_id`, `positiontitles`.* FROM `employees` LEFT JOIN `positiontitles` ON `employees`.`position_id` = `positiontitles`.`position_id` WHERE `employees`.`employees_id` = '$employees_id'";
+			$sql = "SELECT employees.position_id, positiontitles.* FROM employees LEFT JOIN positiontitles ON employees.position_id = positiontitles.position_id WHERE employees.employees_id = '$employees_id'";
 			$res = $mysqli->query($sql);
 			if ($row = $res->fetch_assoc()) {
 				$position = $row["position"];
@@ -174,10 +174,10 @@ class PcrForm
 			$si = [
 				"mi_id" => $si["mi_id"],
 				"mi_succIn" => $si["mi_succIn"],
-				"si_corrections" => $si["corrections"],
-				"mi_quality" => unserialize($si["mi_quality"]),
-				"mi_eff" => unserialize($si["mi_eff"]),
-				"mi_time" => unserialize($si["mi_time"])
+				"si_corrections" => json_decode($si["corrections"], true) ?? [],
+				"mi_quality" => $this->get_qet_arr($si["mi_id"], "quality"),
+				"mi_eff" => $this->get_qet_arr($si["mi_id"], "efficiency"),
+				"mi_time" => $this->get_qet_arr($si["mi_id"], "timeliness")
 			];
 			$tr = $tr + $si;
 		}
@@ -202,10 +202,10 @@ class PcrForm
 					$si = [
 						"mi_id" => $si["mi_id"],
 						"mi_succIn" => $si["mi_succIn"],
-						"si_corrections" => $si["corrections"],
-						"mi_quality" => unserialize($si["mi_quality"]),
-						"mi_eff" => unserialize($si["mi_eff"]),
-						"mi_time" => unserialize($si["mi_time"]),
+						"si_corrections" => json_decode($si["corrections"], true) ?? [],
+						"mi_quality" => $this->get_qet_arr($si["mi_id"], "quality"),
+						"mi_eff" => $this->get_qet_arr($si["mi_id"], "efficiency"),
+						"mi_time" => $this->get_qet_arr($si["mi_id"], "timeliness"),
 					];
 					$data[] = /* $_tr + */ $si;
 				}
@@ -230,7 +230,7 @@ class PcrForm
 
 		$mysqli = $this->mysqli;
 		$employee_id = $this->fileStatus["employees_id"];
-		$sql = "SELECT * FROM `spms_corefucndata` WHERE `p_id` = '$mi_id' AND `empId` = '$employee_id' LIMIT 1";
+		$sql = "SELECT * FROM spms_pcr_indicator_accomplishments WHERE p_id = '$mi_id' AND empId = '$employee_id' LIMIT 1";
 		$res = $mysqli->query($sql);
 		$row = $res->fetch_assoc();
 
@@ -373,14 +373,14 @@ class PcrForm
 	{
 		$mysqli = $this->mysqli;
 		# for more compact and faster query
-		# ... and `dep_id` = '$department_id'
-		# department_id from spms_performancereviewstatus
+		# ... and dep_id = '$department_id'
+		# department_id from spms_pcr_status
 		$department_id = isset($fileStatus["department_id"]) ? $fileStatus["department_id"] : "";
 		$period_id = $fileStatus["period_id"];
 		$employee_id = $fileStatus["employees_id"];
 		# not recommended department_id from employees table
 		$main_Arr = [];
-		$sql = "SELECT * from spms_corefunctions where parent_id='' and mfo_periodId='$period_id' and `dep_id` = '$department_id' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+		$sql = "SELECT * from spms_pcr_mfos where parent_id='' and mfo_periodId='$period_id' and dep_id = '$department_id' ORDER BY spms_pcr_mfos.cf_count ASC";
 		$sql = $mysqli->query($sql);
 		$parent = [[], [], []];
 		while ($core = $sql->fetch_assoc()) {
@@ -425,6 +425,19 @@ class PcrForm
 		return $main_Arr;
 	}
 
+	private function get_qet_arr($mi_id, $measure_type)
+	{
+		$arr = [];
+		$mysqli = $this->mysqli;
+		$result = $mysqli->query("SELECT score, descriptor FROM spms_pcr_si_qet_descriptors
+		                          WHERE success_indicator_id = '$mi_id' AND measure_type = '$measure_type'
+		                          ORDER BY score ASC");
+		while ($row = $result->fetch_assoc()) {
+			$arr[(int)$row['score']] = $row['descriptor'];
+		}
+		return $arr;
+	}
+
 	private function si($employee_id, $siId)
 	{
 		$mysqli = $this->mysqli;
@@ -432,17 +445,17 @@ class PcrForm
 		if (!$siId || $siId == null) {
 			return $i;
 		}
-		$sqlSi1 = "SELECT * from spms_matrixindicators where cf_ID='$siId'";
+		$sqlSi1 = "SELECT * from spms_pcr_indicators where cf_ID='$siId'";
 		$sqlSi1 = $mysqli->query($sqlSi1);
 		if ($sqlSi1->num_rows > 0) {
 			while ($a = $sqlSi1->fetch_assoc()) {
-				$incharge = explode(',', $a['mi_incharge']);
-				$cIn = 0;
-				while ($cIn < count($incharge)) {
-					if ($incharge[$cIn] == $employee_id) {
-						array_push($i, $a);
-					}
-					$cIn++;
+				$mi_id = $a['mi_id'];
+				$check = "SELECT id FROM spms_pcr_si_assignments
+				          WHERE success_indicator_id = '$mi_id' AND user_id = '$employee_id'
+				          LIMIT 1";
+				$check_res = $mysqli->query($check);
+				if ($check_res && $check_res->num_rows > 0) {
+					array_push($i, $a);
 				}
 			}
 		} else {
@@ -455,7 +468,7 @@ class PcrForm
 	private function q($siId)
 	{
 		$mysqli = $this->mysqli;
-		$sql = "SELECT * from spms_corefunctions where parent_id='$siId' ORDER BY `spms_corefunctions`.`cf_count` ASC";
+		$sql = "SELECT * from spms_pcr_mfos where parent_id='$siId' ORDER BY spms_pcr_mfos.cf_count ASC";
 		$sql = $mysqli->query($sql);
 		return $sql;
 	}
@@ -515,7 +528,7 @@ class PcrForm
 		$cTotal = 0;
 		$a = 0;
 		if ($si != "") {
-			$check = "SELECT * from spms_corefucndata where p_id='$si[mi_id]' and empId='$employee_id'";
+			$check = "SELECT * from spms_pcr_indicator_accomplishments where p_id='$si[mi_id]' and empId='$employee_id'";
 			$check = $mysqli->query($check);
 			if ($check->num_rows > 0) {
 				$SiData = $check->fetch_assoc();
@@ -553,7 +566,7 @@ class PcrForm
 		$period_id = $fileStatus['period_id'];
 		$employee_id = $fileStatus['employees_id'];
 
-		$sql = "SELECT * from spms_strategicfuncdata where period_id = '$period_id' and emp_id = '$employee_id'";
+		$sql = "SELECT * from spms_pcr_strategic_accomplishments where period_id = '$period_id' and emp_id = '$employee_id'";
 		$sql = $mysqli->query($sql);
 		$totalCount = 0;
 		$totalAv = 0;
@@ -619,11 +632,11 @@ class PcrForm
 		$totalAv = 0;
 
 		if ($formType == '1' || $formType == '5') {
-			$sql = "SELECT * FROM `spms_supportfunctions` where `type`=1";
+			$sql = "SELECT * FROM spms_pcr_support_functions where type=1";
 		} elseif ($formType == '3') {
-			$sql = "SELECT * FROM `spms_supportfunctions` where `type`=3";
+			$sql = "SELECT * FROM spms_pcr_support_functions where type=3";
 		} elseif ($formType == '2' || $formType == '4') {
-			$sql = "SELECT * FROM `spms_supportfunctions` where `type`=2";
+			$sql = "SELECT * FROM spms_pcr_support_functions where type=2";
 		} else {
 			// return bcdiv($totalAv, 1, 2);
 		}
@@ -634,7 +647,7 @@ class PcrForm
 		$total_percentage = 0;
 
 		while ($tr = $sql->fetch_assoc()) {
-			$sqlSelect = "SELECT * from spms_supportfunctiondata where parent_id='$tr[id_suppFunc]' and emp_id='$employee_id' and period_id='$period_id'";
+			$sqlSelect = "SELECT * from spms_pcr_support_function_accomplishments where parent_id='$tr[id_suppFunc]' and emp_id='$employee_id' and period_id='$period_id'";
 			$sqlSelect = $mysqli->query($sqlSelect);
 			$sqlSelectCount = $sqlSelect->num_rows;
 			if ($sqlSelectCount > 0) {
@@ -748,7 +761,7 @@ class PcrForm
 		$period_id = $this->fileStatus["period_id"];
 		$employees_id = $this->fileStatus["employees_id"];
 		$comments_and_reccomendations = "";
-		$sql = "SELECT * FROM `spms_commentrec` WHERE `period_id` = '$period_id' AND `emp_id` = '$employees_id'";
+		$sql = "SELECT * FROM spms_pcr_recommendations WHERE period_id = '$period_id' AND emp_id = '$employees_id'";
 		$res = $this->mysqli->query($sql);
 		if ($row = $res->fetch_assoc()) {
 			$comments_and_reccomendations = $row["comment"];

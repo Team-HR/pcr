@@ -3,7 +3,7 @@
 $nameFormatter = new NameFormatter($mysqli);
 
 if (isset($_POST["getPeriods"])) {
-    $sql = "SELECT * FROM `spms_mfo_period`";
+    $sql = "SELECT * FROM spms_periods";
     $res = $mysqli->query($sql);
     $data = [];
     while ($row = $res->fetch_assoc()) {
@@ -11,7 +11,7 @@ if (isset($_POST["getPeriods"])) {
     }
     echo  json_encode($data);
 } elseif (isset($_POST["getDepartments"])) {
-    $sql = "SELECT * FROM `department` ORDER BY `department`.`department` ASC";
+    $sql = "SELECT * FROM department ORDER BY department.department ASC";
     $res = $mysqli->query($sql);
     $data = [];
     while ($row = $res->fetch_assoc()) {
@@ -26,7 +26,7 @@ if (isset($_POST["getPeriods"])) {
 
     $data = [];
     // get period id first
-    $sql = "SELECT * FROM `spms_mfo_period` WHERE `month_mfo` = '$selPeriod' AND `year_mfo` = '$selYear'";
+    $sql = "SELECT * FROM spms_periods WHERE month_mfo = '$selPeriod' AND year_mfo = '$selYear'";
 
     $res = $mysqli->query($sql);
     $row = $res->fetch_assoc();
@@ -34,9 +34,9 @@ if (isset($_POST["getPeriods"])) {
 
     if ($selDepartment) {
         $department_id = $selDepartment["department_id"];
-        $sql = "SELECT `spms_performancereviewstatus`.*, `department`.* FROM `spms_performancereviewstatus` LEFT JOIN `department` ON `spms_performancereviewstatus`.`department_id` = `department`.`department_id` WHERE `spms_performancereviewstatus`.`period_id` = '$period_id' AND `spms_performancereviewstatus`.`department_id` = '$department_id'";
+        $sql = "SELECT spms_pcr_status.*, department.* FROM spms_pcr_status LEFT JOIN department ON spms_pcr_status.department_id = department.department_id WHERE spms_pcr_status.period_id = '$period_id' AND spms_pcr_status.department_id = '$department_id'";
     } else {
-        $sql = "SELECT `spms_performancereviewstatus`.*, `department`.* FROM `spms_performancereviewstatus` LEFT JOIN `department` ON `spms_performancereviewstatus`.`department_id` = `department`.`department_id` WHERE `spms_performancereviewstatus`.`period_id` = '$period_id'";
+        $sql = "SELECT spms_pcr_status.*, department.* FROM spms_pcr_status LEFT JOIN department ON spms_pcr_status.department_id = department.department_id WHERE spms_pcr_status.period_id = '$period_id'";
     }
 
     $res = $mysqli->query($sql);
@@ -56,12 +56,12 @@ if (isset($_POST["getPeriods"])) {
     echo json_encode($data);
 } elseif (isset($_POST["lockForm"])) {
     $performanceReviewStatus_id = $_POST["performanceReviewStatus_id"];
-    $sql = "UPDATE `spms_performancereviewstatus` SET `submitted` = 'Done' WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$performanceReviewStatus_id';";
+    $sql = "UPDATE spms_pcr_status SET submitted = 'Done' WHERE spms_pcr_status.performanceReviewStatus_id = '$performanceReviewStatus_id';";
     $mysqli->query($sql);
     echo json_encode($performanceReviewStatus_id);
 } elseif (isset($_POST["unlockForm"])) {
     $performanceReviewStatus_id = $_POST["performanceReviewStatus_id"];
-    $sql = "UPDATE `spms_performancereviewstatus` SET `submitted` = '', `panelApproved` = ''  WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$performanceReviewStatus_id';";
+    $sql = "UPDATE spms_pcr_status SET submitted = '', panelApproved = ''  WHERE spms_pcr_status.performanceReviewStatus_id = '$performanceReviewStatus_id';";
     $mysqli->query($sql);
     echo json_encode($performanceReviewStatus_id);
 } elseif (isset($_POST["convertForm"])) {
@@ -75,13 +75,13 @@ if (isset($_POST["getPeriods"])) {
     $period_id = $fileToConvert["period_id"];
 
 
-    $sql = "UPDATE `spms_performancereviewstatus` SET `formType` = '$selFormType' WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$performanceReviewStatus_id';
+    $sql = "UPDATE spms_pcr_status SET formType = '$selFormType' WHERE spms_pcr_status.performanceReviewStatus_id = '$performanceReviewStatus_id';
     ";
     $mysqli->query($sql);
 
     # check if file has support function data existing
 
-    // $sql = "SELECT * FROM `spms_supportfunctiondata` WHERE emp_id = '$employees_id' AND period_id = '$period_id';";
+    // $sql = "SELECT * FROM spms_pcr_support_function_accomplishments WHERE emp_id = '$employees_id' AND period_id = '$period_id';";
     // $res = $mysqli->query($sql);
     // $support_function_data = [];
     // while ($row = $res->fetch_assoc()) {
@@ -125,7 +125,7 @@ if (isset($_POST["getPeriods"])) {
 
             ];
             foreach ($conversion as $key => $func) {
-                $sql = "UPDATE `spms_supportfunctiondata` SET `parent_id` = '$func[parent_id]', `percent` = '$func[percent]' WHERE `parent_id` = '$key' AND `emp_id` = '$employees_id' AND `period_id` = '$period_id';";
+                $sql = "UPDATE spms_pcr_support_function_accomplishments SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
                 $mysqli->query($sql);
             }
         } elseif ($currFormType == '3') {
@@ -152,7 +152,7 @@ if (isset($_POST["getPeriods"])) {
                 ],
             ];
             foreach ($conversion as $key => $func) {
-                $sql = "UPDATE `spms_supportfunctiondata` SET `parent_id` = '$func[parent_id]', `percent` = '$func[percent]' WHERE `parent_id` = '$key' AND `emp_id` = '$employees_id' AND `period_id` = '$period_id';";
+                $sql = "UPDATE spms_pcr_support_function_accomplishments SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
                 $mysqli->query($sql);
             }
         }
@@ -194,7 +194,7 @@ if (isset($_POST["getPeriods"])) {
 
             ];
             foreach ($conversion as $key => $func) {
-                $sql = "UPDATE `spms_supportfunctiondata` SET `parent_id` = '$func[parent_id]', `percent` = '$func[percent]' WHERE `parent_id` = '$key' AND `emp_id` = '$employees_id' AND `period_id` = '$period_id';";
+                $sql = "UPDATE spms_pcr_support_function_accomplishments SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
                 $mysqli->query($sql);
             }
         } elseif ($currFormType == '3') {
@@ -221,7 +221,7 @@ if (isset($_POST["getPeriods"])) {
                 ],
             ];
             foreach ($conversion as $key => $func) {
-                $sql = "UPDATE `spms_supportfunctiondata` SET `parent_id` = '$func[parent_id]', `percent` = '$func[percent]' WHERE `parent_id` = '$key' AND `emp_id` = '$employees_id' AND `period_id` = '$period_id';";
+                $sql = "UPDATE spms_pcr_support_function_accomplishments SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
                 $mysqli->query($sql);
             }
         }
@@ -250,7 +250,7 @@ if (isset($_POST["getPeriods"])) {
                 ],
             ];
             foreach ($conversion as $key => $func) {
-                $sql = "UPDATE `spms_supportfunctiondata` SET `parent_id` = '$func[parent_id]', `percent` = '$func[percent]' WHERE `parent_id` = '$key' AND `emp_id` = '$employees_id' AND `period_id` = '$period_id';";
+                $sql = "UPDATE spms_pcr_support_function_accomplishments SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
                 $mysqli->query($sql);
             }
         } elseif ($currFormType == '2') {
@@ -277,7 +277,7 @@ if (isset($_POST["getPeriods"])) {
                 ],
             ];
             foreach ($conversion as $key => $func) {
-                $sql = "UPDATE `spms_supportfunctiondata` SET `parent_id` = '$func[parent_id]', `percent` = '$func[percent]' WHERE `parent_id` = '$key' AND `emp_id` = '$employees_id' AND `period_id` = '$period_id';";
+                $sql = "UPDATE spms_pcr_support_function_accomplishments SET parent_id = '$func[parent_id]', percent = '$func[percent]' WHERE parent_id = '$key' AND emp_id = '$employees_id' AND period_id = '$period_id';";
                 $mysqli->query($sql);
             }
         }
@@ -289,11 +289,15 @@ if (isset($_POST["getPeriods"])) {
 function getUsername($mysqli, $employees_id)
 {
     $username = "N/A";
-    $res = $mysqli->query("SELECT * FROM `spms_accounts` WHERE employees_id = '$employees_id'");
+    $stmt = $mysqli->prepare("SELECT * FROM spms_accounts WHERE employees_id = ?");
+    $stmt->bind_param("i", $employees_id);
+    $stmt->execute();
+    $res = $stmt->get_result();
     if ($row = $res->fetch_assoc()) {
         $username = $row["username"];
     } else {
         $username = '';
     };
+    $stmt->close();
     return $username;
 }

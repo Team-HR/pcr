@@ -1,11 +1,15 @@
 <?php
 require_once "../assets/libs/RatingScaleMatrixDestroyer.php";
+require_once "../../assets/libs/class/Class.php";
+
+$_ipcr = new IPCR();
+$mysqli = $_ipcr->getMysqli();
 
 if (isset($_POST['rsmGetTableData'])) {
     $period = $_POST['period'];
     $year = $_POST['year'];
 
-    $sql = "SELECT * from `spms_mfo_period` where `month_mfo`='$period' and `year_mfo`='$year'";
+    $sql = "SELECT * from spms_periods where month_mfo='$period' and year_mfo='$year'";
     $sql = $mysqli->query($sql);
     // 
     $mfoperiod = $sql->fetch_assoc();
@@ -15,7 +19,7 @@ if (isset($_POST['rsmGetTableData'])) {
 
     $tr = "";
     while ($dep = $sql->fetch_assoc()) {
-        $rsm = "SELECT * from `spms_rsmstatus` where `period_id`='$mfoperiod[mfoperiod_id]' and `department_id`='$dep[department_id]'";
+        $rsm = "SELECT * from spms_rsm_status where period_id='$mfoperiod[mfoperiod_id]' and department_id='$dep[department_id]'";
         $rsm =  $mysqli->query($rsm);
         if ($rsm->num_rows) {
             $rsm = $rsm->fetch_assoc();
@@ -54,12 +58,12 @@ if (isset($_POST['rsmGetTableData'])) {
     if (isset($_POST['edit'])) {
         $dataID = $_POST['dat'];
         $edit = $_POST['edit'];
-        $sql = "UPDATE `spms_rsmstatus` SET `edit` = '$edit' WHERE `spms_rsmstatus`.`rsmStatus_id` = '$dataID'";
+        $sql = "UPDATE spms_rsm_status SET edit = '$edit' WHERE spms_rsm_status.rsmStatus_id = '$dataID'";
         $sql = $mysqli->query($sql);
         if (!$sql) {
             $view = $mysqli->error;
         } else {
-            $getRsm = "SELECT * FROM `spms_rsmstatus`  left join `department` on `spms_rsmstatus`.`department_id`=`department`.`department_id` where `rsmStatus_id`='$dataID'";
+            $getRsm = "SELECT * FROM spms_rsm_status  left join department on spms_rsm_status.department_id=department.department_id where rsmStatus_id='$dataID'";
             $getRsm = $mysqli->query($getRsm);
             $getRsm = $getRsm->fetch_assoc();
             $check = '';
@@ -78,20 +82,20 @@ if (isset($_POST['rsmGetTableData'])) {
     } else {
         $period = $_POST['period'];
         $department = $_POST['department'];
-        $check = "SELECT * from `spms_rsmstatus` where `period_id`='$period' and `department_id`='$department'";
+        $check = "SELECT * from spms_rsm_status where period_id='$period' and department_id='$department'";
         $check = $mysqli->query($check);
         if ($check->num_rows) {
             $check = $check->fetch_assoc();
-            $sql = "UPDATE `spms_rsmstatus` SET `edit` = '1' WHERE `spms_rsmstatus`.`rsmStatus_id` = '$check[rsmStatus_id]'";
+            $sql = "UPDATE spms_rsm_status SET edit = '1' WHERE spms_rsm_status.rsmStatus_id = '$check[rsmStatus_id]'";
             $sql = $mysqli->query($sql);
             $dataId = $check['rsmStatus_id'];
         } else {
-            $sql = "INSERT INTO `spms_rsmstatus` (`rsmStatus_id`, `period_id`, `department_id`, `done`, `edit`, `alter_logs`) VALUES (NULL, '$period', '$department', '0', '1', '')";
+            $sql = "INSERT INTO spms_rsm_status (rsmStatus_id, period_id, department_id, done, edit, alter_logs) VALUES (NULL, '$period', '$department', '0', '1', '')";
             $sql = $mysqli->query($sql);
             $dataId = $mysqli->insert_id;
         }
 
-        $getInputedDat = "SELECT * from `spms_rsmstatus` left join `department` on `spms_rsmstatus`.`department_id`=`department`.`department_id` where `rsmStatus_id`='$dataId'";
+        $getInputedDat = "SELECT * from spms_rsm_status left join department on spms_rsm_status.department_id=department.department_id where rsmStatus_id='$dataId'";
         $getInputedDat = $mysqli->query($getInputedDat);
         $getInputedDat = $getInputedDat->fetch_assoc();
         $view = "
@@ -106,15 +110,15 @@ if (isset($_POST['rsmGetTableData'])) {
 } elseif (isset($_POST['enableAllRsm'])) {
     $year = $_POST['year'];
     $period = $_POST['period'];
-    $periodId = "SELECT * from `spms_mfo_period` where `month_mfo`='$period' and `year_mfo`='$year'";
+    $periodId = "SELECT * from spms_periods where month_mfo='$period' and year_mfo='$year'";
     $periodId = $mysqli->query($periodId);
     $periodId = $periodId->fetch_assoc();
-    $allDepartment  = "SELECT * from `department`";
+    $allDepartment  = "SELECT * from department";
     $allDepartment = $mysqli->query($allDepartment);
     $w = [];
     $wo = [];
     while ($dep = $allDepartment->fetch_assoc()) {
-        $check = "SELECT * from `spms_rsmstatus` where `period_id`='$periodId[mfoperiod_id]' and `department_id`='$dep[department_id]'";
+        $check = "SELECT * from spms_rsm_status where period_id='$periodId[mfoperiod_id]' and department_id='$dep[department_id]'";
         $check = $mysqli->query($check);
         if ($check->num_rows) {
             $getW = $check->fetch_assoc();
@@ -128,7 +132,7 @@ if (isset($_POST['rsmGetTableData'])) {
 } elseif (isset($_POST['editAllWith'])) {
     $dataId = $_POST['dataid'];
     $edit = $_POST['edit'];
-    $sql = "UPDATE `spms_rsmstatus` SET `edit` = '$edit' WHERE `spms_rsmstatus`.`rsmStatus_id` = '$dataId'";
+    $sql = "UPDATE spms_rsm_status SET edit = '$edit' WHERE spms_rsm_status.rsmStatus_id = '$dataId'";
     $mysqli->query($sql);
     if ($mysqli->error) {
         echo $mysqli->error;
@@ -139,7 +143,7 @@ if (isset($_POST['rsmGetTableData'])) {
     $period = $_POST['period'];
     $department = $_POST['department'];
     $edit = $_POST['edit'];
-    $sql = "INSERT INTO `spms_rsmstatus` (`rsmStatus_id`, `period_id`, `department_id`, `done`, `edit`, `alter_logs`) VALUES (NULL, '$period', '$department', '0', '$edit', '')";
+    $sql = "INSERT INTO spms_rsm_status (rsmStatus_id, period_id, department_id, done, edit, alter_logs) VALUES (NULL, '$period', '$department', '0', '$edit', '')";
     $mysqli->query($sql);
     if ($mysqli->error) {
         echo $mysqli->error;

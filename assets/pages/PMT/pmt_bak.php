@@ -14,13 +14,13 @@ if (isset($_GET['year']) && isset($_GET['period']) && $_GET['year'] != "" && $_G
 	}
 }
 // $period = "July - December";
-$periodSql = "SELECT * from spms_mfo_period where `month_mfo`='$period' and `year_mfo`='$year'";
+$periodSql = "SELECT * from spms_periods where month_mfo='$period' and year_mfo='$year'";
 $periodSql = $mysqli->query($periodSql);
 $periodSql = $periodSql->fetch_assoc();
 $userId = $user->get_emp('employees_id');
-$sql = "SELECT * FROM `spms_departmentassignedtopmt` left join `department` on 
-			`spms_departmentassignedtopmt`.`department_id`=`department`.`department_id`
-			where `employees_id`='$userId'";
+$sql = "SELECT * FROM spms_pmt_department_assignments left join department on 
+			spms_pmt_department_assignments.department_id=department.department_id
+			where employees_id='$userId'";
 $sql = $mysqli->query($sql);
 $card = "";
 while ($data = $sql->fetch_assoc()) {

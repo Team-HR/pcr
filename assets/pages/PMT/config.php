@@ -4,15 +4,15 @@ require_once "assets/libs/PcrForm.php";
 if (isset($_POST['showDepartmentFiles'])) {
 	$tableData = "";
 	$department = $_POST['departmentId'];
-	$depQuery = "SELECT * from `department` where `department_id`=$department";
+	$depQuery = "SELECT * from department where department_id=$department";
 	$depQuery = $mysqli->query($depQuery);
 	$depQuery = $depQuery->fetch_assoc();
 	$period_id = $_POST['period'];
 	// FETCH all validated spcr and ipcr 
 	// fetch all dpcr
 	// dpcr query 
-	$sqlDpcr = "SELECT * FROM `spms_performancereviewstatus` where 
-		`period_id` = '$period_id' and `department_id` = '$department'";
+	$sqlDpcr = "SELECT * FROM spms_pcr_status where 
+		period_id = '$period_id' and department_id = '$department'";
 	$sqlDpcr = $mysqli->query($sqlDpcr);
 	while ($data = $sqlDpcr->fetch_assoc()) {
 		$formOwner = new Employee_data();
@@ -101,7 +101,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 } elseif (isset($_POST["initLoad"])) {
 	$tableData = "";
 	$department_id = $_POST['department_id'];
-	$query = "SELECT * from `department` where `department_id`='$department_id'";
+	$query = "SELECT * from department where department_id='$department_id'";
 	$res = $mysqli->query($query);
 	$row = $res->fetch_assoc();
 	$department = $row["department"];
@@ -113,7 +113,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 	// FETCH all validated spcr and ipcr 
 	// fetch all dpcr
 	// dpcr query 
-	$query = "SELECT * FROM `spms_performancereviewstatus` where `period_id` = '$period_id' and `department_id` = '$department_id'";
+	$query = "SELECT * FROM spms_pcr_status where period_id = '$period_id' and department_id = '$department_id'";
 	$sqlDpcr = $mysqli->query($query);
 
 	$data = [];
@@ -163,7 +163,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 		"year" => $period_info["year"]
 	]);
 } else if (isset($_POST["viewFile"])) {
-	$sql = "SELECT * from `spms_performancereviewstatus` WHERE `performanceReviewStatus_id`='$_POST[dataId]'";
+	$sql = "SELECT * from spms_pcr_status WHERE performanceReviewStatus_id='$_POST[dataId]'";
 	$sql = $mysqli->query($sql);
 	$sql = $sql->fetch_assoc();
 	$_SESSION['empIdPending'] = $sql['employees_id'];
@@ -171,7 +171,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 	// $_SESSION['deptIdPending'] = $sql['department_id'];
 	if ($sql['PMT'] == 0 || $sql['PMT'] == '0') {
 		$empId = $user->get_emp('employees_id');
-		$sqlNullRep = "UPDATE `spms_performancereviewstatus` SET `PMT` = '$empId' WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id`='$sql[performanceReviewStatus_id]'";
+		$sqlNullRep = "UPDATE spms_pcr_status SET PMT = '$empId' WHERE spms_pcr_status.performanceReviewStatus_id='$sql[performanceReviewStatus_id]'";
 		$mysqli->query($sqlNullRep);
 	}
 	$formData = new Employee_data();
@@ -194,13 +194,13 @@ if (isset($_POST['showDepartmentFiles'])) {
 	// $period = $_POST["period"];
 	// $year = $_POST["year"];
 	$data = [];
-	// $sql = "SELECT * from spms_mfo_period where `month_mfo`='$period' and `year_mfo`='$year'";
+	// $sql = "SELECT * from spms_periods where month_mfo='$period' and year_mfo='$year'";
 	// $res = $mysqli->query($sql);
 	// $periodSql = $res->fetch_assoc();
 	$employee_id_auth = $user->get_emp('employees_id');
-	$sql = "SELECT * FROM `spms_departmentassignedtopmt` left join `department` on 
-			`spms_departmentassignedtopmt`.`department_id`=`department`.`department_id`
-			where `employees_id`='$employee_id_auth'";
+	$sql = "SELECT * FROM spms_pmt_department_assignments left join department on 
+			spms_pmt_department_assignments.department_id=department.department_id
+			where employees_id='$employee_id_auth'";
 	$res = $mysqli->query($sql);
 	// echo json_encode($employee_id_auth);
 	while ($row = $res->fetch_assoc()) {
@@ -210,7 +210,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 } elseif (isset($_POST['getPeriodId'])) {
 	$period = $_POST["period"];
 	$year = $_POST["year"];
-	$sql = "SELECT * from spms_mfo_period where `month_mfo`='$period' and `year_mfo`='$year'";
+	$sql = "SELECT * from spms_periods where month_mfo='$period' and year_mfo='$year'";
 	$res = $mysqli->query($sql);
 	$row = $res->fetch_assoc();
 	$period_id = $row['mfoperiod_id'];
@@ -227,7 +227,7 @@ if (isset($_POST['showDepartmentFiles'])) {
 // show form 
 elseif (isset($_POST["initLoadForm"])) {
 	$id = $_POST["id"];
-	$sql = "SELECT * FROM `spms_performancereviewstatus` WHERE `performanceReviewStatus_id` = '$id'";
+	$sql = "SELECT * FROM spms_pcr_status WHERE performanceReviewStatus_id = '$id'";
 	$res = $mysqli->query($sql);
 	$row = $res->fetch_assoc();
 	$period_id = $row["period_id"];
@@ -266,7 +266,7 @@ elseif (isset($_POST["initLoadForm"])) {
 	$sfd_id = $payload["sfd_id"];
 
 	// get exisiting cfdata first and compare to check if changes were made
-	$sql = "SELECT * FROM `spms_supportfunctiondata` WHERE `sfd_id` = '$sfd_id'";
+	$sql = "SELECT * FROM spms_pcr_support_function_accomplishments WHERE sfd_id = '$sfd_id'";
 	$res = $mysqli->query($sql);
 
 	$row = $res->fetch_assoc();
@@ -290,7 +290,7 @@ elseif (isset($_POST["initLoadForm"])) {
 	}
 
 	$correction_is_made = false;
-	$corrections = false;
+	$corrections = [];
 
 	// if ($current_percent != $payload["percent"]) {
 	// 	$correction_is_made = true;
@@ -357,7 +357,7 @@ elseif (isset($_POST["initLoadForm"])) {
 		#!!!! test end
 
 		$supEdit[] = $corrections_made;
-		// $sql = "UPDATE `spms_corefucndata` SET `supEdit` = '$supEdit' WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id'; ";
+		// $sql = "UPDATE spms_pcr_indicator_accomplishments SET supEdit = '$supEdit' WHERE spms_pcr_indicator_accomplishments.cfd_id = '$cfd_id'; ";
 		// $mysqli->query($sql);
 		$supEdit = serialize($supEdit);
 		$supEdit = $mysqli->real_escape_string($supEdit);
@@ -383,7 +383,7 @@ elseif (isset($_POST["initLoadForm"])) {
 	//   )
 
 	// check first if sfd_id exists 
-	$sql = "SELECT * FROM `spms_supportfunctiondata` WHERE `sfd_id` = '$sfd_id'";
+	$sql = "SELECT * FROM spms_pcr_support_function_accomplishments WHERE sfd_id = '$sfd_id'";
 	$res = $mysqli->query($sql);
 
 	// if none return null
@@ -396,7 +396,7 @@ elseif (isset($_POST["initLoadForm"])) {
 	$critics = $payload["critics"];
 	$critics = serialize($critics);
 	$critics = $mysqli->real_escape_string($critics);
-	// $sql = "UPDATE `spms_supportfunctiondata` SET `critics` = '$critics' WHERE `spms_supportfunctiondata`.`sfd_id` = '$sfd_id';";
+	// $sql = "UPDATE spms_pcr_support_function_accomplishments SET critics = '$critics' WHERE spms_pcr_support_function_accomplishments.sfd_id = '$sfd_id';";
 	// $res = $mysqli->query($sql);
 	// echo  json_encode($res);
 	// return null;
@@ -421,8 +421,8 @@ elseif (isset($_POST["initLoadForm"])) {
 	// payload_q
 	// payload_e
 	// payload_t
-	// spms_supportfunctiondata
-	$sql = "UPDATE `spms_supportfunctiondata` SET `accomplishment` = '$payload_actualAcc', `Q` = '$payload_q', `E` = '$payload_e', `T` = '$payload_t', `supEdit` = '$supEdit' ,`critics` = '$critics' WHERE `spms_supportfunctiondata`.`sfd_id` = '$sfd_id';";
+	// spms_pcr_support_function_accomplishments
+	$sql = "UPDATE spms_pcr_support_function_accomplishments SET accomplishment = '$payload_actualAcc', Q = '$payload_q', E = '$payload_e', T = '$payload_t', supEdit = '$supEdit' ,critics = '$critics' WHERE spms_pcr_support_function_accomplishments.sfd_id = '$sfd_id';";
 
 	$res = $mysqli->query($sql);
 
@@ -438,7 +438,7 @@ elseif (isset($_POST["initLoadForm"])) {
 	$cfd_id = $payload["cfd_id"];
 
 	// get exisiting cfdata first and compare to check if changes were made
-	$sql = "SELECT * FROM `spms_corefucndata` WHERE `cfd_id` = '$cfd_id'";
+	$sql = "SELECT * FROM spms_pcr_indicator_accomplishments WHERE cfd_id = '$cfd_id'";
 	$res = $mysqli->query($sql);
 
 	$row = $res->fetch_assoc();
@@ -464,7 +464,7 @@ elseif (isset($_POST["initLoadForm"])) {
 
 
 	$correction_is_made = false;
-	$corrections = false;
+	$corrections = [];
 
 	if ($current_percent != $payload["percent"]) {
 		$correction_is_made = true;
@@ -531,7 +531,7 @@ elseif (isset($_POST["initLoadForm"])) {
 		#!!!! test end
 
 		$supEdit[] = $corrections_made;
-		// $sql = "UPDATE `spms_corefucndata` SET `supEdit` = '$supEdit' WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id'; ";
+		// $sql = "UPDATE spms_pcr_indicator_accomplishments SET supEdit = '$supEdit' WHERE spms_pcr_indicator_accomplishments.cfd_id = '$cfd_id'; ";
 		// $mysqli->query($sql);
 		$supEdit = serialize($supEdit);
 		$supEdit = $mysqli->real_escape_string($supEdit);
@@ -565,7 +565,7 @@ elseif (isset($_POST["initLoadForm"])) {
 
 
 	// check first if cfd_id exists 
-	$sql = "SELECT * FROM `spms_corefucndata` WHERE `cfd_id` = '$cfd_id'";
+	$sql = "SELECT * FROM spms_pcr_indicator_accomplishments WHERE cfd_id = '$cfd_id'";
 	$res = $mysqli->query($sql);
 
 	// if none return null
@@ -595,12 +595,12 @@ elseif (isset($_POST["initLoadForm"])) {
 
 	$sql_critics = "";
 	if ($criticize) {
-		$sql_critics = ",`critics` = '$critics'";
+		$sql_critics = ",critics = '$critics'";
 	} else {
-		$sql_critics = ",`critics` = ''";
+		$sql_critics = ",critics = ''";
 	}
 
-	$sql = "UPDATE `spms_corefucndata` SET  `percent` = '$payload_percent', `actualAcc` = '$payload_actualAcc', `q` = '$payload_q', `e` = '$payload_e', `t` = '$payload_t', `supEdit` = '$supEdit' $sql_critics WHERE `spms_corefucndata`.`cfd_id` = '$cfd_id';";
+	$sql = "UPDATE spms_pcr_indicator_accomplishments SET  percent = '$payload_percent', actualAcc = '$payload_actualAcc', q = '$payload_q', e = '$payload_e', t = '$payload_t', supEdit = '$supEdit' $sql_critics WHERE spms_pcr_indicator_accomplishments.cfd_id = '$cfd_id';";
 
 	$res = $mysqli->query($sql);
 
@@ -609,7 +609,7 @@ elseif (isset($_POST["initLoadForm"])) {
 } elseif (isset($_POST["doApprove"])) {
 	$performanceReviewStatus_id = $_POST["id"];
 	$current_date = date("d-m-Y");
-	$sql = "UPDATE `spms_performancereviewstatus` SET `panelApproved` = '$current_date' WHERE `performanceReviewStatus_id` = '$performanceReviewStatus_id'";
+	$sql = "UPDATE spms_pcr_status SET panelApproved = '$current_date' WHERE performanceReviewStatus_id = '$performanceReviewStatus_id'";
 	echo json_encode($mysqli->query($sql));
 }
 
@@ -617,7 +617,7 @@ elseif (isset($_POST["initLoadForm"])) {
 
 function getPeriodInformation($mysqli, $period_id)
 {
-	$sql = "SELECT * FROM `spms_mfo_period` WHERE `mfoperiod_id` = '$period_id'";
+	$sql = "SELECT * FROM spms_periods WHERE mfoperiod_id = '$period_id'";
 	$res = $mysqli->query($sql);
 	$row = $res->fetch_assoc();
 	$period = $row["month_mfo"];

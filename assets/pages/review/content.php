@@ -23,7 +23,7 @@ if (isset($_POST['page'])) {
 } elseif (isset($_POST['UncriticizedEmpIdPost'])) {
   $employee_id = $_SESSION['empIdPending'] = $_POST['UncriticizedEmpIdPost'];
   $period_id =  $_SESSION['periodPending'];
-  $sql = "SELECT * from `spms_performancereviewstatus` WHERE `period_id` = $period_id AND `employees_id` = $employee_id";
+  $sql = "SELECT * from spms_pcr_status WHERE period_id = $period_id AND employees_id = $employee_id";
   $res = $mysqli->query($sql);
   $row = $res->fetch_assoc();
   $_SESSION['fileStatusPending'] = $row;
@@ -32,27 +32,27 @@ if (isset($_POST['page'])) {
   $accountId = $_SESSION['emp_id'];
   $dataId = $_POST['approvalPost'];
   $UpdateColumn = "";
-  $fetchDataSql = "SELECT * from `spms_performancereviewstatus` where `performanceReviewStatus_id` = '$dataId'";
+  $fetchDataSql = "SELECT * from spms_pcr_status where performanceReviewStatus_id = '$dataId'";
   $fetchDataSql = $mysqli->query($fetchDataSql);
   $fetchDataSql = $fetchDataSql->fetch_assoc();
 
   $date = date('d-m-Y');
   if ($fetchDataSql['PMT'] == $accountId) {
-    $UpdateColumn = "`panelApproved` = '$date'";
+    $UpdateColumn = "panelApproved = '$date'";
   } elseif ($fetchDataSql['ImmediateSup'] == $accountId and $fetchDataSql['DepartmentHead'] == $accountId) {
-    $UpdateColumn = "`approved` = '$date', `certify` = '$date'";
+    $UpdateColumn = "approved = '$date', certify = '$date'";
   } elseif ($fetchDataSql['ImmediateSup'] == "" and $fetchDataSql['DepartmentHead'] == $accountId) {
-    $UpdateColumn = "`approved` = '$date', `certify` = '$date'";
+    $UpdateColumn = "approved = '$date', certify = '$date'";
   } elseif ($fetchDataSql['DepartmentHead'] == $accountId) {
-    $UpdateColumn = "`certify` = '$date'";
+    $UpdateColumn = "certify = '$date'";
     if ($fetchDataSql['employees_id'] == $fetchDataSql['ImmediateSup']) {
-      $UpdateColumn = "`approved` = '$date', `certify` = '$date'";
+      $UpdateColumn = "approved = '$date', certify = '$date'";
     }
   } elseif ($fetchDataSql['ImmediateSup'] == $accountId) {
-    $UpdateColumn = "`approved` = '$date'";
+    $UpdateColumn = "approved = '$date'";
   }
   if ($UpdateColumn != "") {
-    $sql = "UPDATE `spms_performancereviewstatus` SET $UpdateColumn WHERE `spms_performancereviewstatus`.`performanceReviewStatus_id` = '$dataId'";
+    $sql = "UPDATE spms_pcr_status SET $UpdateColumn WHERE spms_pcr_status.performanceReviewStatus_id = '$dataId'";
     $sql = $mysqli->query($sql);
     if (!$sql) {
       die($mysqli->error);
