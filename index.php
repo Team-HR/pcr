@@ -1,4 +1,7 @@
 <?php
+// This file is the main entry point for the PCR application
+// It handles session management, includes necessary classes, and routes to the appropriate pages
+
 require_once "assets/libs/session_init.php";
 session_start();
 require_once "assets/libs/config_class.php";
