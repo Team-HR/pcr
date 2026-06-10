@@ -137,6 +137,61 @@ if (isset($_POST['showDepartmentFiles'])) {
 			$formType = "IPCR (NGA)";
 		}
 
+		// Check for corrections (stored in critics field)
+		$employee_id = $row['employees_id'];
+		$has_pmtEdit = false;
+		$has_critics = false;
+
+		// Check core function critics
+		$correction_sql = "SELECT a.critics 
+						   FROM spms_pcr_indicator_accomplishments a
+						   JOIN spms_pcr_indicators i ON a.p_id = i.mi_id
+						   JOIN spms_pcr_mfos m ON i.cf_ID = m.cf_ID
+						   WHERE a.empId = '$employee_id' 
+						   AND m.mfo_periodId = '$period_id'
+						   AND a.critics IS NOT NULL 
+						   AND a.critics != ''";
+		$correction_res = $mysqli->query($correction_sql);
+		if ($correction_res && $correction_res->num_rows > 0) {
+			while ($corr_row = $correction_res->fetch_assoc()) {
+				if ($corr_row['critics'] && $corr_row['critics'] != '') {
+					$critics_data = @unserialize($corr_row['critics']);
+					if ($critics_data && is_array($critics_data)) {
+						if (!empty($critics_data['IS']) || !empty($critics_data['DH']) || !empty($critics_data['PMT'])) {
+							$has_critics = true;
+						}
+						if (!empty($critics_data['PMT'])) {
+							$has_pmtEdit = true;
+						}
+					}
+				}
+			}
+		}
+
+		// Check support function critics
+		$support_sql = "SELECT critics 
+						FROM spms_pcr_support_function_accomplishments
+						WHERE emp_id = '$employee_id' 
+						AND period_id = '$period_id'
+						AND critics IS NOT NULL 
+						AND critics != ''";
+		$support_res = $mysqli->query($support_sql);
+		if ($support_res && $support_res->num_rows > 0) {
+			while ($supp_row = $support_res->fetch_assoc()) {
+				if ($supp_row['critics'] && $supp_row['critics'] != '') {
+					$critics_data = @unserialize($supp_row['critics']);
+					if ($critics_data && is_array($critics_data)) {
+						if (!empty($critics_data['IS']) || !empty($critics_data['DH']) || !empty($critics_data['PMT'])) {
+							$has_critics = true;
+						}
+						if (!empty($critics_data['PMT'])) {
+							$has_pmtEdit = true;
+						}
+					}
+				}
+			}
+		}
+
 		$item = [
 			"id" => $row["performanceReviewStatus_id"],
 			"name" => $fullName,
@@ -146,6 +201,8 @@ if (isset($_POST['showDepartmentFiles'])) {
 			"date_approved" => $row["approved"],
 			"date_certified" => $row["certify"],
 			"panel_approved" => $row["panelApproved"],
+			"has_pmtEdit" => $has_pmtEdit,
+			"has_critics" => $has_critics
 		];
 
 		$data[] = $item;
