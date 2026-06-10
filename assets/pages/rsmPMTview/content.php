@@ -33,7 +33,7 @@
                     <div style="min-height: 500px;"></div>
                 </td>
             </tr>
-            <tr v-for="item in items" :key="item.cf_ID">
+            <tr v-for="item,i in items" :key="i">
                 <template v-if="!item.mi_id">
                     <td colspan="7">
                         <div :style="'margin-left:'+(item.level*50)+'px;' ">
@@ -44,7 +44,6 @@
                             {{ item.mfo_corrections }}
                             <br>
                             {{ item.correction_status }} -->
-
                         </div>
                     </td>
                 </template>
