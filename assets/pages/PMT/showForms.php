@@ -6,7 +6,7 @@
 
 	<div class="ui basic segment" style="margin-left: 200px; margin-right: 200px; height: 720px; /* overflow-y:scroll; */">
 		<div style="margin-bottom: 8px;">
-			<span style="display: inline-block; width: 16px; height: 16px; background-color: #fff3cd; border: 1px solid #ccc; vertical-align: middle; margin-right: 6px;"></span>
+			<span style="display: inline-block; width: 16px; height: 16px; background-color: #ffcccc; border: 1px solid #ccc; vertical-align: middle; margin-right: 6px;"></span>
 			<span style="vertical-align: middle; font-size: 12px; color: #555; background:white; padding:5px;">Highlighted rows have PMT correction/s</span>
 		</div>
 		<table class="ui mini structured celled table">
@@ -23,7 +23,7 @@
 			</thead>
 			<tbody>
 				<template v-for="item,i in items" :key="i">
-					<tr :style="item.has_pmtEdit ? 'background-color: #fff3cd;' : ''">
+					<tr :style="item.has_pmtEdit ? 'background-color: #ffcccc;' : ''">
 						<td width="25">{{ item.formType }}</td>
 						<td>{{ item.name }}</td>
 						<td width="25">{{ item.date_submitted }}</td>
