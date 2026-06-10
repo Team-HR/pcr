@@ -34,6 +34,16 @@
 		min-width: 80px !important;
 		/* Adjust this value based on your UI needs */
 	}
+
+	/* Always show edge chevrons and color them blue */
+	.orgchart .node .edge {
+		opacity: 1 !important;
+		visibility: visible !important;
+		color: #1a73e8 !important;
+	}
+	.orgchart .node .edge::before {
+		color: #1a73e8 !important;
+	}
 </style>
 
 <div id="chart-container"></div>

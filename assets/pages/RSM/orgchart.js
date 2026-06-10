@@ -263,7 +263,7 @@ function initializeOrgchart(data, containerId) {
     'zoom': true,
     'pan': true,
     // verticalLevel: 2,
-    // visibleLevel: 2,
+    visibleLevel: 2,
     'initCompleted': function ($chart) {
       var $container = $('#' + containerId);
       $container.scrollLeft(($container[0].scrollWidth - $container.width()) / 2);
