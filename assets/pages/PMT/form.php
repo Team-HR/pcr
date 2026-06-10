@@ -153,7 +153,7 @@
 						<td :style="item.corrected_T ? 'color:red':''">{{item.t}}</td>
 						<td style="text-align: center;">{{item.average}}</td>
 						<td></td>
-						<td width="150" style="text-align: center;"> <button class="ui small button" @click="review(item)"><i class="ui icon edit"></i> Review</button> </td>
+						<td width="150" style="text-align: center;"> <button class="ui small button" :class="(item.corrected_percent || item.corrected_actualAcc || item.corrected_Q || item.corrected_E || item.corrected_T || (item.critics && item.critics.PMT)) ? 'red' : ''" @click="review(item)"><i class="ui icon edit"></i> Review</button> </td>
 					</template>
 					<!-- else if disabled/not_applicable -->
 					<template v-else-if="item.not_applicable">
@@ -243,20 +243,22 @@
 			<template v-for="item, in support_functions.rows" :key="item.id_suppFunc">
 				<tr>
 					<td>
-						<template v-if="item.critics && item.critics.PMT">
-							<a class="ui red ribbon label" style="margin: 15px;" @click="reviewSupportFunction(item)">View Comment/s</a>
-							<br>
-						</template>
 						<button class="ui basic mini button">{{item.percent + "%"}}</button> {{item.mfo}}
 					</td>
-					<td>{{item.suc_in}}</td>
+					<td>
+						<template v-if="item.critics && item.critics.PMT">
+							<a class="ui red ribbon label"  @click="reviewSupportFunction(item)">View Comment/s</a>
+							<br>
+						</template>
+						{{item.suc_in}}
+					</td>
 					<td :style="item.corrected_accomplishment ? 'color:red':''">{{item.accomplishment}}</td>
 					<td :style="item.corrected_Q ? 'color:red':''">{{item.Q}}</td>
 					<td :style="item.corrected_E ? 'color:red':''">{{item.E}}</td>
 					<td :style="item.corrected_T ? 'color:red':''">{{item.T}}</td>
 					<td>{{item.average_rating}}</td>
 					<td>{{}}</td>
-					<td class="center aligned"><button class="ui small button" @click="reviewSupportFunction(item)"><i class="ui icon edit"></i> Review</button></td>
+					<td class="center aligned"><button class="ui small button" :class="(item.corrected_accomplishment || item.corrected_Q || item.corrected_E || item.corrected_T || (item.critics && item.critics.PMT)) ? 'red' : ''" @click="reviewSupportFunction(item)"><i class="ui icon edit"></i> Review</button></td>
 				</tr>
 			</template>
 		</table>
