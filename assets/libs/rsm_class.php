@@ -95,7 +95,7 @@ class RsmClass extends Db
         $department = $this->department;
         $period  = $this->period;
         $data = [];
-        $query = "SELECT * from spms_pcr_mfos where parent_id='' and dep_id='$department' and mfo_periodId='$period' order by cf_count ASC";
+        $query = "SELECT * from spms_pcr_mfos where (parent_id='' OR parent_id IS NULL) and dep_id='$department' and mfo_periodId='$period' order by cf_count ASC";
         $result = $this->mysqli->query($query);
 
         while ($row = $result->fetch_assoc()) {
@@ -142,7 +142,7 @@ class RsmClass extends Db
     {
         $department = $this->department;
         $period  = $this->period;
-        $query = "SELECT * from spms_pcr_mfos where parent_id='' and dep_id='$department' and mfo_periodId='$period' order by cf_count ASC";
+        $query = "SELECT * from spms_pcr_mfos where (parent_id='' OR parent_id IS NULL) and dep_id='$department' and mfo_periodId='$period' order by cf_count ASC";
         $query = $this->mysqli->query($query);
         $view = "";
         while ($row = $query->fetch_assoc()) {
@@ -162,12 +162,7 @@ class RsmClass extends Db
         $department = $this->department;
         $period  = $this->period;
         $data = [];
-        # 
-        # Better check on children with wrong mfo_periodId OR
-        # disregard since child depends on parent_id with proper mfo_periodId?
-        # and mfo_periodId='$period'
-        #
-        $sql = "SELECT * from spms_pcr_mfos where parent_id='$parent_id' and dep_id='$department' order by cf_count ASC";
+        $sql = "SELECT * from spms_pcr_mfos where parent_id='$parent_id' and dep_id='$department' and mfo_periodId='$period' order by cf_count ASC";
         $result = $this->mysqli->query($sql);
         while ($row = $result->fetch_assoc()) {
             $item = [
