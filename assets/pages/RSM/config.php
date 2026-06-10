@@ -634,11 +634,69 @@ function table($mysqli)
   $period = $period->fetch_assoc();
   // $period_id = $period['mfoperiod_id'];
   echo "
-  <button class='noprint' onclick = 'rsmLoad(\"table\")'>Refresh</button>
+  <button class='noprint' onclick = 'rsmLoad(\"table\")' style='cursor:pointer;'>Refresh</button>
+  <button class='noprint' id='rsmToggleAll' onclick='rsmToggleAll()' style='margin-left:6px;cursor:pointer;'>&#9660; Collapse All</button>
+  <style>
+  tr[data-mfo-id] { transition: opacity 0.15s; }
+  .rsm-chevron { user-select:none; font-size:18px; padding:2px 4px; cursor:pointer; }
+  .rsm-chevron.collapsed { transform: rotate(-90deg); }
+  #rsm-toggle-loader { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.5); z-index:9999; align-items:center; justify-content:center; font-size:20px; }
+  #rsm-toggle-loader.active { display:flex; }
+  </style>
+  <div id='rsm-toggle-loader'><i class='ui spinner loading icon' style='font-size:32px;'></i></div>
   <script>
   $('.ui.dropdown').dropdown({
     fullTextSearch:true
   });
+  (function(){
+    function getAllDescendants(mfoId) {
+      var rows = [];
+      document.querySelectorAll('[data-mfo-parent=\"' + mfoId + '\"]').forEach(function(tr) {
+        rows.push(tr);
+        var childId = tr.getAttribute('data-mfo-id');
+        if (childId) {
+          getAllDescendants(childId).forEach(function(c){ rows.push(c); });
+        }
+      });
+      return rows;
+    }
+    document.querySelectorAll('.rsm-chevron').forEach(function(chevron) {
+      chevron.addEventListener('click', function() {
+        var mfoId = this.getAttribute('data-toggle');
+        var collapsed = this.classList.toggle('collapsed');
+        getAllDescendants(mfoId).forEach(function(tr) {
+          tr.style.display = collapsed ? 'none' : '';
+        });
+      });
+    });
+    window.rsmToggleAll = function() {
+      var loader = document.getElementById('rsm-toggle-loader');
+      loader.classList.add('active');
+      setTimeout(function() {
+        var btn = document.getElementById('rsmToggleAll');
+        var collapsing = btn.getAttribute('data-state') !== 'collapsed';
+        document.querySelectorAll('.rsm-chevron').forEach(function(chevron) {
+          var mfoId = chevron.getAttribute('data-toggle');
+          if (collapsing) {
+            chevron.classList.add('collapsed');
+          } else {
+            chevron.classList.remove('collapsed');
+          }
+          getAllDescendants(mfoId).forEach(function(tr) {
+            tr.style.display = collapsing ? 'none' : '';
+          });
+        });
+        if (collapsing) {
+          btn.setAttribute('data-state', 'collapsed');
+          btn.innerHTML = '&#9654; Expand All';
+        } else {
+          btn.setAttribute('data-state', '');
+          btn.innerHTML = '&#9660; Collapse All';
+        }
+        loader.classList.remove('active');
+      }, 50);
+    };
+  })();
   </script>
   <table class='tablepr' border='1px' style='border-collapse:collapse;width:100%;font-size:13px'>
   <thead>
@@ -708,10 +766,8 @@ function tbodyChild($dataId, $padding)
   $sql2 = $mysqli->query($sql2);
   $padding += 15;
   while ($row2 = $sql2->fetch_assoc()) {
-    $sql3 = "SELECT * from spms_pcr_mfos where parent_id='$row2[cf_ID]' ORDER BY spms_pcr_mfos.cf_count ASC";
-    $sql3 = $mysqli->query($sql3);
     $pad = $padding . "px";
-    $view .= trows($mysqli, $row2, $pad, '');
+    $view .= trows($mysqli, $row2, $pad, '', $dataId);
     $view .= tbodyChild($row2['cf_ID'], $padding);
   }
   return $view;
@@ -768,18 +824,21 @@ function validaateCorrection($dat)
   return $color;
 }
 
-function trows($mysqli, $row, $padding, $addDisplay)
+function trows($mysqli, $row, $padding, $addDisplay, $mfo_parent_id = '')
 {
-  $sql2 = "SELECT * from spms_pcr_mfos where parent_id='$row[cf_ID]'";
+  $mfo_id = $row['cf_ID'];
+  $sql2 = "SELECT * from spms_pcr_mfos where parent_id='$mfo_id'";
   $sql2 = $mysqli->query($sql2);
   $sql2count = $sql2->num_rows;
   if ($sql2count > 0) {
     $set_drop = settingDrop($mysqli, $row, '', $addDisplay, 'display:none');
+    $chevron = "<span class='rsm-chevron noprint' data-toggle='$mfo_id' style='cursor:pointer;margin-right:8px;display:inline-block;transition:transform 0.2s;font-size:18px;line-height:1;vertical-align:middle;'>&#9660;</span>";
   } else {
     $set_drop = settingDrop($mysqli, $row, '', $addDisplay, '');
+    $chevron = "<span style='display:inline-block;width:18px;margin-right:6px;'></span>";
   }
   $view = "";
-  $siData1 = "SELECT * from spms_pcr_indicators where cf_ID='$row[cf_ID]'";
+  $siData1 = "SELECT * from spms_pcr_indicators where cf_ID='$mfo_id'";
   $siData1 = $mysqli->query($siData1);
   $siDatacount1 = $siData1->num_rows;
   $count = 1;
@@ -914,9 +973,9 @@ function trows($mysqli, $row, $padding, $addDisplay)
       }
       if ($count == 1) {
         $view .= "
-        <tr >
+        <tr data-mfo-id='$mfo_id' data-mfo-parent='$mfo_parent_id'>
         <td style='padding-left:$padding;width:25%;$correctionColorMFO'>
-        " . $set_drop . "
+        $chevron" . $set_drop . "
         $row[cf_count]) $row[cf_title] " .  ""/*json_encode($row)*/ . "
         </td>
         <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . ""/*json_encode($siDataRow1)*/ . "</td>
@@ -939,7 +998,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
         ";
       } else {
         $view .= "
-        <tr >
+        <tr data-mfo-owner='$mfo_id' data-mfo-parent='$mfo_parent_id'>
         <td></td>
         <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . "</td>
         <td>$performanceMeasure</td>
@@ -962,9 +1021,9 @@ function trows($mysqli, $row, $padding, $addDisplay)
     }
   } else {
     $view .= "
-    <tr >
+    <tr data-mfo-id='$mfo_id' data-mfo-parent='$mfo_parent_id'>
     <td style='padding-left:$padding;width:500px;$correctionColorMFO'>
-    " . $set_drop . "
+    $chevron" . $set_drop . "
     $row[cf_count]) $row[cf_title] " . ""/*json_encode($row)*/ . "
     </td>
     <td></td>
