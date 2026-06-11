@@ -44,6 +44,7 @@ if (isset($_POST['get_mfo_tree'])) {
       "code" => "",
       "title" => $row["cf_count"] . ". " . $row["cf_title"],
       "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"]),
+      "success_indicators" => get_success_indicators_formatted($mysqli, $row["cf_ID"]),
       "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id)
     ];
     $mfo_children[] = $node;
@@ -1400,6 +1401,21 @@ function get_success_indicators($mysqli, $cf_ID)
   return $data;
 }
 
+// Helper function to get formatted success indicators for tree
+function get_success_indicators_formatted($mysqli, $cf_ID)
+{
+  $data = [];
+  $sql = "SELECT mi_id, mi_succIn FROM spms_pcr_indicators WHERE cf_ID = '$cf_ID'";
+  $result = $mysqli->query($sql);
+  while ($row = $result->fetch_assoc()) {
+    $data[] = [
+      "id" => $row["mi_id"],
+      "description" => $row["mi_succIn"]
+    ];
+  }
+  return $data;
+}
+
 // Helper function to get personnel in-charge for an MFO
 function get_mfo_personnel_incharge($mysqli, $cf_id)
 {
@@ -1463,6 +1479,7 @@ function get_mfo_tree_children($mysqli, $parent_id, $department_id)
       "code" => "",
       "title" => $row["cf_count"] . ". " . $row["cf_title"],
       "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"]),
+      "success_indicators" => get_success_indicators_formatted($mysqli, $row["cf_ID"]),
       "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id)
     ];
     $children[] = $node;

@@ -1,52 +1,83 @@
-<script src="/node_modules/orgchart/dist/js/jquery.orgchart.min.js"></script>
-<link rel="stylesheet" href="/node_modules/orgchart/dist/css/jquery.orgchart.min.css">
 <script src="/assets/pages/RSM/orgchart.js?v=<?php echo filemtime(__DIR__ . '/orgchart.js'); ?>"></script>
 
 <style>
-	#chart-container {
+	/* JSON Display Container */
+	#json-container {
 		position: relative;
-		font-family: Arial;
-		height: 1560px;
-		border: 1px solid #aaa;
+		font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+		background-color: #1e1e1e;
+		border: 1px solid #333;
+		border-radius: 6px;
 		overflow: auto;
-		text-align: center;
+		max-height: 600px;
+		padding: 20px;
+	}
+
+	#json-container pre {
+		margin: 0;
+		white-space: pre-wrap;
+		word-wrap: break-word;
+		color: #d4d4d4;
+	}
+
+	/* Controls styling */
+	#json-controls {
+		display: flex;
+		gap: 10px;
+		margin-bottom: 15px;
+		padding: 10px;
+		background-color: #f5f5f5;
+		border-radius: 4px;
+	}
+
+	#json-controls button {
+		padding: 8px 16px;
+		font-size: 14px;
+		border: 1px solid #ccc;
+		border-radius: 4px;
 		background-color: white;
+		cursor: pointer;
+		transition: background-color 0.2s;
 	}
 
-	/* Target the title element inside the node container */
-	.orgchart .node .content {
-		height: auto !important;
-		/* Removes the restrictive fixed height */
-		line-height: 1.4 !important;
-		/* Provides proper vertical spacing for text rows */
-		white-space: normal !important;
-		/* Overrides 'nowrap' to allow actual text wrapping */
-		overflow: visible !important;
-		/* Ensures long text strings aren't clipped */
-		text-overflow: clip !important;
-		/* Removes the trailing ellipsis (...) */
-		padding: 8px 4px;
-		/* Adds padding around wrapped sentences */
+	#json-controls button:hover {
+		background-color: #e9e9e9;
 	}
 
-	/* Optional: Set a fixed or minimum width for your MFO nodes */
-	.orgchart .node {
-		min-width: 80px !important;
-		/* Adjust this value based on your UI needs */
+	#json-controls button.copied {
+		background-color: #4caf50;
+		color: white;
+		border-color: #4caf50;
 	}
 
-	/* Always show edge chevrons and color them blue */
-	.orgchart .node .edge {
-		opacity: 1 !important;
-		visibility: visible !important;
-		color: #1a73e8 !important;
+	/* Custom scrollbar for dark theme */
+	#json-container::-webkit-scrollbar {
+		height: 12px;
+		width: 12px;
 	}
-	.orgchart .node .edge::before {
-		color: #1a73e8 !important;
+
+	#json-container::-webkit-scrollbar-track {
+		background: #2d2d2d;
+		border-radius: 6px;
+	}
+
+	#json-container::-webkit-scrollbar-thumb {
+		background: #555;
+		border-radius: 6px;
+	}
+
+	#json-container::-webkit-scrollbar-thumb:hover {
+		background: #777;
 	}
 </style>
 
-<div id="chart-container"></div>
+<div id="json-controls">
+	<button id="copy-json-btn" onclick="copyJsonToClipboard()">Copy JSON</button>
+</div>
+
+<div id="json-container">
+	<pre id="json-display"></pre>
+</div>
 
 <script>
 	$(document).ready(function() {
