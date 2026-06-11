@@ -356,28 +356,31 @@ elseif (isset($_POST["initLoadForm"])) {
 	// 	];
 	// }
 
-	if ($current_actualAcc != $payload["accomplishment"]) {
+	if ((string)$current_actualAcc !== (string)$payload["accomplishment"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"accomplishment", $current_actualAcc, $payload["accomplishment"]
 		];
+		error_log("PMT DEBUG: accomplishment changed from '$current_actualAcc' to '{$payload['accomplishment']}'");
+	} else {
+		error_log("PMT DEBUG: accomplishment NOT changed - DB: '$current_actualAcc' vs PAYLOAD: '{$payload['accomplishment']}'");
 	}
 
-	if ($current_Q != $payload["q"]) {
+	if ((string)$current_Q !== (string)$payload["q"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"Q", $current_Q, $payload["q"]
 		];
 	}
 
-	if ($current_E != $payload["e"]) {
+	if ((string)$current_E !== (string)$payload["e"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"E", $current_E, $payload["e"]
 		];
 	}
 
-	if ($current_T != $payload["t"]) {
+	if ((string)$current_T !== (string)$payload["t"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"T", $current_T, $payload["t"]
@@ -483,6 +486,9 @@ elseif (isset($_POST["initLoadForm"])) {
 
 	$res = $mysqli->query($sql);
 
+	error_log("PMT DEBUG: correction_is_made=$correction_is_made, supEdit=" . ($supEdit ? 'set' : 'empty'));
+	error_log("PMT DEBUG: corrections=" . json_encode($corrections));
+
 	echo json_encode($sql);
 	return null;
 	###########################################################
@@ -523,35 +529,38 @@ elseif (isset($_POST["initLoadForm"])) {
 	$correction_is_made = false;
 	$corrections = [];
 
-	if ($current_percent != $payload["percent"]) {
+	if ((string)$current_percent !== (string)$payload["percent"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"percent", $current_percent, $payload["percent"]
 		];
 	}
 
-	if ($current_actualAcc != $payload["actualAcc"]) {
+	if ((string)$current_actualAcc !== (string)$payload["actualAcc"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"actualAcc", $current_actualAcc, $payload["actualAcc"]
 		];
+		error_log("PMT CORE DEBUG: actualAcc changed from '$current_actualAcc' to '{$payload['actualAcc']}'");
+	} else {
+		error_log("PMT CORE DEBUG: actualAcc NOT changed - DB: '$current_actualAcc' vs PAYLOAD: '{$payload['actualAcc']}'");
 	}
 
-	if ($current_Q != $payload["q"]) {
+	if ((string)$current_Q !== (string)$payload["q"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"Q", $current_Q, $payload["q"]
 		];
 	}
 
-	if ($current_E != $payload["e"]) {
+	if ((string)$current_E !== (string)$payload["e"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"E", $current_E, $payload["e"]
 		];
 	}
 
-	if ($current_T != $payload["t"]) {
+	if ((string)$current_T !== (string)$payload["t"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"T", $current_T, $payload["t"]
@@ -660,6 +669,9 @@ elseif (isset($_POST["initLoadForm"])) {
 	$sql = "UPDATE spms_pcr_indicator_accomplishments SET  percent = '$payload_percent', actualAcc = '$payload_actualAcc', q = '$payload_q', e = '$payload_e', t = '$payload_t', supEdit = '$supEdit' $sql_critics WHERE spms_pcr_indicator_accomplishments.cfd_id = '$cfd_id';";
 
 	$res = $mysqli->query($sql);
+
+	error_log("PMT CORE DEBUG: correction_is_made=$correction_is_made, supEdit=" . ($supEdit ? 'set' : 'empty'));
+	error_log("PMT CORE DEBUG: corrections=" . json_encode($corrections));
 
 	echo json_encode($corrections);
 	return null;

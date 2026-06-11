@@ -203,13 +203,13 @@
 					</td>
 					<!-- if has spms_pcr_indicator_accomplishments -->
 					<template v-if="item.cfd_id && !item.not_applicable">
-						<td>{{item.actualAcc}}</td>
-						<td>{{item.q}}</td>
-						<td>{{item.e}}</td>
-						<td>{{item.t}}</td>
+						<td :style="item.corrected_actualAcc ? 'color:red':''">{{item.actualAcc}}</td>
+						<td :style="item.corrected_Q ? 'color:red':''">{{item.q}}</td>
+						<td :style="item.corrected_E ? 'color:red':''">{{item.e}}</td>
+						<td :style="item.corrected_T ? 'color:red':''">{{item.t}}</td>
 						<td style="text-align: center;">{{item.average}}</td>
 						<td></td>
-						<td width="150" style="text-align: center;"> <button class="ui small button" @click="review(item)"><i class="ui icon edit"></i> Review</button> </td>
+						<td width="150" style="text-align: center;"> <button class="ui small button" :class="(item.corrected_percent || item.corrected_actualAcc || item.corrected_Q || item.corrected_E || item.corrected_T || (item.critics && item.critics.PMT)) ? 'red' : ''" @click="review(item)"><i class="ui icon edit"></i> Review</button> </td>
 					</template>
 					<!-- else if disabled/not_applicable -->
 					<template v-else-if="item.not_applicable">
