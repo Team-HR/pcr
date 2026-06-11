@@ -1022,16 +1022,10 @@ function trows($mysqli, $row, $padding, $addDisplay, $mfo_parent_id = '')
   } else {
     $view .= "
     <tr data-mfo-id='$mfo_id' data-mfo-parent='$mfo_parent_id'>
-    <td style='padding-left:$padding;width:500px;$correctionColorMFO'>
+    <td colspan='7' style='padding-left:$padding;width:500px;$correctionColorMFO'>
     $chevron" . $set_drop . "
     $row[cf_count]) $row[cf_title] " . ""/*json_encode($row)*/ . "
     </td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
     <td class='noprint'></td>
     </tr>
     ";
