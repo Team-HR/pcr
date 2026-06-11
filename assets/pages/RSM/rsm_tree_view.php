@@ -1,27 +1,63 @@
 <script src="/assets/pages/RSM/orgchart.js?v=<?php echo filemtime(__DIR__ . '/orgchart.js'); ?>"></script>
 
 <style>
-	/* JSON Display Container */
-	#json-container {
-		position: relative;
-		font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-		background-color: #1e1e1e;
-		border: 1px solid #333;
-		border-radius: 6px;
-		overflow: auto;
-		max-height: 600px;
-		padding: 20px;
+	/* Accordion Container */
+	#mfo-accordion-container {
+		max-height: 800px;
+		overflow-y: auto;
+		padding: 10px;
+		width: 100%;
 	}
 
-	#json-container pre {
-		margin: 0;
-		white-space: pre-wrap;
-		word-wrap: break-word;
-		color: #d4d4d4;
+	#mfo-accordion {
+		width: 100%;
 	}
 
-	/* Controls styling */
-	#json-controls {
+	/* Nested accordion indentation */
+	.ui.styled.accordion .content .ui.styled.accordion {
+		margin-left: 20px;
+		margin-top: 10px;
+		width: calc(100% - 20px);
+	}
+
+	/* Accordion title styling */
+	.ui.styled.accordion .title {
+		font-weight: 500;
+		padding: 12px 15px !important;
+	}
+
+	.ui.styled.accordion .title:hover {
+		background-color: #f8f9fa;
+	}
+
+	/* Content styling */
+	.ui.styled.accordion .content {
+		padding: 15px !important;
+	}
+
+	/* Success indicators list */
+	.success-indicator-item {
+		padding: 8px 0;
+		border-bottom: 1px solid #eee;
+	}
+
+	.success-indicator-item:last-child {
+		border-bottom: none;
+	}
+
+	/* Personnel tags */
+	.personnel-tag {
+		display: inline-block;
+		background-color: #e3f2fd;
+		color: #1976d2;
+		padding: 4px 10px;
+		border-radius: 4px;
+		margin: 2px;
+		font-size: 12px;
+	}
+
+	/* Controls */
+	#accordion-controls {
 		display: flex;
 		gap: 10px;
 		margin-bottom: 15px;
@@ -30,7 +66,7 @@
 		border-radius: 4px;
 	}
 
-	#json-controls button {
+	#accordion-controls button {
 		padding: 8px 16px;
 		font-size: 14px;
 		border: 1px solid #ccc;
@@ -40,43 +76,31 @@
 		transition: background-color 0.2s;
 	}
 
-	#json-controls button:hover {
+	#accordion-controls button:hover {
 		background-color: #e9e9e9;
 	}
 
-	#json-controls button.copied {
-		background-color: #4caf50;
-		color: white;
-		border-color: #4caf50;
+	/* Level indicators */
+	.mfo-code {
+		color: #666;
+		font-weight: bold;
+		margin-right: 8px;
 	}
 
-	/* Custom scrollbar for dark theme */
-	#json-container::-webkit-scrollbar {
-		height: 12px;
-		width: 12px;
-	}
-
-	#json-container::-webkit-scrollbar-track {
-		background: #2d2d2d;
-		border-radius: 6px;
-	}
-
-	#json-container::-webkit-scrollbar-thumb {
-		background: #555;
-		border-radius: 6px;
-	}
-
-	#json-container::-webkit-scrollbar-thumb:hover {
-		background: #777;
+	.empty-children {
+		color: #999;
+		font-style: italic;
+		padding: 10px;
 	}
 </style>
 
-<div id="json-controls">
-	<button id="copy-json-btn" onclick="copyJsonToClipboard()">Copy JSON</button>
+<div id="accordion-controls">
+	<button onclick="expandAllAccordion()">Expand All</button>
+	<button onclick="collapseAllAccordion()">Collapse All</button>
 </div>
 
-<div id="json-container">
-	<pre id="json-display"></pre>
+<div id="mfo-accordion-container">
+	<div class="ui styled accordion" id="mfo-accordion"></div>
 </div>
 
 <script>

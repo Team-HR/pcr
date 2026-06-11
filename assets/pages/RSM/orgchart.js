@@ -1,7 +1,4 @@
-// JSON display functions for RSM org tree view
-
-// Store current JSON data for copy functionality
-var currentJsonData = null;
+// RSM Tree and Org Tree display functions
 
 function rsm_load_tree(period, year) {
   $.post(
@@ -25,8 +22,8 @@ function rsm_load_tree(period, year) {
                 alert("Error: " + parsedData.error);
                 return;
               }
-              // Display as pretty JSON for MFO tree
-              displayPrettyJson(parsedData);
+              // Render as accordion for MFO tree
+              renderMfoAccordion(parsedData);
             } catch (e) {
               console.error("JSON parse error:", e);
               console.error("Response:", treeData);
@@ -63,7 +60,7 @@ function org_load_tree(period, year) {
                 alert("Error: " + parsedData.error);
                 return;
               }
-              // Display as pretty JSON
+              // Display as pretty JSON for personnel org tree
               displayPrettyJson(parsedData);
             } catch (e) {
               console.error("JSON parse error:", e);
@@ -79,46 +76,101 @@ function org_load_tree(period, year) {
   );
 }
 
-function displayPrettyJson(data) {
-  // Store for copy functionality
-  currentJsonData = data;
+function renderMfoAccordion(treeData) {
+  var $container = $('#mfo-accordion');
+  $container.empty();
 
-  // Format JSON with indentation and display as plain text
+  // treeData is array with single root element (department)
+  if (treeData && treeData.length > 0 && treeData[0].children) {
+    var html = buildMfoAccordionHtml(treeData[0].children);
+    $container.html(html);
+
+    // Initialize Semantic UI accordion
+    $container.accordion({
+      exclusive: false,
+      animateChildren: false,
+      duration: 200
+    });
+  }
+}
+
+function buildMfoAccordionHtml(mfoNodes) {
+  if (!mfoNodes || mfoNodes.length === 0) {
+    return '<div class="empty-children">No MFO items</div>';
+  }
+
+  var html = '';
+
+  mfoNodes.forEach(function(node) {
+    var hasChildren = node.children && node.children.length > 0;
+    var titleClass = hasChildren ? '' : 'disabled';
+
+    html += '<div class="' + (hasChildren ? 'active' : '') + ' title ' + titleClass + '">';
+    html += '<i class="dropdown icon"></i>';
+    if (node.code) {
+      html += '<span class="mfo-code">' + escapeHtml(node.code) + '</span>';
+    }
+    html += escapeHtml(node.title);
+    html += '</div>';
+
+    html += '<div class="' + (hasChildren ? 'active' : '') + ' content">';
+
+    // Success indicators
+    if (node.success_indicators && node.success_indicators.length > 0) {
+      html += '<div class="ui list">';
+      html += '<div class="item"><strong>Success Indicators:</strong></div>';
+      node.success_indicators.forEach(function(si) {
+        html += '<div class="success-indicator-item">';
+        html += escapeHtml(si.description);
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    // Personnel in charge
+    if (node.personnel_incharge && node.personnel_incharge.length > 0) {
+      html += '<div style="margin-top: 10px;">';
+      html += '<strong>Personnel In-Charge:</strong><br>';
+      node.personnel_incharge.forEach(function(person) {
+        html += '<span class="personnel-tag">' + escapeHtml(person.full_name) + '</span>';
+      });
+      html += '</div>';
+    }
+
+    // Nested children accordion
+    if (hasChildren) {
+      html += '<div class="ui styled accordion">';
+      html += buildMfoAccordionHtml(node.children);
+      html += '</div>';
+    }
+
+    html += '</div>';
+  });
+
+  return html;
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function expandAllAccordion() {
+  $('#mfo-accordion .title').addClass('active');
+  $('#mfo-accordion .content').addClass('active');
+}
+
+function collapseAllAccordion() {
+  $('#mfo-accordion .title').removeClass('active');
+  $('#mfo-accordion .content').removeClass('active');
+}
+
+function displayPrettyJson(data) {
   var jsonString = JSON.stringify(data, null, 2);
   $('#json-display').text(jsonString);
-}
-
-function copyJsonToClipboard() {
-  if (!currentJsonData) {
-    alert("No JSON data to copy");
-    return;
-  }
-
-  var jsonString = JSON.stringify(currentJsonData, null, 2);
-
-  // Create temporary textarea to copy
-  var $temp = $('<textarea>');
-  $('body').append($temp);
-  $temp.val(jsonString).select();
-
-  try {
-    document.execCommand('copy');
-    showCopySuccess();
-  } catch (err) {
-    console.error('Failed to copy:', err);
-    alert('Failed to copy to clipboard');
-  }
-
-  $temp.remove();
-}
-
-function showCopySuccess() {
-  var $btn = $('#copy-json-btn');
-  var originalText = $btn.text();
-
-  $btn.text('Copied!').addClass('copied');
-
-  setTimeout(function() {
-    $btn.text(originalText).removeClass('copied');
-  }, 2000);
 }
