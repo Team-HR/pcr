@@ -966,7 +966,7 @@ class Employee_data extends Db
 				$totalToUse = ($tr["id_suppFunc"] == "5" || $tr["id_suppFunc"] == "20") ? $totalMM : $totalLGUAct;
 
 				$supportSi = explode("of", $tr["suc_in"]);
-				$supportSi = $supportSi[0] . " of (__/" . $totalToUse . ") " . $supportSi[1];
+				$supportSi = $supportSi[0] . " (__/" . $totalToUse . ") of " . $supportSi[1];
 			}
 
 

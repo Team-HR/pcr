@@ -366,7 +366,7 @@ if (isset($_POST['coreFucntionInput'])) {
     $totalToUse = ($dataId == "5" || $dataId == "20") ? $totalMM : $totalLGUAct;
 
     $successIndicator = explode("of", $sqlSuc["suc_in"]);
-    $successIndicator = $successIndicator[0] . " of (__/" . $totalToUse . ") " . $successIndicator[1];
+    $successIndicator = $successIndicator[0] . " (__/" . $totalToUse . ") of " . $successIndicator[1];
   }
 
   echo "
@@ -504,7 +504,7 @@ if (isset($_POST['coreFucntionInput'])) {
     $totalToUse = ($sqldataSuccIn['parent_id'] == "5" || $sqldataSuccIn['parent_id'] == "20") ? $totalMM : $totalLGUAct;
 
     $successIndicatorEdit = explode("of", $sqlSuccIn["suc_in"]);
-    $successIndicatorEdit = $successIndicatorEdit[0] . " of (__/" . $totalToUse . ") " . $successIndicatorEdit[1];
+    $successIndicatorEdit = $successIndicatorEdit[0] . " (__/" . $totalToUse . ") of " . $successIndicatorEdit[1];
   }
 
 
