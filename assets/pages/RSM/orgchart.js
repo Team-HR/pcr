@@ -101,11 +101,12 @@ function buildMfoAccordionHtml(mfoNodes) {
 
   var html = '';
 
-  mfoNodes.forEach(function(node) {
+  mfoNodes.forEach(function(node, index) {
     var hasChildren = node.children && node.children.length > 0;
     var titleClass = hasChildren ? '' : 'disabled';
+    var uniqueId = 'mfo-' + node.id + '-' + index;
 
-    html += '<div class="' + (hasChildren ? 'active' : '') + ' title ' + titleClass + '">';
+    html += '<div class="' + (hasChildren ? 'active' : '') + ' title ' + titleClass + '" data-mfo-id="' + uniqueId + '">';
     html += '<i class="dropdown icon"></i>';
     if (node.code) {
       html += '<span class="mfo-code">' + escapeHtml(node.code) + '</span>';
@@ -137,6 +138,11 @@ function buildMfoAccordionHtml(mfoNodes) {
       html += '</div>';
     }
 
+    // Nested children toggle button (above children accordion)
+    if (hasChildren) {
+      html += '<button class="toggle-children-btn" onclick="toggleChildrenAccordion(event, \'' + uniqueId + '\')">Collapse</button>';
+    }
+
     // Nested children accordion
     if (hasChildren) {
       html += '<div class="ui styled accordion">';
@@ -163,11 +169,38 @@ function escapeHtml(text) {
 function expandAllAccordion() {
   $('#mfo-accordion .title').addClass('active');
   $('#mfo-accordion .content').addClass('active');
+  $('.toggle-children-btn').text('Collapse');
 }
 
 function collapseAllAccordion() {
   $('#mfo-accordion .title').removeClass('active');
   $('#mfo-accordion .content').removeClass('active');
+  $('.toggle-children-btn').text('Expand');
+}
+
+function toggleChildrenAccordion(event, mfoId) {
+  event.stopPropagation();
+
+  var $title = $('[data-mfo-id="' + mfoId + '"]').first();
+  var $content = $title.next('.content');
+  var $nestedAccordion = $content.find('.ui.styled.accordion').first();
+  var $btn = $(event.target);
+
+  if ($nestedAccordion.length) {
+    var isExpanded = $nestedAccordion.find('.title.active').length > 0;
+
+    if (isExpanded) {
+      // Collapse all children
+      $nestedAccordion.find('.title').removeClass('active');
+      $nestedAccordion.find('.content').removeClass('active');
+      $btn.text('Expand');
+    } else {
+      // Expand all children
+      $nestedAccordion.find('.title').addClass('active');
+      $nestedAccordion.find('.content').addClass('active');
+      $btn.text('Collapse');
+    }
+  }
 }
 
 function displayPrettyJson(data) {

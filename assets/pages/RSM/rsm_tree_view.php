@@ -24,10 +24,22 @@
 	.ui.styled.accordion .title {
 		font-weight: 500;
 		padding: 12px 15px !important;
+		color: #333;
 	}
 
 	.ui.styled.accordion .title:hover {
 		background-color: #f8f9fa;
+	}
+
+	/* Collapsed title - default text color */
+	.ui.styled.accordion .title:not(.active) {
+		color: #333;
+	}
+
+	/* Expanded title - slightly darker */
+	.ui.styled.accordion .title.active {
+		color: #000;
+		background-color: #f0f0f0;
 	}
 
 	/* Content styling */
@@ -54,6 +66,22 @@
 		border-radius: 4px;
 		margin: 2px;
 		font-size: 12px;
+	}
+
+	/* Toggle button for nested accordion */
+	.toggle-children-btn {
+		float: right;
+		padding: 4px 10px;
+		font-size: 11px;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		background-color: #f0f0f0;
+		cursor: pointer;
+		margin-left: 10px;
+	}
+
+	.toggle-children-btn:hover {
+		background-color: #e0e0e0;
 	}
 
 	/* Controls */
