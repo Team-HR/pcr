@@ -93,7 +93,7 @@
 			} else if (strtoupper($user->authorization[$index]) == strtoupper("Matrix")) {
 			?>
 				<a class="item" href="?MotherRatingScale">Rating Scale Matrix</a>
-				<a class="item" href="?MotherRatingScale&Tree"><i class="icon sitemap"></i> RSM Map</a>
+				<a class="item" href="?MotherRatingScale&Tree"><i class="icon sitemap"></i> RSM Structure</a>
 			<?php
 			} else if (strtoupper($user->authorization[$index]) == strtoupper('pmt')) {
 			?>
