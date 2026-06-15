@@ -127,7 +127,11 @@
 	<button onclick="collapseAllAccordion()">Collapse All</button>
 </div>
 
-<div id="mfo-accordion-container">
+<div id="mfo-accordion-container" style="position: relative; min-height: 100px;">
+	<div id="mfo-loader" style="display:none; text-align:center; padding: 40px 0;">
+		<div class="ui active inline loader"></div>
+		<p style="margin-top: 10px; color: #666;">Loading MFO tree...</p>
+	</div>
 	<div class="ui styled accordion" id="mfo-accordion"></div>
 </div>
 

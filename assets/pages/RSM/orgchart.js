@@ -1,6 +1,10 @@
 // RSM Tree and Org Tree display functions
 
 function rsm_load_tree(period, year) {
+  // Show loader
+  $('#mfo-loader').show();
+  $('#mfo-accordion').hide();
+
   $.post(
     "?config=rsm",
     {
@@ -19,12 +23,18 @@ function rsm_load_tree(period, year) {
             try {
               var parsedData = JSON.parse(treeData);
               if (parsedData.error) {
+                $('#mfo-loader').hide();
+                $('#mfo-accordion').show();
                 alert("Error: " + parsedData.error);
                 return;
               }
               // Render as accordion for MFO tree
               renderMfoAccordion(parsedData);
+              $('#mfo-loader').hide();
+              $('#mfo-accordion').show();
             } catch (e) {
+              $('#mfo-loader').hide();
+              $('#mfo-accordion').show();
               console.error("JSON parse error:", e);
               console.error("Response:", treeData);
               alert("Error loading tree data. Please try again.");
@@ -32,6 +42,8 @@ function rsm_load_tree(period, year) {
           }
         );
       } else {
+        $('#mfo-loader').hide();
+        $('#mfo-accordion').show();
         alert(data);
       }
     }
