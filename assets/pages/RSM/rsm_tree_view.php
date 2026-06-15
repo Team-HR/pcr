@@ -127,6 +127,11 @@
 	<button onclick="collapseAllAccordion()">Collapse All</button>
 </div>
 
+<div id="rsm-header" style="display:none; margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 4px; border-left: 4px solid #1976d2; text-align: center;">
+	<h2 id="rsm-department-title" style="margin: 0 0 5px 0; color: #333;"></h2>
+	<p id="rsm-period-year" style="margin: 0; color: #666; font-size: 14px;"></p>
+</div>
+
 <div id="mfo-accordion-container" style="position: relative; min-height: 100px;">
 	<div id="mfo-loader" style="display:none; text-align:center; padding: 40px 0;">
 		<div class="ui active inline loader"></div>

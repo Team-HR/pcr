@@ -99,7 +99,25 @@ function renderMfoAccordion(treeData) {
 
   // treeData is array with single root element (department)
   if (treeData && treeData.length > 0 && treeData[0].children) {
-    var html = buildMfoAccordionHtml(treeData[0].children);
+    var rootNode = treeData[0];
+
+    // Populate header with department and period-year
+    var deptName = rootNode.title || rootNode.code || 'Department';
+    var deptAlias = rootNode.code || '';
+    var displayTitle = deptAlias ? deptAlias + ' - ' + deptName : deptName;
+
+    $('#rsm-department-title').text(displayTitle);
+
+    // Get period and year from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const period = urlParams.get('period');
+    const year = urlParams.get('year');
+    $('#rsm-period-year').text(period && year ? period + ' ' + year : '');
+
+    // Show header
+    $('#rsm-header').show();
+
+    var html = buildMfoAccordionHtml(rootNode.children);
     $container.html(html);
 
     // Initialize Semantic UI accordion
