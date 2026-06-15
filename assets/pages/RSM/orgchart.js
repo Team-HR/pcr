@@ -1,9 +1,10 @@
 // RSM Tree and Org Tree display functions
 
 function rsm_load_tree(period, year) {
-  // Show loader
+  // Show loader, hide accordion and controls
   $('#mfo-loader').show();
   $('#mfo-accordion').hide();
+  $('#accordion-controls').hide();
 
   $.post(
     "?config=rsm",
@@ -25,6 +26,7 @@ function rsm_load_tree(period, year) {
               if (parsedData.error) {
                 $('#mfo-loader').hide();
                 $('#mfo-accordion').show();
+                $('#accordion-controls').show();
                 alert("Error: " + parsedData.error);
                 return;
               }
@@ -32,9 +34,11 @@ function rsm_load_tree(period, year) {
               renderMfoAccordion(parsedData);
               $('#mfo-loader').hide();
               $('#mfo-accordion').show();
+              $('#accordion-controls').show();
             } catch (e) {
               $('#mfo-loader').hide();
               $('#mfo-accordion').show();
+              $('#accordion-controls').show();
               console.error("JSON parse error:", e);
               console.error("Response:", treeData);
               alert("Error loading tree data. Please try again.");
@@ -44,6 +48,7 @@ function rsm_load_tree(period, year) {
       } else {
         $('#mfo-loader').hide();
         $('#mfo-accordion').show();
+        $('#accordion-controls').show();
         alert(data);
       }
     }
