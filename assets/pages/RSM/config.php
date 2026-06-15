@@ -14,6 +14,10 @@ if (isset($_POST['get_mfo_tree'])) {
   $department_id = $_SESSION["emp_info"]["department_id"];
   $period_id = $_SESSION["period"];
 
+  // Get supervisor IDs for the department/period (used to highlight personnel)
+  $supervisor_ids = get_department_supervisor_ids($mysqli, $department_id, $period_id);
+  $department_head_id = get_department_head_id($mysqli, $department_id, $period_id);
+
   // Get department name
   $dept_name = "";
   $dept_alias = "";
@@ -43,9 +47,9 @@ if (isset($_POST['get_mfo_tree'])) {
       "id" => $row["cf_ID"],
       "code" => "",
       "title" => $row["cf_count"] . ". " . $row["cf_title"],
-      "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"]),
+      "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"], $supervisor_ids, $department_head_id),
       "success_indicators" => get_success_indicators_formatted($mysqli, $row["cf_ID"]),
-      "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id)
+      "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id, $supervisor_ids, $department_head_id)
     ];
     $mfo_children[] = $node;
   }
@@ -1417,7 +1421,7 @@ function get_success_indicators_formatted($mysqli, $cf_ID)
 }
 
 // Helper function to get personnel in-charge for an MFO
-function get_mfo_personnel_incharge($mysqli, $cf_id)
+function get_mfo_personnel_incharge($mysqli, $cf_id, $supervisor_ids = [], $department_head_id = null)
 {
   $personnel = [];
   $seen_ids = [];
@@ -1456,7 +1460,9 @@ function get_mfo_personnel_incharge($mysqli, $cf_id)
 
       $personnel[] = [
         "employee_id" => $emp_row['employees_id'],
-        "full_name" => $fullName
+        "full_name" => $fullName,
+        "is_supervisor" => in_array($emp_row['employees_id'], $supervisor_ids),
+        "is_department_head" => ($department_head_id && $emp_row['employees_id'] == $department_head_id)
       ];
     }
   }
@@ -1464,8 +1470,46 @@ function get_mfo_personnel_incharge($mysqli, $cf_id)
   return $personnel;
 }
 
+// Helper function to get IDs of supervisors (those with subordinates) in a department/period
+function get_department_supervisor_ids($mysqli, $department_id, $period_id)
+{
+  $supervisor_ids = [];
+
+  $sql = "SELECT DISTINCT ImmediateSup, DepartmentHead FROM spms_pcr_status 
+          WHERE department_id = '$department_id' AND period_id = '$period_id'";
+  $result = $mysqli->query($sql);
+
+  if ($result) {
+    while ($row = $result->fetch_assoc()) {
+      if (!empty($row['ImmediateSup'])) {
+        $supervisor_ids[] = $row['ImmediateSup'];
+      }
+      if (!empty($row['DepartmentHead'])) {
+        $supervisor_ids[] = $row['DepartmentHead'];
+      }
+    }
+  }
+
+  return array_values(array_unique($supervisor_ids));
+}
+
+// Helper function to get the department head ID for a department/period
+function get_department_head_id($mysqli, $department_id, $period_id)
+{
+  $sql = "SELECT DepartmentHead FROM spms_pcr_status 
+          WHERE department_id = '$department_id' AND period_id = '$period_id' AND DepartmentHead != '' 
+          LIMIT 1";
+  $result = $mysqli->query($sql);
+
+  if ($result && $row = $result->fetch_assoc()) {
+    return $row['DepartmentHead'];
+  }
+
+  return null;
+}
+
 // Recursive function to get MFO children
-function get_mfo_tree_children($mysqli, $parent_id, $department_id)
+function get_mfo_tree_children($mysqli, $parent_id, $department_id, $supervisor_ids = [], $department_head_id = null)
 {
   $children = [];
   $sql = "SELECT cf_ID, cf_count, cf_title FROM spms_pcr_mfos 
@@ -1478,9 +1522,9 @@ function get_mfo_tree_children($mysqli, $parent_id, $department_id)
       "id" => $row["cf_ID"],
       "code" => "",
       "title" => $row["cf_count"] . ". " . $row["cf_title"],
-      "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"]),
+      "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"], $supervisor_ids, $department_head_id),
       "success_indicators" => get_success_indicators_formatted($mysqli, $row["cf_ID"]),
-      "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id)
+      "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id, $supervisor_ids, $department_head_id)
     ];
     $children[] = $node;
   }

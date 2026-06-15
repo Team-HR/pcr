@@ -168,7 +168,13 @@ function buildMfoAccordionHtml(mfoNodes) {
       html += '<div style="margin-top: 10px;">';
       html += '<strong>Personnel In-Charge:</strong><br>';
       node.personnel_incharge.forEach(function(person) {
-        html += '<span class="personnel-tag">' + escapeHtml(person.full_name) + '</span>';
+        var tagClass = 'personnel-tag';
+        if (person.is_department_head) {
+          tagClass = 'personnel-tag personnel-tag-dept-head';
+        } else if (person.is_supervisor) {
+          tagClass = 'personnel-tag personnel-tag-supervisor';
+        }
+        html += '<span class="' + tagClass + '">' + escapeHtml(person.full_name) + '</span>';
       });
       html += '</div>';
     }

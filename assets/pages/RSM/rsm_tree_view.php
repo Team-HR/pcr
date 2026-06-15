@@ -68,6 +68,19 @@
 		font-size: 12px;
 	}
 
+	/* Supervisor personnel tag (has subordinates) */
+	.personnel-tag-supervisor {
+		background-color: #fff3cd;
+		color: #856404;
+	}
+
+	/* Department head personnel tag */
+	.personnel-tag-dept-head {
+		background-color: #d4edda;
+		color: #155724;
+		font-weight: bold;
+	}
+
 	/* Toggle button for nested accordion */
 	.toggle-children-btn {
 		float: right;
