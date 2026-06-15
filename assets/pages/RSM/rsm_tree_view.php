@@ -133,6 +133,64 @@
 		font-style: italic;
 		padding: 10px;
 	}
+
+	/* Q/E/T measures */
+	.qet-toggle-btn {
+		display: inline-block;
+		margin-top: 6px;
+		padding: 2px 10px;
+		font-size: 11px;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		background-color: #f0f0f0;
+		cursor: pointer;
+	}
+
+	.qet-toggle-btn:hover {
+		background-color: #e0e0e0;
+	}
+
+	.qet-measures {
+		display: none;
+		margin-top: 8px;
+		gap: 10px;
+	}
+
+	.qet-measures.qet-visible {
+		display: flex;
+	}
+
+	.qet-column {
+		flex: 1;
+		min-width: 0;
+		background-color: #fafafa;
+		border: 1px solid #eee;
+		border-radius: 4px;
+		padding: 8px;
+	}
+
+	.qet-column-label {
+		font-weight: bold;
+		font-size: 12px;
+		color: #1976d2;
+		margin-bottom: 6px;
+		border-bottom: 1px solid #eee;
+		padding-bottom: 4px;
+	}
+
+	.qet-item {
+		font-size: 11px;
+		color: #444;
+		padding: 2px 0;
+		line-height: 1.4;
+	}
+
+	.qet-score {
+		display: inline-block;
+		min-width: 16px;
+		font-weight: bold;
+		color: #856404;
+	}
 </style>
 
 
@@ -144,6 +202,7 @@
 <div id="accordion-controls">
 	<button onclick="expandAllAccordion()">Expand All</button>
 	<button onclick="collapseAllAccordion()">Collapse All</button>
+	<button id="toggle-measures-btn" onclick="toggleAllQetMeasures()">Show All Measures</button>
 </div>
 
 <div id="mfo-accordion-container" style="position: relative; min-height: 100px;">

@@ -1412,12 +1412,41 @@ function get_success_indicators_formatted($mysqli, $cf_ID)
   $sql = "SELECT mi_id, mi_succIn FROM spms_pcr_indicators WHERE cf_ID = '$cf_ID'";
   $result = $mysqli->query($sql);
   while ($row = $result->fetch_assoc()) {
+    $qet = get_si_qet_measures($mysqli, $row["mi_id"]);
     $data[] = [
       "id" => $row["mi_id"],
-      "description" => $row["mi_succIn"]
+      "description" => $row["mi_succIn"],
+      "quality" => $qet["quality"],
+      "efficiency" => $qet["efficiency"],
+      "timeliness" => $qet["timeliness"]
     ];
   }
   return $data;
+}
+
+// Helper function to get Q/E/T measures for a success indicator
+function get_si_qet_measures($mysqli, $mi_id)
+{
+  $measures = ["quality" => [], "efficiency" => [], "timeliness" => []];
+
+  $sql = "SELECT measure_type, score, descriptor FROM spms_pcr_si_qet_descriptors 
+          WHERE success_indicator_id = '$mi_id' 
+          ORDER BY score DESC";
+  $result = $mysqli->query($sql);
+
+  if ($result) {
+    while ($row = $result->fetch_assoc()) {
+      $type = $row["measure_type"];
+      if (isset($measures[$type])) {
+        $measures[$type][] = [
+          "score" => $row["score"],
+          "descriptor" => $row["descriptor"]
+        ];
+      }
+    }
+  }
+
+  return $measures;
 }
 
 // Helper function to get personnel in-charge for an MFO

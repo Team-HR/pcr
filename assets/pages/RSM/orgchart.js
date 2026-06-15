@@ -158,6 +158,7 @@ function buildMfoAccordionHtml(mfoNodes) {
       node.success_indicators.forEach(function(si) {
         html += '<div class="success-indicator-item">';
         html += escapeHtml(si.description);
+        html += buildQetMeasuresHtml(si);
         html += '</div>';
       });
       html += '</div>';
@@ -195,6 +196,68 @@ function buildMfoAccordionHtml(mfoNodes) {
   });
 
   return html;
+}
+
+function buildQetMeasuresHtml(si) {
+  var measures = [
+    { key: 'quality', label: 'Quality' },
+    { key: 'efficiency', label: 'Efficiency' },
+    { key: 'timeliness', label: 'Timeliness' }
+  ];
+
+  // Check if there is any QET data at all
+  var hasAny = measures.some(function(m) {
+    return si[m.key] && si[m.key].length > 0;
+  });
+  if (!hasAny) return '';
+
+  var html = '';
+  html += '<button class="qet-toggle-btn" onclick="toggleQetMeasures(event, this)">Show Measures</button>';
+  html += '<div class="qet-measures">';
+
+  measures.forEach(function(m) {
+    var items = si[m.key] || [];
+    if (items.length === 0) return;
+    html += '<div class="qet-column">';
+    html += '<div class="qet-column-label">' + m.label + '</div>';
+    items.forEach(function(item) {
+      html += '<div class="qet-item"><span class="qet-score">' + escapeHtml(String(item.score)) + '</span> ' + escapeHtml(item.descriptor) + '</div>';
+    });
+    html += '</div>';
+  });
+
+  html += '</div>';
+  return html;
+}
+
+function toggleQetMeasures(event, btn) {
+  event.stopPropagation();
+  var $btn = $(btn);
+  var $measures = $btn.next('.qet-measures');
+  if ($measures.hasClass('qet-visible')) {
+    $measures.removeClass('qet-visible');
+    $btn.text('Show Measures');
+  } else {
+    $measures.addClass('qet-visible');
+    $btn.text('Hide Measures');
+  }
+}
+
+function toggleAllQetMeasures() {
+  var $measures = $('#mfo-accordion .qet-measures');
+  if ($measures.length === 0) return;
+
+  // If any is hidden, show all; otherwise hide all
+  var anyHidden = $measures.not('.qet-visible').length > 0;
+  if (anyHidden) {
+    $measures.addClass('qet-visible');
+    $('.qet-toggle-btn').text('Hide Measures');
+    $('#toggle-measures-btn').text('Hide All Measures');
+  } else {
+    $measures.removeClass('qet-visible');
+    $('.qet-toggle-btn').text('Show Measures');
+    $('#toggle-measures-btn').text('Show All Measures');
+  }
 }
 
 function escapeHtml(text) {
