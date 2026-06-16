@@ -573,7 +573,7 @@ class Employee_data extends Db
 
 		$cachedResults = getCachedQueryResultRedis($this->mysqli, $this->redis, $cacheKey, $sqlSi1);
 
-		if (count($cachedResults) > 0) {
+		if (is_array($cachedResults) && count($cachedResults) > 0) {
 			$emp_id = $this->emp_ID;
 			foreach ($cachedResults as $a) {
 				$mi_id = $a['mi_id'];
