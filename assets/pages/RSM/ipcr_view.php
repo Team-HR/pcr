@@ -39,6 +39,43 @@ if ($department_id) {
   }
 }
 
+// Determine the employee's role within the department/period (dept head > supervisor > subordinate)
+$role_label = 'Personnel';
+$role_color = '#1976d2'; // blue
+$role_bg = '#e3f2fd';
+if ($emp && $department_id && $period_id) {
+  $emp_esc = $mysqli->real_escape_string($emp);
+  $dep_esc = $mysqli->real_escape_string($department_id);
+  $per_esc = $mysqli->real_escape_string($period_id);
+
+  $is_dept_head = false;
+  $is_supervisor = false;
+
+  $dh_res = $mysqli->query("SELECT 1 FROM spms_pcr_status 
+                            WHERE department_id='$dep_esc' AND period_id='$per_esc' AND DepartmentHead='$emp_esc' LIMIT 1");
+  if ($dh_res && $dh_res->num_rows > 0) {
+    $is_dept_head = true;
+  }
+
+  if (!$is_dept_head) {
+    $sup_res = $mysqli->query("SELECT 1 FROM spms_pcr_status 
+                               WHERE department_id='$dep_esc' AND period_id='$per_esc' AND ImmediateSup='$emp_esc' LIMIT 1");
+    if ($sup_res && $sup_res->num_rows > 0) {
+      $is_supervisor = true;
+    }
+  }
+
+  if ($is_dept_head) {
+    $role_label = 'Department Head';
+    $role_color = '#155724'; // green
+    $role_bg = '#d4edda';
+  } elseif ($is_supervisor) {
+    $role_label = 'Supervisor';
+    $role_color = '#856404'; // gold
+    $role_bg = '#fff3cd';
+  }
+}
+
 $irm = new IRM();
 $irm->set_cardi($emp, $period_id, $department_id);
 $irm_rows = $irm->get_view();
@@ -123,7 +160,9 @@ $irm_rows = $irm->get_view();
               <br>
               <?= htmlspecialchars($period_label) ?>
               <br>
-              <span style="text-transform:capitalize;color:#1976d2"><?= htmlspecialchars($emp_name) ?></span>
+              <span style="text-transform:capitalize;color:<?= $role_color ?>"><?= htmlspecialchars($emp_name) ?></span>
+              <br>
+              <span style="display:inline-block;margin-top:6px;padding:3px 12px;border-radius:12px;font-size:12px;font-weight:bold;color:<?= $role_color ?>;background-color:<?= $role_bg ?>"><?= htmlspecialchars($role_label) ?></span>
             </th>
           </tr>
           <tr>
