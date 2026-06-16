@@ -2088,7 +2088,10 @@ class Employee_data extends Db
 	function RatingScaleTable()
 	{
 		$view = "
-		<table border='1px' style='border-collapse:collapse;width:98%;margin:auto'>
+		<style>
+		.ratingScaleTable, .ratingScaleTable th, .ratingScaleTable td { border: 1px solid #000 !important; }
+		</style>
+		<table class='ratingScaleTable' border='1px' style='border-collapse:collapse;width:98%;margin:auto'>
 		<thead style='background:#00c4ff36;font-size:14px'>
 		<tr>
 		<th colspan='5' style='font-size:18px'>

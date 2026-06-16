@@ -703,6 +703,9 @@ function table($mysqli)
     };
   })();
   </script>
+  <style>
+  .tablepr, .tablepr th, .tablepr td { border: 1px solid #000 !important; }
+  </style>
   <table class='tablepr' border='1px' style='border-collapse:collapse;width:100%;font-size:13px'>
   <thead>
   <tr class='noprint'>
