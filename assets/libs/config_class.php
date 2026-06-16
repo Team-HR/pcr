@@ -2408,7 +2408,7 @@ class table
 		<tr style='background:#00c4ff36;font-size:14px'>
 		<th rowspan='2' style='padding:20px'>MFO / PAP</th>
 		<th rowspan='2'>Success Indicator</th>
-		<th rowspan='2' style='$this->budgetView'>Alloted Budget<br>for 2021 (whole<br>year)</th>
+		<th rowspan='2' style='$this->budgetView'>Alloted Budget<br>for the current year</th>
 		<th  rowspan='2' style='$this->accountableView'>Individual/s or <br> Division Accountable</th>
 		<th rowspan='2'>Actual Accomplishments</th>
 		<th colspan='4' style='width:40px'>Rating Matrix</th>

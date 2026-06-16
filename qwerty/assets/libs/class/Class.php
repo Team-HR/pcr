@@ -399,7 +399,8 @@ class IPCR extends Db
     $added = "";
     $headerCol = 8;
     if ($this->fileStatus['formType'] == 3) {
-      $added .= "<th rowspan='2'>  Alloted Budget for " . $this->fileStatus['year_mfo'] . " (whole year)</th>";
+      // $added .= "<th rowspan='2'>  Alloted Budget for " . $this->fileStatus['year_mfo'] . " (whole year)</th>";
+      $added .= "<th rowspan='2'>  Alloted Budget for the current year</th>";
       $headerCol++;
     }
     if ($this->fileStatus['formType'] == 3 || $this->fileStatus['formType'] == 2) {
