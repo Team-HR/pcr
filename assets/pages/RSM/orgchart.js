@@ -169,13 +169,13 @@ function buildMfoAccordionHtml(mfoNodes) {
       html += '<div style="margin-top: 10px;">';
       html += '<strong>Personnel In-Charge:</strong><br>';
       node.personnel_incharge.forEach(function(person) {
-        var tagClass = 'personnel-tag';
+        var tagClass = 'personnel-tag personnel-tag-clickable';
         if (person.is_department_head) {
-          tagClass = 'personnel-tag personnel-tag-dept-head';
+          tagClass = 'personnel-tag personnel-tag-clickable personnel-tag-dept-head';
         } else if (person.is_supervisor) {
-          tagClass = 'personnel-tag personnel-tag-supervisor';
+          tagClass = 'personnel-tag personnel-tag-clickable personnel-tag-supervisor';
         }
-        html += '<span class="' + tagClass + '">' + escapeHtml(person.full_name) + '</span>';
+        html += '<span class="' + tagClass + '" title="View Individual Rating Scale" onclick="openPersonnelIpcr(event, \'' + person.employee_id + '\')">' + escapeHtml(person.full_name) + '</span>';
       });
       html += '</div>';
     }
@@ -228,6 +228,21 @@ function buildQetMeasuresHtml(si) {
 
   html += '</div>';
   return html;
+}
+
+function openPersonnelIpcr(event, employeeId) {
+  event.stopPropagation();
+  if (!employeeId) return;
+
+  var urlParams = new URLSearchParams(window.location.search);
+  var period = urlParams.get('period');
+  var year = urlParams.get('year');
+
+  var url = '?config=RSMipcrView&emp=' + encodeURIComponent(employeeId);
+  if (period && year) {
+    url += '&period=' + encodeURIComponent(period) + '&year=' + encodeURIComponent(year);
+  }
+  window.open(url, '_blank');
 }
 
 function toggleQetMeasures(event, btn) {

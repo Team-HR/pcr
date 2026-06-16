@@ -68,6 +68,18 @@
 		font-size: 12px;
 	}
 
+	/* Clickable personnel tag */
+	.personnel-tag-clickable {
+		cursor: pointer;
+		transition: filter 0.15s ease, box-shadow 0.15s ease;
+	}
+
+	.personnel-tag-clickable:hover {
+		filter: brightness(0.95);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+		text-decoration: underline;
+	}
+
 	/* Supervisor personnel tag (has subordinates) */
 	.personnel-tag-supervisor {
 		background-color: #fff3cd;
