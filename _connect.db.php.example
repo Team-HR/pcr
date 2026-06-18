@@ -1,6 +1,0 @@
-<?php
-date_default_timezone_set("Asia/Manila");
-$host = "hostname";
-$user = "username";
-$password = "password";
-$database = "database_name";

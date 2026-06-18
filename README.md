@@ -45,23 +45,9 @@ WEB_PORT=<web-port>
 EOF
 ```
 
-## 4. Create the database connection file
+These same variables are read automatically by `_connect.db.php` (which is committed and contains no credentials), so no separate database config file needs to be created.
 
-`_connect.db.php` is gitignored and must be created manually:
-
-```bash
-cat > _connect.db.php << 'EOF'
-<?php
-date_default_timezone_set("Asia/Manila");
-$host = "<db-host>";
-$user = "<db-user>";
-$password = "<db-password>";
-$database = "<db-name>";
-$port = "<db-port>";
-EOF
-```
-
-## 5. Build the image
+## 4. Build the image
 
 The PHP extensions (including `bcmath`, `gd`, `pdo_mysql`, and `redis`) are installed automatically by the `Dockerfile` — no manual `apt-get` steps are needed.
 
@@ -76,7 +62,7 @@ docker compose up -d --build
 > docker compose up -d
 > ```
 
-## 6. Verify
+## 5. Verify
 
 ```bash
 # Container is running
