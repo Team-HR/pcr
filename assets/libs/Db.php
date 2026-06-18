@@ -20,7 +20,7 @@ class Db extends mysqli
 
 		require $config_file;
 		
-		$mysqli = new mysqli($host, $user, $password, $database);
+		$mysqli = new mysqli($host, $user, $password, $database, $port);
 		$mysqli->set_charset("utf8");
 
 		// MYSQL ERROR REPORTING START

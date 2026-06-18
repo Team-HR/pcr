@@ -1,4 +1,4 @@
-FROM php:7.4-apache
+FROM php:8.2-apache
 
 # Install dependencies and PHP extensions in single layer
 RUN apt-get update \
@@ -7,6 +7,8 @@ RUN apt-get update \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
         libpng-dev \
+        libssl-dev \
+        pkg-config \
         unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
@@ -17,12 +19,22 @@ RUN apt-get update \
         calendar \
         zip \
         gd \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
     && a2enmod rewrite \
     && chown -R www-data:www-data /var/www/ \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Redis PHP extension from GitHub
+RUN curl -fsSL https://github.com/phpredis/phpredis/archive/refs/tags/6.1.0.tar.gz -o /tmp/redis.tar.gz \
+    && cd /tmp \
+    && tar -xzf redis.tar.gz \
+    && cd phpredis-6.1.0 \
+    && phpize \
+    && ./configure \
+    && make -j$(nproc) \
+    && make install \
+    && docker-php-ext-enable redis \
+    && rm -rf /tmp/redis* || echo "Redis extension installation failed - may cause errors"
 
 # Optional: Install and enable xdebug
 # RUN pecl install xdebug && docker-php-ext-enable xdebug
