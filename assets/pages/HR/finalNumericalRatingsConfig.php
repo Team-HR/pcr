@@ -1,4 +1,5 @@
 <?php
+ini_set('display_errors', 0);
 require_once "assets/libs/FinalNumericalRatings.php";
 // $finalNumericalRating = new FinalNumericalRating();
 /*
@@ -50,10 +51,7 @@ if (isset($_POST['getDepartmentItems'])) {
 		$data[] = $row;
 	}
 	print json_encode($data);
-}
-
-
-else if (isset($_POST['getDepartmentHeadItems'])) {
+} else if (isset($_POST['getDepartmentHeadItems'])) {
 	$data = [];
 	$sql = "SELECT * FROM employees ORDER BY lastName ASC;";
 	$res = $mysqli->query($sql);
@@ -64,11 +62,8 @@ else if (isset($_POST['getDepartmentHeadItems'])) {
 		];
 	}
 	print json_encode($data);
-}
-
-// SELECT * FROM spms_periods WHERE year_mfo > 2018 ORDER BY spms_periods.year_mfo DESC;
-
-else if (isset($_POST['getPeriodItems'])) {
+} else if (isset($_POST['getPeriodItems'])) {
+	// SELECT * FROM spms_periods WHERE year_mfo > 2018 ORDER BY spms_periods.year_mfo DESC;
 	$data = [];
 	$sql = "SELECT * FROM spms_periods WHERE year_mfo > 2018 ORDER BY spms_periods.year_mfo DESC;";
 	$res = $mysqli->query($sql);
@@ -480,7 +475,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
 				$empincharge = "";
 				if (isset($siDataRow1['mi_id'])) {
 					$mi_id = $siDataRow1['mi_id'];
-					$sql = "SELECT * FROM spms_pcr_indicator_accomplishmentswhere p_id = '$mi_id' AND empId = '$empDataId';";
+					$sql = "SELECT * FROM spms_pcr_indicator_accomplishments WHERE p_id = '$mi_id' AND empId = '$empDataId';";
 					$res = $mysqli->query($sql);
 					if ($rowdata = $res->fetch_assoc()) {
 						// $empincharge .= " -- " . json_encode($rowdata);
@@ -570,7 +565,6 @@ function trows($mysqli, $row, $padding, $addDisplay)
 						$empincharge .= "NOT ACCOMPLISHED";
 					}
 				}
-			}
 			$Qdata = "";
 			$Edata = "";
 			$Tdata = "";

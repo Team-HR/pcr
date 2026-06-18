@@ -1,4 +1,7 @@
 <?php
+// This file is the main entry point for the PCR application
+// It handles session management, includes necessary classes, and routes to the appropriate pages
+
 require_once "assets/libs/session_init.php";
 session_start();
 require_once "assets/libs/config_class.php";
@@ -146,6 +149,8 @@ if (isset($_SESSION['emp_id'])) {
 			require_once "assets/pages/RSM/config.php";
 		} elseif ($filePath == "RSMmodalCont") {
 			require_once "assets/pages/RSM/modalCont.php";
+		} elseif ($filePath == "RSMipcrView") {
+			require_once "assets/pages/RSM/ipcr_view.php";
 		} elseif ($filePath == "prContent") {
 			require_once "assets/pages/performanceRating/content.php";
 		} elseif ($filePath == "reassign") {

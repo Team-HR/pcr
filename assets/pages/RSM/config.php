@@ -14,6 +14,10 @@ if (isset($_POST['get_mfo_tree'])) {
   $department_id = $_SESSION["emp_info"]["department_id"];
   $period_id = $_SESSION["period"];
 
+  // Get supervisor IDs for the department/period (used to highlight personnel)
+  $supervisor_ids = get_department_supervisor_ids($mysqli, $department_id, $period_id);
+  $department_head_id = get_department_head_id($mysqli, $department_id, $period_id);
+
   // Get department name
   $dept_name = "";
   $dept_alias = "";
@@ -43,8 +47,9 @@ if (isset($_POST['get_mfo_tree'])) {
       "id" => $row["cf_ID"],
       "code" => "",
       "title" => $row["cf_count"] . ". " . $row["cf_title"],
-      "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"]),
-      "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id)
+      "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"], $supervisor_ids, $department_head_id),
+      "success_indicators" => get_success_indicators_formatted($mysqli, $row["cf_ID"]),
+      "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id, $supervisor_ids, $department_head_id)
     ];
     $mfo_children[] = $node;
   }
@@ -634,12 +639,73 @@ function table($mysqli)
   $period = $period->fetch_assoc();
   // $period_id = $period['mfoperiod_id'];
   echo "
-  <button class='noprint' onclick = 'rsmLoad(\"table\")'>Refresh</button>
+  <button class='noprint' onclick = 'rsmLoad(\"table\")' style='cursor:pointer;'>Refresh</button>
+  <button class='noprint' id='rsmToggleAll' onclick='rsmToggleAll()' style='margin-left:6px;cursor:pointer;'>&#9660; Collapse All</button>
+  <style>
+  tr[data-mfo-id] { transition: opacity 0.15s; }
+  .rsm-chevron { user-select:none; font-size:18px; padding:2px 4px; cursor:pointer; }
+  .rsm-chevron.collapsed { transform: rotate(-90deg); }
+  #rsm-toggle-loader { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.5); z-index:9999; align-items:center; justify-content:center; font-size:20px; }
+  #rsm-toggle-loader.active { display:flex; }
+  </style>
+  <div id='rsm-toggle-loader'><i class='ui spinner loading icon' style='font-size:32px;'></i></div>
   <script>
   $('.ui.dropdown').dropdown({
     fullTextSearch:true
   });
+  (function(){
+    function getAllDescendants(mfoId) {
+      var rows = [];
+      document.querySelectorAll('[data-mfo-parent=\"' + mfoId + '\"]').forEach(function(tr) {
+        rows.push(tr);
+        var childId = tr.getAttribute('data-mfo-id');
+        if (childId) {
+          getAllDescendants(childId).forEach(function(c){ rows.push(c); });
+        }
+      });
+      return rows;
+    }
+    document.querySelectorAll('.rsm-chevron').forEach(function(chevron) {
+      chevron.addEventListener('click', function() {
+        var mfoId = this.getAttribute('data-toggle');
+        var collapsed = this.classList.toggle('collapsed');
+        getAllDescendants(mfoId).forEach(function(tr) {
+          tr.style.display = collapsed ? 'none' : '';
+        });
+      });
+    });
+    window.rsmToggleAll = function() {
+      var loader = document.getElementById('rsm-toggle-loader');
+      loader.classList.add('active');
+      setTimeout(function() {
+        var btn = document.getElementById('rsmToggleAll');
+        var collapsing = btn.getAttribute('data-state') !== 'collapsed';
+        document.querySelectorAll('.rsm-chevron').forEach(function(chevron) {
+          var mfoId = chevron.getAttribute('data-toggle');
+          if (collapsing) {
+            chevron.classList.add('collapsed');
+          } else {
+            chevron.classList.remove('collapsed');
+          }
+          getAllDescendants(mfoId).forEach(function(tr) {
+            tr.style.display = collapsing ? 'none' : '';
+          });
+        });
+        if (collapsing) {
+          btn.setAttribute('data-state', 'collapsed');
+          btn.innerHTML = '&#9654; Expand All';
+        } else {
+          btn.setAttribute('data-state', '');
+          btn.innerHTML = '&#9660; Collapse All';
+        }
+        loader.classList.remove('active');
+      }, 50);
+    };
+  })();
   </script>
+  <style>
+  .tablepr, .tablepr th, .tablepr td { border: 1px solid #000 !important; }
+  </style>
   <table class='tablepr' border='1px' style='border-collapse:collapse;width:100%;font-size:13px'>
   <thead>
   <tr class='noprint'>
@@ -708,10 +774,8 @@ function tbodyChild($dataId, $padding)
   $sql2 = $mysqli->query($sql2);
   $padding += 15;
   while ($row2 = $sql2->fetch_assoc()) {
-    $sql3 = "SELECT * from spms_pcr_mfos where parent_id='$row2[cf_ID]' ORDER BY spms_pcr_mfos.cf_count ASC";
-    $sql3 = $mysqli->query($sql3);
     $pad = $padding . "px";
-    $view .= trows($mysqli, $row2, $pad, '');
+    $view .= trows($mysqli, $row2, $pad, '', $dataId);
     $view .= tbodyChild($row2['cf_ID'], $padding);
   }
   return $view;
@@ -768,18 +832,21 @@ function validaateCorrection($dat)
   return $color;
 }
 
-function trows($mysqli, $row, $padding, $addDisplay)
+function trows($mysqli, $row, $padding, $addDisplay, $mfo_parent_id = '')
 {
-  $sql2 = "SELECT * from spms_pcr_mfos where parent_id='$row[cf_ID]'";
+  $mfo_id = $row['cf_ID'];
+  $sql2 = "SELECT * from spms_pcr_mfos where parent_id='$mfo_id'";
   $sql2 = $mysqli->query($sql2);
   $sql2count = $sql2->num_rows;
   if ($sql2count > 0) {
     $set_drop = settingDrop($mysqli, $row, '', $addDisplay, 'display:none');
+    $chevron = "<span class='rsm-chevron noprint' data-toggle='$mfo_id' style='cursor:pointer;margin-right:8px;display:inline-block;transition:transform 0.2s;font-size:18px;line-height:1;vertical-align:middle;'>&#9660;</span>";
   } else {
     $set_drop = settingDrop($mysqli, $row, '', $addDisplay, '');
+    $chevron = "<span style='display:inline-block;width:18px;margin-right:6px;'></span>";
   }
   $view = "";
-  $siData1 = "SELECT * from spms_pcr_indicators where cf_ID='$row[cf_ID]'";
+  $siData1 = "SELECT * from spms_pcr_indicators where cf_ID='$mfo_id'";
   $siData1 = $mysqli->query($siData1);
   $siDatacount1 = $siData1->num_rows;
   $count = 1;
@@ -914,9 +981,9 @@ function trows($mysqli, $row, $padding, $addDisplay)
       }
       if ($count == 1) {
         $view .= "
-        <tr >
+        <tr data-mfo-id='$mfo_id' data-mfo-parent='$mfo_parent_id'>
         <td style='padding-left:$padding;width:25%;$correctionColorMFO'>
-        " . $set_drop . "
+        $chevron" . $set_drop . "
         $row[cf_count]) $row[cf_title] " .  ""/*json_encode($row)*/ . "
         </td>
         <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . ""/*json_encode($siDataRow1)*/ . "</td>
@@ -939,7 +1006,7 @@ function trows($mysqli, $row, $padding, $addDisplay)
         ";
       } else {
         $view .= "
-        <tr >
+        <tr data-mfo-owner='$mfo_id' data-mfo-parent='$mfo_parent_id'>
         <td></td>
         <td style='width:25%;$correctionColor'>" . nl2br($siDataRow1['mi_succIn']) . "</td>
         <td>$performanceMeasure</td>
@@ -962,17 +1029,11 @@ function trows($mysqli, $row, $padding, $addDisplay)
     }
   } else {
     $view .= "
-    <tr >
-    <td style='padding-left:$padding;width:500px;$correctionColorMFO'>
-    " . $set_drop . "
+    <tr data-mfo-id='$mfo_id' data-mfo-parent='$mfo_parent_id'>
+    <td colspan='7' style='padding-left:$padding;width:500px;$correctionColorMFO'>
+    $chevron" . $set_drop . "
     $row[cf_count]) $row[cf_title] " . ""/*json_encode($row)*/ . "
     </td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
     <td class='noprint'></td>
     </tr>
     ";
@@ -1347,8 +1408,52 @@ function get_success_indicators($mysqli, $cf_ID)
   return $data;
 }
 
+// Helper function to get formatted success indicators for tree
+function get_success_indicators_formatted($mysqli, $cf_ID)
+{
+  $data = [];
+  $sql = "SELECT mi_id, mi_succIn FROM spms_pcr_indicators WHERE cf_ID = '$cf_ID'";
+  $result = $mysqli->query($sql);
+  while ($row = $result->fetch_assoc()) {
+    $qet = get_si_qet_measures($mysqli, $row["mi_id"]);
+    $data[] = [
+      "id" => $row["mi_id"],
+      "description" => $row["mi_succIn"],
+      "quality" => $qet["quality"],
+      "efficiency" => $qet["efficiency"],
+      "timeliness" => $qet["timeliness"]
+    ];
+  }
+  return $data;
+}
+
+// Helper function to get Q/E/T measures for a success indicator
+function get_si_qet_measures($mysqli, $mi_id)
+{
+  $measures = ["quality" => [], "efficiency" => [], "timeliness" => []];
+
+  $sql = "SELECT measure_type, score, descriptor FROM spms_pcr_si_qet_descriptors 
+          WHERE success_indicator_id = '$mi_id' 
+          ORDER BY score DESC";
+  $result = $mysqli->query($sql);
+
+  if ($result) {
+    while ($row = $result->fetch_assoc()) {
+      $type = $row["measure_type"];
+      if (isset($measures[$type])) {
+        $measures[$type][] = [
+          "score" => $row["score"],
+          "descriptor" => $row["descriptor"]
+        ];
+      }
+    }
+  }
+
+  return $measures;
+}
+
 // Helper function to get personnel in-charge for an MFO
-function get_mfo_personnel_incharge($mysqli, $cf_id)
+function get_mfo_personnel_incharge($mysqli, $cf_id, $supervisor_ids = [], $department_head_id = null)
 {
   $personnel = [];
   $seen_ids = [];
@@ -1387,7 +1492,9 @@ function get_mfo_personnel_incharge($mysqli, $cf_id)
 
       $personnel[] = [
         "employee_id" => $emp_row['employees_id'],
-        "full_name" => $fullName
+        "full_name" => $fullName,
+        "is_supervisor" => in_array($emp_row['employees_id'], $supervisor_ids),
+        "is_department_head" => ($department_head_id && $emp_row['employees_id'] == $department_head_id)
       ];
     }
   }
@@ -1395,8 +1502,46 @@ function get_mfo_personnel_incharge($mysqli, $cf_id)
   return $personnel;
 }
 
+// Helper function to get IDs of supervisors (those with subordinates) in a department/period
+function get_department_supervisor_ids($mysqli, $department_id, $period_id)
+{
+  $supervisor_ids = [];
+
+  $sql = "SELECT DISTINCT ImmediateSup, DepartmentHead FROM spms_pcr_status 
+          WHERE department_id = '$department_id' AND period_id = '$period_id'";
+  $result = $mysqli->query($sql);
+
+  if ($result) {
+    while ($row = $result->fetch_assoc()) {
+      if (!empty($row['ImmediateSup'])) {
+        $supervisor_ids[] = $row['ImmediateSup'];
+      }
+      if (!empty($row['DepartmentHead'])) {
+        $supervisor_ids[] = $row['DepartmentHead'];
+      }
+    }
+  }
+
+  return array_values(array_unique($supervisor_ids));
+}
+
+// Helper function to get the department head ID for a department/period
+function get_department_head_id($mysqli, $department_id, $period_id)
+{
+  $sql = "SELECT DepartmentHead FROM spms_pcr_status 
+          WHERE department_id = '$department_id' AND period_id = '$period_id' AND DepartmentHead != '' 
+          LIMIT 1";
+  $result = $mysqli->query($sql);
+
+  if ($result && $row = $result->fetch_assoc()) {
+    return $row['DepartmentHead'];
+  }
+
+  return null;
+}
+
 // Recursive function to get MFO children
-function get_mfo_tree_children($mysqli, $parent_id, $department_id)
+function get_mfo_tree_children($mysqli, $parent_id, $department_id, $supervisor_ids = [], $department_head_id = null)
 {
   $children = [];
   $sql = "SELECT cf_ID, cf_count, cf_title FROM spms_pcr_mfos 
@@ -1409,8 +1554,9 @@ function get_mfo_tree_children($mysqli, $parent_id, $department_id)
       "id" => $row["cf_ID"],
       "code" => "",
       "title" => $row["cf_count"] . ". " . $row["cf_title"],
-      "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"]),
-      "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id)
+      "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"], $supervisor_ids, $department_head_id),
+      "success_indicators" => get_success_indicators_formatted($mysqli, $row["cf_ID"]),
+      "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id, $supervisor_ids, $department_head_id)
     ];
     $children[] = $node;
   }

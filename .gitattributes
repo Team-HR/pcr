@@ -1,0 +1,15 @@
+# Exclude development files from production exports
+.gitattributes export-ignore
+.gitignore export-ignore
+.github/ export-ignore
+docs/ export-ignore
+tools/ export-ignore
+*.md export-ignore
+test*.php export-ignore
+PcrFormTest.php export-ignore
+test.php export-ignore
+test_proc.php export-ignore
+test_session_config.php export-ignore
+node_modules/ export-ignore
+package*.json export-ignore
+monitoring/ export-ignore

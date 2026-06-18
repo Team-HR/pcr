@@ -1,90 +1,83 @@
-<script src="/node_modules/orgchart/dist/js/jquery.orgchart.min.js"></script>
-<link rel="stylesheet" href="/node_modules/orgchart/dist/css/jquery.orgchart.min.css">
 <script src="/assets/pages/RSM/orgchart.js?v=<?php echo filemtime(__DIR__ . '/orgchart.js'); ?>"></script>
 
 <style>
-	#orgchart-container {
+	/* JSON Display Container */
+	#json-container {
 		position: relative;
-		font-family: Arial;
-		height: 560px;
-		border: 1px solid #aaa;
+		font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+		background-color: #1e1e1e;
+		border: 1px solid #333;
+		border-radius: 6px;
 		overflow: auto;
-		text-align: center;
-		background-color: white;
+		max-height: 1000px;
+		padding: 20px;
 	}
 
-	/* Target the title element inside the node container */
-	.orgchart .node .content {
-		height: auto !important;
-		/* Removes the restrictive fixed height */
-		line-height: 1.4 !important;
-		/* Provides proper vertical spacing for text rows */
-		white-space: normal !important;
-		/* Overrides 'nowrap' to allow actual text wrapping */
-		overflow: visible !important;
+	#json-container pre {
+		margin: 0;
+		white-space: pre-wrap;
+		word-wrap: break-word;
+		color: #d4d4d4;
 	}
 
-	/* Custom scrollbar styling */
-	#orgchart-container::-webkit-scrollbar {
-		height: 20px;
-		width: 12px;
-	}
-
-	#orgchart-container::-webkit-scrollbar-track {
-		background: #f1f1f1;
-		border-radius: 6px;
-	}
-
-	#orgchart-container::-webkit-scrollbar-thumb {
-		background: grey;
-		border-radius: 6px;
-	}
-
-	#orgchart-container::-webkit-scrollbar-thumb:hover {
-		background: teal;
-	}
-
-	/* Optional: Set a fixed or minimum width for your MFO nodes */
-	.orgchart .node {
-		min-width: 80px !important;
-		/* Adjust this value based on your UI needs */
-	}
-
-	/* Highlighted node styling */
-	.orgchart .node.highlighted {
-		background-color: #ffeb3b !important;
-		border: 2px solid #fbc02d !important;
-		box-shadow: 0 0 10px rgba(251, 192, 45, 0.5) !important;
-	}
-
-	/* Search input styling */
-	#search-container {
+	/* Controls styling */
+	#json-controls {
+		display: flex;
+		gap: 10px;
 		margin-bottom: 15px;
 		padding: 10px;
 		background-color: #f5f5f5;
 		border-radius: 4px;
 	}
 
-	#search-input {
-		width: 100%;
-		padding: 8px 12px;
+	#json-controls button {
+		padding: 8px 16px;
 		font-size: 14px;
 		border: 1px solid #ccc;
 		border-radius: 4px;
-		box-sizing: border-box;
+		background-color: white;
+		cursor: pointer;
+		transition: background-color 0.2s;
 	}
 
-	#search-input:focus {
-		outline: none;
-		border-color: #007bff;
+	#json-controls button:hover {
+		background-color: #e9e9e9;
+	}
+
+	#json-controls button.copied {
+		background-color: #4caf50;
+		color: white;
+		border-color: #4caf50;
+	}
+
+	/* Custom scrollbar for dark theme */
+	#json-container::-webkit-scrollbar {
+		height: 12px;
+		width: 12px;
+	}
+
+	#json-container::-webkit-scrollbar-track {
+		background: #2d2d2d;
+		border-radius: 6px;
+	}
+
+	#json-container::-webkit-scrollbar-thumb {
+		background: #555;
+		border-radius: 6px;
+	}
+
+	#json-container::-webkit-scrollbar-thumb:hover {
+		background: #777;
 	}
 </style>
 
-<div id="search-container">
-	<input type="text" id="search-input" placeholder="Search by name...">
+<div id="json-controls">
+	<button id="copy-json-btn" onclick="copyJsonToClipboard()">Copy JSON</button>
 </div>
 
-<div id="orgchart-container"></div>
+<div id="json-container">
+	<pre id="json-display"></pre>
+</div>
 
 <script>
 	$(document).ready(function() {

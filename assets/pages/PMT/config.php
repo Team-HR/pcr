@@ -137,6 +137,61 @@ if (isset($_POST['showDepartmentFiles'])) {
 			$formType = "IPCR (NGA)";
 		}
 
+		// Check for corrections (stored in critics field)
+		$employee_id = $row['employees_id'];
+		$has_pmtEdit = false;
+		$has_critics = false;
+
+		// Check core function critics
+		$correction_sql = "SELECT a.critics 
+						   FROM spms_pcr_indicator_accomplishments a
+						   JOIN spms_pcr_indicators i ON a.p_id = i.mi_id
+						   JOIN spms_pcr_mfos m ON i.cf_ID = m.cf_ID
+						   WHERE a.empId = '$employee_id' 
+						   AND m.mfo_periodId = '$period_id'
+						   AND a.critics IS NOT NULL 
+						   AND a.critics != ''";
+		$correction_res = $mysqli->query($correction_sql);
+		if ($correction_res && $correction_res->num_rows > 0) {
+			while ($corr_row = $correction_res->fetch_assoc()) {
+				if ($corr_row['critics'] && $corr_row['critics'] != '') {
+					$critics_data = @unserialize($corr_row['critics']);
+					if ($critics_data && is_array($critics_data)) {
+						if (!empty($critics_data['IS']) || !empty($critics_data['DH']) || !empty($critics_data['PMT'])) {
+							$has_critics = true;
+						}
+						if (!empty($critics_data['PMT'])) {
+							$has_pmtEdit = true;
+						}
+					}
+				}
+			}
+		}
+
+		// Check support function critics
+		$support_sql = "SELECT critics 
+						FROM spms_pcr_support_function_accomplishments
+						WHERE emp_id = '$employee_id' 
+						AND period_id = '$period_id'
+						AND critics IS NOT NULL 
+						AND critics != ''";
+		$support_res = $mysqli->query($support_sql);
+		if ($support_res && $support_res->num_rows > 0) {
+			while ($supp_row = $support_res->fetch_assoc()) {
+				if ($supp_row['critics'] && $supp_row['critics'] != '') {
+					$critics_data = @unserialize($supp_row['critics']);
+					if ($critics_data && is_array($critics_data)) {
+						if (!empty($critics_data['IS']) || !empty($critics_data['DH']) || !empty($critics_data['PMT'])) {
+							$has_critics = true;
+						}
+						if (!empty($critics_data['PMT'])) {
+							$has_pmtEdit = true;
+						}
+					}
+				}
+			}
+		}
+
 		$item = [
 			"id" => $row["performanceReviewStatus_id"],
 			"name" => $fullName,
@@ -146,6 +201,8 @@ if (isset($_POST['showDepartmentFiles'])) {
 			"date_approved" => $row["approved"],
 			"date_certified" => $row["certify"],
 			"panel_approved" => $row["panelApproved"],
+			"has_pmtEdit" => $has_pmtEdit,
+			"has_critics" => $has_critics
 		];
 
 		$data[] = $item;
@@ -299,28 +356,31 @@ elseif (isset($_POST["initLoadForm"])) {
 	// 	];
 	// }
 
-	if ($current_actualAcc != $payload["accomplishment"]) {
+	if ((string)$current_actualAcc !== (string)$payload["accomplishment"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"accomplishment", $current_actualAcc, $payload["accomplishment"]
 		];
+		error_log("PMT DEBUG: accomplishment changed from '$current_actualAcc' to '{$payload['accomplishment']}'");
+	} else {
+		error_log("PMT DEBUG: accomplishment NOT changed - DB: '$current_actualAcc' vs PAYLOAD: '{$payload['accomplishment']}'");
 	}
 
-	if ($current_Q != $payload["q"]) {
+	if ((string)$current_Q !== (string)$payload["q"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"Q", $current_Q, $payload["q"]
 		];
 	}
 
-	if ($current_E != $payload["e"]) {
+	if ((string)$current_E !== (string)$payload["e"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"E", $current_E, $payload["e"]
 		];
 	}
 
-	if ($current_T != $payload["t"]) {
+	if ((string)$current_T !== (string)$payload["t"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"T", $current_T, $payload["t"]
@@ -426,6 +486,9 @@ elseif (isset($_POST["initLoadForm"])) {
 
 	$res = $mysqli->query($sql);
 
+	error_log("PMT DEBUG: correction_is_made=$correction_is_made, supEdit=" . ($supEdit ? 'set' : 'empty'));
+	error_log("PMT DEBUG: corrections=" . json_encode($corrections));
+
 	echo json_encode($sql);
 	return null;
 	###########################################################
@@ -466,35 +529,38 @@ elseif (isset($_POST["initLoadForm"])) {
 	$correction_is_made = false;
 	$corrections = [];
 
-	if ($current_percent != $payload["percent"]) {
+	if ((string)$current_percent !== (string)$payload["percent"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"percent", $current_percent, $payload["percent"]
 		];
 	}
 
-	if ($current_actualAcc != $payload["actualAcc"]) {
+	if ((string)$current_actualAcc !== (string)$payload["actualAcc"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"actualAcc", $current_actualAcc, $payload["actualAcc"]
 		];
+		error_log("PMT CORE DEBUG: actualAcc changed from '$current_actualAcc' to '{$payload['actualAcc']}'");
+	} else {
+		error_log("PMT CORE DEBUG: actualAcc NOT changed - DB: '$current_actualAcc' vs PAYLOAD: '{$payload['actualAcc']}'");
 	}
 
-	if ($current_Q != $payload["q"]) {
+	if ((string)$current_Q !== (string)$payload["q"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"Q", $current_Q, $payload["q"]
 		];
 	}
 
-	if ($current_E != $payload["e"]) {
+	if ((string)$current_E !== (string)$payload["e"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"E", $current_E, $payload["e"]
 		];
 	}
 
-	if ($current_T != $payload["t"]) {
+	if ((string)$current_T !== (string)$payload["t"]) {
 		$correction_is_made = true;
 		$corrections[] = [
 			"T", $current_T, $payload["t"]
@@ -603,6 +669,9 @@ elseif (isset($_POST["initLoadForm"])) {
 	$sql = "UPDATE spms_pcr_indicator_accomplishments SET  percent = '$payload_percent', actualAcc = '$payload_actualAcc', q = '$payload_q', e = '$payload_e', t = '$payload_t', supEdit = '$supEdit' $sql_critics WHERE spms_pcr_indicator_accomplishments.cfd_id = '$cfd_id';";
 
 	$res = $mysqli->query($sql);
+
+	error_log("PMT CORE DEBUG: correction_is_made=$correction_is_made, supEdit=" . ($supEdit ? 'set' : 'empty'));
+	error_log("PMT CORE DEBUG: corrections=" . json_encode($corrections));
 
 	echo json_encode($corrections);
 	return null;

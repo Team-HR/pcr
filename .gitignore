@@ -1,3 +1,6 @@
 /node_modules
 _connect.db.php
 /assets/libs/cache/*
+
+deploy_key
+deploy_key.pub

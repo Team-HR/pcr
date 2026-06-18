@@ -93,7 +93,7 @@
 			} else if (strtoupper($user->authorization[$index]) == strtoupper("Matrix")) {
 			?>
 				<a class="item" href="?MotherRatingScale">Rating Scale Matrix</a>
-				<a class="item" href="?MotherRatingScale&Tree"><i class="icon sitemap"></i> RSM Map</a>
+				<a class="item" href="?MotherRatingScale&Tree"><i class="icon sitemap"></i> RSM Structure</a>
 			<?php
 			} else if (strtoupper($user->authorization[$index]) == strtoupper('pmt')) {
 			?>
@@ -125,7 +125,7 @@
 </div>
 <div id="appLoader" class="ui vertical segment">
 	<div class="ui active page dimmer" style="height:200%">
-		<div id="appLoaderMsg" class="ui medium text loader" style="top:100px;position:fixed">Loading</div>
+		<div id="appLoaderMsg" class="ui medium text loader" style="top:100px;position:fixed">Loading... Please wait...</div>
 	</div>
 
 	<body>

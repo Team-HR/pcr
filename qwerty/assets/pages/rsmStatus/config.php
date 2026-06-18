@@ -1,6 +1,6 @@
 <?php
-require_once "../assets/libs/RatingScaleMatrixDestroyer.php";
-require_once "../../assets/libs/class/Class.php";
+require_once __DIR__ . "/../../../../assets/libs/RatingScaleMatrixDestroyer.php";
+require_once __DIR__ . "/../../libs/class/Class.php";
 
 $_ipcr = new IPCR();
 $mysqli = $_ipcr->getMysqli();
@@ -13,6 +13,11 @@ if (isset($_POST['rsmGetTableData'])) {
     $sql = $mysqli->query($sql);
     // 
     $mfoperiod = $sql->fetch_assoc();
+
+    if (!$mfoperiod) {
+        echo "<tr><td colspan='4' style='text-align:center'>No period found for $period $year</td></tr>";
+        return;
+    }
     // 
     $sql = "SELECT * from department";
     $sql = $mysqli->query($sql);

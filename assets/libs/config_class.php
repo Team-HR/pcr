@@ -573,7 +573,7 @@ class Employee_data extends Db
 
 		$cachedResults = getCachedQueryResultRedis($this->mysqli, $this->redis, $cacheKey, $sqlSi1);
 
-		if (count($cachedResults) > 0) {
+		if (is_array($cachedResults) && count($cachedResults) > 0) {
 			$emp_id = $this->emp_ID;
 			foreach ($cachedResults as $a) {
 				$mi_id = $a['mi_id'];
@@ -966,7 +966,7 @@ class Employee_data extends Db
 				$totalToUse = ($tr["id_suppFunc"] == "5" || $tr["id_suppFunc"] == "20") ? $totalMM : $totalLGUAct;
 
 				$supportSi = explode("of", $tr["suc_in"]);
-				$supportSi = $supportSi[0] . " of (__/" . $totalToUse . ") " . $supportSi[1];
+				$supportSi = $supportSi[0] . " (__/" . $totalToUse . ") of " . $supportSi[1];
 			}
 
 
@@ -2088,7 +2088,10 @@ class Employee_data extends Db
 	function RatingScaleTable()
 	{
 		$view = "
-		<table border='1px' style='border-collapse:collapse;width:98%;margin:auto'>
+		<style>
+		.ratingScaleTable, .ratingScaleTable th, .ratingScaleTable td { border: 1px solid #000 !important; }
+		</style>
+		<table class='ratingScaleTable' border='1px' style='border-collapse:collapse;width:98%;margin:auto'>
 		<thead style='background:#00c4ff36;font-size:14px'>
 		<tr>
 		<th colspan='5' style='font-size:18px'>
@@ -2408,7 +2411,7 @@ class table
 		<tr style='background:#00c4ff36;font-size:14px'>
 		<th rowspan='2' style='padding:20px'>MFO / PAP</th>
 		<th rowspan='2'>Success Indicator</th>
-		<th rowspan='2' style='$this->budgetView'>Alloted Budget<br>for 2021 (whole<br>year)</th>
+		<th rowspan='2' style='$this->budgetView'>Alloted Budget<br>for the current year</th>
 		<th  rowspan='2' style='$this->accountableView'>Individual/s or <br> Division Accountable</th>
 		<th rowspan='2'>Actual Accomplishments</th>
 		<th colspan='4' style='width:40px'>Rating Matrix</th>

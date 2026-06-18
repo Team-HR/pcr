@@ -1,6 +1,11 @@
-// OrgChart-related functions for RSM tree and OrgTree views
+// RSM Tree and Org Tree display functions
 
 function rsm_load_tree(period, year) {
+  // Show loader, hide accordion and controls
+  $('#mfo-loader').show();
+  $('#mfo-accordion').hide();
+  $('#accordion-controls').hide();
+
   $.post(
     "?config=rsm",
     {
@@ -19,13 +24,21 @@ function rsm_load_tree(period, year) {
             try {
               var parsedData = JSON.parse(treeData);
               if (parsedData.error) {
+                $('#mfo-loader').hide();
+                $('#mfo-accordion').show();
+                $('#accordion-controls').show();
                 alert("Error: " + parsedData.error);
                 return;
               }
-              // Map MFO data to orgchart format and initialize orgchart
-              var orgchartData = mapMfoToOrgchart(parsedData);
-              initializeOrgchart(orgchartData);
+              // Render as accordion for MFO tree
+              renderMfoAccordion(parsedData);
+              $('#mfo-loader').hide();
+              $('#mfo-accordion').show();
+              $('#accordion-controls').show();
             } catch (e) {
+              $('#mfo-loader').hide();
+              $('#mfo-accordion').show();
+              $('#accordion-controls').show();
               console.error("JSON parse error:", e);
               console.error("Response:", treeData);
               alert("Error loading tree data. Please try again.");
@@ -33,63 +46,13 @@ function rsm_load_tree(period, year) {
           }
         );
       } else {
+        $('#mfo-loader').hide();
+        $('#mfo-accordion').show();
+        $('#accordion-controls').show();
         alert(data);
       }
     }
   );
-}
-
-function mapMfoToOrgchart(mfoNodes) {
-  if (!mfoNodes || mfoNodes.length === 0) return {};
-
-  // If multiple root nodes, create a virtual root
-  if (mfoNodes.length === 1) {
-    return mapSingleMfoToOrgchart(mfoNodes[0]);
-  } else {
-    // Create a virtual root for multiple top-level nodes
-    var virtualRoot = {
-      name: "MFO Hierarchy",
-      title: "Department Matrix",
-      children: mfoNodes.map(mapSingleMfoToOrgchart)
-    };
-    return virtualRoot;
-  }
-}
-
-function mapSingleMfoToOrgchart(mfoNode) {
-  var orgNode = {
-    name: mfoNode.code,
-    title: '<span style="font-size: 14px; font-weight: bold;">' + mfoNode.title + '</span>'
-  };
-
-  // Add personnel in-charge as bulleted list if available
-  if (mfoNode.personnel_incharge && mfoNode.personnel_incharge.length > 0) {
-    var personnelList = '<ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 10px;">';
-    mfoNode.personnel_incharge.forEach(function (person) {
-      personnelList += '<li>' + person.full_name + '</li>';
-    });
-    personnelList += '</ul>';
-    orgNode.title += personnelList;
-  }
-
-  if (mfoNode.children && mfoNode.children.length > 0) {
-    orgNode.children = mfoNode.children.map(mapSingleMfoToOrgchart);
-  }
-
-  return orgNode;
-}
-
-function mapPersonnelToOrgchart(personnelNode) {
-  var orgNode = {
-    name: '',
-    title: '<span style="font-size: 14px; font-weight: bold;">' + personnelNode.name + '</span>'
-  };
-
-  if (personnelNode.children && personnelNode.children.length > 0) {
-    orgNode.children = personnelNode.children.map(mapPersonnelToOrgchart);
-  }
-
-  return orgNode;
 }
 
 function org_load_tree(period, year) {
@@ -114,11 +77,8 @@ function org_load_tree(period, year) {
                 alert("Error: " + parsedData.error);
                 return;
               }
-              // Map personnel data to orgchart format and initialize orgchart
-              var orgchartData = mapPersonnelToOrgchart(parsedData);
-              initializeOrgchart(orgchartData, 'orgchart-container');
-              // Initialize search functionality
-              initSearchOrgchart('orgchart-container');
+              // Display as pretty JSON for personnel org tree
+              displayPrettyJson(parsedData);
             } catch (e) {
               console.error("JSON parse error:", e);
               console.error("Response:", treeData);
@@ -133,141 +93,236 @@ function org_load_tree(period, year) {
   );
 }
 
-function initSearchOrgchart(containerId) {
-  var $searchInput = $('#search-input');
-  var searchTimeout;
+function renderMfoAccordion(treeData) {
+  var $container = $('#mfo-accordion');
+  $container.empty();
 
-  $searchInput.on('input', function() {
-    var searchTerm = $(this).val().trim().toLowerCase();
+  // treeData is array with single root element (department)
+  if (treeData && treeData.length > 0 && treeData[0].children) {
+    var rootNode = treeData[0];
 
-    // Clear previous timeout
-    clearTimeout(searchTimeout);
+    // Populate header with department and period-year
+    var deptName = rootNode.title || rootNode.code || 'Department';
+    var deptAlias = rootNode.code || '';
+    var displayTitle = deptAlias ? deptAlias + ' - ' + deptName : deptName;
 
-    // Debounce search to prevent excessive searches
-    searchTimeout = setTimeout(function() {
-      searchOrgchart(containerId, searchTerm);
-    }, 300);
-  });
-}
+    $('#rsm-department-title').text(displayTitle);
 
-function searchOrgchart(containerId, searchTerm) {
-  var $container = $('#' + containerId);
-  var $chart = $container.find('.orgchart');
+    // Get period and year from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const period = urlParams.get('period');
+    const year = urlParams.get('year');
+    $('#rsm-period-year').text(period && year ? period + ' ' + year : '');
 
-  // Remove previous highlights
-  $chart.find('.node').removeClass('highlighted');
+    // Show header
+    $('#rsm-header').show();
 
-  if (!searchTerm) {
-    return;
-  }
+    var html = buildMfoAccordionHtml(rootNode.children);
+    $container.html(html);
 
-  // Search through all nodes
-  var $nodes = $chart.find('.node');
-  var matchedNode = null;
-
-  $nodes.each(function() {
-    var $node = $(this);
-    var nodeText = $node.find('.title').text().toLowerCase();
-
-    if (nodeText.includes(searchTerm)) {
-      matchedNode = $node;
-      return false; // Break the loop after first match
-    }
-  });
-
-  if (matchedNode) {
-    // Highlight the matched node
-    matchedNode.addClass('highlighted');
-
-    // Scroll to and center the matched node
-    var $chartEl = $container.find('.orgchart');
-    var current = getCurrentTranslate($chartEl);
-
-    var containerWidth = $container.width();
-    var containerHeight = $container.height();
-    var nodeOffset = matchedNode.offset();
-    var containerOffset = $container.offset();
-
-    var nodeCenterX = nodeOffset.left - containerOffset.left + (matchedNode.outerWidth() / 2);
-    var nodeCenterY = nodeOffset.top - containerOffset.top + (matchedNode.outerHeight() / 2);
-
-    var targetX = containerWidth / 2;
-    var targetY = containerHeight / 2;
-
-    var newX = current.x + (targetX - nodeCenterX);
-    var newY = current.y + (targetY - nodeCenterY);
-
-    $chartEl.css('transform', 'translate(' + newX + 'px, ' + newY + 'px)');
+    // Initialize Semantic UI accordion
+    $container.accordion({
+      exclusive: false,
+      animateChildren: false,
+      duration: 200
+    });
   }
 }
 
-function getCurrentTranslate($el) {
-  var transform = $el.css('transform');
-  if (!transform || transform === 'none') return { x: 0, y: 0 };
-
-  var match = transform.match(/translate\(([^,]+)px,\s*([^)]+)px\)/);
-  if (match) return { x: parseFloat(match[1]), y: parseFloat(match[2]) };
-
-  match = transform.match(/matrix\(([^)]+)\)/);
-  if (match) {
-    var parts = match[1].split(/,\s*/);
-    if (parts.length === 6) {
-      return { x: parseFloat(parts[4]), y: parseFloat(parts[5]) };
-    }
+function buildMfoAccordionHtml(mfoNodes) {
+  if (!mfoNodes || mfoNodes.length === 0) {
+    return '<div class="empty-children">No MFO items</div>';
   }
 
-  return { x: 0, y: 0 };
-}
+  var html = '';
 
-function initializeOrgchart(data, containerId) {
-  containerId = containerId || 'chart-container';
+  mfoNodes.forEach(function(node, index) {
+    var hasChildren = node.children && node.children.length > 0;
+    var titleClass = hasChildren ? '' : 'disabled';
+    var uniqueId = 'mfo-' + node.id + '-' + index;
 
-  var showDescendents = function (node, depth) {
-    if (depth === 1) {
-      return false;
+    html += '<div class="' + (hasChildren ? 'active' : '') + ' title ' + titleClass + '" data-mfo-id="' + uniqueId + '">';
+    html += '<i class="dropdown icon"></i>';
+    if (node.code) {
+      html += '<span class="mfo-code">' + escapeHtml(node.code) + '</span>';
     }
-    $(node).siblings('.nodes').children()
-      .removeClass('isCollapsedDescendant isChildrenCollapsed')
-      .find('.node:first').each(function (index, node) {
-        var $temp = $(node).siblings('.nodes').removeClass('hidden');
-        var $children = $temp.children().removeClass('isCollapsedDescendant').find('.node:first');
-        if ($children.length) {
-          $children[0].style.offsetWidth = $children[0].offsetWidth;
-        }
-        $children.removeClass('slide-up');
-        showDescendents(node, depth--);
+    html += escapeHtml(node.title);
+    html += '</div>';
+
+    html += '<div class="' + (hasChildren ? 'active' : '') + ' content">';
+
+    // Success indicators
+    if (node.success_indicators && node.success_indicators.length > 0) {
+      html += '<div class="ui list">';
+      html += '<div class="item"><strong>Success Indicators:</strong></div>';
+      node.success_indicators.forEach(function(si) {
+        html += '<div class="success-indicator-item">';
+        html += escapeHtml(si.description);
+        html += buildQetMeasuresHtml(si);
+        html += '</div>';
       });
-  };
-
-  var getCurrentTranslate = function ($el) {
-    var transform = $el.css('transform');
-    if (!transform || transform === 'none') return { x: 0, y: 0 };
-
-    var match = transform.match(/translate\(([^,]+)px,\s*([^)]+)px\)/);
-    if (match) return { x: parseFloat(match[1]), y: parseFloat(match[2]) };
-
-    match = transform.match(/matrix\(([^)]+)\)/);
-    if (match) {
-      var parts = match[1].split(/,\s*/);
-      if (parts.length === 6) {
-        return { x: parseFloat(parts[4]), y: parseFloat(parts[5]) };
-      }
+      html += '</div>';
     }
 
-    return { x: 0, y: 0 };
-  };
-
-  $('#' + containerId).orgchart({
-    'data': data,
-    'nodeContent': 'title',
-    'zoom': true,
-    'pan': true,
-    // verticalLevel: 2,
-    // visibleLevel: 2,
-    'initCompleted': function ($chart) {
-      var $container = $('#' + containerId);
-      $container.scrollLeft(($container[0].scrollWidth - $container.width()) / 2);
+    // Personnel in charge
+    if (node.personnel_incharge && node.personnel_incharge.length > 0) {
+      html += '<div style="margin-top: 10px;">';
+      html += '<strong>Personnel In-Charge:</strong><br>';
+      node.personnel_incharge.forEach(function(person) {
+        var tagClass = 'personnel-tag personnel-tag-clickable';
+        if (person.is_department_head) {
+          tagClass = 'personnel-tag personnel-tag-clickable personnel-tag-dept-head';
+        } else if (person.is_supervisor) {
+          tagClass = 'personnel-tag personnel-tag-clickable personnel-tag-supervisor';
+        }
+        html += '<span class="' + tagClass + '" title="View Individual Rating Scale" onclick="openPersonnelIpcr(event, \'' + person.employee_id + '\')">' + escapeHtml(person.full_name) + '</span>';
+      });
+      html += '</div>';
     }
 
+    // Nested children toggle button (above children accordion)
+    if (hasChildren) {
+      html += '<button class="toggle-children-btn" onclick="toggleChildrenAccordion(event, \'' + uniqueId + '\')">Collapse</button>';
+    }
+
+    // Nested children accordion
+    if (hasChildren) {
+      html += '<div class="ui styled accordion">';
+      html += buildMfoAccordionHtml(node.children);
+      html += '</div>';
+    }
+
+    html += '</div>';
   });
+
+  return html;
+}
+
+function buildQetMeasuresHtml(si) {
+  var measures = [
+    { key: 'quality', label: 'Quality' },
+    { key: 'efficiency', label: 'Efficiency' },
+    { key: 'timeliness', label: 'Timeliness' }
+  ];
+
+  // Check if there is any QET data at all
+  var hasAny = measures.some(function(m) {
+    return si[m.key] && si[m.key].length > 0;
+  });
+  if (!hasAny) return '';
+
+  var html = '';
+  html += '<button class="qet-toggle-btn" onclick="toggleQetMeasures(event, this)">Show Measures</button>';
+  html += '<div class="qet-measures">';
+
+  measures.forEach(function(m) {
+    var items = si[m.key] || [];
+    if (items.length === 0) return;
+    html += '<div class="qet-column">';
+    html += '<div class="qet-column-label">' + m.label + '</div>';
+    items.forEach(function(item) {
+      html += '<div class="qet-item"><span class="qet-score">' + escapeHtml(String(item.score)) + '</span> ' + escapeHtml(item.descriptor) + '</div>';
+    });
+    html += '</div>';
+  });
+
+  html += '</div>';
+  return html;
+}
+
+function openPersonnelIpcr(event, employeeId) {
+  event.stopPropagation();
+  if (!employeeId) return;
+
+  var urlParams = new URLSearchParams(window.location.search);
+  var period = urlParams.get('period');
+  var year = urlParams.get('year');
+
+  var url = '?config=RSMipcrView&emp=' + encodeURIComponent(employeeId);
+  if (period && year) {
+    url += '&period=' + encodeURIComponent(period) + '&year=' + encodeURIComponent(year);
+  }
+  window.open(url, '_blank');
+}
+
+function toggleQetMeasures(event, btn) {
+  event.stopPropagation();
+  var $btn = $(btn);
+  var $measures = $btn.next('.qet-measures');
+  if ($measures.hasClass('qet-visible')) {
+    $measures.removeClass('qet-visible');
+    $btn.text('Show Measures');
+  } else {
+    $measures.addClass('qet-visible');
+    $btn.text('Hide Measures');
+  }
+}
+
+function toggleAllQetMeasures() {
+  var $measures = $('#mfo-accordion .qet-measures');
+  if ($measures.length === 0) return;
+
+  // If any is hidden, show all; otherwise hide all
+  var anyHidden = $measures.not('.qet-visible').length > 0;
+  if (anyHidden) {
+    $measures.addClass('qet-visible');
+    $('.qet-toggle-btn').text('Hide Measures');
+    $('#toggle-measures-btn').text('Hide All Measures');
+  } else {
+    $measures.removeClass('qet-visible');
+    $('.qet-toggle-btn').text('Show Measures');
+    $('#toggle-measures-btn').text('Show All Measures');
+  }
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function expandAllAccordion() {
+  $('#mfo-accordion .title').addClass('active');
+  $('#mfo-accordion .content').addClass('active');
+  $('.toggle-children-btn').text('Collapse');
+}
+
+function collapseAllAccordion() {
+  $('#mfo-accordion .title').removeClass('active');
+  $('#mfo-accordion .content').removeClass('active');
+  $('.toggle-children-btn').text('Expand');
+}
+
+function toggleChildrenAccordion(event, mfoId) {
+  event.stopPropagation();
+
+  var $title = $('[data-mfo-id="' + mfoId + '"]').first();
+  var $content = $title.next('.content');
+  var $nestedAccordion = $content.find('.ui.styled.accordion').first();
+  var $btn = $(event.target);
+
+  if ($nestedAccordion.length) {
+    var isExpanded = $nestedAccordion.find('.title.active').length > 0;
+
+    if (isExpanded) {
+      // Collapse all children
+      $nestedAccordion.find('.title').removeClass('active');
+      $nestedAccordion.find('.content').removeClass('active');
+      $btn.text('Expand');
+    } else {
+      // Expand all children
+      $nestedAccordion.find('.title').addClass('active');
+      $nestedAccordion.find('.content').addClass('active');
+      $btn.text('Collapse');
+    }
+  }
+}
+
+function displayPrettyJson(data) {
+  var jsonString = JSON.stringify(data, null, 2);
+  $('#json-display').text(jsonString);
 }
