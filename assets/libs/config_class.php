@@ -78,7 +78,9 @@ class Employee_data extends Db
 		parent::__construct();
 
 		$this->redis = new Redis();
-		$this->redis->connect('redis', 6379);
+		$redisHost = getenv('REDIS_HOST') ?: 'redis';
+		$redisPort = (int)(getenv('REDIS_PORT') ?: 6379);
+		$this->redis->connect($redisHost, $redisPort);
 	}
 	private function load()
 	{
