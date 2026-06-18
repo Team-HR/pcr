@@ -1,0 +1,33 @@
+services:
+  httpd-pcr:
+    hostname: spms-online
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: spms-online:2
+    container_name: spms-online
+    restart: always
+    ports:
+      - "${WEB_PORT:-8082}:80"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT:-3306}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+    volumes:
+      - ./:/var/www/html/
+      - ./docker/apache/vhost.conf:/etc/apache2/sites-available/000-default.conf
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/php.ini
+      - ./docker/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+    networks:
+      - default
+      - redis_net
+
+networks:
+  default:
+  redis_net:
+    name: ohrmd_docker_apps_backend
+    external: true

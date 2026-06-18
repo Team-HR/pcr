@@ -77,8 +77,19 @@ class Employee_data extends Db
 	{
 		parent::__construct();
 
-		$this->redis = new Redis();
-		$this->redis->connect('redis', 6379);
+		$this->redis = null;
+		if (class_exists('Redis')) {
+			try {
+				$redis = new Redis();
+				$redisHost = getenv('REDIS_HOST') ?: 'redis';
+				$redisPort = (int)(getenv('REDIS_PORT') ?: 6379);
+				if (@$redis->connect($redisHost, $redisPort)) {
+					$this->redis = $redis;
+				}
+			} catch (\Throwable $e) {
+				$this->redis = null;
+			}
+		}
 	}
 	private function load()
 	{
@@ -2666,16 +2677,12 @@ function getSupportFunctionActivitiesCount($mysqli, $period_id)
 
 function getCachedQueryResultRedis($mysqli, $redis, $cacheKey, $query, $expiry = 30)
 {
-	// $redis = new Redis();
-	// $redis->connect('redis');
-
-	// Check if data is in cache
-	if ($redis->exists($cacheKey)) {
+	// Check if data is in cache (only when Redis is available)
+	if ($redis instanceof Redis && $redis->exists($cacheKey)) {
 		return json_decode($redis->get($cacheKey), true);
 	}
 
 	// Execute the query
-	// $mysqli = new mysqli("localhost", "username", "password", "database");
 	$result = $mysqli->query($query);
 
 	if (!$result) {
@@ -2684,8 +2691,10 @@ function getCachedQueryResultRedis($mysqli, $redis, $cacheKey, $query, $expiry =
 
 	$data = $result->fetch_all(MYSQLI_ASSOC);
 
-	// Store in Redis
-	$redis->setex($cacheKey, $expiry, json_encode($data));
+	// Store in Redis (only when available)
+	if ($redis instanceof Redis) {
+		$redis->setex($cacheKey, $expiry, json_encode($data));
+	}
 
 	return $data;
 }
