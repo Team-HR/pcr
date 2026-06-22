@@ -157,8 +157,8 @@ function renderMfoAccordion(treeData) {
 
     // Populate header with department and period-year
     var deptName = rootNode.title || rootNode.code || 'Department';
-    var deptAlias = rootNode.code || '';
-    var displayTitle = deptAlias ? deptAlias + ' - ' + deptName : deptName;
+    //var deptAlias = rootNode.code || '';
+    var displayTitle = deptName; //deptAlias ? deptAlias + ' - ' + deptName : deptName;
 
     $('#rsm-department-title').text(displayTitle);
 
@@ -208,7 +208,7 @@ function buildMfoAccordionHtml(mfoNodes) {
 
   var html = '';
 
-  mfoNodes.forEach(function(node, index) {
+  mfoNodes.forEach(function (node, index) {
     var hasChildren = node.children && node.children.length > 0;
     var titleClass = hasChildren ? '' : 'disabled';
     var uniqueId = 'mfo-' + node.id + '-' + index;
@@ -230,7 +230,7 @@ function buildMfoAccordionHtml(mfoNodes) {
     if (node.success_indicators && node.success_indicators.length > 0) {
       html += '<div class="ui list">';
       html += '<div class="item"><strong>Success Indicators:</strong></div>';
-      node.success_indicators.forEach(function(si) {
+      node.success_indicators.forEach(function (si) {
         html += '<div class="success-indicator-item">';
         html += '<div class="si-header">';
         html += '<div class="si-description">' + escapeHtml(si.description) + '</div>';
@@ -273,7 +273,7 @@ function buildMfoAccordionHtml(mfoNodes) {
 
 function buildPersonnelTagsHtml(personnel) {
   var html = '';
-  personnel.forEach(function(person) {
+  personnel.forEach(function (person) {
     var tagClass = 'personnel-tag personnel-tag-clickable';
     if (person.is_department_head) {
       tagClass = 'personnel-tag personnel-tag-clickable personnel-tag-dept-head';
@@ -293,7 +293,7 @@ function buildQetMeasuresHtml(si) {
   ];
 
   // Check if there is any QET data at all
-  var hasAny = measures.some(function(m) {
+  var hasAny = measures.some(function (m) {
     return si[m.key] && si[m.key].length > 0;
   });
   if (!hasAny) return '';
@@ -302,12 +302,12 @@ function buildQetMeasuresHtml(si) {
   html += '<button class="qet-toggle-btn" onclick="toggleQetMeasures(event, this)">Show Measures</button>';
   html += '<div class="qet-measures">';
 
-  measures.forEach(function(m) {
+  measures.forEach(function (m) {
     var items = si[m.key] || [];
     if (items.length === 0) return;
     html += '<div class="qet-column">';
     html += '<div class="qet-column-label">' + m.label + '</div>';
-    items.forEach(function(item) {
+    items.forEach(function (item) {
       html += '<div class="qet-item"><span class="qet-score">' + escapeHtml(String(item.score)) + '</span> ' + escapeHtml(item.descriptor) + '</div>';
     });
     html += '</div>';
