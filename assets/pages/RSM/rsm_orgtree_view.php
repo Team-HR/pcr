@@ -1,4 +1,4 @@
-<script src="/assets/pages/RSM/orgchart.js?v=<?php echo filemtime(__DIR__ . '/orgchart.js'); ?>"></script>
+<script src="/assets/pages/RSM/rsm_tree_view.js?v=<?php echo filemtime(__DIR__ . '/rsm_tree_view.js'); ?>"></script>
 
 <style>
 	/* JSON Display Container */

@@ -1,4 +1,4 @@
-<script src="/assets/pages/RSM/orgchart.js?v=<?php echo filemtime(__DIR__ . '/orgchart.js'); ?>"></script>
+<script src="/assets/pages/RSM/rsm_tree_view.js?v=<?php echo filemtime(__DIR__ . '/rsm_tree_view.js'); ?>"></script>
 
 <style>
 	/* Accordion Container */
@@ -278,8 +278,9 @@
 
 
 <div id="rsm-header" style="display:none; margin-bottom: 0px; padding: 10px; background-color: #f8f9fa; text-align: center;">
+	<h3>Rating Scale Matrix</h3>
 	<h2 id="rsm-department-title" style="margin: 0 0 5px 0; color: #333;"></h2>
-	<p id="rsm-period-year" style="margin: 0; color: #666; font-size: 14px;"></p>
+	<p id="rsm-period-year" style="margin: 0; font-size: 24px;"></p>
 </div>
 <div id="accordion-controls">
 	<button onclick="expandAllAccordion()">Expand All</button>
