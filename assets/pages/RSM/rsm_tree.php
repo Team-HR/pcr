@@ -10,8 +10,8 @@
 					<h1 class="ui icon header">
 						<i class="sitemap outline icon"></i>
 						<div class="content">
-							RSM Structure
-							<div class="sub header">View the Matrix hierarchy of your Department</div>
+							Rating Scale Matrix Editor
+							<div class="sub header">View/Edit the performance targets of your Department</div>
 						</div>
 					</h1>
 				</div>

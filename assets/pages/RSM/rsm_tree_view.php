@@ -1,3 +1,21 @@
+<?php
+if ($user->authorization) {
+	$hasMatrixAuth = false;
+	for ($index = 0; $index < count($user->authorization); $index++) {
+		if (strtoupper($user->authorization[$index]) == strtoupper("Matrix")) {
+			$hasMatrixAuth = true;
+			break;
+		}
+	}
+	if (!$hasMatrixAuth) {
+		echo Authorization_Error();
+		exit;
+	}
+} else {
+	echo Authorization_Error();
+	exit;
+}
+?>
 <script src="/assets/pages/RSM/rsm_tree_view.js?v=<?php echo filemtime(__DIR__ . '/rsm_tree_view.js'); ?>"></script>
 
 <style>
