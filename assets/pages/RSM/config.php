@@ -32,7 +32,7 @@ if (isset($_POST['get_mfo_tree'])) {
 
   // Get top-level MFOs (parent_id='')
   $mfo_children = [];
-  $sql = "SELECT cf_ID, cf_count, cf_title FROM spms_pcr_mfos 
+  $sql = "SELECT cf_ID, cf_count, cf_title, dep_id, corrections FROM spms_pcr_mfos 
           WHERE parent_id='' AND dep_id='$department_id' AND mfo_periodId='$period_id' 
           ORDER BY cf_count ASC";
   $result = $mysqli->query($sql);
@@ -43,15 +43,7 @@ if (isset($_POST['get_mfo_tree'])) {
   }
 
   while ($row = $result->fetch_assoc()) {
-    $node = [
-      "id" => $row["cf_ID"],
-      "code" => "",
-      "title" => $row["cf_count"] . ". " . $row["cf_title"],
-      "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"], $supervisor_ids, $department_head_id),
-      "success_indicators" => get_success_indicators_formatted($mysqli, $row["cf_ID"]),
-      "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id, $supervisor_ids, $department_head_id)
-    ];
-    $mfo_children[] = $node;
+    $mfo_children[] = build_mfo_tree_node($mysqli, $row, $department_id, $supervisor_ids, $department_head_id);
   }
 
   // Create root node with department name
@@ -63,6 +55,25 @@ if (isset($_POST['get_mfo_tree'])) {
   ]];
 
   echo json_encode($tree_data);
+  exit;
+} elseif (isset($_POST['get_mfo_actions'])) {
+  $cf_ID = $mysqli->real_escape_string($_POST['get_mfo_actions']);
+  $sql = "SELECT * FROM spms_pcr_mfos WHERE cf_ID = '$cf_ID'";
+  $result = $mysqli->query($sql);
+  if (!$result || !($row = $result->fetch_assoc())) {
+    echo "<div style='text-align:center;padding:20px;color:#999;'>MFO not found.</div>";
+    exit;
+  }
+
+  $has_children = false;
+  $childSql = "SELECT cf_ID FROM spms_pcr_mfos WHERE parent_id = '$cf_ID' LIMIT 1";
+  $childRes = $mysqli->query($childSql);
+  if ($childRes && $childRes->num_rows > 0) {
+    $has_children = true;
+  }
+  $delete_style = $has_children ? 'display:none' : '';
+
+  echo mfoActionsModal($mysqli, $row, '', '', $delete_style);
   exit;
 } elseif (isset($_POST['get_org_tree'])) {
   if (!isset($_SESSION["emp_info"]["department_id"]) || !isset($_SESSION["period"])) {
@@ -1122,7 +1133,7 @@ function AddInputs($mysqli, $dataId)
   }
   return $view;
 }
-function settingDrop($mysqli, $row, $edit, $add, $delete)
+function mfoActionsItems($mysqli, $row, $edit, $add, $delete)
 {
   $correction = "";
   if ($row['corrections']) {
@@ -1149,14 +1160,7 @@ function settingDrop($mysqli, $row, $edit, $add, $delete)
     </div>
     ";
   }
-  $view = "
-  <div class='mini ui left pointing dropdown icon noprint'>
-  <i class='green settings icon'></i>
-  <div class='menu'>
-  <div class='header'>
-  <i class='tags icon'></i>
-  Actions
-  </div>
+  return "
   $correction
   <div class='header' style='$edit'>
   <p class='ui horizontal divider'>
@@ -1204,6 +1208,19 @@ function settingDrop($mysqli, $row, $edit, $add, $delete)
   <div class='header' style='$delete'>
   <button class='mini ui negative fluid button' onclick='MfoSiDelete($row[cf_ID])'><i class='trash icon'></i> Remove</button>
   </div>
+  ";
+}
+function settingDrop($mysqli, $row, $edit, $add, $delete, $triggerIcon = "green settings icon")
+{
+  $view = "
+  <div class='mini ui left pointing dropdown icon noprint'>
+  <i class='{$triggerIcon}'></i>
+  <div class='menu'>
+  <div class='header'>
+  <i class='tags icon'></i>
+  Actions
+  </div>
+  " . mfoActionsItems($mysqli, $row, $edit, $add, $delete) . "
   <div class='item' style='display:none'>
   </div>
   <br>
@@ -1213,6 +1230,23 @@ function settingDrop($mysqli, $row, $edit, $add, $delete)
   $correctionMFO = validaateCorrection($row['corrections']);
   if (!rsmEditStatus("") && !$correctionMFO) {
     $view = "";
+  }
+  return $view;
+}
+function mfoActionsModal($mysqli, $row, $edit, $add, $delete)
+{
+  $view = "
+  <div style='max-width:500px;margin:0 auto;'>
+  <div class='header' style='text-align:center;'>
+  <i class='tags icon'></i>
+  Actions
+  </div>
+  " . mfoActionsItems($mysqli, $row, $edit, $add, $delete) . "
+  </div>
+  ";
+  $correctionMFO = validaateCorrection($row['corrections']);
+  if (!rsmEditStatus("") && !$correctionMFO) {
+    $view = "<div style='text-align:center;padding:20px;color:#999;'>Editing is not enabled for this period.</div>";
   }
   return $view;
 }
@@ -1409,7 +1443,7 @@ function get_success_indicators($mysqli, $cf_ID)
 }
 
 // Helper function to get formatted success indicators for tree
-function get_success_indicators_formatted($mysqli, $cf_ID)
+function get_success_indicators_formatted($mysqli, $cf_ID, $supervisor_ids = [], $department_head_id = null)
 {
   $data = [];
   $sql = "SELECT mi_id, mi_succIn FROM spms_pcr_indicators WHERE cf_ID = '$cf_ID'";
@@ -1421,10 +1455,50 @@ function get_success_indicators_formatted($mysqli, $cf_ID)
       "description" => $row["mi_succIn"],
       "quality" => $qet["quality"],
       "efficiency" => $qet["efficiency"],
-      "timeliness" => $qet["timeliness"]
+      "timeliness" => $qet["timeliness"],
+      "personnel_incharge" => get_si_personnel_incharge($mysqli, $row["mi_id"], $supervisor_ids, $department_head_id)
     ];
   }
   return $data;
+}
+
+// Helper function to get personnel in-charge for a single success indicator
+function get_si_personnel_incharge($mysqli, $mi_id, $supervisor_ids = [], $department_head_id = null)
+{
+  $personnel = [];
+  $seen_ids = [];
+
+  $assign_sql = "SELECT a.user_id, e.employees_id, e.firstName, e.lastName, e.middleName, e.extName
+                  FROM spms_pcr_si_assignments a
+                  LEFT JOIN employees e ON a.user_id = e.employees_id
+                  WHERE a.success_indicator_id = '$mi_id'";
+  $assign_result = $mysqli->query($assign_sql);
+
+  while ($emp_row = $assign_result->fetch_assoc()) {
+    if (!$emp_row['employees_id']) continue;
+    if (in_array($emp_row['employees_id'], $seen_ids)) continue;
+    $seen_ids[] = $emp_row['employees_id'];
+
+    $firstName  = $emp_row['firstName']  ?? '';
+    $lastName   = $emp_row['lastName']   ?? '';
+    $middleName = $emp_row['middleName'] ?? '';
+    $extName    = $emp_row['extName']    ?? '';
+
+    $middleInitial = $middleName !== '' ? $middleName[0] . '.' : '';
+    $extFormatted  = $extName !== '' ? ", $extName" : '';
+
+    $parts = array_filter([$lastName, $firstName, $middleInitial]);
+    $fullName = implode(' ', $parts) . $extFormatted;
+
+    $personnel[] = [
+      "employee_id" => $emp_row['employees_id'],
+      "full_name" => $fullName,
+      "is_supervisor" => in_array($emp_row['employees_id'], $supervisor_ids),
+      "is_department_head" => ($department_head_id && $emp_row['employees_id'] == $department_head_id)
+    ];
+  }
+
+  return $personnel;
 }
 
 // Helper function to get Q/E/T measures for a success indicator
@@ -1544,24 +1618,32 @@ function get_department_head_id($mysqli, $department_id, $period_id)
 function get_mfo_tree_children($mysqli, $parent_id, $department_id, $supervisor_ids = [], $department_head_id = null)
 {
   $children = [];
-  $sql = "SELECT cf_ID, cf_count, cf_title FROM spms_pcr_mfos 
+  $sql = "SELECT cf_ID, cf_count, cf_title, dep_id, corrections FROM spms_pcr_mfos 
           WHERE parent_id='$parent_id' AND dep_id='$department_id' 
           ORDER BY cf_count ASC";
   $result = $mysqli->query($sql);
 
   while ($row = $result->fetch_assoc()) {
-    $node = [
-      "id" => $row["cf_ID"],
-      "code" => "",
-      "title" => $row["cf_count"] . ". " . $row["cf_title"],
-      "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"], $supervisor_ids, $department_head_id),
-      "success_indicators" => get_success_indicators_formatted($mysqli, $row["cf_ID"]),
-      "children" => get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id, $supervisor_ids, $department_head_id)
-    ];
-    $children[] = $node;
+    $children[] = build_mfo_tree_node($mysqli, $row, $department_id, $supervisor_ids, $department_head_id);
   }
 
   return $children;
+}
+
+function build_mfo_tree_node($mysqli, $row, $department_id, $supervisor_ids, $department_head_id)
+{
+  $children = get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id, $supervisor_ids, $department_head_id);
+  $can_edit = rsmEditStatus("") || validaateCorrection($row['corrections']);
+
+  return [
+    "id" => $row["cf_ID"],
+    "code" => "",
+    "title" => $row["cf_count"] . ". " . $row["cf_title"],
+    "personnel_incharge" => get_mfo_personnel_incharge($mysqli, $row["cf_ID"], $supervisor_ids, $department_head_id),
+    "success_indicators" => get_success_indicators_formatted($mysqli, $row["cf_ID"], $supervisor_ids, $department_head_id),
+    "children" => $children,
+    "can_edit" => $can_edit
+  ];
 }
 
 // Helper function to get employee name

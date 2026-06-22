@@ -1,10 +1,58 @@
 // RSM Tree and Org Tree display functions
 
-function rsm_load_tree(period, year) {
-  // Show loader, hide accordion and controls
-  $('#mfo-loader').show();
-  $('#mfo-accordion').hide();
-  $('#accordion-controls').hide();
+// Extract the stable MFO cf_ID from a data-mfo-id value ("mfo-<cfId>-<index>")
+function mfoIdFromDataAttr(dataMfoId) {
+  if (!dataMfoId) return '';
+  var parts = dataMfoId.split('-');
+  // Drop the leading "mfo" and the trailing index, keep the cf_ID in between
+  return parts.slice(1, parts.length - 1).join('-');
+}
+
+// Snapshot which MFO sections are currently expanded
+function getExpandedMfoIds() {
+  var ids = {};
+  $('#mfo-accordion .title.active').each(function () {
+    var id = mfoIdFromDataAttr($(this).attr('data-mfo-id'));
+    if (id) ids[id] = true;
+  });
+  return ids;
+}
+
+// Re-apply expanded/collapsed state after the tree is re-rendered
+function applyExpandedMfoIds(ids) {
+  $('#mfo-accordion .title').each(function () {
+    var $title = $(this);
+    var id = mfoIdFromDataAttr($title.attr('data-mfo-id'));
+    var $content = $title.next('.content');
+    if (ids[id]) {
+      $title.addClass('active');
+      $content.addClass('active');
+    } else {
+      $title.removeClass('active');
+      $content.removeClass('active');
+    }
+  });
+
+  // Sync the nested toggle button labels with the restored state
+  $('#mfo-accordion .toggle-children-btn').each(function () {
+    var $btn = $(this);
+    var $nested = $btn.nextAll('.ui.styled.accordion').first();
+    var expanded = $nested.find('.title.active').length > 0;
+    $btn.text(expanded ? 'Collapse' : 'Expand');
+  });
+}
+
+function rsm_load_tree(period, year, preserveScroll) {
+  // Remember scroll position and expanded sections so saves don't reset the view
+  var savedScrollTop = preserveScroll ? $('#mfo-accordion-container').scrollTop() : 0;
+  var savedExpanded = preserveScroll ? getExpandedMfoIds() : null;
+
+  // Show loader, hide accordion and controls (skip when refreshing in place to avoid flicker)
+  if (!preserveScroll) {
+    $('#mfo-loader').show();
+    $('#mfo-accordion').hide();
+    $('#accordion-controls').hide();
+  }
 
   $.post(
     "?config=rsm",
@@ -35,6 +83,12 @@ function rsm_load_tree(period, year) {
               $('#mfo-loader').hide();
               $('#mfo-accordion').show();
               $('#accordion-controls').show();
+              if (preserveScroll) {
+                if (savedExpanded) {
+                  applyExpandedMfoIds(savedExpanded);
+                }
+                $('#mfo-accordion-container').scrollTop(savedScrollTop);
+              }
             } catch (e) {
               $('#mfo-loader').hide();
               $('#mfo-accordion').show();
@@ -129,6 +183,24 @@ function renderMfoAccordion(treeData) {
   }
 }
 
+function openMfoActionsModal(event, mfoId) {
+  event.stopPropagation();
+  $("#allModal").modal("setting", "closable", false).modal("show");
+  $("#modalContL").html(
+    "<div style='text-align: center'><img src='assets/img/loading.gif' style='transform: scale(.1);height:500px'></div>"
+  );
+  $.post(
+    "?config=rsm",
+    {
+      get_mfo_actions: mfoId,
+    },
+    function (data) {
+      $("#modalContL").html(data);
+      $("#modalContL").find(".ui.dropdown").dropdown();
+    }
+  );
+}
+
 function buildMfoAccordionHtml(mfoNodes) {
   if (!mfoNodes || mfoNodes.length === 0) {
     return '<div class="empty-children">No MFO items</div>';
@@ -143,6 +215,9 @@ function buildMfoAccordionHtml(mfoNodes) {
 
     html += '<div class="' + (hasChildren ? 'active' : '') + ' title ' + titleClass + '" data-mfo-id="' + uniqueId + '">';
     html += '<i class="dropdown icon"></i>';
+    if (node.can_edit) {
+      html += '<i class="edit icon mfo-edit-btn" title="Edit MFO" onclick="openMfoActionsModal(event, \'' + node.id + '\')"></i>';
+    }
     if (node.code) {
       html += '<span class="mfo-code">' + escapeHtml(node.code) + '</span>';
     }
@@ -151,31 +226,21 @@ function buildMfoAccordionHtml(mfoNodes) {
 
     html += '<div class="' + (hasChildren ? 'active' : '') + ' content">';
 
-    // Success indicators
+    // Success indicators (with personnel in-charge shown per indicator)
     if (node.success_indicators && node.success_indicators.length > 0) {
       html += '<div class="ui list">';
       html += '<div class="item"><strong>Success Indicators:</strong></div>';
       node.success_indicators.forEach(function(si) {
         html += '<div class="success-indicator-item">';
-        html += escapeHtml(si.description);
+        html += '<div class="si-description">' + escapeHtml(si.description) + '</div>';
         html += buildQetMeasuresHtml(si);
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-
-    // Personnel in charge
-    if (node.personnel_incharge && node.personnel_incharge.length > 0) {
-      html += '<div style="margin-top: 10px;">';
-      html += '<strong>Personnel In-Charge:</strong><br>';
-      node.personnel_incharge.forEach(function(person) {
-        var tagClass = 'personnel-tag personnel-tag-clickable';
-        if (person.is_department_head) {
-          tagClass = 'personnel-tag personnel-tag-clickable personnel-tag-dept-head';
-        } else if (person.is_supervisor) {
-          tagClass = 'personnel-tag personnel-tag-clickable personnel-tag-supervisor';
+        if (si.personnel_incharge && si.personnel_incharge.length > 0) {
+          html += '<div class="si-personnel" style="margin-top: 8px;">';
+          html += '<strong>Personnel In-Charge:</strong><br>';
+          html += buildPersonnelTagsHtml(si.personnel_incharge);
+          html += '</div>';
         }
-        html += '<span class="' + tagClass + '" title="View Individual Rating Scale" onclick="openPersonnelIpcr(event, \'' + person.employee_id + '\')">' + escapeHtml(person.full_name) + '</span>';
+        html += '</div>';
       });
       html += '</div>';
     }
@@ -195,6 +260,20 @@ function buildMfoAccordionHtml(mfoNodes) {
     html += '</div>';
   });
 
+  return html;
+}
+
+function buildPersonnelTagsHtml(personnel) {
+  var html = '';
+  personnel.forEach(function(person) {
+    var tagClass = 'personnel-tag personnel-tag-clickable';
+    if (person.is_department_head) {
+      tagClass = 'personnel-tag personnel-tag-clickable personnel-tag-dept-head';
+    } else if (person.is_supervisor) {
+      tagClass = 'personnel-tag personnel-tag-clickable personnel-tag-supervisor';
+    }
+    html += '<span class="' + tagClass + '" title="View Individual Rating Scale" onclick="openPersonnelIpcr(event, \'' + person.employee_id + '\')">' + escapeHtml(person.full_name) + '</span>';
+  });
   return html;
 }
 

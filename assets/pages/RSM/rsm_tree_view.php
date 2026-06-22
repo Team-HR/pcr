@@ -48,13 +48,36 @@
 	}
 
 	/* Success indicators list */
+	.success-indicators {
+		margin-top: 6px;
+	}
+
+	.success-indicators-header {
+		margin-bottom: 8px;
+	}
+
+	.success-indicators-header .si-count {
+		color: #1976d2;
+		font-size: 12px;
+	}
+
 	.success-indicator-item {
-		padding: 8px 0;
-		border-bottom: 1px solid #eee;
+		padding: 10px 12px;
+		margin-bottom: 8px;
+		background-color: #fafafa;
+		border: 1px solid #e0e0e0;
+		border-left: 3px solid #1976d2;
+		border-radius: 4px;
 	}
 
 	.success-indicator-item:last-child {
-		border-bottom: none;
+		margin-bottom: 0;
+	}
+
+	.success-indicator-item .si-number {
+		font-weight: bold;
+		color: #1976d2;
+		margin-right: 4px;
 	}
 
 	/* Personnel tags */
@@ -203,6 +226,17 @@
 		font-weight: bold;
 		color: #856404;
 	}
+
+	.mfo-edit-btn {
+		cursor: pointer;
+		color: #1976d2;
+		margin-right: 5px;
+		opacity: 0.6;
+	}
+
+	.mfo-edit-btn:hover {
+		opacity: 1;
+	}
 </style>
 
 
@@ -226,6 +260,18 @@
 </div>
 
 <script>
+	function rsmLoad(view) {
+		if (view === 'table') {
+			$('#allModal').modal('hide');
+			var urlParams = new URLSearchParams(window.location.search);
+			var period = urlParams.get('period');
+			var year = urlParams.get('year');
+			if (period && year) {
+				rsm_load_tree(period, year, true);
+			}
+		}
+	}
+
 	$(document).ready(function() {
 		// Check if period and year are in URL parameters
 		const urlParams = new URLSearchParams(window.location.search);
