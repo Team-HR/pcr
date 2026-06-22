@@ -80,6 +80,41 @@
 		margin-right: 4px;
 	}
 
+	.si-header {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 10px;
+	}
+
+	.si-header .si-description {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.si-actions {
+		flex-shrink: 0;
+		white-space: nowrap;
+	}
+
+	.si-actions i {
+		cursor: pointer;
+		opacity: 0.6;
+		margin-left: 6px;
+	}
+
+	.si-actions i:hover {
+		opacity: 1;
+	}
+
+	.si-actions .si-edit-btn {
+		color: #1976d2;
+	}
+
+	.si-actions .si-delete-btn {
+		color: #d32f2f;
+	}
+
 	/* Personnel tags */
 	.personnel-tag {
 		display: inline-block;
@@ -189,6 +224,7 @@
 		display: none;
 		margin-top: 8px;
 		gap: 10px;
+		font-size: 14px;
 	}
 
 	.qet-measures.qet-visible {

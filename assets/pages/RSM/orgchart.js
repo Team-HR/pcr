@@ -232,7 +232,15 @@ function buildMfoAccordionHtml(mfoNodes) {
       html += '<div class="item"><strong>Success Indicators:</strong></div>';
       node.success_indicators.forEach(function(si) {
         html += '<div class="success-indicator-item">';
+        html += '<div class="si-header">';
         html += '<div class="si-description">' + escapeHtml(si.description) + '</div>';
+        if (node.can_edit) {
+          html += '<div class="si-actions">';
+          html += '<i class="edit icon si-edit-btn" title="Edit Success Indicator" onclick="event.stopPropagation(); siEditOpenModal(\'' + si.id + '\')"></i>';
+          html += '<i class="trash icon si-delete-btn" title="Delete Success Indicator" onclick="event.stopPropagation(); deleteOpenModal(\'' + si.id + '\')"></i>';
+          html += '</div>';
+        }
+        html += '</div>';
         html += buildQetMeasuresHtml(si);
         if (si.personnel_incharge && si.personnel_incharge.length > 0) {
           html += '<div class="si-personnel" style="margin-top: 8px;">';
