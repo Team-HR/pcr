@@ -232,6 +232,7 @@ function buildMfoAccordionHtml(mfoNodes) {
       html += '<div class="item"><strong>Success Indicators:</strong></div>';
       node.success_indicators.forEach(function (si) {
         html += '<div class="success-indicator-item">';
+        html += buildSiCorrectionsHtml(si);
         html += '<div class="si-header">';
         html += '<div class="si-description">' + escapeHtml(si.description) + '</div>';
         if (node.can_edit) {
@@ -268,6 +269,28 @@ function buildMfoAccordionHtml(mfoNodes) {
     html += '</div>';
   });
 
+  return html;
+}
+
+function buildSiCorrectionsHtml(si) {
+  if (!si.corrections || si.corrections.length === 0) return '';
+
+  var anyPending = si.corrections.some(function (c) { return !c.accomplished; });
+  var ribbonColor = anyPending ? 'red' : 'green';
+
+  var html = '';
+  html += '<div class="si-corrections">';
+  html += '<a class="ui ' + ribbonColor + ' ribbon label"><i class="exclamation circle icon"></i> Corrections</a>';
+  html += '<div class="si-correction-list">';
+  si.corrections.forEach(function (c) {
+    var stateLabel = c.accomplished
+      ? '<span class="si-correction-status accomplished">Accomplished</span>'
+      : '<span class="si-correction-status unaccomplished">Unaccomplished</span>';
+    // c.comment is system-generated HTML (name/date/text)
+    html += '<div class="si-correction-item">' + c.comment + ' - ' + stateLabel + '</div>';
+  });
+  html += '</div>';
+  html += '</div>';
   return html;
 }
 

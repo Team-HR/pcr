@@ -1585,7 +1585,7 @@ function get_success_indicators($mysqli, $cf_ID)
 function get_success_indicators_formatted($mysqli, $cf_ID, $supervisor_ids = [], $department_head_id = null)
 {
   $data = [];
-  $sql = "SELECT mi_id, mi_succIn FROM spms_pcr_indicators WHERE cf_ID = '$cf_ID'";
+  $sql = "SELECT mi_id, mi_succIn, corrections FROM spms_pcr_indicators WHERE cf_ID = '$cf_ID'";
   $result = $mysqli->query($sql);
   while ($row = $result->fetch_assoc()) {
     $qet = get_si_qet_measures($mysqli, $row["mi_id"]);
@@ -1595,10 +1595,28 @@ function get_success_indicators_formatted($mysqli, $cf_ID, $supervisor_ids = [],
       "quality" => $qet["quality"],
       "efficiency" => $qet["efficiency"],
       "timeliness" => $qet["timeliness"],
-      "personnel_incharge" => get_si_personnel_incharge($mysqli, $row["mi_id"], $supervisor_ids, $department_head_id)
+      "personnel_incharge" => get_si_personnel_incharge($mysqli, $row["mi_id"], $supervisor_ids, $department_head_id),
+      "corrections" => parse_corrections($row["corrections"])
     ];
   }
   return $data;
+}
+
+// Parse a corrections JSON string into a list of comments with accomplished status
+function parse_corrections($corrections)
+{
+  $out = [];
+  if (!$corrections) return $out;
+  $c = json_decode($corrections, true);
+  if (!is_array($c)) return $out;
+  foreach ($c as $item) {
+    if (!is_array($item) || !isset($item[0])) continue;
+    $out[] = [
+      "comment" => $item[0],
+      "accomplished" => !empty($item[1])
+    ];
+  }
+  return $out;
 }
 
 // Helper function to get personnel in-charge for a single success indicator
@@ -1772,7 +1790,7 @@ function get_mfo_tree_children($mysqli, $parent_id, $department_id, $supervisor_
 function build_mfo_tree_node($mysqli, $row, $department_id, $supervisor_ids, $department_head_id)
 {
   $children = get_mfo_tree_children($mysqli, $row["cf_ID"], $department_id, $supervisor_ids, $department_head_id);
-  $can_edit = rsmEditStatus("") || validaateCorrection($row['corrections']);
+  $can_edit = rsmEditStatus("") ? true : false;
 
   return [
     "id" => $row["cf_ID"],

@@ -80,12 +80,44 @@ if ($user->authorization) {
 	}
 
 	.success-indicator-item {
+		position: relative;
 		padding: 10px 12px;
 		margin-bottom: 8px;
 		background-color: #fafafa;
 		border: 1px solid #e0e0e0;
 		border-left: 3px solid #1976d2;
 		border-radius: 4px;
+	}
+
+	/* Corrections ribbon + comment list */
+	.si-corrections {
+		margin-bottom: 10px;
+	}
+
+	.si-correction-list {
+		margin-top: 8px;
+		font-size: 12px;
+		color: #444;
+	}
+
+	.si-correction-item {
+		padding: 4px 0;
+		border-bottom: 1px dashed #e0e0e0;
+		line-height: 1.4;
+	}
+
+	.si-correction-item:last-child {
+		border-bottom: none;
+	}
+
+	.si-correction-status.accomplished {
+		color: #21ba45;
+		font-weight: bold;
+	}
+
+	.si-correction-status.unaccomplished {
+		color: #db2828;
+		font-weight: bold;
 	}
 
 	.success-indicator-item:last-child {
