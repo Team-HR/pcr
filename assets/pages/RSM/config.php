@@ -5,7 +5,146 @@ require_once __DIR__ . '/../../libs/Db.php';
 $db = new Db();
 $mysqli = $db->getMysqli();
 
-if (isset($_POST['get_mfo_tree'])) {
+if (isset($_GET['rsm_print'])) {
+  // Standalone printable Rating Scale Matrix for a period (opened in a new tab).
+  // Routed via ?config=rsm&rsm_print=1[&period=Month&year=YYYY]
+  if (isset($_GET['period']) && isset($_GET['year'])) {
+    $p = $mysqli->real_escape_string($_GET['period']);
+    $y = $mysqli->real_escape_string($_GET['year']);
+    $pres = $mysqli->query("SELECT mfoperiod_id FROM spms_periods WHERE month_mfo='$p' AND year_mfo='$y' LIMIT 1");
+    if ($pres && $prow = $pres->fetch_assoc()) {
+      $_SESSION['period'] = $prow['mfoperiod_id'];
+    }
+  }
+
+  $period_id = isset($_SESSION['period']) ? $_SESSION['period'] : '';
+
+  // Resolve department for the current user/period (mirrors table() logic)
+  $employee_id = $_SESSION['emp_info']['employees_id'];
+  $department_id = $_SESSION['emp_info']['department_id'];
+  $st = $mysqli->query("SELECT department_id FROM spms_pcr_status WHERE employees_id='$employee_id' AND period_id='$period_id' LIMIT 1");
+  if ($st && $strow = $st->fetch_assoc()) {
+    $department_id = $strow['department_id'];
+  }
+
+  $dept_name = '';
+  $dres = $mysqli->query("SELECT department FROM department WHERE department_id='" . $mysqli->real_escape_string($department_id) . "' LIMIT 1");
+  if ($dres && $drow = $dres->fetch_assoc()) {
+    $dept_name = $drow['department'];
+  }
+
+  $period_label = '';
+  if ($period_id !== '') {
+    $pr = $mysqli->query("SELECT month_mfo, year_mfo FROM spms_periods WHERE mfoperiod_id='" . $mysqli->real_escape_string($period_id) . "' LIMIT 1");
+    if ($pr && $prow2 = $pr->fetch_assoc()) {
+      $period_label = $prow2['month_mfo'] . ' ' . $prow2['year_mfo'];
+    }
+  }
+?>
+  <!DOCTYPE html>
+  <html>
+
+  <head>
+    <title>Rating Scale Matrix<?= $dept_name ? ' - ' . htmlspecialchars($dept_name) : '' ?></title>
+    <link rel="shortcut icon" href="assets/ico/logo.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="assets/libs/ui/dist/semantic.css">
+    <script src="assets/libs/jquery/jquery-3.3.1.min.js"></script>
+    <style media="screen">
+      body {
+        background-color: #f7f7f7;
+        padding: 30px;
+      }
+
+      .rsm-wrapper {
+        width: 100%;
+        margin: 0 auto;
+        background: #fff;
+        padding: 24px;
+        border-radius: 6px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+      }
+
+      .rsm-toolbar {
+        text-align: right;
+        margin-bottom: 16px;
+      }
+
+      .rsm-print-header {
+        text-align: center;
+        margin-bottom: 16px;
+      }
+
+      .rsm-print-header h2 {
+        margin: 0;
+      }
+
+      /* Hide editing controls/options for the clean read-only view */
+      .noprint {
+        display: none !important;
+      }
+
+      .tablepr th,
+      .tablepr td {
+        padding: 8px 10px;
+      }
+    </style>
+    <style media="print">
+      @page {
+        size: landscape;
+      }
+
+      body {
+        background: #fff;
+        padding: 0;
+      }
+
+      .rsm-wrapper {
+        box-shadow: none;
+        padding: 0;
+      }
+
+      .noprint {
+        display: none !important;
+      }
+
+      .rsm-print-header {
+        text-align: center;
+      }
+
+      table {
+        font-size: 12px;
+      }
+
+      .tablepr th,
+      .tablepr td {
+        padding: 8px 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="rsm-wrapper">
+      <div class="rsm-toolbar noprint">
+        <button class="ui small primary button" onclick="window.print()"><i class="print icon"></i> Print</button>
+      </div>
+      <div class="rsm-print-header">
+        <h2>Rating Scale Matrix</h2>
+        <?php if ($dept_name) : ?>
+          <div style="text-transform:uppercase;font-weight:bold;font-size:1.2em"><?= htmlspecialchars($dept_name) ?></div>
+        <?php endif; ?>
+        <?php if ($period_label) : ?>
+          <div style="color:#555"><?= htmlspecialchars($period_label) ?></div>
+        <?php endif; ?>
+      </div>
+      <?php table($mysqli); ?>
+    </div>
+  </body>
+
+  </html>
+<?php
+  exit;
+} elseif (isset($_POST['get_mfo_tree'])) {
   if (!isset($_SESSION["emp_info"]["department_id"]) || !isset($_SESSION["period"])) {
     echo json_encode(["error" => "Session data not available"]);
     exit;

@@ -332,6 +332,18 @@ function openPersonnelIpcr(event, employeeId) {
   window.open(url, '_blank');
 }
 
+function printRsmMatrix() {
+  var urlParams = new URLSearchParams(window.location.search);
+  var period = urlParams.get('period');
+  var year = urlParams.get('year');
+
+  var url = '?config=rsm&rsm_print=1';
+  if (period && year) {
+    url += '&period=' + encodeURIComponent(period) + '&year=' + encodeURIComponent(year);
+  }
+  window.open(url, '_blank');
+}
+
 function toggleQetMeasures(event, btn) {
   event.stopPropagation();
   var $btn = $(btn);

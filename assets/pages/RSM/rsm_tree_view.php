@@ -286,6 +286,7 @@
 	<button onclick="expandAllAccordion()">Expand All</button>
 	<button onclick="collapseAllAccordion()">Collapse All</button>
 	<button id="toggle-measures-btn" onclick="toggleAllQetMeasures()">Show All Measures</button>
+	<button id="print-rsm-btn" onclick="printRsmMatrix()">Print</button>
 </div>
 
 <div id="mfo-accordion-container" style="position: relative; min-height: 100px;">
