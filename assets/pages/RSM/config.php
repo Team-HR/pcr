@@ -190,6 +190,8 @@ if (isset($_GET['rsm_print'])) {
     "id" => "dept_root",
     "code" => $dept_alias ? $dept_alias : $dept_name,
     "title" => $dept_name,
+    "edit_enabled" => rsmEditStatus("") ? true : false,
+    "rsm_status_id" => rsmEditStatus("id") ?: null,
     "children" => $mfo_children
   ]];
 

@@ -1,5 +1,8 @@
 // RSM Tree and Org Tree display functions
 
+// Store root node data for access by submission function
+var rootNodeData = null;
+
 // Extract the stable MFO cf_ID from a data-mfo-id value ("mfo-<cfId>-<index>")
 function mfoIdFromDataAttr(dataMfoId) {
   if (!dataMfoId) return '';
@@ -154,6 +157,7 @@ function renderMfoAccordion(treeData) {
   // treeData is array with single root element (department)
   if (treeData && treeData.length > 0 && treeData[0].children) {
     var rootNode = treeData[0];
+    rootNodeData = rootNode; // Store for submission function
 
     // Populate header with department and period-year
     var deptName = rootNode.title || rootNode.code || 'Department';
@@ -170,6 +174,15 @@ function renderMfoAccordion(treeData) {
 
     // Show header
     $('#rsm-header').show();
+
+    // Show "Add New MFO" and "Submit" only when editing is enabled for this period
+    if (rootNode.edit_enabled) {
+      $('#add-mfo-btn').show();
+      $('#submit-rsm-btn').show();
+    } else {
+      $('#add-mfo-btn').hide();
+      $('#submit-rsm-btn').hide();
+    }
 
     var html = buildMfoAccordionHtml(rootNode.children);
     $container.html(html);
@@ -197,6 +210,50 @@ function openMfoActionsModal(event, mfoId) {
     function (data) {
       $("#modalContL").html(data);
       $("#modalContL").find(".ui.dropdown").dropdown();
+    }
+  );
+}
+
+function openAddMfoModal() {
+  $("#allModal").modal("setting", "closable", false).modal("show");
+  var html = ''
+    + '<div class="ui form">'
+    + '<h2 class="ui horizontal divider"><i class="blue plus square outline icon"></i> Add New MFO <i class="blue plus square outline icon"></i></h2>'
+    + '<div class="field">'
+    + '<label>Count (e.g. 1 or I.A)</label>'
+    + '<input type="text" id="new-mfo-count" placeholder="Count">'
+    + '</div>'
+    + '<div class="field">'
+    + '<label>Title</label>'
+    + '<input type="text" id="new-mfo-title" placeholder="MFO/PAP Title">'
+    + '</div>'
+    + '<button class="mini ui positive fluid button" onclick="saveNewMfo(this)"><i class="save icon"></i> Save</button>'
+    + '</div>';
+  $("#modalContL").html(html);
+}
+
+function saveNewMfo(btn) {
+  var count = ($("#new-mfo-count").val() || '').trim();
+  var title = ($("#new-mfo-title").val() || '').trim();
+  if (!count || !title) {
+    alert("Please fill in both Count and Title.");
+    return;
+  }
+  $(btn).addClass('loading disabled');
+  $.post(
+    "?config=rsm",
+    {
+      addRSMData: title,
+      rsmCount: count,
+      pid: '',
+    },
+    function (data) {
+      if (data == 1) {
+        rsmLoad("table");
+      } else {
+        $(btn).removeClass('loading disabled');
+        alert(data);
+      }
     }
   );
 }
@@ -365,6 +422,30 @@ function printRsmMatrix() {
     url += '&period=' + encodeURIComponent(period) + '&year=' + encodeURIComponent(year);
   }
   window.open(url, '_blank');
+}
+
+function submitRsmMatrix() {
+  if (!rootNodeData || !rootNodeData.rsm_status_id) {
+    alert("Unable to submit: RSM status ID not found.");
+    return;
+  }
+  var rsmStatusId = rootNodeData.rsm_status_id;
+  var confirmed = confirm("Are you sure you want to submit the Rating Scale Matrix? This will lock editing for this period.");
+  if (!confirmed) return;
+
+  $.post(
+    "?config=rsm",
+    {
+      closeRsm: rsmStatusId
+    },
+    function (data, textStatus, xhr) {
+      if (data == 1) {
+        rsmLoad("table");
+      } else {
+        alert("Submission failed: " + data);
+      }
+    }
+  );
 }
 
 function toggleQetMeasures(event, btn) {

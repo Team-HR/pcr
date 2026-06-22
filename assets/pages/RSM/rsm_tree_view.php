@@ -333,10 +333,16 @@ if ($user->authorization) {
 	<div id="rsm-period-year" style="margin: 0; font-size: 24px;"></div>
 </div>
 <div id="accordion-controls">
+	<button id="add-mfo-btn" onclick="openAddMfoModal()" style="display:none;"><i class="plus icon"></i>Add New MFO</button>
+	<!-- add divider here -->
+	<div style="border-left: 1px solid #ccc; height: 24px; margin: 0 10px;"></div>
 	<button onclick="expandAllAccordion()">Expand All</button>
 	<button onclick="collapseAllAccordion()">Collapse All</button>
 	<button id="toggle-measures-btn" onclick="toggleAllQetMeasures()">Show All Measures</button>
-	<button id="print-rsm-btn" onclick="printRsmMatrix()">Print</button>
+	<div style="margin: auto;"></div>
+	<!-- TODO: add submit button here that locks rsm for edit -->
+	<button id="submit-rsm-btn" onclick="submitRsmMatrix()" style="display:none;"><i class="check icon"></i>Submit</button>
+	<button id="print-rsm-btn" onclick="printRsmMatrix()"><i class="print icon"></i>Print</button>
 </div>
 
 <div id="mfo-accordion-container" style="position: relative; min-height: 100px;">
