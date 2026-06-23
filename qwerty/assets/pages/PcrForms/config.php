@@ -46,7 +46,6 @@ if (isset($_POST["getPeriods"])) {
         $row["name"] = $nameFormatter->getFullNameStandardUpper();
         $row["username"] = getUsername($mysqli, $employees_id);
         $row["department"] =  $row["department"];
-        $row["hasPMTCorrections"] = hasPMTCorrections($mysqli, $employees_id, $period_id);
         $data[] = $row;
     }
 
@@ -303,47 +302,3 @@ function getUsername($mysqli, $employees_id)
     return $username;
 }
 
-function hasPMTCorrections($mysqli, $employees_id, $period_id)
-{
-    $hasPMT = false;
-
-    $sql = "SELECT a.critics
-            FROM spms_pcr_indicator_accomplishments a
-            JOIN spms_pcr_indicators i ON a.p_id = i.mi_id
-            JOIN spms_pcr_mfos m ON i.cf_ID = m.cf_ID
-            WHERE a.empId = '$employees_id'
-            AND m.mfo_periodId = '$period_id'
-            AND a.critics IS NOT NULL
-            AND a.critics != ''";
-    $res = $mysqli->query($sql);
-    if ($res && $res->num_rows > 0) {
-        while ($row = $res->fetch_assoc()) {
-            $critics = @unserialize($row['critics']);
-            if (is_array($critics) && !empty($critics['PMT'])) {
-                $hasPMT = true;
-                break;
-            }
-        }
-    }
-
-    if (!$hasPMT) {
-        $sql = "SELECT critics
-                FROM spms_pcr_support_function_accomplishments
-                WHERE emp_id = '$employees_id'
-                AND period_id = '$period_id'
-                AND critics IS NOT NULL
-                AND critics != ''";
-        $res = $mysqli->query($sql);
-        if ($res && $res->num_rows > 0) {
-            while ($row = $res->fetch_assoc()) {
-                $critics = @unserialize($row['critics']);
-                if (is_array($critics) && !empty($critics['PMT'])) {
-                    $hasPMT = true;
-                    break;
-                }
-            }
-        }
-    }
-
-    return $hasPMT;
-}

@@ -62,7 +62,6 @@
                 <td>SUBMITTED</td>
                 <td>PANELAPPROVED DATE</td>
                 <td>DATE ACCOMPLISHED</td>
-                <td>PMT CORRECTIONS</td>
             </tr>
         </thead>
         <tbody>
@@ -88,7 +87,6 @@
                     <td>{{item.submitted}}</td>
                     <td>{{item.panelApproved}}</td>
                     <td>{{item.dateAccomplished}}</td>
-                    <td>{{item.hasPMTCorrections ? 'Yes' : 'No'}}</td>
                 </tr>
             </template>
         </tbody>
