@@ -8,7 +8,7 @@
 
 require_once __DIR__ . '/../_connect.db.php';
 
-$db = new mysqli($host, $user, $password, $database);
+$db = new mysqli($host, $user, $password, $database, $port);
 $db->set_charset("utf8");
 
 if ($db->connect_error) {
