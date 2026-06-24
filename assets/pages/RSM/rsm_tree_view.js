@@ -184,6 +184,19 @@ function renderMfoAccordion(treeData) {
       $('#submit-rsm-btn').hide();
     }
 
+    // When the RSM for this period is empty, the period is editable, and a
+    // previous-period RSM exists, offer to duplicate it (reuses copyRSM()).
+    var isEmpty = !rootNode.children || rootNode.children.length === 0;
+    if (isEmpty && rootNode.edit_enabled && rootNode.prev_rsm_exists) {
+      $container.html(
+        '<div class="empty-children" style="text-align:center; padding:30px;">'
+        + '<p>No Rating Scale Matrix has been created for this period yet.</p>'
+        + '<button class="ui green large button" onclick="copyRSM()"><i class="copy icon"></i>Copy Previous RSM</button>'
+        + '</div>'
+      );
+      return;
+    }
+
     var html = buildMfoAccordionHtml(rootNode.children);
     $container.html(html);
 

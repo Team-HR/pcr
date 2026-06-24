@@ -185,12 +185,24 @@ if (isset($_GET['rsm_print'])) {
     $mfo_children[] = build_mfo_tree_node($mysqli, $row, $department_id, $supervisor_ids, $department_head_id);
   }
 
+  // Determine if a previous-period RSM exists for this department (for the duplicator button)
+  $prev_rsm_exists = false;
+  $previous_period_id = getPreviousPeriodId($mysqli);
+  if ($previous_period_id) {
+    $prev_sql = "SELECT cf_ID FROM spms_pcr_mfos WHERE mfo_periodId = '$previous_period_id' AND dep_id = '$department_id' LIMIT 1;";
+    $prev_res = $mysqli->query($prev_sql);
+    if ($prev_res && $prev_res->num_rows > 0) {
+      $prev_rsm_exists = true;
+    }
+  }
+
   // Create root node with department name
   $tree_data = [[
     "id" => "dept_root",
     "code" => $dept_alias ? $dept_alias : $dept_name,
     "title" => $dept_name,
     "edit_enabled" => rsmEditStatus("") ? true : false,
+    "prev_rsm_exists" => $prev_rsm_exists,
     "rsm_status_id" => rsmEditStatus("id") ?: null,
     "children" => $mfo_children
   ]];
