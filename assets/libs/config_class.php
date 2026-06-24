@@ -2241,8 +2241,8 @@ class year
 	{
 		// 1st period: 01-06
 		// 2nd period: 07-12
-		$dnow = date('Y') + 1;
-		$dpast = date('Y') - 50;
+		$dnow = 2026;
+		$dpast = 2021;
 		$view = "";
 		while ($dnow >= $dpast) {
 
