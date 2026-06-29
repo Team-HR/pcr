@@ -10,7 +10,7 @@
   <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
   <!-- <script src="assets/libs/bootstrap-5.0.1-dist/js/bootstrap.min.js" charset="utf-8" defer></script> -->
   <script src="assets/libs/bootstrap-5.0.1-dist/js/bootstrap.js" charset="utf-8" defer></script>
-  <script src="https://unpkg.com/vue@3"></script>
+  <script src="assets/libs/vue/vue.global.prod.js"></script>
 
   <!-- <style type="text/css" media="print">
     @page { 
